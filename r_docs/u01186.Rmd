@@ -1,0 +1,396 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-08-03'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyr)
+library(rstatix)
+
+source("../scripts/helpers.R")
+
+dataT <- read.delim(file="../data/raw_data/u01186_all_target_fits.txt", head=TRUE, sep="\t")
+dataTF2 <- read.delim(file="../data/raw_data/u01186_targF2_fits.txt", header = TRUE, sep="\t") 
+
+
+dataAUCF1 <- read.delim(file="../data/raw_data/u01186_area_under_the_curve.txt", head=TRUE, sep="\t")
+dataAUCF1 <- gather(dataAUCF1,type,looks, c(T, C, U))
+dataAUCF1 <- dataAUCF1[dataAUCF1$type!="T",]
+
+
+dataAUCF2 <- read.delim(file="../data/raw_data/u01186_CU_AUC_F2.txt", header = TRUE, sep="\t")
+dataAUCF2 <- gather(dataAUCF2,type,looks, c(cohort, unrel))
+```
+
+
+model 1
+
+```{r}
+maxF1.aov <- anova_test(
+  data = dataT, dv = Max, wid = Participant,
+  between = condition
+)
+
+u01186_mod_z_1 <- dataT %>% 
+  lm(z(Max) ~ condition, .) 
+
+export_ols(u01186_mod_z_1, 
+           key_effects = mod_coeffs(u01186_mod_z_1))
+
+```
+
+model 2
+
+```{r}
+xoF1.aov <- anova_test(
+  data = dataT, dv = Crossover, wid = Participant,
+  between  = condition
+)
+
+u01186_mod_z_2 <- dataT %>% 
+  lm(z(Crossover) ~ condition, .) 
+
+export_ols(u01186_mod_z_2, 
+           key_effects = mod_coeffs(u01186_mod_z_2))
+```
+
+
+model 3 
+
+```{r}
+slopeF1.aov <- anova_test(
+  data = dataT, dv = Slope, wid = Participant,
+  between = condition
+)
+
+u01186_mod_z_3 <- dataT %>% 
+  lm(z(Slope) ~ condition, .) 
+
+export_ols(u01186_mod_z_3, 
+           key_effects = mod_coeffs(u01186_mod_z_3))
+```
+
+
+within models (f2)
+
+model 4 
+
+```{r}
+maxF2.aov <- anova_test(
+  data = dataTF2, dv = Max, wid = stimulus,
+  within = condition
+)
+
+u01186_mod_rm_z_4 <- dataTF2 %>% 
+  afex::aov_4(z(Max) ~ condition + (condition|stimulus), .)
+
+export_ols(u01186_mod_rm_z_4, 
+           key_effects = c("condition"))
+
+
+u01186_mod_lmer_z_4 <- dataTF2 %>% 
+  lme4::lmer(z(Max) ~ condition + (1|stimulus), .)
+
+export_ols(u01186_mod_lmer_z_4, 
+           key_effects = mod_coeffs(u01186_mod_lmer_z_4))
+```
+
+
+model 5 
+
+```{r}
+xoF2.aov <- anova_test(
+  data = dataTF2, dv = Crossover, wid = stimulus,
+  within = condition
+)
+
+u01186_mod_rm_z_5 <- dataTF2 %>% 
+  afex::aov_4(z(Crossover) ~ condition + (condition|stimulus), .)
+
+export_ols(u01186_mod_rm_z_5, 
+           key_effects = c("condition"))
+
+
+u01186_mod_lmer_z_5 <- dataTF2 %>% 
+  lme4::lmer(z(Crossover) ~ condition + (1|stimulus), .)
+
+export_ols(u01186_mod_lmer_z_5, 
+           key_effects = mod_coeffs(u01186_mod_lmer_z_5))
+```
+
+
+model 6 
+
+```{r}
+slopeF2.aov <- anova_test(
+  data = dataTF2, dv = Slope, wid = stimulus,
+  within = condition
+)
+
+
+u01186_mod_rm_z_6 <- dataTF2 %>% 
+  afex::aov_4(z(Slope) ~ condition + (condition|stimulus), .)
+
+export_ols(u01186_mod_rm_z_6, 
+           key_effects = c("condition"))
+
+
+u01186_mod_lmer_z_6 <- dataTF2 %>% 
+  lme4::lmer(z(Slope) ~ condition + (1|stimulus), .)
+
+export_ols(u01186_mod_lmer_z_6, 
+           key_effects = mod_coeffs(u01186_mod_lmer_z_6))
+```
+
+
+
+competitor contrasts
+
+
+
+Model 7
+
+```{r}
+dataAUC_noneVtext <- dataAUCF1[dataAUCF1$Condition2=="None"|dataAUCF1$Condition2=="Text",]
+
+aucF1_noneVtext.aov <- anova_test(
+  data = dataAUC_noneVtext, dv = looks, wid = Participant,
+  between=Condition2, within = type
+)
+
+u01186_mod_rm_z_7 <- dataAUC_noneVtext %>% 
+  afex::aov_4(z(looks) ~ Condition2*type + (type|Participant),.)
+
+export_ols(
+  u01186_mod_rm_z_7, 
+  key_effects = c("Condition2", "type", "Condition2:type")
+)
+
+u01186_mod_lmer_z_7 <- dataAUC_noneVtext %>% 
+  lme4::lmer(z(looks) ~ Condition2*type + (1|Participant),.)
+
+export_ols(
+  u01186_mod_lmer_z_7, 
+  key_effects = c("Condition2Text", "typeU", "Condition2Text:typeU")
+)
+```
+
+
+Model 8
+
+```{r}
+dataAUCF2_noneVtext <- dataAUCF2[dataAUCF2$condition=="None"|dataAUCF2$condition=="Text",]
+
+# Run ANOVA
+aucF2_noneVtext.aov <- anova_test(
+  data = dataAUCF2_noneVtext, dv = looks, wid = stimulus,
+  within = c(condition,type)
+)
+
+
+u01186_mod_rm_z_8 <- dataAUCF2_noneVtext %>% 
+  afex::aov_4(z(looks) ~ condition*type + (condition*type|stimulus),.)
+
+export_ols(
+  u01186_mod_rm_z_8, 
+  key_effects = c("condition2", "type", "condition:type")
+)
+
+u01186_mod_lmer_z_8 <- dataAUCF2_noneVtext %>% 
+  lme4::lmer(z(looks) ~ condition*type + (1|stimulus),.)
+
+export_ols(
+  u01186_mod_lmer_z_8, 
+  key_effects = c("conditionText", "typeunrel", "conditionText:typeunrel")
+)
+```
+
+
+
+
+Model 9
+
+```{r}
+dataAUC_textVvnl <- dataAUCF1[dataAUCF1$Condition2=="Text"|dataAUCF1$Condition2=="VisNewLocs",]
+
+# Run ANOVA
+aucF1_textVvnl.aov <- anova_test(
+  data = dataAUC_textVvnl, dv = looks, wid = Participant,
+  between=Condition2, within = type
+)
+
+
+u01186_mod_rm_z_9 <- dataAUC_textVvnl %>% 
+  afex::aov_4(z(looks) ~ Condition2*type + (type|Participant),.)
+
+export_ols(
+  u01186_mod_rm_z_9, 
+  key_effects = c("Condition2", "type", "Condition2:type")
+)
+
+u01186_mod_lmer_z_9 <- dataAUC_textVvnl %>% 
+  lme4::lmer(z(looks) ~ Condition2*type + (1|Participant),.)
+
+export_ols(
+  u01186_mod_lmer_z_9, 
+  key_effects = mod_coeffs(u01186_mod_lmer_z_9)
+)
+```
+
+
+Model 10
+
+```{r}
+dataAUCF2_textVvnl <- dataAUCF2[dataAUCF2$condition=="None"|dataAUCF2$condition=="VisNew",]
+
+# Run ANOVA
+aucF2_textVvnl.aov <- anova_test(
+  data = dataAUCF2_textVvnl, dv = looks, wid = stimulus,
+  within = c(condition,type)
+)
+
+
+u01186_mod_rm_z_10 <- dataAUCF2_textVvnl %>% 
+  afex::aov_4(z(looks) ~ condition*type + (condition*type|stimulus),.)
+
+export_ols(
+  u01186_mod_rm_z_10, 
+  key_effects = c("condition2", "type", "condition:type")
+)
+
+u01186_mod_lmer_z_10 <- dataAUCF2_textVvnl %>% 
+  lme4::lmer(z(looks) ~ condition*type + (1|stimulus),.)
+
+export_ols(
+  u01186_mod_lmer_z_10, 
+  key_effects = mod_coeffs(u01186_mod_lmer_z_10)
+)
+```
+
+
+
+Model 11
+
+```{r}
+dataAUC_vnlVvsl <- dataAUCF1[dataAUCF1$Condition2=="VisNewLocs"|dataAUCF1$Condition2=="VisSameLocs",]
+
+aucF1_vnlVvsl.aov <- anova_test(
+  data = dataAUC_vnlVvsl, dv = looks, wid = Participant,
+  between=Condition2, within = type
+)
+
+
+u01186_mod_rm_z_11 <- dataAUC_vnlVvsl %>% 
+  afex::aov_4(z(looks) ~ Condition2*type + (type|Participant),.)
+
+export_ols(
+  u01186_mod_rm_z_11, 
+  key_effects = c("Condition2", "type", "Condition2:type")
+)
+
+u01186_mod_lmer_z_11 <- dataAUC_vnlVvsl %>% 
+  lme4::lmer(z(looks) ~ Condition2*type + (1|Participant),.)
+
+export_ols(
+  u01186_mod_lmer_z_11, 
+  key_effects = mod_coeffs(u01186_mod_lmer_z_11)
+)
+```
+
+
+Model 12
+
+```{r}
+dataAUCF2_vnlVvsl <- dataAUCF2[dataAUCF2$condition=="VisNew"|dataAUCF2$condition=="VisSame",]
+
+# Run ANOVA
+aucF2_vnlVvsl.aov <- anova_test(
+  data = dataAUCF2_vnlVvsl, dv = looks, wid = stimulus,
+  within = c(condition,type)
+)
+
+u01186_mod_rm_z_12 <- dataAUCF2_vnlVvsl %>% 
+  afex::aov_4(z(looks) ~ condition*type + (condition*type|stimulus),.)
+
+export_ols(
+  u01186_mod_rm_z_12, 
+  key_effects = c("condition2", "type", "condition:type")
+)
+
+u01186_mod_lmer_z_12 <- dataAUCF2_vnlVvsl %>% 
+  lme4::lmer(z(looks) ~ condition*type + (1|stimulus),.)
+
+export_ols(
+  u01186_mod_lmer_z_12, 
+  key_effects = mod_coeffs(u01186_mod_lmer_z_12)
+)
+```
+
+
+
+Model 13
+
+```{r}
+dataAUC_vslVsp <- dataAUCF1[dataAUCF1$Condition2=="VisSameLocs"|dataAUCF1$Condition2=="Self-paced",]
+
+# Run ANOVA
+aucF1_vslVsp.aov <- anova_test(
+  data = dataAUC_vslVsp, dv = looks, wid = Participant,
+  between=Condition2, within = type
+)
+get_anova_table(aucF1_vslVsp.aov)
+
+
+u01186_mod_rm_z_13 <- dataAUC_vslVsp %>% 
+  afex::aov_4(z(looks) ~ Condition2*type + (type|Participant),.)
+
+export_ols(
+  u01186_mod_rm_z_13, 
+  key_effects = c("Condition2", "type", "Condition2:type")
+)
+
+u01186_mod_lmer_z_13 <- dataAUC_vslVsp %>% 
+  lme4::lmer(z(looks) ~ Condition2*type + (1|Participant),.)
+
+export_ols(
+  u01186_mod_lmer_z_13, 
+  key_effects = mod_coeffs(u01186_mod_lmer_z_13)
+)
+```
+
+
+Model 14
+ 
+```{r}
+dataAUCF2_vslVsp <- dataAUCF2[dataAUCF2$condition=="VisSame"|dataAUCF2$condition=="SelfPaced",]
+
+# Run ANOVA
+aucF2_vslVsp.aov <- anova_test(
+  data = dataAUCF2_vslVsp, dv = looks, wid = stimulus,
+  within = c(condition,type)
+)
+
+
+u01186_mod_rm_z_14 <- dataAUCF2_vslVsp %>% 
+  afex::aov_4(z(looks) ~ condition*type + (condition*type|stimulus),.)
+
+export_ols(
+  u01186_mod_rm_z_14, 
+  key_effects = c("condition2", "type", "condition:type")
+)
+
+u01186_mod_lmer_z_14 <- dataAUCF2_vslVsp %>% 
+  lme4::lmer(z(looks) ~ condition*type + (1|stimulus),.)
+
+export_ols(
+  u01186_mod_lmer_z_14, 
+  key_effects = mod_coeffs(u01186_mod_lmer_z_14)
+)
+```
+ 
+ 
+

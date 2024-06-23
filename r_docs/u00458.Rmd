@@ -1,0 +1,236 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-29'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+```
+
+
+```{r}
+accuracy_byParti <- read.csv("../data/raw_data/u00458_accuracy_by_participant.csv", header = TRUE)
+subset_musician <- subset(accuracy_byParti, MusicExperience==1)
+subset_nonmusician <- subset(accuracy_byParti, MusicExperience==0)
+```
+
+model 1
+
+```{r}
+t.test(accuracy_byParti$full, accuracy_byParti$melody, paired = TRUE, alternative="less") # here
+
+df_1_long <- accuracy_byParti %>% 
+  dplyr::select(id = Participant, full, melody) %>% 
+  tidyr::pivot_longer(-id)
+
+u00458_mod_rm_z_1 <- df_1_long %>% 
+  afex::aov_4(z(value) ~ name + (name|id), .)
+
+export_ols(
+  u00458_mod_rm_z_1, 
+  key_effects = c("name")
+)
+
+
+u00458_mod_lmer_z_1 <- df_1_long %>% 
+  lme4::lmer(z(value) ~ name + (1|id), .)
+
+export_ols(
+  u00458_mod_lmer_z_1, 
+  key_effects = c("namemelody")
+)
+```
+
+
+model 2 
+
+```{r}
+t.test(subset_musician$full, subset_nonmusician$full, paired = FALSE, alternative="greater")
+
+df_2_long <- data.frame(
+  musician = subset_musician$full[1:9], 
+  nonmusician = subset_nonmusician$full, 
+  id = 1:9
+) %>% tidyr::pivot_longer(-id)
+
+
+u00458_mod_rm_z_2 <- df_2_long %>% 
+  afex::aov_4(z(value) ~ name + (name|id),.)
+
+export_ols(
+  u00458_mod_rm_z_2, 
+  key_effects = c("name")
+)
+
+
+u00458_mod_lmer_z_2 <- df_2_long %>% 
+  lme4::lmer(z(value) ~ name + (1|id),.)
+
+export_ols(
+  u00458_mod_lmer_z_2, 
+  key_effects = c("namenonmusician")
+)
+```
+
+model 3 
+
+```{r}
+t.test(subset_musician$melody, subset_nonmusician$melody, paired = FALSE, alternative="greater") 
+
+
+df_3_long <- data.frame(
+  musician = subset_musician$melody[1:9], 
+  nonmusician = subset_nonmusician$melody,
+  id = 1:9
+) %>% tidyr::pivot_longer(-id)
+
+u00458_mod_rm_z_3 <- df_3_long %>% 
+  afex::aov_4(z(value) ~ name + (name|id),.)
+
+export_ols(
+  u00458_mod_rm_z_3, 
+  key_effects = c("name")
+)
+
+
+u00458_mod_lmer_z_3 <- df_3_long %>% 
+  lme4::lmer(z(value) ~ name + (1|id),.)
+
+export_ols(
+  u00458_mod_lmer_z_3, 
+  key_effects = c("namenonmusician")
+)
+```
+
+model 4 
+
+```{r}
+t.test(subset_musician$lyrics, subset_nonmusician$lyrics, paired = FALSE, alternative="greater")
+
+
+df_4_long <- data.frame(
+  musician = subset_musician$lyrics[1:9], 
+  nonmusician = subset_nonmusician$lyrics,
+  id = 1:9
+) %>% tidyr::pivot_longer(-id)
+
+u00458_mod_rm_z_4 <- df_4_long %>% 
+  afex::aov_4(z(value) ~ name + (name|id),.)
+
+export_ols(
+  u00458_mod_rm_z_4, 
+  key_effects = c("name")
+)
+
+
+u00458_mod_lmer_z_4 <- df_4_long %>% 
+  lme4::lmer(z(value) ~ name + (1|id),.)
+
+export_ols(
+  u00458_mod_lmer_z_4, 
+  key_effects = c("namenonmusician")
+)
+```
+
+
+```{r}
+similarity <- read.csv("../data/raw_data/u00458_perceptual_simi_vs_pmi_long.csv", header = TRUE)
+similarity$GROUP <- factor(similarity$GROUP)
+similarity$GROUP <- relevel(relevel(relevel(similarity$GROUP,"LYRICS_SIMI"),"MELODY_SIMI"),"FULL_SIMI")
+GROUP.labs <- c("Full-audio", "Melody-only", "Lyrics-only")
+names(GROUP.labs) <- c("FULL_SIMI", "MELODY_SIMI", "LYRICS_SIMI")
+```
+
+model 5
+
+```{r}
+u00458_mod_z_5 <- similarity %>% 
+  dplyr::filter(GROUP == "FULL_SIMI") %>% 
+  lm(z(PMI) ~ z(SIMILARITY), .) 
+
+export_ols(
+  u00458_mod_z_5,
+  key_effects = "z(SIMILARITY)"
+)
+```
+
+model 6 
+
+```{r}
+u00458_mod_z_6 <- similarity %>% 
+  dplyr::filter(GROUP == "MELODY_SIMI") %>% 
+  lm(z(PMI) ~ z(SIMILARITY), .)  
+
+export_ols(
+  u00458_mod_z_6,
+  key_effects = "z(SIMILARITY)"
+)
+```
+
+model 7 
+
+```{r}
+u00458_mod_z_7 <- similarity %>% 
+  dplyr::filter(GROUP == "LYRICS_SIMI") %>% 
+  lm(z(PMI) ~ z(SIMILARITY), .) 
+
+export_ols(
+  u00458_mod_z_7,
+  key_effects = "z(SIMILARITY)"
+)
+```
+
+
+
+```{r}
+perceptual_musly <- read.csv("../data/raw_data/u00458_perceptual_simi_vs_musly_simi_long.csv", header = TRUE)
+perceptual_musly$GROUP <- factor(perceptual_musly$GROUP)
+perceptual_musly$GROUP <- relevel(relevel(relevel(perceptual_musly$GROUP,"LYRICS_SIMI"),"MELODY_SIMI"),"FULL_SIMI")
+GROUP.labs <- c("Full-audio", "Melody-only", "Lyrics-only")
+names(GROUP.labs) <- c("FULL_SIMI", "MELODY_SIMI", "LYRICS_SIMI")
+```
+
+model 8 
+
+```{r}
+u00458_mod_z_8 <- perceptual_musly %>% 
+  dplyr::filter(GROUP == "FULL_SIMI") %>% 
+  lm(z(Musly_simi) ~ z(SIMILARITY), .) 
+
+export_ols(
+  u00458_mod_z_8,
+  key_effects = "z(SIMILARITY)"
+)
+```
+
+model 9 
+
+```{r}
+u00458_mod_z_9 <- perceptual_musly %>% 
+  dplyr::filter(GROUP == "MELODY_SIMI") %>% 
+  lm(z(Musly_simi) ~ z(SIMILARITY), .) 
+
+export_ols(
+  u00458_mod_z_9,
+  key_effects = "z(SIMILARITY)"
+)
+```
+
+model 10 
+
+```{r}
+u00458_mod_z_10 <- perceptual_musly %>% 
+  dplyr::filter(GROUP == "MELODY_SIMI") %>% 
+  lm(z(Musly_simi) ~ z(SIMILARITY), .) 
+
+export_ols(
+  u00458_mod_z_10,
+  key_effects = "z(SIMILARITY)"
+)
+```
+

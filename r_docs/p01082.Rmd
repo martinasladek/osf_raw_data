@@ -1,0 +1,199 @@
+---
+title: "p01082"
+author: "MS"
+date: '2022-07-05'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+#######
+## Read in data, then process it
+#######
+t1 = read.csv("../data/raw_data/p01082_lrq_T1.csv")
+t2 = read.csv("../data/raw_data/p01082_lrq_T2.csv")
+t3 = read.csv("../data/raw_data/p01082_lrq_T3.csv")
+```
+```{r}
+names(t1)
+```
+
+
+
+```{r}
+##Get the relevant columns
+#set the column names we want
+t1_cols_2_select = c("CTS_ID", "Sex", "Age", "EndDate", "Race", "Hisp", "AQ7", "AQ8", "AQ11", #AQ7 is first gen status, AQ8 is a pay for college variable that was coded awkwardly so we ultimately didn't use, AQ11 is one item measure of whether relied more on old or new friends 
+                     paste0("IPPA_1m_", 1:25), paste0("IPPA_2f_", 1:25), paste0("IPPA_peer_", 1:25),
+                     paste0("LS", 1:20))
+
+t23_cols_2_select = c("CTS_ID", "EndDate",
+                      paste0("LS", 1:20))
+#Select the columns we want
+t1 = dplyr::select(t1, all_of(t1_cols_2_select))
+t2 = dplyr::select(t2, all_of(t23_cols_2_select))
+t3 = dplyr::select(t3, all_of(t23_cols_2_select))
+
+##Rename the columns
+names(t1) = c("ID", "sex", "baseline_age", "date_raw", "race", "eth", "first_gen", "pay_for_college", "friend_rely",
+              paste0("IPPA_M_", 1:25), paste0("IPPA_F_", 1:25), paste0("IPPA_P_", 1:25), paste0("LS_", 1:20)) 
+t1$race = ifelse(is.na(t1$race), NA, ifelse(t1$race ==4, 0, 1)) #0 = white, 1 = non-white
+#for IPPA: M - Mother, F - Father, P - Peer
+names(t2) = c("ID", "date_raw", paste0("LS_", 1:20))
+names(t3) = c("ID", "date_raw", paste0("LS_", 1:20))
+
+##Reverse code the necessary items
+#set the keys
+ippa_mf_keys = c(1, 1, -1, 1, 1, -1, 1, -1, -1, -1, -1, 1, 1, -1, 1, 1, -1, -1, 1, 1, 1, 1, -1, 1, 1) #reverse scored items 3,6,8,9,10,11,14,17,18,23 -- items are the same for mother and father
+ippa_p_keys = c(1, 1, 1, -1, -1, 1, 1, 1, -1, -1, -1, 1, 1, 1, 1, 1, 1, -1, 1, 1, 1, -1, -1, 1, 1) #reverse scored items 4,5,9,10,11,18,22,23
+ls_keys = c(-1, 1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, 1, 1, -1, -1, 1, 1, -1, -1) #reverse scored items 1,5,6,9,10,15,16,19,20
+
+#reverse score ippa at Time1
+t1[,c(paste0("IPPA_M_", 1:25), paste0("IPPA_F_", 1:25), paste0("IPPA_P_", 1:25))] = psych::reverse.code(keys=c(ippa_mf_keys,ippa_mf_keys,ippa_p_keys),
+                                                                                                        items = t1[,c(paste0("IPPA_M_", 1:25), paste0("IPPA_F_", 1:25), paste0("IPPA_P_", 1:25))],
+                                                                                                        mini=1, maxi=5)
+
+#reverse score loneliness at Time1
+t1[,c(paste0("LS_", 1:20))] = psych::reverse.code(keys=c(ls_keys),
+                                                 items = t1[,c(paste0("LS_", 1:20))],
+                                                 mini=1, maxi=4)
+#reverse score loneliness at Time2
+t2[,c(paste0("LS_", 1:20))] = psych::reverse.code(keys=c(ls_keys),
+                                                  items = t2[,c(paste0("LS_", 1:20))],
+                                                  mini=1, maxi=4)
+#reverse score loneliness at Time3
+t3[,c(paste0("LS_", 1:20))] = psych::reverse.code(keys=c(ls_keys),
+                                                  items = t3[,c(paste0("LS_", 1:20))],
+                                                  mini=1, maxi=4)
+
+#######
+## Conduct reliability analysis
+#######
+
+##reliability is critical for growth curve modeling work
+##here we'll use coefficient omega
+
+#We reported reliability from the psych package's omega() function, but also double checked that against the MBESS package's function. The omega totals converge well, but it was unclear why the hierarchical 
+#omegas weren't consistent. We thus just reported the total omegas from the psych package because... i hierarchical omega might be nice to know, but won't affect validity of our results ii i'm more familiar
+#with the psych package and trust it more
+
+# ##IPPA (only measured at wave 1)
+# #mother
+# psych::omega(t1[,paste("IPPA_M_", c(1:25), sep="")], 2) #with psych package -- .96 total, .7 hierarchical
+# MBESS::ci.reliability(data=t1[,paste("IPPA_M_", c(1:25), sep="")], type="omega", conf.level = 0.95, interval.type="bca", B=1000) #With MBESS -- 0.9494 total, 95% CI [0.93, 0.96]
+# MBESS::ci.reliability(data=t1[,paste("IPPA_M_", c(1:25), sep="")], type="hierarchical", conf.level = 0.95, interval.type="bca", B=1000) #With MBESS -- 0.9377 hierarchical, 95% CI [0.91, 0.96]
+# 
+# #father
+# psych::omega(t1[,paste("IPPA_F_", c(1:25), sep="")], 2) #with psych package -- .96 total, .06 hierarchical
+# MBESS::ci.reliability(data=t1[,paste("IPPA_F_", c(1:25), sep="")], type="omega", conf.level = 0.95, interval.type="bca", B=1000) #With MBESS -- 0.9583 total, 95% CI [0.95, 0.97]
+# MBESS::ci.reliability(data=t1[,paste("IPPA_F_", c(1:25), sep="")], type="hierarchical", conf.level = 0.95, interval.type="bca", B=1000) #With MBESS -- 0.9485 hierarchical, 95% CI [0.92, 0.96]
+# 
+# #peer
+# psych::omega(t1[,paste("IPPA_P_", c(1:25), sep="")], 2) #with psych package -- .96 total, .37 hierarchical
+# MBESS::ci.reliability(data=t1[,paste("IPPA_P_", c(1:25), sep="")], type="omega", conf.level = 0.95, interval.type="bca", B=1000) #With MBESS -- 0.9447 total, 95% CI [0.92, 0.96]
+# MBESS::ci.reliability(data=t1[,paste("IPPA_P_", c(1:25), sep="")], type="hierarchical", conf.level = 0.95, interval.type="bca", B=1000) #With MBESS -- 0.9178 hierarchical, 95% CI [0.87, 0.95]
+# 
+# ##Loneliness (measured at three timepoints)
+# #t1
+# psych::omega(t1[,paste("LS_", c(1:20), sep="")], 2) #with psych package -- .95 total, .69 hierarchical
+# MBESS::ci.reliability(data=t1[,paste("LS_", c(1:20), sep="")], type="omega", conf.level = 0.95, interval.type="bca", B=1000) #With MBESS -- 0.9500 total, 95% CI [0.93, 0.96]
+# MBESS::ci.reliability(data=t1[,paste("LS_", c(1:20), sep="")], type="hierarchical", conf.level = 0.95, interval.type="bca", B=1000) #With MBESS -- 0.9476 hierarchical, 95% CI [0.93, 0.96]
+# 
+# #t2
+# psych::omega(t2[,paste("LS_", c(1:20), sep="")], 2) #with psych package -- .95 total, .73 hierarchical
+# MBESS::ci.reliability(data=t2[,paste("LS_", c(1:20), sep="")], type="omega", conf.level = 0.95, interval.type="bca", B=1000) #With MBESS -- 0.9506 total, 95% CI [0.94, 0.96]
+# MBESS::ci.reliability(data=t2[,paste("LS_", c(1:20), sep="")], type="hierarchical", conf.level = 0.95, interval.type="bca", B=1000) #With MBESS -- 0.9482 hierarchical, 95% CI [0.93, 0.96]
+# 
+# #t3
+# psych::omega(t3[,paste("LS_", c(1:20), sep="")], 2) #with psych package -- .95 total, .76 hierarchical
+# MBESS::ci.reliability(data=t3[,paste("LS_", c(1:20), sep="")], type="omega", conf.level = 0.95, interval.type="bca", B=1000) #With MBESS -- 0.9447 total, 95% CI [0.93, 0.96]
+# MBESS::ci.reliability(data=t3[,paste("LS_", c(1:20), sep="")], type="hierarchical", conf.level = 0.95, interval.type="bca", B=1000) #with MBESS -- 0.9442 hierarchical, 95% CI [0.93, 0.96]   
+
+
+#######
+## Create composites of each measure & merge into a single long dataset
+#######
+
+##IPPA
+#M 
+t1$IPPA_M = rowMeans(t1[,paste("IPPA_M_", c(1:25), sep="")], na.rm = TRUE)
+#F
+t1$IPPA_F = rowMeans(t1[,paste("IPPA_F_", c(1:25), sep="")], na.rm = TRUE)
+#Create parent composite
+t1$IPPA_Parent = rowMeans(t1[,c("IPPA_M", "IPPA_F")], na.rm = TRUE)
+#P
+t1$IPPA_Friend = rowMeans(t1[,paste("IPPA_P_", c(1:25), sep="")], na.rm = TRUE)
+
+##UCLA Loneliness Scale
+#t1
+t1$Loneliness = rowMeans(t1[,paste("LS_", c(1:20), sep="")], na.rm = TRUE)
+#t2
+t2$Loneliness = rowMeans(t2[,paste("LS_", c(1:20), sep="")], na.rm = TRUE)
+#t3
+t3$Loneliness = rowMeans(t3[,paste("LS_", c(1:20), sep="")], na.rm = TRUE)
+
+#create timepoint variable (not used as a covariate)
+t1$timepoint = rep(1, length(t1$ID))
+t2$timepoint = rep(2, length(t2$ID))
+t3$timepoint = rep(3, length(t3$ID))
+
+#create quarter start variable (i.e., quarter in which time 1 took place)
+temp1 = unlist(lapply(as.character(t1$date_raw), strsplit, " ")) #split dates from times in date_raw; unlist output and save in 'temp'
+date1 = temp1[stringr::str_detect(temp1, "/[1-2][0-9]")] #use stringr's str_detect() to pull out 
+t1$date = lubridate::mdy(date1) #use lubridate to convert to date
+t1$quarter_start = ifelse(t1$date < "2020-01-01", 0,
+                              ifelse(t1$date < "2020-03-30", 1, 2))
+
+#merge t2 & t3 first
+t23 = rbind(t2[,c('ID', "date_raw", "timepoint", "Loneliness")], t3[,c('ID', "date_raw", "timepoint", "Loneliness")])
+#now merge the above with part of T1
+t123 = rbind(t1[,c('ID', "date_raw", "timepoint", "Loneliness")], t23)
+#now add in baseline age, sex, and the IPPA data
+allDat = dplyr::inner_join(t123, t1[,c("ID", "sex", "baseline_age", "IPPA_Parent", "IPPA_Friend",
+                                       "quarter_start", "race", "eth", "first_gen", "pay_for_college")])
+allDat$ID = as.character(allDat$ID)
+
+#now we need to tweak the dates
+temp = unlist(lapply(as.character(allDat$date_raw), strsplit, " ")) #split dates from times in date_raw; unlist output and save in 'temp'
+date = temp[stringr::str_detect(temp, "/[1-2][0-9]")] #use stringr's str_detect() to pull out 
+allDat$date = lubridate::mdy(date) #use lubridate to convert to date
+allDat = allDat[order(allDat$ID),] #order by date
+allDat$time = unlist(lapply(1:length(unique(allDat$ID)),
+       function(s) as.numeric(allDat[allDat$ID==unique(allDat$ID)[s],"date"] - min(allDat[allDat$ID==unique(allDat$ID)[s],"date"])))) #create timescore by subtracting each subject's date from baseline
+
+
+#center our covariates (excluding sex)
+allDat$IPPA_Parent = scale(allDat$IPPA_Parent, scale = F)
+allDat$IPPA_Friend = scale(allDat$IPPA_Friend, scale = F)
+allDat$sex = allDat$sex - 1 #recode sex
+
+#remove missing data
+allDat = tidyr::drop_na(allDat)
+
+#create variable to indicate whether measurement was taken before or during LA lockdown
+allDat$lockdown = ifelse(allDat$date < "2020-03-13", 0, 1)
+
+temp = aggregate(allDat$lockdown, by = list(allDat$ID), sum)
+mask = unique(allDat$ID)[temp$x == 0]
+noCovidDat = allDat[allDat$ID %in% mask, ] #get subjects who complete the study prior to COVID
+allDat$anyCovid = ifelse(allDat$ID %in% mask, 0, 1) #create a variable denoting whether the subject has any data collected after COVID
+```
+
+
+```{r}
+######
+## Cross-sectional analyses
+######
+t1$Int_IPPA_Parent = scale(t1$IPPA_Parent, scale = F) # mean center parent
+t1$Int_IPPA_Friend = scale(t1$IPPA_Friend, scale = F) # mean center friend
+parent_friend=lm(Loneliness ~ IPPA_Parent + IPPA_Friend + sex, data = as.data.frame(t1))
+summary(parent_friend)
+p_f_interaction=lm(Loneliness ~ sex + Int_IPPA_Parent*Int_IPPA_Friend, data = as.data.frame(t1))
+summary(p_f_interaction)
+rely_frq=lm(Loneliness ~ sex + Int_IPPA_Parent + Int_IPPA_Friend*friend_rely, data = as.data.frame(t1))
+summary(rely_frq) # does relying more on old versus new friends moderate frq & loneliness relationship
+
+```

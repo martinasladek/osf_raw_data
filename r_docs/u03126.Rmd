@@ -1,0 +1,80 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-04'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.r")
+
+df_1 <- haven::read_sav("../data/raw_data/u03126_Data Study 1 - COVID-19 Prediction.sav")
+df_2 <- haven::read_sav("../data/raw_data/u03126_Data Study 2 - Prolific COVID-19 Prediction.sav")
+df_3 <- haven::read_sav("../data/raw_data/u03126_Data Study 3 - Vaccine and Relationship Prediction.sav")
+```
+
+To replicate the primary analyses in Jamovi (or SPSS or R), conduct an independent t-test using the variable ‘Condition’ as the predictor variable and ‘DV1_Prediction_diff_self’ and ‘DV2_Prediction_diff_other’ as outcome measures.
+
+As described in the paper, this analysis provides a mean comparison of difference scores (realistic vs best-case scenario compared to realistic vs worst-case scenario), showing that the distance from the best-case to the realistic prediction is consistently smaller than the distance from worst-case to the realistic prediction, both when participants made the prediction on behalf of themselves (‘DV1_Prediction_diff_self’) and for the average person (‘DV2_Prediction_diff_other’).
+
+# Study 1 
+
+model 1
+
+```{r}
+u03126_mod_z_1 <- df_1 %>% 
+  lm(z(DV2_Prediction_diff_other) ~ as.factor(Condition), .) 
+
+export_ols(u03126_mod_z_1, 
+           key_effects = c("as.factor(Condition)2"))
+```
+
+
+```{r}
+u03126_mod_z_2 <- df_1 %>% 
+  lm(z(DV1_Prediction_diff_self) ~ as.factor(Condition), .) 
+
+export_ols(u03126_mod_z_2, 
+           key_effects = c("as.factor(Condition)2"))
+```
+
+# Study 2
+
+```{r}
+u03126_mod_z_3 <- df_2 %>% 
+  lm(z(DV2_Other_Realism_Discrepancy) ~ as.factor(Condition), .) 
+
+export_ols(u03126_mod_z_3, 
+           key_effects = c("as.factor(Condition)2"))
+```
+
+
+```{r}
+u03126_mod_z_4 <- df_2 %>% 
+  lm(z(DV1_Self_Realism_Discrepancy) ~ as.factor(Condition), .) 
+
+export_ols(u03126_mod_z_4, 
+           key_effects = c("as.factor(Condition)2"))
+```
+
+# Study 3 
+
+```{r}
+u03126_mod_z_5 <- df_3 %>% 
+  lm(z(DV1_Vaccine_Realistic_Deviation_Months) ~ as.factor(Condition_Vaccine), .) 
+
+export_ols(u03126_mod_z_5, 
+           key_effects = c("as.factor(Condition_Vaccine)2"))
+```
+
+
+```{r}
+u03126_mod_z_5 <- df_3 %>% 
+  lm(z(DV2_Relationship_Realistic_Deviation) ~ as.factor(Condition_Relationship), .) 
+
+export_ols(u03126_mod_z_5, 
+           key_effects = c("as.factor(Condition_Relationship)2"))
+```
+

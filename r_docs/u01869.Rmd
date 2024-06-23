@@ -1,0 +1,186 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-06-12'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(reticulate)
+
+source("../scripts/helpers.R")
+```
+
+```{python}
+# Core analysis packages
+import numpy as np
+import os, sys
+import pandas as pd
+from scipy import stats
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+from statsmodels.stats import anova
+from patsy import dmatrices
+import bff
+import pingouin as pg
+```
+
+
+```{python}
+def median_split(S):
+    return S > S.median()
+```
+
+
+```{python}
+def ttest_ind(x1, x2, equivar=False, alpha=0.05, printres=False):
+  n1 = len(x1)
+  M1 = np.mean(x1)
+  s1 = np.std(x1, ddof=1)
+  n2 = len(x2)
+  M2 = np.mean(x2)
+  s2 = np.std(x2, ddof=1)
+  
+  # t-test
+  [t, p] = stats.ttest_ind(x1, x2, equal_var=equivar)
+  # cohen's d
+  dof = n1 + n2 - 2
+  sp = np.sqrt(((n1-1)*s1**2 + (n2-1)*s2**2) / dof)
+  d = np.abs(M1 - M2) / sp
+  # degrees of freedom
+  df = (s1**2/n1 + s2**2/n2)**2 / ((s1**2/n1)**2/(n1-1) + (s2**2/n2)**2/(n2-1))
+  # confidence intervals (M1 - M2) ± ts(M1 - M2)
+  se = np.sqrt(sp**2/n1 + sp**2/n2)
+  CI = (M1 - M2) + np.array([-1,1])*stats.t.ppf(1-alpha/2, df, loc=0, scale=1)*se
+  
+  res = (t, df, p, d, CI[0], CI[1])
+  if printres:
+    print("t = %.5f, df = %.5f, p = %.5f, d = %.5f, CI = (%.5f, %.5f)" % res)
+    else:
+      return res  
+```
+
+```{python}
+df = pd.read_excel(os.path.expanduser("../data/raw_data/u01869_data.xlsx"), index_col=0)
+df.head()
+```
+```{python}
+def get_condnum(X):
+  return np.mod(np.where(X)[-1], 4)
+def sample(data, locs):
+  idx = locs + 4*np.arange(locs.size)
+  return data[idx]
+```
+
+
+```{python}
+# Extract columns with df.target or df["target"] or df.loc[:,"target"]
+age = df.loc[:, "AGE"]
+party = df.loc[:, "PARTY"]
+twitter = df.loc[:, "TWITTER"]
+trust = df.loc[:,"TRUST"]
+partnum = np.arange(trust.size)
+
+# Extract data with df.loc[:,"datastart":"dataend"]
+RdeltaB = df.loc[:, "RU1":"RU32"]
+convincing = df.loc[:, "AP1":"SU32"]
+
+cond_place = np.logical_not(np.isnan(convincing))
+
+sz = RdeltaB.shape
+itemnum = np.arange(sz[-1])
+print(sz)
+
+
+#Compress condition-wise data into a single data matrix and labels
+cond = np.array([get_condnum(cond_place.iloc[i,:]) for i in range(sz[0])])
+# ^ Labels
+convincing = np.array([sample(convincing.iloc[i], cond[i]) for i in range(sz[0])])
+
+# Data and row-wise labels first
+names = ["RdeltaB", "convincing", "cond", "itemnum", \
+         "age", "party", "twitter", "trust", "partnum"]
+data_packed = np.broadcast_arrays(RdeltaB, convincing, cond, itemnum)
+# Then column-wise labels
+cols = [np.tile(a, (sz[1],1)).T for a in [age, party, twitter, trust, partnum]]
+data_packed += cols
+
+data_unpacked = np.vstack([np.reshape(a, (1,-1), order="C") for a in data_packed]).T
+DATA = pd.DataFrame(data=data_unpacked, columns=names)
+
+ticklbl = ["Anec, Norm","Anec, Non-Norm","Sci, Norm","Sci, Non-Norm"]
+
+DATA.head()
+```
+
+
+```{python}
+# Group and average data within participant and PE bin
+AVDATA = DATA.groupby(["partnum", "cond"], as_index=False).mean()
+AVDATA.shape
+
+AVDATA.loc[AVDATA["cond"]==0, "RdeltaB"].mean()
+
+map_dict = {0: "AP", 1: "AU", 2: "SP", 3: "SU"}
+if "IC" in DATA:
+    DATA = DATA.drop("IC", axis=1)
+DATA.insert(8,"IC",DATA["cond"].map(map_dict))
+DATA.head()
+```
+
+```{r}
+data <- py$DATA
+
+data %<>% 
+  dplyr::mutate(
+    pop_unpop = if_else(IC %in% c("AP","SP"), "pop", "unpop"), 
+    sci_anec = if_else(IC %in% c("AU","AP"), "anec", "sci"), 
+  ) %>% 
+  dplyr::group_by(partnum, pop_unpop, sci_anec) %>% 
+  dplyr::summarise(
+    convincing = mean(convincing, na.rm = T), 
+    RdeltaB = mean(RdeltaB, na.rm = T), 
+    #cond = cond
+  )
+
+```
+
+
+```{r}
+u01869_mod_rm_z_1 <- data %>% 
+  afex::aov_4(z(RdeltaB) ~ pop_unpop*sci_anec + (pop_unpop*sci_anec|partnum), .)
+
+export_ols(u01869_mod_rm_z_1, 
+           key_effects = c("pop_unpop", "sci_anec", "pop_unpop:sci_anec"))
+
+
+u01869_mod_lmer_z_1 <- data %>% 
+  lme4::lmer(z(RdeltaB) ~ pop_unpop*sci_anec + (1|partnum), .)
+
+export_ols(u01869_mod_lmer_z_1, 
+           key_effects = c("pop_unpopunpop", "sci_anecsci", "pop_unpopunpop:sci_anecsci"))
+```
+
+
+```{r}
+data_2 <- data %>% 
+  dplyr::group_by(partnum, sci_anec) %>% 
+  dplyr::summarise(across(where(is.numeric), mean))
+
+u01869_mod_z_2 <- data_2 %>% 
+  lm(z(convincing) ~ sci_anec, .)
+
+export_ols(u01869_mod_z_2, 
+           key_effects = c("sci_anecsci"))
+
+
+u01869_mod_z_3 <- data_2 %>% 
+  lm(z(RdeltaB) ~ sci_anec + z(convincing), .) 
+
+export_ols(u01869_mod_z_3, 
+           key_effects = c("sci_anecsci", "z(convincing)"))
+```
+
+For mediations, see: https://github.com/mvlasceanu/normativebeliefs 

@@ -1,0 +1,757 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-05-03'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(afex)
+library(dplyr)
+library(magrittr)
+library(stringr)
+
+source("../scripts/helpers.R")
+
+list.files("../data/raw_data/", pattern = "p00215*")
+```
+
+# Study 1
+
+```{r}
+p00215_tib_1 <- readxl::read_excel("../data/raw_data/p00215_Experiment 1.xlsx")
+
+names(p00215_tib_1) <- as.character(p00215_tib_1[1, ]) 
+
+p00215_tib_1 %<>% 
+  dplyr::filter(row_number() > 1)
+```
+
+
+Item 
+
+```{r}
+p00215_tib_1_item <- p00215_tib_1 %>% 
+  dplyr::filter(BlockName == "Experiment", str_detect(`Test Condition`, "ITEM")) %>% 
+  dplyr::mutate(
+    encoding_cond = case_when(
+      `Encoding Condition [List 1-List 2]` == "ITEM-ITEM" ~ "same", 
+      TRUE ~ "different"
+    ), 
+    list = case_when(
+      str_detect(`Test Condition`, "01") ~ 1, 
+      TRUE ~ 2
+    ) %>% factor(.), 
+    across(ACC1:ACC6, as.numeric)
+  )
+
+p00215_tib_1_item_proccessed <- p00215_tib_1_item %>% 
+  dplyr::select(Subject, encoding_cond, list, contains("ACC")) %>% 
+  dplyr::rowwise() %>% 
+  dplyr::mutate(
+    sum_acc = sum(c(ACC1, ACC2, ACC3, ACC4, ACC5, ACC6))
+  ) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::group_by(Subject, encoding_cond, list) %>% 
+  dplyr::arrange(Subject, encoding_cond, list) %>% 
+  dplyr::mutate(
+    n = n()
+  ) %>% 
+  dplyr::summarise(
+    total_sum_acc = sum(sum_acc), 
+    total_items = max(n) * 6
+  ) %>% 
+  dplyr::mutate(
+    prop = total_sum_acc / total_items
+  )
+
+```
+
+```{r}
+p00215_tib_1_item_proccessed %>% 
+  afex::aov_4(prop ~ list + encoding_cond  + (list+encoding_cond | Subject), 
+              data = .)
+
+
+p00215_tib_1_item_proccessed %>% 
+  afex::aov_4(z(prop) ~ list + encoding_cond  + (list+encoding_cond | Subject), 
+              data = .)
+```
+
+```{r}
+p00215_mod_rm_z_1 <- p00215_tib_1_item_proccessed %>% 
+  afex::aov_4(z(prop) ~ list + encoding_cond  + (list+encoding_cond | Subject), 
+              data = .)
+
+key_effects = c("list", "encoding", "list:encoding_cond")
+export_ols(p00215_mod_rm_z_1, key_effects)
+```
+
+```{r}
+p00215_mod_lmer_z_1 <- p00215_tib_1_item_proccessed %>% 
+  lme4::lmer(z(prop) ~ list * encoding_cond  + (1|Subject), 
+              data = .)
+
+key_effects = c("list2", "encoding_condsame", "list2:encoding_condsame")
+export_ols(p00215_mod_lmer_z_1, key_effects)
+```
+
+
+
+
+
+Order 
+
+```{r}
+p00215_tib_1_order <- p00215_tib_1 %>% 
+  dplyr::filter(BlockName == "Experiment", str_detect(`Test Condition`, "ORDER")) %>% 
+  dplyr::mutate(
+    encoding_cond = case_when(
+      `Encoding Condition [List 1-List 2]` == "ORDER-ORDER" ~ "same", 
+      TRUE ~ "different"
+    ), 
+    list = case_when(
+      str_detect(`Test Condition`, "01") ~ 1, 
+      TRUE ~ 2
+    ) %>% factor(.), 
+    across(ACC1:ACC6, as.numeric)
+  )
+
+p00215_tib_1_order_proccessed <- p00215_tib_1_order %>% 
+  dplyr::select(Subject, encoding_cond, list, contains("ACC")) %>% 
+  dplyr::rowwise() %>% 
+  dplyr::mutate(
+    sum_acc = sum(c(ACC1, ACC2, ACC3, ACC4, ACC5, ACC6))
+  ) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::group_by(Subject, encoding_cond, list) %>% 
+  dplyr::arrange(Subject, encoding_cond, list) %>% 
+  dplyr::mutate(
+    n = n()
+  ) %>% 
+  dplyr::summarise(
+    total_sum_acc = sum(sum_acc), 
+    total_items = max(n) * 6
+  ) %>% 
+  dplyr::mutate(
+    prop = total_sum_acc / total_items
+  )
+```
+
+```{r}
+p00215_tib_1_order_proccessed %>% 
+  afex::aov_4(prop ~ list + encoding_cond  + (list+encoding_cond | Subject), 
+              data = .)
+
+p00215_tib_1_order_proccessed %>% 
+  afex::aov_4(z(prop) ~ list + encoding_cond  + (list+encoding_cond | Subject), 
+              data = .)
+```
+
+```{r}
+p00215_mod_rm_z_2 <- p00215_tib_1_order_proccessed %>% 
+  afex::aov_4(z(prop) ~ list + encoding_cond  + (list+encoding_cond | Subject), 
+              data = .)
+
+key_effects = c("list", "encoding", "list:encoding_cond")
+export_ols(p00215_mod_rm_z_2, key_effects)
+```
+
+lmer
+
+```{r}
+p00215_mod_lmer_z_2 <- p00215_tib_1_order_proccessed %>% 
+  lme4::lmer(z(prop) ~ list * encoding_cond  + (1 | Subject), 
+              data = .)
+
+key_effects = c("list2", "encoding_condsame", "list2:encoding_condsame")
+export_ols(p00215_mod_lmer_z_2, key_effects)
+```
+
+# Study 2 
+
+```{r}
+p00215_tib_2 <- readxl::read_excel("../data/raw_data/p00215_Experiment 2.xlsx")
+
+names(p00215_tib_2) <- as.character(p00215_tib_2[1, ]) 
+
+p00215_tib_2 %<>% 
+  dplyr::filter(row_number() > 1)
+
+```
+
+Item 
+
+```{r}
+p00215_tib_2_item <- p00215_tib_2 %>% 
+  dplyr::filter(BlockName == "Experiment", str_detect(`Test Condition`, "ITEM")) %>% 
+  dplyr::mutate(
+    encoding_cond = case_when(
+      `Encoding Condition [List 1-List 2]` == "ITEM-ITEM" ~ "same", 
+      TRUE ~ "different"
+    ), 
+    list = case_when(
+      str_detect(`Test Condition`, "01") ~ 1, 
+      TRUE ~ 2
+    ) %>% factor(.), 
+    across(ACC1:ACC6, as.numeric)
+  )
+
+p00215_tib_2_item_proccessed <- p00215_tib_2_item %>% 
+  dplyr::select(Subject, encoding_cond, list, contains("ACC")) %>% 
+  dplyr::rowwise() %>% 
+  dplyr::mutate(
+    sum_acc = sum(c(ACC1, ACC2, ACC3, ACC4, ACC5, ACC6))
+  ) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::group_by(Subject, encoding_cond, list) %>% 
+  dplyr::arrange(Subject, encoding_cond, list) %>% 
+  dplyr::mutate(
+    n = n()
+  ) %>% 
+  dplyr::summarise(
+    total_sum_acc = sum(sum_acc), 
+    total_items = max(n) * 6
+  ) %>% 
+  dplyr::mutate(
+    prop = total_sum_acc / total_items
+  )
+
+p00215_tib_2_item
+```
+
+```{r}
+p00215_tib_2_item_proccessed %>% 
+  afex::aov_4(prop ~ list + encoding_cond  + (list+encoding_cond | Subject), 
+              data = .)
+
+p00215_tib_2_item_proccessed %>% 
+  afex::aov_4(z(prop) ~ list + encoding_cond  + (list+encoding_cond | Subject), 
+              data = .)
+
+```
+
+```{r}
+p00215_mod_rm_z_3 <- p00215_tib_2_item_proccessed %>% 
+  afex::aov_4(z(prop) ~ list + encoding_cond  + (list+encoding_cond | Subject), 
+              data = .)
+
+key_effects = c("list", "encoding", "list:encoding_cond")
+export_ols(p00215_mod_rm_z_3, key_effects)
+```
+lmer: 
+
+```{r}
+p00215_mod_lmer_z_3 <- p00215_tib_2_item_proccessed %>% 
+  lme4::lmer(z(prop) ~ list * encoding_cond  + (1 | Subject), 
+              data = .)
+
+key_effects = c("list2", "encoding_condsame", "list2:encoding_condsame")
+export_ols(p00215_mod_lmer_z_3, key_effects)
+```
+
+
+Order 
+
+```{r}
+p00215_tib_2_order <- p00215_tib_2 %>% 
+  dplyr::filter(BlockName == "Experiment", str_detect(`Test Condition`, "ORDER")) %>% 
+  dplyr::mutate(
+    encoding_cond = case_when(
+      `Encoding Condition [List 1-List 2]` == "ORDER-ORDER" ~ "same", 
+      TRUE ~ "different"
+    ), 
+    list = case_when(
+      str_detect(`Test Condition`, "01") ~ 1, 
+      TRUE ~ 2
+    ) %>% factor(.), 
+    across(ACC1:ACC6, as.numeric)
+  )
+
+p00215_tib_2_order_proccessed <- p00215_tib_2_order %>% 
+  dplyr::select(Subject, encoding_cond, list, contains("ACC")) %>% 
+  dplyr::rowwise() %>% 
+  dplyr::mutate(
+    sum_acc = sum(c(ACC1, ACC2, ACC3, ACC4, ACC5, ACC6))
+  ) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::group_by(Subject, encoding_cond, list) %>% 
+  dplyr::arrange(Subject, encoding_cond, list) %>% 
+  dplyr::mutate(
+    n = n()
+  ) %>% 
+  dplyr::summarise(
+    total_sum_acc = sum(sum_acc), 
+    total_items = max(n) * 6
+  ) %>% 
+  dplyr::mutate(
+    prop = total_sum_acc / total_items
+  )
+```
+
+```{r}
+p00215_tib_2_order_proccessed %>% 
+  afex::aov_4(prop ~ list + encoding_cond  + (list+encoding_cond | Subject), 
+              data = .)
+
+```
+
+```{r}
+p00215_mod_rm_z_4 <- p00215_tib_2_order_proccessed %>% 
+  afex::aov_4(z(prop) ~ list + encoding_cond  + (list+encoding_cond | Subject), 
+              data = .)
+
+key_effects = c("list", "encoding", "list:encoding_cond")
+export_ols(p00215_mod_rm_z_4, key_effects)
+```
+lmer
+
+```{r}
+p00215_mod_lmer_z_4 <- p00215_tib_2_order_proccessed %>% 
+  lme4::lmer(z(prop) ~ list * encoding_cond  + (1 | Subject), 
+              data = .)
+
+key_effects = c("list2", "encoding_condsame", "list2:encoding_condsame")
+export_ols(p00215_mod_lmer_z_4, key_effects)
+```
+
+# Study 3
+
+```{r}
+p00215_tib_3 <- readxl::read_excel("../data/raw_data/p00215_Experiment 3.xlsx")
+
+names(p00215_tib_3) <- as.character(p00215_tib_3[1, ]) 
+
+p00215_tib_3 %<>% 
+  dplyr::filter(row_number() > 1)
+
+```
+
+Item 
+
+```{r}
+p00215_tib_3_item <- p00215_tib_3 %>% 
+  dplyr::filter(BlockName == "Experiment", str_detect(`Test Condition`, "ITEM")) %>% 
+  dplyr::mutate(
+    encoding_cond = case_when(
+      `Encoding Condition [List 1-List 2]` == "ITEM-ITEM" ~ "same", 
+      TRUE ~ "different"
+    ), 
+    list = case_when(
+      str_detect(`Test Condition`, "01") ~ 1, 
+      TRUE ~ 2
+    ) %>% factor(.), 
+    across(ACC1:ACC6, as.numeric)
+  )
+
+p00215_tib_3_item_proccessed <- p00215_tib_3_item %>% 
+  dplyr::select(Subject, encoding_cond, list, contains("ACC")) %>% 
+  dplyr::rowwise() %>% 
+  dplyr::mutate(
+    sum_acc = sum(c(ACC1, ACC2, ACC3, ACC4, ACC5, ACC6))
+  ) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::group_by(Subject, encoding_cond, list) %>% 
+  dplyr::arrange(Subject, encoding_cond, list) %>% 
+  dplyr::mutate(
+    n = n()
+  ) %>% 
+  dplyr::summarise(
+    total_sum_acc = sum(sum_acc), 
+    total_items = max(n) * 6
+  ) %>% 
+  dplyr::mutate(
+    prop = total_sum_acc / total_items
+  )
+
+p00215_tib_3_item
+```
+
+```{r}
+p00215_tib_3_item_proccessed %>% 
+  afex::aov_4(prop ~ list + encoding_cond  + (list+encoding_cond | Subject), 
+              data = .)
+
+```
+
+```{r}
+p00215_mod_rm_z_5 <- p00215_tib_3_item_proccessed %>% 
+  afex::aov_4(z(prop) ~ list + encoding_cond  + (list+encoding_cond | Subject), 
+              data = .)
+
+key_effects = c("list", "encoding", "list:encoding_cond")
+export_ols(p00215_mod_rm_z_5, key_effects)
+```
+
+```{r}
+p00215_mod_lmer_z_5 <- p00215_tib_3_item_proccessed %>% 
+  lme4::lmer(z(prop) ~ list * encoding_cond  + (1| Subject), 
+              data = .)
+
+key_effects = c("list2", "encoding_condsame", "list2:encoding_condsame")
+export_ols(p00215_mod_lmer_z_5, key_effects)
+```
+
+Order 
+
+```{r}
+p00215_tib_3_order <- p00215_tib_3 %>% 
+  dplyr::filter(BlockName == "Experiment", str_detect(`Test Condition`, "ORDER")) %>% 
+  dplyr::mutate(
+    encoding_cond = case_when(
+      `Encoding Condition [List 1-List 2]` == "ORDER-ORDER" ~ "same", 
+      TRUE ~ "different"
+    ), 
+    list = case_when(
+      str_detect(`Test Condition`, "01") ~ 1, 
+      TRUE ~ 2
+    ) %>% factor(.), 
+    across(ACC1:ACC6, as.numeric)
+  )
+
+p00215_tib_3_order_proccessed <- p00215_tib_3_order %>% 
+  dplyr::select(Subject, encoding_cond, list, contains("ACC")) %>% 
+  dplyr::rowwise() %>% 
+  dplyr::mutate(
+    sum_acc = sum(c(ACC1, ACC2, ACC3, ACC4, ACC5, ACC6))
+  ) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::group_by(Subject, encoding_cond, list) %>% 
+  dplyr::arrange(Subject, encoding_cond, list) %>% 
+  dplyr::mutate(
+    n = n()
+  ) %>% 
+  dplyr::summarise(
+    total_sum_acc = sum(sum_acc), 
+    total_items = max(n) * 6
+  ) %>% 
+  dplyr::mutate(
+    prop = total_sum_acc / total_items
+  )
+```
+
+```{r}
+p00215_tib_3_order_proccessed %>% 
+  afex::aov_4(prop ~ list + encoding_cond  + (list+encoding_cond | Subject), 
+              data = .)
+
+```
+
+```{r}
+p00215_mod_rm_z_6 <- p00215_tib_3_order_proccessed %>% 
+  afex::aov_4(z(prop) ~ list + encoding_cond  + (list+encoding_cond | Subject), 
+              data = .)
+
+key_effects = c("list", "encoding", "list:encoding_cond")
+export_ols(p00215_mod_rm_z_6, key_effects)
+```
+
+lmer
+
+```{r}
+p00215_mod_lmer_z_6 <- p00215_tib_3_order_proccessed %>% 
+  lme4::lmer(z(prop) ~ list * encoding_cond  + (1| Subject), 
+              data = .)
+
+key_effects = c("list2", "encoding_condsame", "list2:encoding_condsame")
+export_ols(p00215_mod_lmer_z_6, key_effects)
+```
+
+# Study 4
+
+```{r}
+p00215_tib_4 <- readxl::read_excel("../data/raw_data/p00215_Experiment 4.xlsx")
+
+names(p00215_tib_4) <- as.character(p00215_tib_4[1, ]) 
+
+p00215_tib_4 %<>% 
+  dplyr::filter(row_number() > 1)
+
+```
+
+Item 
+
+```{r}
+p00215_tib_4_item <- p00215_tib_4 %>% 
+  dplyr::filter(BlockName == "Experiment", str_detect(`Test Condition`, "ITEM")) %>% 
+  dplyr::mutate(
+    encoding_cond = case_when(
+      `Encoding Condition [List 1-List 2]` == "ITEM-ITEM" ~ "same", 
+      TRUE ~ "different"
+    ), 
+    list = case_when(
+      str_detect(`Test Condition`, "01") ~ 1, 
+      TRUE ~ 2
+    ) %>% factor(.), 
+    across(ACC1:ACC6, as.numeric)
+  )
+
+p00215_tib_4_item_proccessed <- p00215_tib_4_item %>% 
+  dplyr::select(Subject, encoding_cond, list, contains("ACC")) %>% 
+  dplyr::rowwise() %>% 
+  dplyr::mutate(
+    sum_acc = sum(c(ACC1, ACC2, ACC3, ACC4, ACC5, ACC6))
+  ) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::group_by(Subject, encoding_cond, list) %>% 
+  dplyr::arrange(Subject, encoding_cond, list) %>% 
+  dplyr::mutate(
+    n = n()
+  ) %>% 
+  dplyr::summarise(
+    total_sum_acc = sum(sum_acc), 
+    total_items = max(n) * 6
+  ) %>% 
+  dplyr::mutate(
+    prop = total_sum_acc / total_items
+  )
+
+```
+
+```{r}
+p00215_tib_4_item_proccessed %>% 
+  afex::aov_4(prop ~ list + encoding_cond  + (list+encoding_cond | Subject), 
+              data = .)
+
+```
+
+```{r}
+p00215_mod_rm_z_7 <- p00215_tib_4_item_proccessed %>% 
+  afex::aov_4(z(prop) ~ list + encoding_cond  + (list+encoding_cond | Subject), 
+              data = .)
+
+key_effects = c("list", "encoding", "list:encoding_cond")
+export_ols(p00215_mod_rm_z_7, key_effects)
+```
+lmer
+
+```{r}
+p00215_mod_lmer_z_7 <- p00215_tib_4_item_proccessed %>% 
+  lme4::lmer(z(prop) ~ list * encoding_cond  + (1 | Subject), 
+              data = .)
+
+key_effects = c("list2", "encoding_condsame", "list2:encoding_condsame")
+export_ols(p00215_mod_lmer_z_7, key_effects)
+```
+
+Order 
+
+```{r}
+p00215_tib_4_order <- p00215_tib_4 %>% 
+  dplyr::filter(BlockName == "Experiment", str_detect(`Test Condition`, "ORDER")) %>% 
+  dplyr::mutate(
+    encoding_cond = case_when(
+      `Encoding Condition [List 1-List 2]` == "ORDER-ORDER" ~ "same", 
+      TRUE ~ "different"
+    ), 
+    list = case_when(
+      str_detect(`Test Condition`, "01") ~ 1, 
+      TRUE ~ 2
+    ) %>% factor(.), 
+    across(ACC1:ACC6, as.numeric)
+  )
+
+p00215_tib_4_order_proccessed <- p00215_tib_4_order %>% 
+  dplyr::select(Subject, encoding_cond, list, contains("ACC")) %>% 
+  dplyr::rowwise() %>% 
+  dplyr::mutate(
+    sum_acc = sum(c(ACC1, ACC2, ACC3, ACC4, ACC5, ACC6))
+  ) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::group_by(Subject, encoding_cond, list) %>% 
+  dplyr::arrange(Subject, encoding_cond, list) %>% 
+  dplyr::mutate(
+    n = n()
+  ) %>% 
+  dplyr::summarise(
+    total_sum_acc = sum(sum_acc), 
+    total_items = max(n) * 6
+  ) %>% 
+  dplyr::mutate(
+    prop = total_sum_acc / total_items
+  )
+```
+
+```{r}
+p00215_tib_4_order_proccessed %>% 
+  afex::aov_4(prop ~ list + encoding_cond  + (list+encoding_cond | Subject), 
+              data = .)
+
+```
+
+```{r}
+p00215_mod_rm_z_8 <- p00215_tib_4_order_proccessed %>% 
+  afex::aov_4(z(prop) ~ list + encoding_cond  + (list+encoding_cond | Subject), 
+              data = .)
+
+key_effects = c("list", "encoding", "list:encoding_cond")
+export_ols(p00215_mod_rm_z_8, key_effects)
+```
+lmer 
+
+```{r}
+p00215_mod_lmer_z_8 <- p00215_tib_4_order_proccessed %>% 
+  lme4::lmer(z(prop) ~ list * encoding_cond  + (1 | Subject), 
+              data = .)
+
+key_effects = c("list2", "encoding_condsame", "list2:encoding_condsame")
+export_ols(p00215_mod_lmer_z_8, key_effects)
+```
+
+
+# Study 5
+
+```{r}
+p00215_tib_5 <- readxl::read_excel("../data/raw_data/p00215_Experiment 5.xlsx")
+
+names(p00215_tib_5) <- as.character(p00215_tib_5[1, ]) 
+
+p00215_tib_5 %<>% 
+  dplyr::filter(row_number() > 1)
+
+```
+
+Item
+
+```{r}
+p00215_tib_5_item <- p00215_tib_5 %>% 
+  dplyr::filter(str_detect(BlockName,"Experiment"), str_detect(`Test Condition`, "ITEM")) %>% 
+  dplyr::mutate(
+    encoding_cond = case_when(
+      `Encoding Condition [List 1-List 2]` == "ITEM-ITEM" ~ "same", 
+      `Encoding Condition [List 1-List 2]` == "ITEM" ~ "single", 
+      TRUE ~ "different"
+    ), 
+    list = case_when(
+      str_detect(`Test Condition`, "01") ~ 1, 
+      TRUE ~ 2
+    ) %>% factor(.), 
+    list_count = case_when(
+      str_detect(BlockName, "OneList") ~ 1, 
+      TRUE ~ 2
+    ) %>% factor(.),
+    across(ACC1:ACC4, as.numeric)
+  )
+
+p00215_tib_5_item_proccessed <- p00215_tib_5_item %>% 
+  dplyr::select(Subject, list_count, encoding_cond, list, contains("ACC")) %>% 
+  dplyr::rowwise() %>% 
+  dplyr::mutate(
+    sum_acc = sum(c(ACC1, ACC2, ACC3, ACC4))
+  ) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::group_by(Subject, list_count, encoding_cond, list) %>% 
+  dplyr::arrange(Subject, list_count, encoding_cond, list) %>% 
+  dplyr::mutate(
+    n = n()
+  ) %>% 
+  dplyr::summarise(
+    total_sum_acc = sum(sum_acc), 
+    total_items = max(n) * 4
+  ) %>% 
+  dplyr::mutate(
+    prop = total_sum_acc / total_items
+  ) %>% 
+  dplyr::filter(list_count != 1)
+
+p00215_tib_5_item
+```
+
+```{r}
+p00215_tib_5_item_proccessed %>% 
+  afex::aov_4(prop ~ list + encoding_cond  + (list+encoding_cond | Subject), 
+              data = .)
+
+```
+
+```{r}
+p00215_mod_rm_z_9 <- p00215_tib_5_item_proccessed %>% 
+  afex::aov_4(z(prop) ~ list + encoding_cond  + (list+encoding_cond | Subject), 
+              data = .)
+
+key_effects = c("list", "encoding", "list:encoding_cond")
+export_ols(p00215_mod_rm_z_9, key_effects)
+```
+
+```{r}
+p00215_mod_lmer_z_9 <- p00215_tib_5_item_proccessed %>% 
+  lme4::lmer(z(prop) ~ list * encoding_cond  + (1 | Subject), 
+              data = .)
+
+key_effects = c("list2", "encoding_condsame", "list2:encoding_condsame")
+export_ols(p00215_mod_lmer_z_9, key_effects)
+```
+
+
+Order
+
+```{r}
+p00215_tib_5_order <- p00215_tib_5 %>% 
+  dplyr::filter(str_detect(BlockName,"Experiment"), str_detect(`Test Condition`, "ORDER")) %>% 
+  dplyr::mutate(
+    encoding_cond = case_when(
+      `Encoding Condition [List 1-List 2]` == "ORDER-ORDER" ~ "same", 
+      `Encoding Condition [List 1-List 2]` == "ORDER" ~ "single", 
+      TRUE ~ "different"
+    ), 
+    list = case_when(
+      str_detect(`Test Condition`, "01") ~ 1, 
+      TRUE ~ 2
+    ) %>% factor(.), 
+    list_count = case_when(
+      str_detect(BlockName, "OneList") ~ 1, 
+      TRUE ~ 2
+    ) %>% factor(.),
+    across(ACC1:ACC4, as.numeric)
+  )
+
+p00215_tib_5_order_proccessed <- p00215_tib_5_order %>% 
+  dplyr::select(Subject, list_count, encoding_cond, list, contains("ACC")) %>% 
+  dplyr::rowwise() %>% 
+  dplyr::mutate(
+    sum_acc = sum(c(ACC1, ACC2, ACC3, ACC4))
+  ) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::group_by(Subject, list_count, encoding_cond, list) %>% 
+  dplyr::arrange(Subject, list_count, encoding_cond, list) %>% 
+  dplyr::mutate(
+    n = n()
+  ) %>% 
+  dplyr::summarise(
+    total_sum_acc = sum(sum_acc), 
+    total_items = max(n) * 4
+  ) %>% 
+  dplyr::mutate(
+    prop = total_sum_acc / total_items
+  ) %>% 
+  dplyr::filter(list_count != 1)
+
+```
+
+```{r}
+p00215_tib_5_order_proccessed %>% 
+  afex::aov_4(prop ~ list + encoding_cond  + (list+encoding_cond | Subject), 
+              data = .)
+
+```
+
+```{r}
+p00215_mod_rm_z_10 <- p00215_tib_5_order_proccessed %>% 
+  afex::aov_4(z(prop) ~ list + encoding_cond  + (list+encoding_cond | Subject), 
+              data = .)
+
+key_effects = c("list", "encoding", "list:encoding_cond")
+export_ols(p00215_mod_rm_z_10, key_effects)
+```
+
+```{r}
+p00215_mod_lmer_z_10 <- p00215_tib_5_order_proccessed %>% 
+  lme4::lmer(z(prop) ~ list * encoding_cond  + (1 | Subject), 
+              data = .)
+
+key_effects = c("list2", "encoding_condsame", "list2:encoding_condsame")
+export_ols(p00215_mod_lmer_z_10, key_effects)
+```
+

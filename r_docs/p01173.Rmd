@@ -1,0 +1,23 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-06'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+df <- read.csv("../data/raw_data/p01173_questionnaire_plus_behavioral_data.csv")
+df
+```
+```{r}
+p01173_mod_z_1 <- df %>% 
+  lm(z(loss.of.control...RT) ~ z(age) + z(pursuit.rotor.task...time.on.target) + 
+       z(prob.monitor...accuracy) + z(NFC), .)
+
+export_ols(p01173_mod_z_1, 
+           key_effects = c("z(age)", "z(pursuit.rotor.task...time.on.target)", 
+                           "z(prob.monitor...accuracy)", "z(NFC)"))
+```
+

@@ -1,0 +1,260 @@
+---
+title: ""
+output: html_document
+---
+
+The current study examined whether use of a foreign language affects the manner in which people evaluate a criminal situation. We employed a range of crime scenarios, for which severity judgment scores were obtained. Crimes that were written in a foreign language were systematically evaluated as less severe compared with the same cases described in the native language. We propose that these differences may be due to attenuated emotional processing in a nonnative language. Crucially, this observed variation in severity judgment may also affect magistrates and police interrogators confronted with crime scenarios formulated in a foreign tongue. This in turn would have inevitable consequences for the penalty they will or will not exact on the suspect.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+library(gtools)
+library(robustbase)
+library(magrittr) # unless you routinely load tidyverse, in which case leave this one out. You just need it for the pipe. 
+library(moments)
+
+
+variables <- c("paper", "outcome", "n", "skew", "kurt", "z_1.96", "z_2.58", "z_3.29", "mode_n", "var", "var_ratio")
+
+list.files("../data/raw_data/", pattern = "p00294")
+
+p00294_tib <- readr::read_csv("../data/raw_data/p00294_woumans2020_Data Crime Experiment_tidy.csv") %>% 
+  dplyr::mutate(
+    Crime_Language = as.factor(`Crime Language`), 
+    CrimP_PPrspPctivP  = as.factor(`CrimP PPrspPctivP`),
+    z_Scenario_1 = z(`Scenario 1`), 
+    z_English_oral_comprehension = z(`English oral comprehension`),
+    z_Comprehension_Scenario_1 = z(`Comprehension Scenario 1`),
+    z_Scenario_2 = z(`Scenario 2`),
+    z_Scenario_3 = z(`Scenario 3`),
+    z_Scenario_4 = z(`Scenario 4`),
+    z_Comprehension_Scenario_2 = z(`Comprehension Scenario 2`),
+    z_Comprehension_Scenario_3 = z(`Comprehension Scenario 3`),
+    z_Comprehension_Scenario_4 = z(`Comprehension Scenario 4`),
+    
+  )
+
+names(p00294_tib)
+nrow(p00294_tib)
+
+p00294_tib
+```
+
+```{r}
+contrasts(p00294_tib$Crime_Language) <- c(0.5,-0.5)
+contrasts(p00294_tib$CrimP_PPrspPctivP) <- c(0.5,-0.5)
+```
+
+# Scenario 1
+
+```{r}
+p00294_tib %>% 
+  dplyr::group_by(Crime_Language, CrimP_PPrspPctivP) %>% 
+  dplyr::summarise(
+    mean = mean(`Scenario 1`)
+  )
+
+lm(`Scenario 1` ~ Crime_Language*CrimP_PPrspPctivP
+   + `English oral comprehension` 
+   + `Comprehension Scenario 1`, 
+   data = p00294_tib) %>% car::Anova(type = 3)
+```
+
+refit this model:
+
+```{r}
+p00294_mod_1 <- lm(`Scenario 1` ~ `Crime Language`*`CrimP PPrspPctivP`
+                   + `English oral comprehension` 
+                   + `Comprehension Scenario 1` 
+                  , data = p00294_tib)
+
+p00294_mod_1 %>% summary()
+```
+
+```{r}
+p00294_mod_1_z <- lm(z_Scenario_1 ~  Crime_Language*CrimP_PPrspPctivP
+                     +z_English_oral_comprehension 
+                     + z_Comprehension_Scenario_1, 
+                     data = p00294_tib)
+
+p00294_mod_1_z %>% summary()
+
+
+```
+
+key effects:
+
+```{r}
+key_effects <- c("Crime_Language1", 
+                 "CrimP_PPrspPctivP1",  
+                 "Crime_Language1:CrimP_PPrspPctivP1")
+
+broom::tidy(p00294_mod_1_z) %>% 
+  dplyr::filter(term %in% key_effects)
+
+p00294_mod_1_z_list <- list(
+  model = p00294_mod_1_z, key_effects = key_effects
+)
+
+```
+
+
+
+```{r}
+saveRDS(object = p00294_mod_1_z_list, 
+        file = "../objects/lm/p00294_mod_1_z_list.rds")
+
+```
+
+# Scenario 2
+
+```{r}
+p00294_tib %>% 
+  dplyr::group_by(`Crime Language`, `CrimP PPrspPctivP`) %>% 
+  dplyr::summarise(
+    mean = mean(`Scenario 2`)
+  )
+
+lm(`Scenario 2` ~ `Crime Language`*`CrimP PPrspPctivP` 
+   + `English oral comprehension` 
+   + `Comprehension Scenario 2`, 
+   data = p00294_tib) %>% car::Anova(type = 3)
+```
+
+refit this model:
+
+```{r}
+p00294_mod_2 <- lm(`Scenario 2` ~ `Crime Language`*`CrimP PPrspPctivP` 
+                   + `English oral comprehension` 
+                   + `Comprehension Scenario 2`, 
+                   data = p00294_tib)
+
+p00294_mod_2 %>% summary()
+```
+
+```{r}
+p00294_mod_2_z <- lm(z_Scenario_2 ~  Crime_Language*CrimP_PPrspPctivP
+                     +z_English_oral_comprehension 
+                     + z_Comprehension_Scenario_2, 
+                     data = p00294_tib)
+
+p00294_mod_2_z %>% summary()
+```
+
+```{r}
+broom::tidy(p00294_mod_2_z) %>% 
+  dplyr::filter(term %in% key_effects)
+
+p00294_mod_2_z_list <- list(
+  model = p00294_mod_2_z, key_effects = key_effects
+)
+```
+
+
+```{r}
+saveRDS(object = p00294_mod_2_z_list, 
+        file = "../objects/lm/p00294_mod_2_z_list.rds")
+```
+
+# Scenario 3
+
+```{r}
+p00294_tib %>% 
+  dplyr::group_by(`Crime Language`, `CrimP PPrspPctivP`) %>% 
+  dplyr::summarise(
+    mean = mean(`Scenario 3`)
+  )
+
+lm(`Scenario 3` ~ `Crime Language`*`CrimP PPrspPctivP` 
+   + `English oral comprehension` 
+   + `Comprehension Scenario 3`, 
+   data = p00294_tib) %>% car::Anova(type = 3)
+```
+
+refit this model:
+
+```{r}
+p00294_mod_3 <- lm(`Scenario 3` ~ `Crime Language`*`CrimP PPrspPctivP` 
+                   + `English oral comprehension` 
+                   + `Comprehension Scenario 3`, 
+                   data = p00294_tib)
+
+p00294_mod_3 %>% summary()
+```
+
+```{r}
+p00294_mod_3_z <- lm(z_Scenario_3 ~  Crime_Language*CrimP_PPrspPctivP
+                     +z_English_oral_comprehension 
+                     + z_Comprehension_Scenario_3, 
+                     data = p00294_tib)
+
+p00294_mod_3_z %>% summary()
+```
+
+```{r}
+broom::tidy(p00294_mod_3_z) %>% 
+  dplyr::filter(term %in% key_effects)
+
+p00294_mod_3_z_list <- list(
+  model = p00294_mod_3_z, key_effects = key_effects
+)
+```
+
+
+```{r}
+saveRDS(object = p00294_mod_3_z_list, 
+        file = "../objects/lm/p00294_mod_3_z_list.rds")
+```
+
+# Scenario 4
+
+```{r}
+p00294_tib %>% 
+  dplyr::group_by(`Crime Language`, `CrimP PPrspPctivP`) %>% 
+  dplyr::summarise(
+    mean = mean(`Scenario 4`)
+  )
+
+lm(`Scenario 4` ~ `Crime Language`*`CrimP PPrspPctivP` 
+   + `English oral comprehension` 
+   + `Comprehension Scenario 4`, 
+   data = p00294_tib) %>% car::Anova(type = 3)
+```
+
+refit this model:
+
+```{r}
+p00294_mod_4 <- lm(`Scenario 4` ~ `Crime Language`*`CrimP PPrspPctivP` 
+                   + `English oral comprehension` 
+                   + `Comprehension Scenario 4`, 
+                   data = p00294_tib)
+
+p00294_mod_4 %>% summary()
+```
+
+```{r}
+p00294_mod_4_z <- lm(z_Scenario_4 ~  Crime_Language*CrimP_PPrspPctivP
+                     +z_English_oral_comprehension 
+                     + z_Comprehension_Scenario_4, 
+                     data = p00294_tib)
+
+p00294_mod_4_z %>% summary()
+```
+
+
+```{r}
+broom::tidy(p00294_mod_4_z) %>% 
+  dplyr::filter(term %in% key_effects)
+
+p00294_mod_4_z_list <- list(
+  model = p00294_mod_4_z, key_effects = key_effects
+)
+```
+
+
+```{r}
+export_ols(p00294_mod_4_z, key_effects)
+
+```

@@ -1,0 +1,103 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-20'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df <- readxl::read_excel("../data/raw_data/p01498_1-s2.0-S001002771830043X-mmc1.xlsx")
+names(df) = c("id", "acc", "rt", "hand", "position", "literacy")
+```
+
+1. compute accuracy to exclude participant
+
+```{r}
+df %>% 
+  dplyr::group_by(id) %>% 
+  dplyr::summarise(
+    acc = sum(acc), 
+    n = n(), 
+    acc = acc/n
+  ) %>% 
+  dplyr::arrange(acc)
+
+```
+
+this seems like a clean dataset with trial-level outliers already removed. 
+
+
+
+process per participant: 
+
+```{r}
+df %<>% 
+  dplyr::filter(acc == 1, 
+               # hand != 101,
+                position != 0,
+                ) %>% 
+ # dplyr::group_by(id) %>% 
+  dplyr::mutate(
+    mean_rt = mean(rt), 
+    sd_rt = sd(rt), 
+    sd_rt_2.5 = 2.5*sd_rt, 
+    lower_sd = mean_rt - sd_rt_2.5, 
+    upper_sd = mean_rt + sd_rt_2.5, 
+    include = if_else((rt > lower_sd & rt < upper_sd), TRUE, FALSE)
+  ) %>% 
+  dplyr::filter(include == TRUE) %>% 
+  dplyr::group_by(id, literacy, position, hand) %>%
+  #dplyr::mutate(log_rt = log(rt)) %>% 
+  dplyr::summarise(rt = mean(rt)) %>% 
+  dplyr::group_by(literacy, position, hand) %>% 
+  dplyr::mutate(
+    log_rt = log(rt),
+    literacy = factor(literacy), 
+    position = factor(position), 
+    #hand = factor(hand, labels = c("left", "right"))
+  )
+
+```
+
+model1
+
+```{r}
+df %>% 
+  dplyr::group_by(position) %>% 
+  dplyr::summarise(mean = mean(rt), 
+                   sd = sd(rt))
+```
+
+
+```{r}
+df %>% 
+  afex::aov_4(log_rt ~  literacy*position*hand + (position*hand|id), ., 
+              anova_table = list(correction = "none"))
+```
+
+```{r}
+df_wide <- df %>% 
+  tidyr::pivot_wider(
+    id_cols = c(id, literacy), 
+    names_from = c(position, hand), 
+    values_from = c(rt, log_rt), 
+    #names_glue = paste0("{%s}_{%s}", "position")
+  )
+```
+
+
+```{r}
+haven::write_sav(df_wide, "../data/p01498/df.sav")
+```
+
+
+
+```{r}
+progress()
+```
+
+

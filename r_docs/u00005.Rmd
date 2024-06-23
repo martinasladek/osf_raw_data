@@ -1,0 +1,72 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-29'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+ocd <- read.csv("../data/raw_data/u00005_ocd.survey.deidentified.csv") %>% 
+  mutate(across(ends_with('Date'), ~as.POSIXct(mdy_hm(.))))
+
+for_numeric <- read_csv("../data/raw_data/u00005_ocd.survey.deidentified.numeric.csv") %>% 
+  mutate(across(ends_with('Date'), ~as.POSIXct(mdy_hm(.))))
+```
+
+process vars 
+
+```{r}
+for_numeric <- for_numeric %>% filter(Progress>55&(ocd$diagnosed=='Professionally diagnosed'|ocd$diagnosed=='Self diagnosed'|
+                                                     ocd$diagnosed=='I suspect I may have OCD')&!is.na(Q33))
+ocd <- ocd %>% filter(Progress>55&(diagnosed=='Professionally diagnosed'|diagnosed=='Self diagnosed'|
+                                     diagnosed=='I suspect I may have OCD')&!is.na(Q33))
+##run 3 lines below to filter only people formally diagnosed AND that completed DOCS##
+#ocd <- ocd %>% filter(diagnosed=='Professionally diagnosed'&Progress>55)
+#for_numeric <- for_numeric %>% filter(diagnosed==1&Progress>55)
+
+
+for_numeric <- for_numeric %>% mutate(contamination.mean=rowMeans(select(for_numeric,Q5:Q9),na.rm=T)-1,
+                                      responsible.mean=rowMeans(select(for_numeric,Q13:Q17),na.rm=T)-1,
+                                      unacceptable.thought.mean=rowMeans(select(for_numeric,Q20:Q24),na.rm=T)-1,
+                                      just.right.mean=rowMeans(select(for_numeric,Q26:Q30),na.rm=T)-1) %>% 
+  mutate(contamination_cutoff=ifelse(contamination.mean>2,1,0),
+         responsible_cutoff=ifelse(responsible.mean>2,1,0),
+         unacceptable.thought_cutoff=ifelse(unacceptable.thought.mean>2,1,0),
+         just.right_cutoff=ifelse(just.right.mean>2,1,0))
+for_numeric$docs_total <- with(for_numeric,contamination.mean+responsible.mean+
+                                 just.right.mean+unacceptable.thought.mean)
+ocd <- ocd %>% bind_cols(for_numeric %>% select(contamination_cutoff:just.right_cutoff,docs_total))
+for_numeric <- for_numeric %>% mutate(contamination.change=Q33-1,responsible.change=Q31-1,unacceptable.thought.change=Q32-1,
+                                      just.right.change=Q34-1,ocd.change.overall=(just.right.change+contamination.change+responsible.change+unacceptable.thought.change)/4)
+ocd <- ocd %>% mutate(contamination.change=factor(Q33),responsible.change=factor(Q31),unacceptable.thought.change=factor(Q32),
+                      just.right.change=factor(Q34),ocd.change.overall=for_numeric$ocd.change.overall)
+```
+
+
+
+```{r}
+#summary of differences between change in each dimensions and 0
+long_for_numeric <- for_numeric %>% pivot_longer(contamination.change:just.right.change) %>% 
+  mutate(name=recode(name,contamination.change='Contamination',responsible.change='Responsibility for harm',just.right.change='Symmetry & Completeness',unacceptable.thought.change='Unacceptable thoughts'))
+
+long_for_numeric %>%   group_by(name) %>% summarize(Mean=mean(value-3,na.rm=T),SD=sd(value-3,na.rm=T),Cohens_D=Mean/SD)
+
+#Comparing differences in change across symptom groups
+summary(aov(long_for_numeric$value~long_for_numeric$name))
+```
+
+
+```{r}
+u00005_mod_z_1 <- long_for_numeric %>%
+  lm(value ~ name , .)
+
+export_ols(
+  u00005_mod_z_1, 
+  key_effects = mod_coeffs(u00005_mod_z_1)
+)
+```
+

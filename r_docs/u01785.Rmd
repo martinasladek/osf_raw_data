@@ -1,0 +1,511 @@
+---
+title: "Statistical Learning Experiment"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+library(gtools)
+library(robustbase)
+library(magrittr) # unless you routinely load tidyverse, in which case leave this one out. You just need it for the pipe. 
+library(moments)
+
+
+variables <- c("paper", "outcome", "n", "skew", "kurt", "z_1.96", "z_2.58", "z_3.29", "mode_n", "var", "var_ratio")
+
+library(gplots)
+library(ggplot2)
+library(BayesFactor)
+library(lsr)
+library("ggpubr")
+library("gridExtra")
+library("reshape2")
+library(lme4)
+library(tidyverse)
+dodge <- position_dodge(width = 0.9)
+chineseColour <- "#00AAFF"
+unfamiliarColour <- "#000099"
+
+list.files("../data/raw_data", pattern = "u01785")
+
+load("../data/raw_data/u01785_perfros_2020_2_alldata.RData")
+```
+
+# Summary of datasets
+
+`r nrow(orig)` people were run at the University of Melbourne on this 35-45 minute experiment. They were undergraduate students who did it for course credit. Of these, `r sum(orig$gender=="male")` classified themselves as male, `r sum(orig$gender=="female")` as female, and `r sum(orig$gender=="na")` declined to state a gender. Ages ranged from `r min(orig$age,na.rm=TRUE)` to `r max(orig$age,na.rm=TRUE)` with a mean of `r round(mean(orig$age,na.rm=TRUE),1)`.
+
+Before analysing the data and as preregistered, `r nBad` people were excluded for getting less than three of the words in either of the two sequences right. As pre-registered, we classified participants as Chinese if they got 3 or more of the Chinese questions correct and also self-identified as a native speaker. This left `r sum(fullD$languageA=="Chinese")` in the Chinese group and `r sum(fullD$languageA=="English")` in the English group. We'll call this the **languageA** classification However, there were 22 people who scored 3+ on the test who called themselves "conversational" or "fluent" which seems wrong and suggests that our initial guideline was perhaps too strict. We therefore created a second language classification (called **languageB**) that included them as Chinese, which left `r sum(fullD$languageB=="Chinese")` in the Chinese group and `r sum(fullD$languageB=="English")` in the English group. All of the analyses and figures below have been done for both classifications, and as you can see there is no qualitative difference between any of them at any point. 
+
+# Statistical Learning Tests
+
+Our first step is just to make sure people are behaving sensibly on the SL tasks, and to check if there are differences in overall performance by condition. 
+
+First let's look at the histograms of all responses to determine whether they look like those reported in Seigelman et al., 2017, and to see whether the data look normal. This includes the **Chinese** and **Unfamiliar** stimuli (light blue and dark blue respectively), broken down by participant (Chinese on top, English on bottom).
+
+\vspace{16pt}
+```{r, echo=FALSE, fig.height=5, fig.width=9.5, fig.align='center'}
+p1 <- ggplot(data = dl, aes(SLcorrect*42, fill=languageA)) +
+  geom_histogram(binwidth=2,colour="black") +
+  scale_fill_manual(values=c(chineseColour,unfamiliarColour)) +
+  facet_wrap(languageA ~ SLtype) +
+  labs(y = "Frequency", x="SLscore") + 
+  ggtitle("Histograms of SL scores") +
+  theme(axis.text.y=element_text(size = rel(0.9)),
+        axis.text.x=element_text(size = rel(1.2)), #axis.ticks.x=element_blank(),
+        axis.title.x=element_blank(),
+        plot.title = element_text(size = rel(1.3)),
+        axis.title.y=element_text(size = rel(1.1)),
+        legend.position="none", #axis.text.x=element_blank(),
+        panel.background = element_rect(fill = "white", colour = "black"))
+
+p2 <- ggplot(data = dl, aes(SLcorrect*42, fill=languageB)) +
+  geom_histogram(binwidth=2) +
+  scale_fill_manual(values=c(chineseColour,unfamiliarColour)) +
+  facet_wrap(languageB ~ SLtype) +
+  labs(y = "Frequency", x="SLscore") + 
+  ggtitle("Histograms of SL scores, languageB") +
+  theme(axis.text.y=element_text(size = rel(0.9)),
+        axis.text.x=element_text(size = rel(1.2)), #axis.ticks.x=element_blank(),
+        axis.title.x=element_blank(),
+        plot.title = element_text(size = rel(1.3)),
+        axis.title.y=element_text(size = rel(1.1)),
+        legend.position="none", #axis.text.x=element_blank(),
+        panel.background = element_rect(fill = "white", colour = "black"))
+grid.arrange(p1,p2,ncol=2)
+```
+\vspace{16pt}
+These look pretty reasonable. Is the accuracy different between conditions?
+\vspace{16pt}
+```{r, echo=FALSE, fig.height=3, fig.width=8, fig.align='center', warning=FALSE, message=FALSE}
+#detach("package:plyr", unload=TRUE)
+newddA <- dplyr::group_by(dl,SLtype,languageA) %>% 
+  summarise(mean=mean(SLcorrect,na.rm = TRUE),
+            sd = sd(SLcorrect,na.rm=TRUE),
+            n = n(),
+            se = sd(SLcorrect,na.rm=TRUE)/sqrt(n()))
+
+p1 <- ggplot(data = newddA, aes(x = SLtype, y = mean, fill = SLtype)) +
+  geom_point(data=dl,aes(x = SLtype, y = SLcorrect, colour=SLtype), 
+             position="jitter", alpha=0.4, show.legend=FALSE) +
+  scale_colour_manual(values=c(chineseColour,unfamiliarColour)) +
+  geom_bar(stat = "identity", position = dodge, colour="black", alpha=0.5, show.legend=FALSE) +
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se), position = dodge, width = 0.25) + 
+  facet_wrap(~languageA) +
+  labs(y = "SLscore") + 
+  ggtitle("Statistical learning by participant group") +
+  coord_cartesian(ylim=c(0.2,1.0)) +
+  scale_fill_manual(values=c(chineseColour,unfamiliarColour)) +
+  theme(axis.text.y=element_text(size = rel(0.9)),
+        axis.text.x=element_text(size = rel(1.2)), #axis.ticks.x=element_blank(),
+        axis.title.x=element_blank(),
+        plot.title = element_text(size = rel(1.3)),
+        axis.title.y=element_text(size = rel(1.1)),
+        legend.position="none", #axis.text.x=element_blank(),
+        panel.background = element_rect(fill = "white", colour = "black"))
+
+newddB <- dplyr::group_by(dl,SLtype,languageB) %>% 
+  summarise(mean=mean(SLcorrect,na.rm = TRUE),
+            sd = sd(SLcorrect,na.rm=TRUE),
+            n = n(),
+            se = sd(SLcorrect,na.rm=TRUE)/sqrt(n()))
+
+p2 <- ggplot(data = newddB, aes(x = SLtype, y = mean, fill = SLtype)) +
+  geom_point(data=dl,aes(x = SLtype, y = SLcorrect, colour=SLtype), 
+             position="jitter", alpha=0.4, show.legend=FALSE) +
+  scale_colour_manual(values=c(chineseColour,unfamiliarColour)) +
+  geom_bar(stat = "identity", position = dodge, colour="black", alpha=0.5, show.legend=FALSE) +
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se), position = dodge, width = 0.25) + 
+  facet_wrap(~languageB) +
+  labs(y = "SLscore") + 
+  ggtitle("Statistical learning, languageB") +
+  coord_cartesian(ylim=c(0.2,1.0)) +
+  scale_fill_manual(values=c(chineseColour,unfamiliarColour)) +
+  theme(axis.text.y=element_text(size = rel(0.9)),
+        axis.text.x=element_text(size = rel(1.2)), #axis.ticks.x=element_blank(),
+        axis.title.x=element_blank(),
+        plot.title = element_text(size = rel(1.3)),
+        axis.title.y=element_text(size = rel(1.1)),
+        legend.position="none", #axis.text.x=element_blank(),
+        panel.background = element_rect(fill = "white", colour = "black"))
+grid.arrange(p1,p2,ncol=2)
+```
+\vspace{16pt}
+Indeed it looks like there is, regardless of how we classify people's languages (languageA or languageB). 
+To evaluate this statistically we ran an ANOVA with accuracy as our outcome variable and stimulus type (SLtype) and participant language (languageA or languageB) as predictor. 
+
+```{r echo=FALSE, results="hide", warning=FALSE, message=FALSE}
+anovaSLA <- summary(aov(SLcorrect ~ SLtype + languageA + SLtype*languageA, data=dl))
+anovaSLB <- summary(aov(SLcorrect ~ SLtype + languageB + SLtype*languageB, data=dl))
+dl$SLtype <- as.factor(dl$SLtype)
+dl$languageA <- as.factor(dl$languageA)
+dl$languageB <- as.factor(dl$languageB)
+bfanovaSLA <- anovaBF(SLcorrect ~ SLtype + languageA + SLtype*languageA, data=dl)
+bfanovaSLB <- anovaBF(SLcorrect ~ SLtype + languageB + SLtype*languageB, data=dl)
+tAch <- t.test(dl$SLcorrect[dl$languageA=="Chinese" & dl$SLtype=="Unfamiliar"],dl$SLcorrect[dl$languageA=="Chinese" & dl$SLtype=="Chinese"])
+tBch <- t.test(dl$SLcorrect[dl$languageB=="Chinese" & dl$SLtype=="Unfamiliar"],dl$SLcorrect[dl$languageB=="Chinese" & dl$SLtype=="Chinese"])
+tAe <- t.test(dl$SLcorrect[dl$languageA=="English" & dl$SLtype=="Unfamiliar"],dl$SLcorrect[dl$languageA=="English" & dl$SLtype=="Chinese"])
+tBe <- t.test(dl$SLcorrect[dl$languageB=="English" & dl$SLtype=="Unfamiliar"],dl$SLcorrect[dl$languageB=="English" & dl$SLtype=="Chinese"])
+tAunf <- t.test(dl$SLcorrect[dl$languageA=="Chinese" & dl$SLtype=="Unfamiliar"],dl$SLcorrect[dl$languageA=="English" & dl$SLtype=="Unfamiliar"])
+tBunf <- t.test(dl$SLcorrect[dl$languageB=="Chinese" & dl$SLtype=="Unfamiliar"],dl$SLcorrect[dl$languageB=="English" & dl$SLtype=="Unfamiliar"])
+
+```
+
+# Reanalyse this: 
+
+```{r}
+contrasts(dl$SLtype) <- c(0.5, -0.5)
+contrasts(dl$languageA) <- c(0.5, -0.5)
+
+u01785_mod_original_6 <- lm(SLcorrect ~ SLtype + languageA + SLtype*languageA, data = dl)
+u01785_mod_original_6 %>% summary()
+```
+
+```{r}
+u01785_mod_z_6 <- lm(z(SLcorrect) ~ SLtype + languageA + SLtype*languageA, data = dl)
+u01785_mod_z_6 %>% summary()
+```
+
+```{r}
+key_effects = c("SLtype1:languageA1")
+export_ols(u01785_mod_z_6, key_effects)
+```
+
+
+
+
+
+
+
+```{r}
+contrasts(dl$languageB) <- c(0.5, -0.5)
+
+u01785_mod_original_7 <- lm(SLcorrect ~ SLtype + languageB + SLtype*languageB, data=dl)
+u01785_mod_original_7 %>% summary()
+```
+
+
+```{r}
+u01785_mod_z_7 <- lm(z(SLcorrect) ~ SLtype + languageB + SLtype*languageB, data=dl)
+u01785_mod_z_7 %>% summary()
+```
+
+
+```{r}
+key_effects = c("SLtype1:languageB1")
+export_ols(u01785_mod_z_7, key_effects)
+```
+
+
+
+
+
+Regardless of how we classify participants into language, the results are significant. For the languageA classification, there is a main effect of SLtype (F(`r anovaSLA[[1]][["Df"]][1]`,`r anovaSLA[[1]][["Df"]][4]`)=`r round(anovaSLA[[1]][["F value"]][1],4)`, p=`r round(anovaSLA[[1]][["Pr(>F)"]][1],4)`) and an interaction (F(`r anovaSLA[[1]][["Df"]][3]`,`r anovaSLA[[1]][["Df"]][4]`)=`r round(anovaSLA[[1]][["F value"]][3],4)`, p=`r round(anovaSLA[[1]][["Pr(>F)"]][3],4)`) but no effect of language (F(`r anovaSLA[[1]][["Df"]][2]`,`r anovaSLA[[1]][["Df"]][4]`)=`r round(anovaSLA[[1]][["F value"]][2],4)`, p=`r round(anovaSLA[[1]][["Pr(>F)"]][2],4)`). For the language B classification, there is a main effect of SLtype (F(`r anovaSLB[[1]][["Df"]][1]`,`r anovaSLB[[1]][["Df"]][4]`)=`r round(anovaSLB[[1]][["F value"]][1],4)`, p=`r round(anovaSLB[[1]][["Pr(>F)"]][1],4)`) and an interaction (F(`r anovaSLB[[1]][["Df"]][3]`,`r anovaSLB[[1]][["Df"]][4]`)=`r round(anovaSLB[[1]][["F value"]][3],4)`, p=`r round(anovaSLB[[1]][["Pr(>F)"]][3],4)`) but no effect of language (F(`r anovaSLB[[1]][["Df"]][2]`,`r anovaSLB[[1]][["Df"]][4]`)=`r round(anovaSLB[[1]][["F value"]][2],4)`, p=`r round(anovaSLB[[1]][["Pr(>F)"]][2],4)`).
+
+We also did Bayesian ANOVAs with default priors showed the same thing: the BayesFactor was `r round(extractBF(bfanovaSLA)$bf[2],3)` for SLtype and `r round(extractBF(bfanovaSLA)$bf[4],3)` for the interaction, with all other BFs less than zero (languageA: BF=`r round(extractBF(bfanovaSLA)$bf[1],3)`; languageA + SLtype: BF=`r round(extractBF(bfanovaSLA)$bf[3],3)`). The qualitative effects are the same for the languageB classification: BF=`r round(extractBF(bfanovaSLB)$bf[2],3)` for SLtype and `r round(extractBF(bfanovaSLB)$bf[4],3)` for the interaction, with all other BFs less than zero (languageA: BF=`r round(extractBF(bfanovaSLB)$bf[1],3)`; languageA + SLtype: BF=`r round(extractBF(bfanovaSLB)$bf[3],3)`).
+
+One interesting thing that I wasn't expecting is that it looks like Chinese people actually do *worse* on the Unfamiliar stimuli -- in particular, nobody does well, the distribution cuts off at around 80% accuracy. I checked to see if there was a significant difference for Chinese people in performance on the Unfamiliar stimuli and on the Chinese stimuli, and indeed there is: language A: t=`r round(tAch[[1]]["t"][[1]],3)`, df=`r round(tAch[[2]]["df"][[1]],3)`, p=`r round(tAch[[3]],3)`; language B: t=`r round(tBch[[1]]["t"][[1]],3)`, df=`r round(tBch[[2]]["df"][[1]],3)`, p=`r round(tBch[[3]],3)`. However, there is no similar difference for English people: t=`r round(tAe[[1]]["t"][[1]],3)`, df=`r round(tAe[[2]]["df"][[1]],3)`, p=`r round(tAe[[3]],3)`; language B: t=`r round(tBe[[1]]["t"][[1]],3)`, df=`r round(tBe[[2]]["df"][[1]],3)`, p=`r round(tBe[[3]],3)`. Chinese people are also worse on unfamiliar stimuli than English people are: t=`r round(tAunf[[1]]["t"][[1]],3)`, df=`r round(tAunf[[2]]["df"][[1]],3)`, p=`r round(tAunf[[3]],3)`; language B: t=`r round(tBunf[[1]]["t"][[1]],3)`, df=`r round(tBunf[[2]]["df"][[1]],3)`, p=`r round(tBunf[[3]],3)`.
+My post-hoc explanation for this is that it may be a kind of interference, the visual analogue of the phonological interference identified in previous studies: the unfamiliar stimuli are visually similar enough to their overlearned Chinese characters that they're actually having a harder time processing them than English speakers are. But this is post-hoc obviously. 
+
+One way to at least get a sense of what is going on by breaking down the Chinese performance on the Unfamiliar stimuli to those who saw it first or second. One might imagine that if it's interference, perhaps those who saw it second would have done worse because of priming. However, the results (shown below) don't bear that out. I'm not sure that this means much though -- these were very common, very overlearned words, so it's quite plausible that there was a lot of interference even without priming. 
+
+```{r, echo=FALSE, fig.height=3, fig.width=10, fig.align='center', warning=FALSE, message=FALSE}
+newdu <- filter(dl,SLtype=="Unfamiliar")
+newdu$slOrder <- recode(newdu$slOrder,"1"="Chinese 1st","2"="Unfamiliar 1st")
+dUnfA <- dplyr::group_by(newdu,languageA,slOrder) %>%
+  summarise(mean=mean(SLcorrect,na.rm = TRUE),
+            sd = sd(SLcorrect,na.rm=TRUE),
+            n = n(),
+            se = sd(SLcorrect,na.rm=TRUE)/sqrt(n()))
+
+
+dUnfB <- dplyr::group_by(newdu,languageB,slOrder) %>%
+  summarise(mean=mean(SLcorrect,na.rm = TRUE),
+            sd = sd(SLcorrect,na.rm=TRUE),
+            n = n(),
+            se = sd(SLcorrect,na.rm=TRUE)/sqrt(n()))
+
+
+p1 <- ggplot(data = dUnfA, aes(x = slOrder, y = mean, fill = slOrder)) +
+  geom_point(data=newdu,aes(x = slOrder, y = SLcorrect, colour=slOrder), 
+             position="jitter", alpha=0.4, show.legend=FALSE) +
+  scale_colour_brewer(type="qual",palette="Accent") +
+  geom_bar(stat = "identity", position = dodge, colour="black", alpha=0.5, show.legend=FALSE) +
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se), position = dodge, width = 0.25) + 
+  facet_wrap(~languageA) +
+  labs(y = "SLscore") + 
+  ggtitle("Unfamiliar stimuli, languageA") +
+  coord_cartesian(ylim=c(0.2,1.0)) +
+  scale_fill_brewer(type="qual",palette="Accent") +
+  theme(axis.text.y=element_text(size = rel(0.9)),
+        axis.text.x=element_text(size = rel(1.2)), #axis.ticks.x=element_blank(),
+        axis.title.x=element_blank(),
+        plot.title = element_text(size = rel(1.3)),
+        axis.title.y=element_text(size = rel(1.1)),
+        legend.position="none", #axis.text.x=element_blank(),
+        panel.background = element_rect(fill = "white", colour = "black"))
+
+p2 <- ggplot(data = dUnfB, aes(x = slOrder, y = mean, fill = slOrder)) +
+  geom_point(data=newdu,aes(x = slOrder, y = SLcorrect, colour=slOrder), 
+             position="jitter", alpha=0.4, show.legend=FALSE) +
+  scale_colour_brewer(type="qual",palette="Accent") +
+  geom_bar(stat = "identity", position = dodge, colour="black", alpha=0.5, show.legend=FALSE) +
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se), position = dodge, width = 0.25) + 
+  facet_wrap(~languageB) +
+  labs(y = "SLscore") + 
+  ggtitle("Unfamiliar stimuli, languageB") +
+  coord_cartesian(ylim=c(0.2,1.0)) +
+  scale_fill_brewer(type="qual",palette="Accent") +
+  theme(axis.text.y=element_text(size = rel(0.9)),
+        axis.text.x=element_text(size = rel(1.2)), #axis.ticks.x=element_blank(),
+        axis.title.x=element_blank(),
+        plot.title = element_text(size = rel(1.3)),
+        axis.title.y=element_text(size = rel(1.1)),
+        legend.position="none", #axis.text.x=element_blank(),
+        panel.background = element_rect(fill = "white", colour = "black"))
+grid.arrange(p1,p2,ncol=2)
+```
+
+We might also care about whether people's behaviour showed the same *pattern* as Siegelman et al., 2017: that is, were the test items that their participants found hard the same test items that our participants found hard? We can evaluate this by calculating the correlation between performance on each item between them (which they reported) and our data. It is evident that all correlations are highly significant, so people were doing sensible things.
+
+\vspace{16pt}
+```{r, echo=FALSE, message=FALSE, fig.height=3, fig.width=8, fig.align='center', warning=FALSE, message=FALSE}
+p1 <- ggscatter(sl, x="baseitems", y="sl1items", add="reg.line", cor.coef=TRUE, size=2,
+                cor.method = "pearson", xlab = "Siegelman items", ylab="Our data",
+                cor.coef.coord=c(0.42,0.65))
+p1 <- p1 + ggtitle("Time 1 SL Data") + theme(plot.title = element_text(hjust=0.5))
+p2 <- ggscatter(sl, x="baseitems", y="sl2items", add="reg.line", cor.coef=TRUE, size=2,
+                cor.method = "pearson", xlab = "Siegelman items", ylab="Our data",
+                cor.coef.coord=c(0.42,0.65))
+p2 <- p2 + ggtitle("Time 2 SL Data") + theme(plot.title = element_text(hjust=0.5))
+grid.arrange(p1,p2,ncol=2)
+```
+
+
+# Perceptual Fluency Tasks
+
+So far it seems that the statistical learning tasks are behaving as expected, and we're getting significant differences in performances based on the visual complexity / familiarity of the stimuli involved. Let's also check that the perceptual fluency tasks are behaving in a sensible fashion. This is a bit harder because they are new tasks so there's no published literature to compare to, but as a first stab we can look at what happens to the duration that the target item flashes over the course of the task (which I'll refer to as the *lag time*). Remember that it gets faster when people are more accurate, so we should expect that in easier tasks it should end up being on average faster. We should also expect it to stabilise somewhere.
+
+Here we'll compare perceptual fluency from the first to the second time people did it. We might be curious about whether performance changes between the tasks, either due to fatigue or practice effects. Thus, the figure below shows overall performance on the First and Second task. 
+
+```{r, echo=FALSE, message=FALSE, fig.height=3, fig.width=5, fig.align='center', warning=FALSE, message=FALSE}
+pf$trial <- 2:48
+timecols <- c("mediumpurple","mediumpurple4")
+ordm <- gather(pf,"order","mean","means1","means2") %>% select(trial,order,mean)
+ordm$order <- recode(ordm$order, "means1"="first","means2"="second")
+ords <- gather(pf,"order","se","se1","se2") %>% select(trial,order,se)
+ords$order <- recode(ords$order, "se1"="first","se2"="second")
+ord <- cbind(ordm,ords)[3:6]
+
+ggplot(data=ord, aes(x=trial, y=mean, group=order, colour=order)) + 
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se), position=dodge, width=0.25) +
+  geom_line(size=0.5) + scale_colour_manual(values=timecols) +
+  labs(y = "PFscore", x="Trial") + 
+  ggtitle("Time course") +
+  coord_cartesian(ylim=c(50,250)) +
+  theme(axis.text.y=element_text(size = rel(0.9)),
+        axis.text.x=element_text(size = rel(0.9)),
+        plot.title = element_text(size = rel(1.3)),
+        axis.title.x=element_text(size = rel(1.1)), 
+        axis.title.y=element_text(size = rel(1.1)), 
+        #legend.position="none",
+        panel.background = element_rect(fill = "white", colour = "black"))
+```
+\vspace{16pt}
+
+Some things are immediately obvious. First, reassuringly, the time each stimulus flashed does go down, and doesn't bobble around. Second, it appears as though there are differences in order just like in the last experiment (people are faster for the first task, so fatigue may be a factor).
+
+We can ask an analogous question for PF as we did for SL: did it differ by participant language or stimulus type?
+
+\vspace{16pt}
+```{r, echo=FALSE, message=FALSE, fig.height=3, fig.width=9, fig.align='center', warning=FALSE, message=FALSE}
+newdpA <- dplyr::group_by(dl,PFtype,languageA) %>% 
+  summarise(mean=mean(PFavg,na.rm = TRUE),
+            sd = sd(PFavg,na.rm=TRUE),
+            n = n(),
+            se = sd(PFavg,na.rm=TRUE)/sqrt(n()))
+
+p1 <- ggplot(data = newdpA, aes(x = PFtype, y = mean, fill = PFtype)) +
+  geom_point(data=dl,aes(x = PFtype, y = PFavg, colour=PFtype), 
+             position="jitter", alpha=0.4, show.legend=FALSE) +
+  scale_colour_manual(values=c(chineseColour,unfamiliarColour)) +
+  geom_bar(stat = "identity", position = dodge, colour="black", alpha=0.5, show.legend=FALSE) +
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se), position = dodge, width = 0.25) + 
+  facet_wrap(~languageA) +
+  labs(y = "PFscore") + 
+  ggtitle("Perceptual fluency by participant group") +
+  coord_cartesian(ylim=c(0,200)) +
+  scale_fill_manual(values=c(chineseColour,unfamiliarColour)) +
+  theme(axis.text.y=element_text(size = rel(0.9)),
+        axis.text.x=element_text(size = rel(1.2)), #axis.ticks.x=element_blank(),
+        axis.title.x=element_blank(),
+        plot.title = element_text(size = rel(1.3)),
+        axis.title.y=element_text(size = rel(1.1)),
+        legend.position="none", #axis.text.x=element_blank(),
+        panel.background = element_rect(fill = "white", colour = "black"))
+
+newdpB <- dplyr::group_by(dl,PFtype,languageB) %>% 
+  summarise(mean=mean(PFavg,na.rm = TRUE),
+            sd = sd(PFavg,na.rm=TRUE),
+            n = n(),
+            se = sd(PFavg,na.rm=TRUE)/sqrt(n()))
+
+p2 <- ggplot(data = newdpB, aes(x = PFtype, y = mean, fill = PFtype)) +
+  geom_point(data=dl,aes(x = PFtype, y = PFavg, colour=PFtype), 
+             position="jitter", alpha=0.4, show.legend=FALSE) +
+  scale_colour_manual(values=c(chineseColour,unfamiliarColour)) +
+  geom_bar(stat = "identity", position = dodge, colour="black", alpha=0.5, show.legend=FALSE) +
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se), position = dodge, width = 0.25) + 
+  facet_wrap(~languageB) +
+  labs(y = "PFscore") + 
+  ggtitle("Perceptual fluency, languageB") +
+  coord_cartesian(ylim=c(0,200)) +
+  scale_fill_manual(values=c(chineseColour,unfamiliarColour)) +
+  theme(axis.text.y=element_text(size = rel(0.9)),
+        axis.text.x=element_text(size = rel(1.2)), #axis.ticks.x=element_blank(),
+        axis.title.x=element_blank(),
+        plot.title = element_text(size = rel(1.3)),
+        axis.title.y=element_text(size = rel(1.1)),
+        legend.position="none", #axis.text.x=element_blank(),
+        panel.background = element_rect(fill = "white", colour = "black"))
+
+grid.arrange(p1,p2,ncol=2)
+
+```
+\vspace{16pt}
+```{r echo=FALSE, results="hide", warning=FALSE, message=FALSE}
+anovaPFA <- summary(aov(PFavg ~ PFtype + languageA + PFtype*languageA, data=dl))
+anovaPFB <- summary(aov(PFavg ~ PFtype + languageB + PFtype*languageB, data=dl))
+dl$PFtype <- as.factor(dl$PFtype)
+bfanovaPFA <- anovaBF(PFavg ~ PFtype + languageA + PFtype*languageA, data=dl[!is.na(dl$PFavg),])
+bfanovaPFB <- anovaBF(PFavg ~ PFtype + languageB + PFtype*languageB, data=dl[!is.na(dl$PFavg),])
+```
+
+# Reproduce this:
+
+```{r}
+dl$PFtype <- as.factor(dl$PFtype)
+contrasts(dl$PFtype) <- c(0.5, -0.5)
+contrasts(dl$languageA) <- c(0.5, -0.5)
+contrasts(dl$languageB) <- c(0.5, -0.5)
+```
+
+```{r}
+u01785_mod_original_8 <- lm(PFavg ~ PFtype + languageA + PFtype*languageA, data=dl)
+u01785_mod_original_8 %>% summary()
+```
+
+```{r}
+u01785_mod_z_8 <- lm(z(PFavg) ~ PFtype + languageA + PFtype*languageA, data=dl)
+u01785_mod_z_8 %>% summary()
+```
+
+```{r}
+key_effects = c("PFtype1:languageA1")
+export_ols(u01785_mod_z_8, key_effects)
+```
+
+
+
+
+
+
+```{r}
+u01785_mod_original_9 <- lm(PFavg ~ PFtype + languageB + PFtype*languageB, data=dl)
+u01785_mod_original_9 %>% summary()
+```
+
+```{r}
+u01785_mod_z_9 <- lm(z(PFavg) ~ PFtype + languageB + PFtype*languageB, data=dl)
+u01785_mod_z_9 %>% summary()
+```
+
+```{r}
+key_effects = c("PFtype1:languageB1")
+export_ols(u01785_mod_z_9, key_effects)
+```
+
+
+
+
+Regardless of how we classify participants into language, the results are significant. For the languageA classification, there is a main effect of PFtype (F(`r anovaPFA[[1]][["Df"]][1]`,`r anovaPFA[[1]][["Df"]][4]`)=`r round(anovaPFA[[1]][["F value"]][1],4)`, p=`r round(anovaPFA[[1]][["Pr(>F)"]][1],4)`) and an effect of language (F(`r anovaPFA[[1]][["Df"]][2]`,`r anovaPFA[[1]][["Df"]][4]`)=`r round(anovaPFA[[1]][["F value"]][2],4)`, p=`r round(anovaPFA[[1]][["Pr(>F)"]][2],4)`) as well as an interaction (F(`r anovaPFA[[1]][["Df"]][3]`,`r anovaPFA[[1]][["Df"]][4]`)=`r round(anovaPFA[[1]][["F value"]][3],4)`, p=`r round(anovaPFA[[1]][["Pr(>F)"]][3],4)`). For the language B classification, there is a main effect of PFtype (F(`r anovaPFB[[1]][["Df"]][1]`,`r anovaPFB[[1]][["Df"]][4]`)=`r round(anovaPFB[[1]][["F value"]][1],4)`, p=`r round(anovaPFB[[1]][["Pr(>F)"]][1],4)`) and an effect of language (F(`r anovaPFB[[1]][["Df"]][2]`,`r anovaPFB[[1]][["Df"]][4]`)=`r round(anovaPFB[[1]][["F value"]][2],4)`, p=`r round(anovaPFB[[1]][["Pr(>F)"]][2],4)`) as well as an interaction (F(`r anovaPFB[[1]][["Df"]][3]`,`r anovaPFB[[1]][["Df"]][4]`)=`r round(anovaPFB[[1]][["F value"]][3],4)`, p=`r round(anovaPFB[[1]][["Pr(>F)"]][3],4)`). 
+
+We also did Bayesian ANOVAs with default priors showed the same thing: for the languageA classification the BayesFactor was `r round(extractBF(bfanovaPFA)$bf[2],3)` for PFtype, `r round(extractBF(bfanovaPFA)$bf[4],3)` for the interaction, `r round(extractBF(bfanovaPFA)$bf[1],3)` for language, and `r round(extractBF(bfanovaPFA)$bf[3],3)` for language+PFtype. The qualitative effects are the same for the languageB classification: `r round(extractBF(bfanovaPFB)$bf[2],3)` for PFtype, `r round(extractBF(bfanovaPFB)$bf[4],3)` for the interaction, `r round(extractBF(bfanovaPFB)$bf[1],3)` for language, and `r round(extractBF(bfanovaPFB)$bf[3],3)` for language+PFtype.
+
+Let's also look at how perceptual fluency predicts perceptual fluency overall.
+
+```{r, echo=FALSE, message=FALSE, fig.height=3, fig.width=9, fig.align='center', warning=FALSE, message=FALSE}
+ggscatter(dl, x="PF1avg", y="PF2avg", add="reg.line", cor.coef=TRUE, 
+                cor.method = "pearson", xlab = "PFscore time 1", ylab="PFscore time 2", size=2, 
+                cor.coef.coord=c(100,20)) +
+  ggtitle("PF to PF Overall") + theme(plot.title = element_text(hjust=0.5))
+
+```
+
+Now let's look within participant and stimulus
+
+```{r, echo=FALSE, fig.height=2.5, fig.width=9, fig.align='center', warning=FALSE, message=FALSE}
+chA <- filter(ds,languageA=="Chinese")
+engA <- filter(ds,languageA=="English")
+p1 <- ggscatter(engA, x="PFavgChinese", y="PFavgUnfamiliar", add="reg.line", cor.coef=TRUE, 
+                cor.method = "pearson", xlab = "PFscore Chinese", ylab="PFscore Unfamiliar", size=2, 
+                cor.coef.coord=c(100,50)) +
+  ggtitle("English people") + theme(plot.title = element_text(hjust=0.5))
+p2 <- ggscatter(chA, x="PFavgChinese", y="PFavgUnfamiliar", add="reg.line", cor.coef=TRUE, 
+                cor.method = "pearson", xlab = "PFscore Chinese", ylab="PFscore Unfamiliar", size=2, 
+                cor.coef.coord=c(100,50)) +
+  ggtitle("Chinese people") + theme(plot.title = element_text(hjust=0.5))
+
+grid.arrange(p1,p2,ncol=2)
+
+# are these significant using fisher transformation
+rSame <- cor.test(chA$PFavgChinese,chA$PFavgUnfamiliar)$estimate[[1]]
+rDifferent <- cor.test(engA$PFavgChinese,engA$PFavgUnfamiliar)$estimate[[1]]
+nSame <- nrow(chA)
+nDifferent <- nrow(engA)
+fisherZ = ((0.5*log((1+rSame)/(1-rSame)))-(0.5*log((1+rDifferent)/(1-rDifferent))))/((1/(nSame-3))+(1/(nDifferent-3)))^0.5
+fisherP = (2*(1-pnorm(abs(fisherZ))))
+```
+
+Using the Fisher transformation: z=`r fisherZ`, p=`r fisherP`. 
+ 
+We can also ask how these measures relate to each other.
+
+# Relation of statistical learning to perceptual fluency
+
+Given the hypotheses of our study, we're also interested in determining whether performance on the perceptual fluency task predicts performance on the statistical learning task. We can look at this both within stimuli of the same type and across stimuli of different types, and broken down among participants of each language group. 
+
+First let's do the simplest thing: comparing the correlations between stimuli of the **same** type (i.e., PF Unfamiliar to SL Unfamiliar, and PF Chinese to SL Chinese) vs **different** (i.e, PF Unfamiliar to SL Chinese and PF Chinese to SL Unfamiliar). We should expect that the correlation will be higher for the same stimuli. This is shown below:
+
+```{r, echo=FALSE, warning=FALSE, fig.height=4, fig.width=9, fig.align='center', message=FALSE}
+dl$corrType <- "Same"
+dl$corrType[dl$PFtype!=dl$SLtype] <- "Different"
+dSame <- filter(dl,corrType=="Same")
+dDiff <- filter(dl,corrType=="Different")
+p1 <- ggscatter(dSame, x="SLcorrect", y="PFavg", add="reg.line", cor.coef=TRUE, 
+                cor.method = "pearson", xlab = "Statistical Learning", ylab="Perceptual Fluency", size=2, 
+                cor.coef.coord=c(0.8,0.46)) +
+  ggtitle("Same") + theme(plot.title = element_text(hjust=0.5))
+p2 <- ggscatter(dDiff, x="SLcorrect", y="PFavg", add="reg.line", cor.coef=TRUE, 
+                cor.method = "pearson", xlab = "Statistical Learning", ylab="Perceptual Fluency", size=2, 
+                cor.coef.coord=c(0.8,0.46)) +
+  ggtitle("Different") + theme(plot.title = element_text(hjust=0.5))
+
+grid.arrange(p1,p2,ncol=2)
+
+# are these significant using fisher transformation
+rSame <- cor.test(dSame$SLcorrect,dSame$PFavg)$estimate[[1]]
+rDifferent <- cor.test(dDiff$SLcorrect,dDiff$PFavg)$estimate[[1]]
+nSame <- nrow(dSame)
+nDifferent <- nrow(dDiff)
+fisherZ = ((0.5*log((1+rSame)/(1-rSame)))-(0.5*log((1+rDifferent)/(1-rDifferent))))/((1/(nSame-3))+(1/(nDifferent-3)))^0.5
+fisherP = (2*(1-pnorm(abs(fisherZ))))
+```
+
+Our prediction was borne out. This time when we test this with the Fisher r-to-z transformation, it is significantly different: z=`r fisherZ`, p=`r fisherP`. 
+

@@ -1,0 +1,121 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-06-06'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df <- haven::read_sav("../data/raw_data/p00743_fear_Dataset.sav")
+
+df_1 <- dplyr::filter(df, Study == 1) %>% 
+  dplyr::mutate(id = 1:nrow(.))
+
+df_2 <- dplyr::filter(df, Study == 2) %>% 
+  dplyr::mutate(id = 1:nrow(.))
+```
+
+# Study 1
+
+```{r}
+df_1_long_1 <- df_1 %>% 
+  dplyr::select(id,Experimental_Group, Ingroup_Self_Focused_Empathy, Outgroup_Self_Focused_Empathy) %>% 
+  tidyr::pivot_longer(cols = -c(id, Experimental_Group)) %>% 
+  dplyr::mutate(
+    across(.cols = c(Experimental_Group, name), .funs = factor)
+  ) 
+
+p00743_mod_rm_z_1 <- df_1_long_1 %>% 
+  afex::aov_4(z(value) ~ Experimental_Group*name + (name|id), .)
+
+export_ols(p00743_mod_rm_z_1, 
+           key_effects = c("Experimental_Group", "name", "Experimental_Group:name"))
+
+
+p00743_mod_lmer_z_1 <- df_1_long_1 %>% 
+  lme4::lmer(z(value) ~ factor(Experimental_Group)*name + (1|id), .)
+
+export_ols(p00743_mod_lmer_z_1, 
+           key_effects = c("factor(Experimental_Group)2", 
+                           "nameOutgroup_Self_Focused_Empathy", 
+                           "factor(Experimental_Group)2:nameOutgroup_Self_Focused_Empathy"))
+```
+
+```{r}
+df_1_long_2 <- df_1 %>% 
+  dplyr::select(id,Experimental_Group, Ingroup_Other_Focused_Empathy, Outgroup_Other_Focused_Empathy) %>% 
+  tidyr::pivot_longer(cols = -c(id, Experimental_Group)) %>% 
+  dplyr::mutate(
+    across(.cols = c(Experimental_Group, name), factor)
+  ) 
+
+p00743_mod_rm_z_2 <- df_1_long_2 %>% 
+  afex::aov_4(z(value) ~ Experimental_Group*name + (name|id), .)
+
+export_ols(p00743_mod_rm_z_2, 
+           key_effects = c("Experimental_Group", "name", "Experimental_Group:name"))
+
+
+p00743_mod_lmer_z_2 <- df_1_long_2 %>% 
+  lme4::lmer(z(value) ~ factor(Experimental_Group)*name + (1|id), .)
+
+export_ols(p00743_mod_lmer_z_2, 
+           key_effects = mod_coeffs(p00743_mod_lmer_z_2))
+```
+
+
+# Study 2
+
+```{r}
+df_2_long_1 <- df_2 %>% 
+  dplyr::select(id,Experimental_Group, Ingroup_Self_Focused_Empathy, Outgroup_Self_Focused_Empathy) %>% 
+  tidyr::pivot_longer(cols = -c(id, Experimental_Group)) %>% 
+  dplyr::mutate(
+    across(.cols = c(Experimental_Group, name), factor)
+  ) 
+
+
+p00743_mod_rm_z_3 <- df_2_long_1 %>% 
+  afex::aov_4(z(value) ~ Experimental_Group*name + (name|id), .)
+
+export_ols(p00743_mod_rm_z_3, 
+           key_effects = c("Experimental_Group", "name", "Experimental_Group:name"))
+
+
+p00743_mod_lmer_z_3 <- df_2_long_1 %>% 
+  lme4::lmer(z(value) ~ factor(Experimental_Group)*name + (1|id), .)
+
+export_ols(p00743_mod_lmer_z_3, 
+           key_effects = c("factor(Experimental_Group)2", 
+                           "nameOutgroup_Self_Focused_Empathy", 
+                           "factor(Experimental_Group)2:nameOutgroup_Self_Focused_Empathy"))
+```
+
+
+```{r}
+df_2_long_2 <- df_2 %>% 
+  dplyr::select(id,Experimental_Group, Ingroup_Other_Focused_Empathy, Outgroup_Other_Focused_Empathy) %>% 
+  tidyr::pivot_longer(cols = -c(id, Experimental_Group)) %>% 
+  dplyr::mutate(
+    across(.cols = c(Experimental_Group, name), factor)
+  ) 
+
+
+p00743_mod_rm_z_4 <- df_2_long_2 %>% 
+  afex::aov_4(z(value) ~ Experimental_Group*name + (name|id), .)
+
+export_ols(p00743_mod_rm_z_4, 
+           key_effects = c("Experimental_Group", "name", "Experimental_Group:name"))
+
+
+p00743_mod_lmer_z_4 <- df_2_long_2 %>% 
+  lme4::lmer(z(value) ~ factor(Experimental_Group)*name + (1|id), .)
+
+export_ols(p00743_mod_lmer_z_4, 
+           key_effects = mod_coeffs(p00743_mod_lmer_z_4))
+```
+

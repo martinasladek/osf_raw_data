@@ -1,0 +1,250 @@
+---
+title: "u00823_nettle2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+```
+
+```{r}
+library(ggplot2)
+library(psych)
+library(reshape2)
+library(emmeans)
+library(cowplot)
+library(stringi)
+library(forcats)
+
+d=read.csv("../data/raw_data/u00823_data processed.csv")
+colnames(d)[1]="duration"
+```
+
+# Study 1: 
+
+## 1 
+
+```{r}
+t.test(d$ubipandem_1, d$ubinormal_1, paired=T)
+
+d_long <- d %>% 
+  dplyr::filter(!is.na(ubipandem_1), !is.na(ubinormal_1)) |> 
+  dplyr::select(id = prolificid, ubipandem_1, ubinormal_1) %>% 
+  tidyr::pivot_longer(-id)
+
+u00823_mod_rm_z_1 <- d_long %>% 
+  afex::aov_4(z(value) ~ name + (name|id), .)
+
+export_ols(u00823_mod_rm_z_1, 
+           key_effects = "name")
+
+
+u00823_mod_lmer_z_1 <- u00823_mod_rm_z_1$data$long  %>% 
+  lme4::lmer(z.value ~ name + (1|id), .)
+
+export_ols(u00823_mod_lmer_z_1, 
+           key_effects = "nameubinormal_1")
+
+```
+
+## 2
+
+```{r}
+d$delta.ubi=d$ubipandem_1 - d$ubinormal_1
+
+d$delta.shirking=d$shirking_3-d$shirking_2
+d$delta.unfairrich=d$unfairrich_3-d$unfairrich_2
+d$delta.unfairdesert=d$unfairdesert_3-d$unfairdesert_2
+d$delta.irresponsibility=d$irrespnsibility_3-d$irrespnsibility_2
+d$delta.value=d$value_3-d$value_2
+d$delta.efficiency=d$efficiency_3-d$efficiency_2
+d$delta.expense = d$expense_3 - d$expense_2
+d$delta.stress = d$stress_3 - d$stress_2
+d$delta.cheat = d$cheat_3 - d$cheat_2
+
+#not this:
+baseline.unst.model=lm(ubinormal_1~ shirking_2 + 
+                    unfairrich_2 + 
+                    unfairdesert_2 + 
+                    irrespnsibility_2 + 
+                    value_2 + 
+                    efficiency_2 + 
+                    expense_2 + 
+                    stress_2 + 
+                    cheat_2, data=d)
+
+predicted.ubi.pandemic = 
+  summary(baseline.unst.model)$coefficients[2, 1]* mean(d$delta.shirking, na.rm=T) +  
+  summary(baseline.unst.model)$coefficients[3, 1]* mean(d$delta.unfairrich, na.rm=T) +  
+  summary(baseline.unst.model)$coefficients[4, 1]* mean(d$delta.unfairdesert, na.rm=T) +  
+  summary(baseline.unst.model)$coefficients[5, 1]* mean(d$delta.irresponsibility, na.rm=T) + +  
+  summary(baseline.unst.model)$coefficients[6, 1]* mean(d$delta.value, na.rm=T) +  
+  summary(baseline.unst.model)$coefficients[7, 1]* mean(d$delta.efficiency, na.rm=T) +  
+  summary(baseline.unst.model)$coefficients[8, 1]* mean(d$delta.expense, na.rm=T) +  
+  summary(baseline.unst.model)$coefficients[9, 1]* mean(d$delta.stress, na.rm=T) +  
+  summary(baseline.unst.model)$coefficients[10, 1]* mean(d$delta.cheat, na.rm=T)
+# Compare this to the observed mean shift
+mean(d$delta.ubi)
+predicted.ubi.pandemic
+
+# Now predict individual-level shift
+d$predicted.pandemic.delta= 
+  summary(baseline.unst.model)$coefficients[2, 1]* d$delta.shirking +  
+  summary(baseline.unst.model)$coefficients[3, 1]* d$delta.unfairrich +  
+  summary(baseline.unst.model)$coefficients[4, 1]* d$delta.unfairdesert +  
+  summary(baseline.unst.model)$coefficients[5, 1]* d$delta.irresponsibility +  
+  summary(baseline.unst.model)$coefficients[6, 1]* d$delta.value +  
+  summary(baseline.unst.model)$coefficients[7, 1]* d$delta.efficiency +  
+  summary(baseline.unst.model)$coefficients[8, 1]* d$delta.expense +  
+  summary(baseline.unst.model)$coefficients[9, 1]* d$delta.stress +  
+  summary(baseline.unst.model)$coefficients[10, 1]* d$delta.cheat
+```
+
+
+```{r}
+u00823_mod_z_2 <- d %>% 
+  lm(z(delta.ubi)~z(predicted.pandemic.delta)*z(ubinormal_1), data=.) 
+
+export_ols(u00823_mod_z_2, 
+           key_effects = c("z(predicted.pandemic.delta)", "z(ubinormal_1)", 
+                           "z(predicted.pandemic.delta):z(ubinormal_1)"))
+
+```
+
+
+# Study 2
+
+
+```{r}
+library(psych)
+library(ggplot2)
+library(lmerTest)
+library(cowplot)
+library(forcats)
+theme_set(theme_bw())
+
+d<-read.csv("../data/raw_data/u00823_data cleaned.csv")
+colnames(d)[3]="duration"
+```
+
+## 3 
+
+```{r}
+t.test(d$ubinormal_1, d$ubipandemic_1, paired=T)
+
+d_long <- d %>% 
+  dplyr::select(id = prolificid, ubipandemic_1, ubinormal_1) %>% 
+  tidyr::pivot_longer(-id)
+
+u00823_mod_rm_z_3 <- d_long %>% 
+  afex::aov_4(z(value) ~ name + (name|id), .)
+
+export_ols(u00823_mod_rm_z_3, 
+           key_effects = "name")
+
+u00823_mod_lmer_z_3 <- d_long %>% 
+  lme4::lmer(z(value) ~ name + (1|id), .)
+
+export_ols(u00823_mod_lmer_z_3, 
+           key_effects = "nameubipandemic_1")
+
+```
+
+## 4
+
+```{r}
+d$delta.ubi = d$ubipandemic_1 - d$ubinormal_1
+
+u00823_mod_z_4 <- lm(z(delta.ubi) ~ z(leftright_1), data=d)
+
+export_ols(u00823_mod_z_4, 
+           key_effects = c("z(leftright_1)"))
+```
+
+## 5 
+
+```{r}
+d$delta.stress=d$strespandemic_1-d$stressnormal_1
+d$delta.simple=d$simplepandemic_1-d$simplenormal_1
+d$delta.cracks=d$crackspandemic_1-d$cracksnormal_1
+d$delta.need=d$needpandemic_1-d$neednormal_1
+d$delta.unpredictable=d$unpredictpandemi_1-d$unpredictablenormal_1
+d$delta.work=d$workpandemic_1-d$worknormal_1
+d$delta.irresponsibility=d$irresponpandemic_1-d$irresponnormal_1
+d$delta.value=d$valuepandemic_1-d$valuenormal_1
+d$delta.poverty=d$povertypandemic_1-d$povertynormal_1
+d$delta.cheat=d$cheatpandemic_1-d$cheatnormal_1
+d$delta.together=d$togetherpandemic_1-d$togethernormal_1
+d$delta.wellbeing=d$wellbeingpandemic_1-d$wellbeingnormal_1
+d$delta.economy=d$economypandemic_1-d$economynormal_1
+d$delta.crime=d$crimepandemic_1-d$crimenormal_1
+d$delta.benefit=d$benefitpandemic_1-d$benefitnormal_1
+d$delta.fair=d$fairpandemic_1-d$fairnormal_1
+
+# not this
+normal.unst.model=lm(ubinormal_1 ~  stressnormal_1 + 
+                  simplenormal_1 + 
+                  cracksnormal_1 + 
+                  neednormal_1 + 
+                  unpredictablenormal_1 + 
+                  irresponnormal_1 + 
+                  valuenormal_1 + 
+                  povertynormal_1 + 
+                  cheatnormal_1 + 
+                  togethernormal_1 + 
+                  wellbeingnormal_1 + 
+                  economynormal_1 + 
+                  crimenormal_1 + 
+                  benefitnormal_1 
+                + fairnormal_1, data=d)
+
+# Predict what the mean preference shift in pandemic should be
+predicted.ubi.pandemic = 
+  summary(normal.unst.model)$coefficients[2, 1]* mean(d$delta.stress, na.rm=T) +  
+  summary(normal.unst.model)$coefficients[3, 1]* mean(d$delta.simple, na.rm=T) +  
+  summary(normal.unst.model)$coefficients[4, 1]* mean(d$delta.cracks, na.rm=T) +  
+  summary(normal.unst.model)$coefficients[5, 1]* mean(d$delta.need, na.rm=T) +   
+  summary(normal.unst.model)$coefficients[6, 1]* mean(d$delta.unpredictable, na.rm=T) +  
+  summary(normal.unst.model)$coefficients[7, 1]* mean(d$delta.irresponsibility, na.rm=T) +  
+  summary(normal.unst.model)$coefficients[8, 1]* mean(d$delta.value, na.rm=T) +  
+  summary(normal.unst.model)$coefficients[9, 1]* mean(d$delta.poverty, na.rm=T) +  
+  summary(normal.unst.model)$coefficients[10, 1]* mean(d$delta.cheat, na.rm=T) + 
+  summary(normal.unst.model)$coefficients[11, 1]* mean(d$delta.together, na.rm=T) + 
+  summary(normal.unst.model)$coefficients[12, 1]* mean(d$delta.wellbeing, na.rm=T) + 
+  summary(normal.unst.model)$coefficients[13, 1]* mean(d$delta.economy, na.rm=T) + 
+  summary(normal.unst.model)$coefficients[14, 1]* mean(d$delta.crime, na.rm=T) + 
+  summary(normal.unst.model)$coefficients[15, 1]* mean(d$delta.benefit, na.rm=T) + 
+  summary(normal.unst.model)$coefficients[16, 1]* mean(d$delta.fair, na.rm=T) 
+  
+
+
+# Now predict the individual-level shift
+d$predicted.ubi.pandemic = 
+  summary(normal.unst.model)$coefficients[2, 1]* d$delta.stress +  
+  summary(normal.unst.model)$coefficients[3, 1]* d$delta.simple +  
+  summary(normal.unst.model)$coefficients[4, 1]* d$delta.cracks +  
+  summary(normal.unst.model)$coefficients[5, 1]* d$delta.need  +  
+  summary(normal.unst.model)$coefficients[6, 1]* d$delta.unpredictable +  
+  summary(normal.unst.model)$coefficients[7, 1]* d$delta.irresponsibility +  
+  summary(normal.unst.model)$coefficients[8, 1]* d$delta.value +  
+  summary(normal.unst.model)$coefficients[9, 1]* d$delta.poverty +  
+  summary(normal.unst.model)$coefficients[10, 1]* d$delta.cheat + 
+  summary(normal.unst.model)$coefficients[11, 1]* d$delta.together + 
+  summary(normal.unst.model)$coefficients[12, 1]* d$delta.wellbeing + 
+  summary(normal.unst.model)$coefficients[13, 1]* d$delta.economy + 
+  summary(normal.unst.model)$coefficients[14, 1]* d$delta.crime + 
+  summary(normal.unst.model)$coefficients[15, 1]* d$delta.benefit + 
+  summary(normal.unst.model)$coefficients[16, 1]* d$delta.fair 
+
+```
+
+```{r}
+u00823_mod_z_5 <- lm(z(delta.ubi)~z(predicted.ubi.pandemic)*z(ubinormal_1), data=d)
+
+export_ols(u00823_mod_z_5, 
+           key_effects = c("z(predicted.ubi.pandemic)", "z(ubinormal_1)",
+                           "z(predicted.ubi.pandemic):z(ubinormal_1)"))
+```
+

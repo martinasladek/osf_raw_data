@@ -1,0 +1,166 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-06'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df_1 <- haven::read_sav("../data/raw_data/p01182_IA_Exp1_exported.sav")
+df_2 <- haven::read_sav("../data/raw_data/p01182_IA_Exp2_exported.sav")
+df_3 <- haven::read_sav("../data/raw_data/p01182_IA_Exp3_exported.sav")
+df_4 <- haven::read_sav("../data/raw_data/p01182_IA_Exp4_exported.sav")
+df_5 <- haven::read_sav("../data/raw_data/p01182_IA_Exp5_exported.sav")
+```
+
+# exp 1 
+
+```{r}
+df_1_long <- df_1 %>% 
+  dplyr::select(id = Subject, TrainingCondition, age_1 = AGE.1, age_2 = AGE.8) %>% 
+  tidyr::pivot_longer(-c(id, TrainingCondition))
+
+p01182_mod_rm_z_1 <- df_1_long %>% 
+  afex::aov_4(z(value) ~ TrainingCondition*name + (name|id), .)
+
+export_ols(p01182_mod_rm_z_1, 
+           key_effects = c("TrainingCondition", "name", "TrainingCondition:name"))
+
+df_1_long <- df_1_long |> dplyr::mutate(TrainingCondition = factor(TrainingCondition))
+
+p01182_mod_lmer_z_1 <- df_1_long %>% 
+  lme4::lmer(z(value) ~ TrainingCondition*name + (1|id), .)
+
+export_ols(p01182_mod_lmer_z_1, 
+           key_effects = c("TrainingCondition2", "nameage_2", "TrainingCondition2:nameage_2"))
+```
+
+
+# exp 2 
+
+```{r}
+df_2_long <- 
+  df_2 %>% 
+  dplyr::select(id = Subject, AGE.1.1, AGE.1.2, AGE.9.1, AGE.9.2) %>% 
+  tidyr::pivot_longer(-c(id)) %>% 
+  dplyr::mutate(
+    block = case_when(
+      name %in% c("AGE.1.1", "AGE.1.2") ~ 1, TRUE ~ 2
+    ) %>% factor(), 
+    training = case_when(
+      name %in% c("AGE.1.1", "AGE.9.1") ~ 1, TRUE ~ 2
+    ) %>% factor()
+  ) 
+
+
+p01182_mod_rm_z_2 <- df_2_long %>% 
+  afex::aov_4(z(value) ~ training*block + (training*block|id), .)
+
+export_ols(p01182_mod_rm_z_2, 
+           key_effects = c("training", "block", "training:block"))
+
+
+p01182_mod_lmer_z_2 <- df_2_long %>% 
+  lme4::lmer(z(value) ~ training*block + (1|id), .)
+
+export_ols(p01182_mod_lmer_z_2, 
+           key_effects = c("training2", "block2", "training2:block2"))
+```
+
+# exp 3
+
+```{r}
+df_3_long <- 
+  df_3 %>% 
+  dplyr::select(id = Subject, AGE.3.1, AGE.3.2, AGE.11.1, AGE.11.2) %>% 
+  tidyr::pivot_longer(-c(id)) %>% 
+  dplyr::mutate(
+    block = case_when(
+      name %in% c("AGE.3.1", "AGE.3.2") ~ 1, TRUE ~ 2
+    ) %>% factor(), 
+    training = case_when(
+      name %in% c("AGE.3.1", "AGE.11.1") ~ 1, TRUE ~ 2
+    ) %>% factor()
+  ) 
+
+
+p01182_mod_rm_z_3 <- df_3_long %>% 
+  afex::aov_4(z(value) ~ training*block + (training*block|id), .)
+
+export_ols(p01182_mod_rm_z_3, 
+           key_effects = c("training", "block", "training:block"))
+
+
+p01182_mod_lmer_z_3 <- df_3_long %>% 
+  lme4::lmer(z(value) ~ training*block + (1|id), .)
+
+export_ols(p01182_mod_lmer_z_3, 
+           key_effects = c("training2", "block2", "training2:block2"))
+```
+
+# exp 4
+
+```{r}
+df_4_long <- 
+  df_4 %>% 
+  dplyr::select(id = Subject, AGE.2.1, AGE.2.2, AGE.9.1, AGE.9.2) %>% 
+  tidyr::pivot_longer(-c(id)) %>% 
+  dplyr::mutate(
+    block = case_when(
+      name %in% c("AGE.2.1", "AGE.2.2") ~ 1, TRUE ~ 2
+    ) %>% factor(), 
+    training = case_when(
+      name %in% c("AGE.2.1", "AGE.9.1") ~ 1, TRUE ~ 2
+    ) %>% factor()
+  ) 
+
+
+p01182_mod_rm_z_4 <- df_4_long %>% 
+  afex::aov_4(z(value) ~ training*block + (training*block|id), .)
+
+export_ols(p01182_mod_rm_z_4, 
+           key_effects = c("training", "block", "training:block"))
+
+
+p01182_mod_lmer_z_4 <- df_4_long %>% 
+  lme4::lmer(z(value) ~ training*block + (1|id), .)
+
+export_ols(p01182_mod_lmer_z_4, 
+           key_effects = c("training2", "block2", "training2:block2"))
+```
+
+# exp 5 
+
+```{r}
+df_5_long <- 
+  df_5 %>% 
+  dplyr::select(id = Subject, AGE.3.1, AGE.3.2, AGE.12.1, AGE.12.2) %>% 
+  tidyr::pivot_longer(-c(id)) %>% 
+  dplyr::mutate(
+    block = case_when(
+      name %in% c("AGE.3.1", "AGE.3.2") ~ 1, TRUE ~ 2
+    ) %>% factor(), 
+    training = case_when(
+      name %in% c("AGE.3.1", "AGE.12.1") ~ 1, TRUE ~ 2
+    ) %>% factor()
+  ) 
+
+
+p01182_mod_rm_z_5 <- df_5_long %>% 
+  afex::aov_4(z(value) ~ training*block + (training*block|id), .)
+
+export_ols(p01182_mod_rm_z_5, 
+           key_effects = c("training", "block", "training:block"))
+
+
+p01182_mod_lmer_z_5 <- df_5_long %>% 
+  lme4::lmer(z(value) ~ training*block + (1|id), .)
+
+export_ols(p01182_mod_lmer_z_5, 
+           key_effects = c("training2", "block2", "training2:block2"))
+```
+

@@ -1,0 +1,697 @@
+---
+title: "Intergroup cooperation, BIS, and Reputation"
+author: "he who must not be named for blind peer review"
+date: "`r Sys.Date()`"
+output:
+  rmdformats::readthedown:
+    code_folding: hide
+    format: readthedown
+    toc_depth: 2
+  html_document:
+    df_print: paged
+    toc_depth: '3'
+   
+---
+# Package loading
+```{r, message = FALSE, warning = FALSE}
+library(broom)
+library(lsr)
+library(sjstats)
+library(sjPlot)
+library(jtools)
+library(reghelper)
+library(psych)
+library(car)
+library(processR)
+library(lavaan)
+library(emmeans)
+library(ggpubr)
+library(gt)
+library(tidyverse)
+
+source("../scripts/helpers.R")
+```
+
+***
+# R setting
+```{r}
+options(scipen=999)
+options(contrasts = c("contr.sum", "contr.poly"))
+```
+
+***
+# Data oarganization
+
+***
+As pre-registered, We contrast-coded the priming condiion as follows; Contrast 1: disease vs (control + disaster); Contrast 2: control vs disasterr. Also, we coded the group condition such that cooperation with in-group and out-gorup were compared against that of unknown. 
+
+```{r, message = FALSE, warning = FALSE}
+# Data loading
+data <- read.csv("../data/raw_data/u05525_Data.csv")
+
+# Reverse coding
+data$si2 <- 7 - data$si2.r
+data$rep3 <- 6 - data$rep3.r
+data$GA2 <- 8 - data$GA2.r
+data$PI2 <- 8 - data$PI2.r
+data$GA6 <- 8 - data$GA6.r
+data$PI6 <- 8 - data$PI6.r
+data$GA7 <- 8 - data$GA7.r
+data$PI7 <- 8 - data$PI7.r
+
+# Data organization
+data <- data %>% 
+  rowwise() %>% 
+  mutate(coop = sum(coop.1.0_1, coop.2.0_1, coop.0.0_1, coop.1.1_1, coop.2.1_1, coop.0.1_1, na.rm = TRUE),
+         comp1 = sum(comp1.1.0, comp1.0.1, comp1.1.0, comp1.1.1, comp1.2.1, comp1.0.1, na.rm = TRUE),
+         comp2 = sum(comp2.1.0, comp2.0.1, comp2.1.0, comp2.1.1, comp2.2.1, comp2.0.1, na.rm = TRUE),
+         comp3 = sum(comp3.1.0, comp3.0.1, comp3.1.0, comp3.1.1, comp3.2.1, comp3.0.1, na.rm = TRUE),
+         comp4 = sum(comp4.1.0, comp4.0.1, comp4.1.0, comp4.1.1, comp4.2.1, comp4.0.1, na.rm = TRUE),
+         comp5 = sum(comp5.1.0, comp5.0.1, comp5.1.0, comp5.1.1, comp5.2.1, comp5.0.1, na.rm = TRUE),) %>% 
+  rename(exp = exp_1)
+
+# Composite score
+data <- data %>% 
+  rowwise() %>% 
+  mutate(si = mean(c(si1, si2, si3, si4, si5, si6)),
+         help = mean(c(help1, help2, help3, help4, help5, help6, help7)),
+         rep = mean(c(rep1, rep2, rep3, rep4)),
+         GA = mean(c(GA1, GA2, GA3, GA4, GA5, GA6, GA7, GA8)),
+         PI = mean(c(PI1, PI2, PI3, PI4, PI5, PI6, PI7)),
+         PVD = mean(c(GA1, GA2, GA3, GA4, GA5, GA6, GA7, GA8, PI1, PI2, PI3, PI4, PI5, PI6, PI7)),
+         threat = mean(c(threat1_1, threat2_1))
+         )
+
+# Factors 
+data$sex <- factor(data$sex, levels = c(1, 2, 3, 4), labels = c("male", "female", "other", "prefer not to say"))
+data$condition <- factor(data$condition, levels = c(0, 1, 2), labels = c("control", "disease", "disaster"))
+data$group <- factor(data$group, levels = c(0, 1, 2), labels = c("unknown", "in-group", "out-group"))
+data$knowledge <- factor(data$knowledge, levels = c(0, 1), labels = c("common", "unilateral"))
+
+# Contrasts
+contrast1<-c(-1, 2, -1)#Contrast 1: disease vs (control + disaster)
+contrast2<-c(-1, 0, 1)#Contrast 2: control vs disaster
+contrasts(data$condition)<-cbind(contrast1,contrast2)#contrast coding 
+in.vs.unknown <- c(-1, 1, 0)# in vs unknown
+out.vs.unknown <- c(-1, 0, 1)# out vs unknown
+contrasts(data$group) <- cbind(in.vs.unknown, out.vs.unknown)
+```
+
+***
+# Variable summary
+```{r}
+data %>% 
+  select(coop, help, exp, rep, GA, PI, PVD, perception.d, perception.c, threat, condition, group, knowledge) %>% 
+  names() %>% 
+  as.data.frame() %>% 
+  rename(variable = 1) %>% 
+  mutate(description = c("cooperation in the PD (from 0 to 300)",
+                         "helping intention measured by seven items, from 1-Strongly disagree to 7-Strongly agree",
+                         "expectation about the partner's cooperaion in the PD (from 0 to 300)",
+                         "reputational concern measured by four items, from 1-Strongly disagree to 5-Strongly agree",
+                         "germ aversion measured by 8 items, from 1-Strongly disagree to 7-Strongly agree",
+                         "perceived infectability measured by 7 items, from 1-Strongly disagree to 7-Strongly agree",
+                         "perceived vulnerability to disease: the composite score of GA and PI",
+                         "perception of non-cooperators in the PD measured by one item, from 1-Extremely negative to 7-Extremely positive",
+                         "perception of cooperators in the PD measured by one item, from 1-Extremely negative to 7-Extremely positive",
+                         "perceived threat of Covid-19 measured by two items, from 1-much better to 7-much worse",
+                         "0 = control, 1 = disease, 2 = disaster",
+                         "0 = unknown, 1 = in-group, 2 = out-group",
+                         "0 = common knowledge, 1 = unilateral knowledge"
+                         )) %>% 
+  gt()
+```
+
+***
+# Reliability{.tabset}
+
+***
+## Social identification  
+```{r}
+a.si <- data %>% 
+  select(si1, si2, si3, si4, si5, si6) %>% 
+  psych::alpha()
+a.si$total %>% 
+  gt()
+```
+
+***
+## Helping intention 
+```{r}
+a.help <- data %>% 
+  select(help1, help2, help3, help4, help5, help6, help7) %>% 
+  psych::alpha()
+a.help$total %>% 
+  gt()
+```
+
+***
+## Reputational concern
+```{r}
+a.rep <- data %>% 
+  select(rep1, rep2, rep3, rep4) %>% 
+  psych::alpha()
+a.rep$total %>% 
+  gt()
+```
+
+***
+## Germ aversion (GA)
+```{r}
+a.GA <- data %>% 
+  select(GA1, GA2, GA3, GA4, GA5, GA6, GA7, GA8) %>% 
+  psych::alpha()
+a.GA$total %>% 
+  gt()
+```
+
+***
+## Perceived vulnerability (PV)
+```{r}
+a.PI <- data %>% 
+  select(PI1, PI2, PI3, PI4, PI5, PI6, PI7) %>% 
+  psych::alpha()
+a.PI$total %>% 
+  gt()
+```
+
+***
+## PVD (GA + PV)
+```{r}
+a.PVD <- data %>% 
+  select(GA1, GA2, GA3, GA4, GA5, GA6, GA7, GA8, PI1, PI2, PI3, PI4, PI5, PI6, PI7) %>% 
+  psych::alpha()
+a.PVD$total %>% 
+  gt()
+```
+
+***
+## Perceived threat of COvid-19
+```{r, warning = FALSE}
+a.threat <- data %>% 
+  select(threat1_1, threat2_1) %>% 
+  psych::alpha()
+a.threat$total %>% 
+  gt()
+```
+
+***
+# Manipulation check 1: disease priming {.tabset}
+
+***
+We first checked whether the disease priming manipulation significantlly affected PVD.
+
+***
+## GA by condition
+
+Apparently, the disease threat manipulation induced germ aversion and participants in the condition reported significantly higher germ aversion compared to those in the control and disaster. Overall PVD was not affected by the condition. Thus, the moderating effect of PVD (as an individual-difference variable) should be partly attributed to the increase in GA by the manipulation. 
+
+```{r, message = FALSE, warning = FALSE}
+data %>%
+  group_by(condition) %>% 
+  summarise(n = n(),
+            mean = mean(GA, na.rm = TRUE),
+            sd = sd(GA, na.rm = TRUE),
+            se = se(GA, na.rm = TRUE)) %>% 
+  mutate(lwr = mean - qnorm(0.975)*se,
+         upr = mean - qnorm(0.975)*se) %>% 
+  gt() %>% 
+  tab_header(title = "Descriptive statistics: GA")
+
+GA.anova <- lm(GA ~ condition, data)
+summ(GA.anova, scale = TRUE, confint = TRUE, part.corr = TRUE, model.info = TRUE) %>% 
+  tidy() %>% 
+  gt()
+```
+
+***
+## PI by condition
+```{r, message = FALSE, warning = FALSE}
+data %>%
+  group_by(condition) %>% 
+  summarise(n = n(),
+            mean = mean(PI, na.rm = TRUE),
+            sd = sd(PI, na.rm = TRUE),
+            se = se(PI, na.rm = TRUE)) %>% 
+  mutate(lwr = mean - qnorm(0.975)*se,
+         upr = mean - qnorm(0.975)*se) %>% 
+  gt() %>% 
+  tab_header(title = "Descriptive statistics: PI")
+
+PI.anova <- lm(PI ~ condition, data)
+summ(PI.anova, scale = TRUE, confint = TRUE, part.corr = TRUE, model.info = TRUE) %>% 
+  tidy() %>% 
+  gt()
+```
+
+***
+## PVD by condition
+```{r, message = FALSE, warning = FALSE}
+data %>%
+  group_by(condition) %>% 
+  summarise(n = n(),
+            mean = mean(PVD, na.rm = TRUE),
+            sd = sd(PVD, na.rm = TRUE),
+            se = se(PVD, na.rm = TRUE)) %>% 
+  mutate(lwr = mean - qnorm(0.975)*se,
+         upr = mean - qnorm(0.975)*se) %>% 
+  gt() %>% 
+  tab_header(title = "Descriptive statistics: PVD")
+
+PVD.anova <- lm(PVD ~ condition, data)
+summ(PVD.anova, scale = TRUE, confint = TRUE, part.corr = TRUE, model.info = TRUE) %>% 
+  tidy() %>% 
+  gt()
+```
+
+***
+# Manipulation check 2: social identification
+
+***
+## Descriptive statistics
+```{r, message = FALSE, warning = FALSE}
+data.frame(mean = mean(data$si),
+           sd = sd(data$si),
+           se = se(data$si)) %>% 
+  mutate(lwr = mean - qnorm(0.975)*se,
+         upr = mean - qnorm(0.975)*se) %>% 
+  gt() 
+```
+
+***
+## t-test
+```{r}
+t.test(data$si, mu = 3.5) %>% 
+  tidy() %>% 
+  mutate(cohensd = cohensD(data$si, mu = 3.5)) %>% 
+  gt()
+```
+
+***
+# Manipulation check 3: knowledge
+
+***
+## Reputational concern {.tabset}
+
+***
+### Descriptive statistics
+```{r, message = FALSE, warning = FALSE}
+data %>%
+  group_by(condition, group, knowledge) %>% 
+  summarise(n = n(),
+            mean = mean(rep, na.rm = TRUE),
+            sd = sd(rep, na.rm = TRUE),
+            se = se(rep, na.rm = TRUE)) %>% 
+  mutate(lwr = mean - qnorm(0.975)*se,
+         upr = mean - qnorm(0.975)*se) %>% 
+  gt() %>% 
+  tab_header(title = "Descriptive statistics: reputational concern")
+```
+
+***
+### Anova
+```{r, message = FALSE, warning = FALSE}
+# model
+rep.model <- lm(rep ~ group*knowledge*condition, data)
+
+# anova
+anova_stats(car::Anova(rep.model, type = 3)) %>% 
+  gt()
+```
+
+***
+### Plot
+```{r, message = FALSE, warning = FALSE}
+data %>% 
+  group_by(group, knowledge, condition) %>% 
+  summarise(mean = mean(rep),
+            se = se(rep)) %>% 
+  ggplot(aes(x = knowledge, y = mean, fill = group)) + 
+        geom_bar(position = position_dodge(), stat = "identity") +
+        facet_wrap(~ condition) +
+        geom_errorbar(aes(ymin = mean - se, ymax = mean + se), 
+                      width=.2,
+                      position = position_dodge(0.9)) +
+        scale_y_continuous(expand = c(0, 0))
+```
+
+***
+## Expectation about the partner's cooperation {.tabset}
+
+***
+### Descriptive statistics
+```{r, message = FALSE, warning = FALSE}
+data %>%
+  group_by(condition, group, knowledge) %>% 
+  summarise(n = n(),
+            mean = mean(exp, na.rm = TRUE),
+            sd = sd(exp, na.rm = TRUE),
+            se = se(exp, na.rm = TRUE)) %>% 
+  mutate(lwr = mean - qnorm(0.975)*se,
+         upr = mean - qnorm(0.975)*se) %>% 
+  gt() %>% 
+  tab_header(title = "Descriptive statistics: expectation")
+```
+
+***
+### Anova
+```{r, message = FALSE, warning = FALSE}
+# model
+exp.model <- lm(exp ~ group*knowledge*condition, data)
+
+# anova
+anova_stats(car::Anova(exp.model, type = 3)) %>% 
+  gt()
+```
+
+***
+### Plot
+```{r, message = FALSE, warning = FALSE}
+data %>% 
+  group_by(group, knowledge, condition) %>% 
+  summarise(mean = mean(exp),
+            se = se(exp)) %>% 
+  ggplot(aes(x = knowledge, y = mean, fill = group)) + 
+        geom_bar(position = position_dodge(), stat = "identity") +
+        facet_wrap(~ condition) +
+        geom_errorbar(aes(ymin = mean - se, ymax = mean + se), 
+                      width=.2,
+                      position = position_dodge(0.9)) +
+        scale_y_continuous(expand = c(0, 0))
+```
+
+***
+# Cooperation
+
+***
+As pre-registered, We contrast-coded the priming condiion as follows; Contrast 1: disease vs (control + disaster); Contrast 2: control vs disasterr. Also, we coded the group condition such that cooperation with in-group and out-gorup were compared against that of unknown.
+
+***
+## Descriptive statistics (row means and SDs)
+```{r, message = FALSE, warning = FALSE}
+data %>%
+  group_by(condition, group, knowledge) %>% 
+  summarise(n = n(),
+            mean = mean(coop, na.rm = TRUE),
+            sd = sd(coop, na.rm = TRUE),
+            se = se(coop, na.rm = TRUE)) %>% 
+  mutate(lwr = mean - qnorm(0.975)*se,
+         upr = mean - qnorm(0.975)*se) %>% 
+  gt() %>% 
+  tab_header(title = "Descriptive statistics: cooperation")
+```
+
+***
+## ANOVA
+
+```{r}
+# model
+coop.model <- lm(coop ~ group*knowledge*condition*PVD, data)
+
+# anova
+anova_stats(car::Anova(coop.model, type = 3)) %>% 
+  gt()
+```
+
+***
+## Planned contrasts
+```{r}
+summ(coop.model, scale = TRUE, confint = TRUE, details = TRUE) %>% 
+  tidy() %>% 
+  gt()
+```
+
+***
+## Estimated marginal means 
+```{r}
+coop.emm <- emmeans(coop.model, pairwise ~ group*knowledge*condition*PVD, adjust = "tukey")
+coop.emm$emmeans %>% 
+  as.data.frame() %>% 
+  gt()
+```
+
+***
+## Plot
+```{r, warning = FALSE, message = FALSE}
+coop.emm$emmeans %>% 
+  as.data.frame() %>% 
+  ggplot(aes(x = knowledge, y = emmean, fill = group)) + 
+        geom_bar(position = position_dodge(), stat = "identity") +
+        facet_wrap(~ condition) +
+        geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE), 
+                      width=.2,
+                      position = position_dodge(0.9)) +
+        scale_y_continuous(expand = c(0, 0))
+```
+
+***
+## Group x knowledge by condition{.tabset}
+
+***
+### Control
+
+##### HERE
+
+```{r}
+data %>%
+  filter(condition == "control") %>% 
+  lm(data = ,
+     formula = coop ~ group*knowledge*PVD) %>% 
+  Anova(type = 3) %>% 
+  anova_stats() %>% 
+  gt()
+
+
+u05525_mod_z_1 <- data %>%
+  filter(condition == "control") %>% 
+  lm(data = ,
+     formula = z(coop) ~ group*knowledge*z(PVD))
+
+export_ols(
+  u05525_mod_z_1, 
+  key_effects = c("groupin.vs.unknown", "groupout.vs.unknown", "z(PVD)",
+                  "groupin.vs.unknown:z(PVD)", "groupout.vs.unknown:z(PVD)")
+)
+
+```
+
+***
+### Disaster
+
+##### HERE
+```{r}
+data %>%
+  filter(condition == "disaster") %>% 
+  lm(data = ,
+     formula = coop ~ group*knowledge*PVD) %>% 
+  Anova(type = 3) %>% 
+  anova_stats() %>% 
+  gt()
+
+
+
+u05525_mod_z_2 <- data %>%
+  filter(condition == "disaster") %>% 
+  lm(data = ,
+     formula = z(coop) ~ group*knowledge*z(PVD))
+
+export_ols(
+  u05525_mod_z_2, 
+  key_effects = c("groupin.vs.unknown", "groupout.vs.unknown", "z(PVD)",
+                  "groupin.vs.unknown:z(PVD)", "groupout.vs.unknown:z(PVD)")
+)
+```
+
+***
+### Disease
+
+##### HERE
+```{r}
+data %>%
+  filter(condition == "disease") %>% 
+  lm(data = ,
+     formula = coop ~ group*knowledge*PVD) %>% 
+  Anova(type = 3) %>% 
+  anova_stats() %>% 
+  gt()
+
+u05525_mod_z_3 <- data %>%
+  filter(condition == "disease") %>% 
+  lm(data = ,
+     formula = z(coop) ~ group*knowledge*z(PVD))
+
+export_ols(
+  u05525_mod_z_3, 
+  key_effects = c("groupin.vs.unknown", "groupout.vs.unknown", "z(PVD)",
+                  "groupin.vs.unknown:z(PVD)", "groupout.vs.unknown:z(PVD)")
+)
+```
+
+***
+## Condition x group, collapsing knowledge{.tabset}
+
+***
+### Anova and planned contrast
+```{r, message = FALSE, warning = FALSE}
+data %>% 
+  lm(data = ,
+     formula = coop ~ group*condition*PVD) %>% 
+  Anova(type = 3) %>% 
+  anova_stats() %>% 
+  gt()
+
+data %>% 
+  lm(data = ,
+     formula = coop ~ group*condition*PVD) %>% 
+  summ(scale = TRUE, confint = TRUE, details = TRUE) %>% 
+  tidy() %>% 
+  gt()
+```
+
+***
+
+
+***
+# Helping
+
+***
+As pre-registered, We contrast-coded the priming condiion as follows; Contrast 1: disease vs (control + disaster); Contrast 2: control vs disasterr. Also, we coded the group condition such that cooperation with in-group and out-gorup were compared against that of unknown.
+
+***
+## Descriptive statistics (row means and SDs)
+```{r, message = FALSE, warning = FALSE}
+data %>%
+  group_by(condition, group) %>% 
+  summarise(n = n(),
+            mean = mean(help, na.rm = TRUE),
+            sd = sd(help, na.rm = TRUE),
+            se = se(help, na.rm = TRUE)) %>% 
+  mutate(lwr = mean - qnorm(0.975)*se,
+         upr = mean - qnorm(0.975)*se) %>% 
+  gt() %>% 
+  tab_header(title = "Descriptive statistics: help")
+```
+
+***
+## ANOVA
+```{r}
+# model
+help.model <- lm(help ~ group*condition*PVD, data)
+
+# anova
+anova_stats(car::Anova(help.model, type = 3)) %>% 
+  gt()
+```
+
+***
+## Planned contrasts
+```{r}
+summ(help.model, scale = TRUE, confint = TRUE, details = TRUE) %>% 
+  tidy() %>% 
+  gt()
+```
+
+***
+## Estimated marginal means 
+```{r}
+help.emm <- emmeans(help.model, pairwise ~ group*condition*PVD, adjust = "tukey")
+help.emm$emmeans %>% 
+  as.data.frame() %>% 
+  gt()
+```
+
+***
+## Plot
+```{r, warning = FALSE, message = FALSE}
+help.emm$emmeans %>% 
+  as.data.frame() %>% 
+  ggplot(aes(x = condition, y = emmean, fill = group)) + 
+        geom_bar(position = position_dodge(), stat = "identity") +
+        geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE), 
+                      width=.2,
+                      position = position_dodge(0.9)) +
+        scale_y_continuous(expand = c(0, 0))
+```
+
+***
+# Group by condition{.tabset}
+
+***
+## Control
+
+##### HERE
+
+```{r}
+data %>%
+  filter(condition == "control") %>% 
+  lm(data = ,
+     formula = coop ~ group*PVD) %>% 
+  Anova(type = 3) %>% 
+  anova_stats() %>% 
+  gt()
+
+
+
+u05525_mod_z_4 <- data %>%
+  filter(condition == "control") %>% 
+  lm(data = ,
+     formula = z(coop) ~ group*z(PVD))
+
+export_ols(
+  u05525_mod_z_4, 
+  key_effects = names(u05525_mod_z_4$coefficients)[-1]
+)
+
+names(u05525_mod_z_4$coefficients)[-1]
+```
+
+***
+## Disaster
+
+##### HERE
+
+```{r}
+data %>%
+  filter(condition == "disaster") %>% 
+  lm(data = ,
+     formula = coop ~ group*PVD) %>% 
+  Anova(type = 3) %>% 
+  anova_stats() %>% 
+  gt()
+
+
+u05525_mod_z_5 <- data %>%
+  filter(condition == "disaster") %>% 
+  lm(data = ,
+     formula = z(coop) ~ group*z(PVD))
+
+export_ols(
+  u05525_mod_z_5, 
+  key_effects = names(u05525_mod_z_5$coefficients)[-1]
+)
+```
+
+***
+## Disease
+
+##### HERE
+
+```{r}
+data %>%
+  filter(condition == "disease") %>% 
+  lm(data = ,
+     formula = coop ~ group*PVD) %>% 
+  Anova(type = 3) %>% 
+  anova_stats() %>% 
+  gt()
+
+u05525_mod_z_6 <- data %>%
+  filter(condition == "disease") %>% 
+  lm(data = ,
+     formula = z(coop) ~ group*z(PVD))
+
+export_ols(
+  u05525_mod_z_6, 
+  key_effects = names(u05525_mod_z_6$coefficients)[-1]
+)
+```

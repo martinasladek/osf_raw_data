@@ -1,0 +1,227 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-05-04'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(afex)
+library(dplyr)
+library(magrittr)
+
+source("../scripts/helpers.R")
+
+list.files("../data/raw_data/", pattern = "u00215*")
+
+u00215_tib_1 <- haven::read_sav("../data/raw_data/u00215_Data_Study1_OSF.sav")
+u00215_tib_2 <- haven::read_sav("../data/raw_data/u00215_Data_Study2_OSF.sav")
+u00215_tib_3 <- haven::read_sav("../data/raw_data/u00215_Data_Study03_OSF.sav")
+u00215_tib_4 <- haven::read_sav("../data/raw_data/u00215_Data_Study4_OSF.sav")
+```
+
+# Study 1 
+
+```{r}
+u00215_tib_1_long <- u00215_tib_1 %>% 
+  dplyr::select(No, MEAN_CM, MEAN_TG00, MEAN_TG17, MEAN_TG33, MEAN_TG50) %>% 
+  tidyr::pivot_longer(
+    cols = -c(No, MEAN_CM), 
+    names_to = "anger_level", 
+    values_to = "score"
+  ) %>% 
+  dplyr::mutate(
+    anger_level = factor(anger_level)
+  )
+
+
+contrasts(u00215_tib_1_long$anger_level) <- contr.poly
+  
+u00215_tib_1_long %>% 
+  afex::aov_4(score ~ anger_level + MEAN_CM + (anger_level|No), 
+              data = ., 
+              factorize =  F, 
+              anova_table =  list(
+                correction = "GG"
+              )
+  )
+```
+
+```{r}
+u00215_mod_rm_z_1 <- u00215_tib_1_long %>% 
+  afex::aov_4(z(score) ~ anger_level + z(MEAN_CM) + (anger_level|No), 
+              data = ., 
+              factorize =  F, 
+              anova_table =  list(
+                correction = "GG"
+              )
+  )
+
+key_effects = c("z(MEAN_CM)", "z(MEAN_CM):anger_level")
+export_ols(u00215_mod_rm_z_1, key_effects)
+
+
+
+
+u00215_mod_lmer_z_1 <- u00215_tib_1_long %>% 
+  lme4::lmer(z(score) ~ anger_level * z(MEAN_CM) + (1|No), 
+              data = .)
+
+key_effects = mod_coeffs(u00215_mod_lmer_z_1)[5:7]
+export_ols(u00215_mod_lmer_z_1, key_effects)
+```
+
+# Study 2
+
+```{r}
+u00215_tib_2 %<>% dplyr::filter(Study1Part == 0)
+
+u00215_tib_2_long <- u00215_tib_2 %>% 
+  dplyr::select(No, MEAN_CM, MEAN_TG00, MEAN_TG17, MEAN_TG33, MEAN_TG50) %>% 
+  tidyr::pivot_longer(
+    cols = -c(No, MEAN_CM), 
+    names_to = "anger_level", 
+    values_to = "score"
+  ) %>% 
+  dplyr::mutate(
+    anger_level = factor(anger_level)
+  )
+
+contrasts(u00215_tib_2_long$anger_level) <- contr.poly
+  
+u00215_tib_2_long %>% 
+  afex::aov_4(score ~ anger_level + MEAN_CM + (anger_level|No), 
+              data = ., 
+              factorize =  F, 
+              anova_table =  list(
+                correction = "GG"
+              )
+  )
+```
+
+```{r}
+u00215_mod_rm_z_2 <- u00215_tib_2_long %>% 
+  afex::aov_4(z(score) ~ anger_level + z(MEAN_CM) + (anger_level|No), 
+              data = ., 
+              factorize =  F, 
+              anova_table =  list(
+                correction = "GG"
+              )
+  )
+
+key_effects = c("z(MEAN_CM)", "z(MEAN_CM):anger_level")
+export_ols(u00215_mod_rm_z_2, key_effects)
+
+
+
+
+u00215_mod_lmer_z_2 <- u00215_tib_2_long %>% 
+  lme4::lmer(z(score) ~ anger_level * z(MEAN_CM) + (1|No), 
+              data = .,
+  )
+
+key_effects = mod_coeffs(u00215_mod_lmer_z_2)[5:7]
+export_ols(u00215_mod_lmer_z_2, key_effects)
+```
+
+# Study 3
+
+```{r}
+u00215_tib_3 %<>% dplyr::filter(`filter_$` == 1)
+```
+
+```{r}
+u00215_tib_3_long <- u00215_tib_3 %>% 
+  dplyr::select(No, Condition, MEAN_CM, MEAN_TG00_56789, MEAN_TG17_56789, MEAN_TG33_56789, MEAN_TG50_56789) %>% 
+  tidyr::pivot_longer(
+    cols = -c(No, Condition, MEAN_CM), 
+    names_to = "anger_level", 
+    values_to = "score"
+  ) %>% 
+  dplyr::mutate(
+    anger_level = factor(anger_level), 
+    Condition = factor(Condition)
+  )
+
+contrasts(u00215_tib_3_long$anger_level) <- contr.poly
+
+u00215_tib_3_long %>% 
+  afex::aov_4(score ~ anger_level * Condition * MEAN_CM + (anger_level|No), 
+              data = ., 
+              factorize =  F, 
+              anova_table =  list(
+                correction = "GG"
+              )
+  )
+```
+
+```{r}
+u00215_mod_rm_z_3 <- u00215_tib_3_long %>% 
+  afex::aov_4(z(score) ~ anger_level * Condition * z(MEAN_CM) + (anger_level|No), 
+              data = ., 
+              factorize =  F, 
+              anova_table =  list(
+                correction = "GG"
+              )
+  )
+
+key_effects = c("Condition:z(MEAN_CM)", "Condition:z(MEAN_CM):anger_level", "z(MEAN_CM)")
+export_ols(u00215_mod_rm_z_3, key_effects)
+
+
+
+
+
+
+u00215_mod_lmer_z_3 <- u00215_tib_3_long %>% 
+  lme4::lmer(z(score) ~ anger_level * Condition * z(MEAN_CM) + (1|No), 
+              data = .
+  )
+
+key_effects = mod_coeffs(u00215_mod_lmer_z_3)[6:15]
+export_ols(u00215_mod_lmer_z_3, key_effects)
+```
+
+
+# Study 4 
+
+```{r}
+u00215_tib_4 %<>% dplyr::filter(`filter_$` == 1)
+```
+
+```{r}
+u00215_tib_4 %>% 
+  lm(Mean_TG_56789 ~ Mean_CM_centered + Order + Order_x_CM_centered, 
+     data = .) %>% summary()
+```
+
+```{r}
+u00215_mod_z_4 <- u00215_tib_4 %>% 
+  lm(z(Mean_TG_56789) ~ z(Mean_CM_centered) + factor(Order) + factor(Order)*z(Mean_CM_centered), 
+     data = .)
+
+key_effects = c(mod_coeffs(u00215_mod_z_4))
+export_ols(u00215_mod_z_4, key_effects)
+```
+
+
+
+
+
+```{r}
+u00215_tib_4 %>% 
+  lm(Mean_TG_56789 ~ Mean_CM + Altruism + RiskPreference, 
+     data = .) %>% summary()
+```
+
+```{r}
+u00215_mod_z_5 <- u00215_tib_4 %>% 
+  lm(z(Mean_TG_56789) ~ z(Mean_CM) + z(Altruism) + z(RiskPreference), 
+     data = .) 
+
+key_effects = c("z(Mean_CM)", "z(Altruism)", "z(RiskPreference)")
+export_ols(u00215_mod_z_5, key_effects)
+```
+

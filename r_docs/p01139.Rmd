@@ -1,0 +1,48 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-05'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+df_1 <- read.csv("../data/raw_data/p01139_difficulty ratings.csv", sep = ";")
+df_1
+```
+
+```{r}
+df_1_long <- df_1 %>% 
+  dplyr::select(-ID, -contains("ME"), id = subject) %>% 
+  tidyr::pivot_longer(cols = -id) %>% 
+  dplyr::mutate(
+    att = if_else(str_detect(name, "IDC"), "IDC", "EDC"), 
+    task = if_else(str_detect(name, "AN"), "AN", "SG")
+  )
+
+df_1_long %>% 
+  afex::aov_4(value ~ att*task + (att*task|id), .)
+```
+ET
+
+```{r}
+#------------------
+# solution rate
+# analysis: 2x2 ANOVA (IDC/EDC & AN/SG) # 2x3: ME
+solution_rate <- read.csv('solution_rate.csv', sep = ';', header = T)
+# remove excluded subjects
+solution_rate <- solution_rate[!solution_rate$subject %in% to_exclude,]
+solution_rate <- gather(solution_rate[,-c(8,9)], variable, rate, -subject)
+solution_rate <- solution_rate %>%
+  separate(variable, c("task", "attention"), "_")
+solution_rate <- solution_rate[!solution_rate$task == "ME",]
+solution_rate$task <- as.factor(solution_rate$task)
+solution_rate$task <- factor(solution_rate$task, levels = c('AN', 'SG')) #'ME', 
+solution_rate$attention <- as.factor(solution_rate$attention)
+
+Solution_rate.aov <- aov(rate ~ task * attention +
+                        Error(subject/(task * attention)), data = solution_rate)
+summary(Solution_rate.aov)
+```
+

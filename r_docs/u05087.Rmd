@@ -1,0 +1,97 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-12'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df_1 <- read.csv("../data/raw_data/u05087_S1_OSF15_Cleaned.csv")
+df_2 <- read.csv("../data/raw_data/u05087_S2_Item.csv")
+```
+
+# study 1
+
+model 1 
+
+```{r}
+u05087_mod_z_1 <- df_1 %>% 
+  lm(z(Important) ~ 
+       z(Surprising) + factor(Rep_Binary) + 
+       z(sqrt(Orig_N)) + z(sqrt(Citations_1stAuth)) + z(sqrt(Citations_SenAuth)) + 
+       z(Prestige_1stAuth) + z(Prestige_SenAuth) + 
+       z(Num_Auth)  + z(NumStudies) + 
+       Discipline, data = .) 
+
+export_ols(
+  u05087_mod_z_1, 
+  key_effects = c("z(Surprising)")
+)
+```
+
+model 2 
+
+```{r}
+u05087_mod_z_2 <- df_1 %>% 
+  lm(z(sqrt(Citations_Paper_T1)) ~ 
+       z(Surprising) + z(Important) + 
+       factor(Rep_Binary) + 
+       z(sqrt(Orig_N)) + z(sqrt(Citations_1stAuth)) + z(sqrt(Citations_SenAuth)) + 
+       z(Prestige_1stAuth) + z(Prestige_SenAuth) + 
+       z(Num_Auth) + z(NumStudies) + 
+       Discipline, data = .) 
+
+export_ols(
+  u05087_mod_z_2, 
+  key_effects = c("z(Surprising)", "z(Important)")
+)
+```
+
+model 3
+
+```{r}
+u05087_mod_z_3 <- df_1 %>% 
+  lm(z(sqrt(Citations_Paper_T2)) ~ 
+       z(Surprising) + z(Important) + 
+       factor(Rep_Binary) + 
+       z(sqrt(Orig_N)) + z(sqrt(Citations_1stAuth)) + z(sqrt(Citations_SenAuth)) + 
+       z(Prestige_1stAuth) + z(Prestige_SenAuth) + 
+       z(Num_Auth) + z(NumStudies) + 
+       Discipline, data = .) 
+
+export_ols(
+  u05087_mod_z_3, 
+  key_effects = c("z(Surprising)", "z(Important)")
+)
+```
+
+# study 2 
+
+```{r}
+df_2 %<>% dplyr::mutate(subfield2 = ifelse(Subfield %in% c(0,1), "psych", "other"))
+```
+
+model 4
+
+```{r}
+u05087_mod_z_4 <- df_2 %>% 
+  lm(z(Importance) ~ as.factor(subfield2), .) 
+
+export_ols(u05087_mod_z_4, 
+           key_effects = c("as.factor(subfield2)psych"))
+```
+
+model 5
+
+```{r}
+u05087_mod_z_5 <- df_2 %>% 
+  lm(z(Surprise) ~ as.factor(subfield2), .) 
+
+export_ols(u05087_mod_z_5, 
+           key_effects = c("as.factor(subfield2)psych"))
+```
+

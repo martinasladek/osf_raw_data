@@ -1,0 +1,240 @@
+---
+title: "p00021_kappes2020"
+author: "MS"
+date: '2022-05-02'
+output: html_document
+---
+
+In integrative as opposed to distributive negotiations, the interests of the negotiation partners can be
+simultaneously realized to some degree, which results in higher individual as well as joint outcomes.
+Perspective taking is important to detect and tap into this integrative potential. In negotiations, priority related
+information exchange can be seen as a behavioral consequence of perspective taking. Based on
+findings on the development of perspective taking across the life span, we tested the hypothesis that there
+are age differences in integrative negotiations. In 2 quasi-experimental studies (Study 1 and 2),
+participants worked in face-to-face interacting dyads on an apartment rental negotiation. In Study 3,
+participants read a negotiation transcript that contained all priority-related information. Our results
+consistently revealed that younger dyads (17–35 years) achieved significantly higher joint outcomes than
+older dyads (65–85 years; in Study 1 and 2) or age-heterogeneous dyads (in Study 1) and that younger
+participants proposed more integrative agreements (in Study 3). Differences between younger and older
+dyads were mediated via information exchange about the negotiation partners’ different priorities (Study
+2) and via the extraction of relevant information about underlying different priorities (Study 3).
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(afex)
+library(dplyr)
+library(magrittr)
+
+source("../scripts/helpers.R")
+
+list.files("../data/raw_data/", pattern = "p00021*")
+
+p00021_tib_1 <- haven::read_sav("../data/raw_data/p00021_kappes2020_Negotiation_1_wide_OSF.sav")
+p00021_tib_2 <- haven::read_sav("../data/raw_data/p00021_kappes2020_Negotiation_2_wide_OSF.sav")
+p00021_tib_3 <- haven::read_sav("../data/raw_data/p00021_kappes2020_Age effects in mediated negotiation_dataset.sav")
+```
+
+# Study 1 
+
+```{r}
+p00021_tib_1 %>%
+  lm(punkte_dyade ~ as.factor(Dyadenart_3), data = .) %>% 
+  car::Anova(type = "III")
+
+
+p00021_tib_1 %>%
+  lm(z(punkte_dyade) ~ as.factor(Dyadenart_3), data = .) %>% 
+  car::Anova(type = "III")
+```
+
+```{r}
+p00021_mod_z_1 <- p00021_tib_1 %>%
+  lm(z(punkte_dyade) ~ as.factor(Dyadenart_3), data = .)
+```
+
+```{r}
+key_effects = c("as.factor(Dyadenart_3)2", "as.factor(Dyadenart_3)3")
+export_ols(p00021_mod_z_1, key_effects)
+```
+
+
+
+
+```{r}
+p00021_tib_1 %>%
+  lm(Infoaustausch_korrekt ~ as.factor(Dyadenart_3), data = .) %>% 
+  car::Anova(type = "III")
+
+p00021_tib_1 %>%
+  lm(z(Infoaustausch_korrekt) ~ as.factor(Dyadenart_3), data = .) %>% 
+  car::Anova(type = "III")
+```
+
+```{r}
+p00021_mod_z_2 <- p00021_tib_1 %>%
+  lm(z(Infoaustausch_korrekt) ~ as.factor(Dyadenart_3), data = .) 
+
+key_effects = c("as.factor(Dyadenart_3)2", "as.factor(Dyadenart_3)3")
+export_ols(p00021_mod_z_2, key_effects)
+```
+
+# Study 2 
+
+```{r}
+p00021_tib_2 %>%
+  lm(punkte_dyade ~ as.factor(Dyadenart), data = .) %>% 
+  car::Anova(type = "III")
+
+p00021_tib_2 %>%
+  lm(z(punkte_dyade) ~ as.factor(Dyadenart), data = .) %>% 
+  car::Anova(type = "III")
+```
+
+```{r}
+p00021_mod_z_3 <- p00021_tib_2 %>%
+  lm(z(punkte_dyade) ~ as.factor(Dyadenart), data = .)
+
+key_effects = c("as.factor(Dyadenart)2")
+export_ols(p00021_mod_z_3, key_effects)
+```
+
+
+
+```{r}
+p00021_tib_2 %>%
+  lm(Infoaustausch_korrekt ~ as.factor(Dyadenart), data = .) %>% 
+  car::Anova(type = "III")
+
+p00021_tib_2 %>%
+  lm(z(Infoaustausch_korrekt) ~ as.factor(Dyadenart), data = .) %>% 
+  car::Anova(type = "III")
+
+p00021_mod_z_4 <- p00021_tib_2 %>%
+  lm(z(Infoaustausch_korrekt) ~ as.factor(Dyadenart), data = .)
+
+key_effects = c("as.factor(Dyadenart)2")
+export_ols(p00021_mod_z_4, key_effects)
+
+```
+
+
+
+
+
+```{r}
+p00021_tib_2_long <- rbind.data.frame(
+  data.frame(
+    dyad = p00021_tib_2$DyadenNr,
+    id = p00021_tib_2$VpnNummer_Ma, 
+    age = p00021_tib_2$Dyade_d, 
+    tom_mean = p00021_tib_2$tom_tom.4_Ma, 
+    story_mean = p00021_tib_2$tom_kontroll.4_Ma, 
+    completed = p00021_tib_2$Vertrag_komplett2
+  ), 
+  data.frame(
+    dyad = p00021_tib_2$DyadenNr,
+    id = p00021_tib_2$VpnNummer_Mi, 
+    age = p00021_tib_2$Dyade_d, 
+    tom_mean = p00021_tib_2$tom_tom.4_Mi, 
+    story_mean = p00021_tib_2$tom_kontroll.4_Mi, 
+    completed = p00021_tib_2$Vertrag_komplett2
+  )
+) %>%
+  tidyr::pivot_longer(
+    cols = -c(id, age, dyad, completed), 
+    names_to = "tom_cond", 
+    values_to = "tom_mean"
+  ) %>% 
+  dplyr::filter(completed != 0)
+```
+
+
+```{r}
+p00021_tib_2_long %>% 
+  afex::aov_4(tom_mean ~ as.factor(age) + tom_cond + (tom_cond|id), 
+              data = .)
+
+p00021_tib_2_long %>% 
+  afex::aov_4(z(tom_mean) ~ as.factor(age) + tom_cond + (tom_cond|id), 
+              data = .)
+```
+
+```{r}
+p00021_mod_rm_z_5 <- p00021_tib_2_long %>% 
+  dplyr::mutate(
+    age = factor(age)
+  ) %>% 
+  afex::aov_4(z(tom_mean) ~ age + tom_cond + (tom_cond|id), 
+              data = .)
+
+key_effects = c("age", "tom_cond", "age:tom_cond")
+export_ols(p00021_mod_rm_z_5, key_effects)
+```
+
+lmer export: 
+
+```{r}
+p00021_mod_lmer_z_5 <- p00021_tib_2_long %>% 
+  dplyr::filter(!id %in% c("22VBMA", "29VBMI", "52VAMA")) %>%
+  lme4::lmer(z(tom_mean) ~ as.factor(age) * tom_cond + (1|id), 
+              data = .)
+
+key_effects = c("as.factor(age)1", "tom_condtom_mean", "as.factor(age)1:tom_condtom_mean")
+export_ols(p00021_mod_lmer_z_5, key_effects)
+```
+
+
+# Study 3 
+
+```{r}
+p00021_tib_3 %>% names()
+
+```
+
+
+```{r}
+# p00021_tib_3 %>% 
+#   dplyr::group_by(Age_dummy) %>% 
+#   dplyr::summarise(
+#     across(
+#       .cols = where(is.numeric), 
+#       .fns = ~ mean(.x, na.rm = T)
+#       )
+#     ) %>% 
+#   t() %>% 
+#   as.data.frame() %>% 
+#   View()
+# 
+# p00021_tib_3 %>% 
+#   dplyr::select(ToM_T_mean_new, diff_contract_optimal, diff_prio_optimal) %>% 
+#   na.omit() %>% 
+#   cor()
+```
+
+```{r}
+p00021_tib_3 %<>% 
+  dplyr::mutate(
+    age = Age,
+    age_dummy = Age_dummy,
+    recog_priorities = diff_prio_optimal, 
+    contract_quality = diff_contract_optimal, 
+    tom = ToM_T_mean_new
+  )
+
+```
+
+mediation 1
+
+```{r}
+p00021_tib_3 %>% 
+  process(data = .,x = "age_dummy", y = "contract_quality", m = "recog_priorities", model = 4, total = 1)
+```
+
+mediation 2
+
+```{r}
+p00021_tib_3 %>% 
+  process(data = .,x = "age_dummy", y = "contract_quality", m = c("tom", "recog_priorities"), model = 6)
+```
+

@@ -1,0 +1,65 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-22'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df <- readxl::read_excel("../data/raw_data/p01583_S1Dataset.xls")
+
+names(df) <- c("id", "eq", "sqr", "major", "sex", "major_group")
+```
+
+S = (SQ-R—mean(SQ-r)) / 150
+E = (EQ—mean(EQ)) / 80
+D = S-E
+
+```{r}
+df %<>% 
+  dplyr::mutate(
+    s = (sqr - mean(sqr))/150,
+    e = (eq - mean(eq))/80, 
+    d = (s-e)/2, 
+    sex = factor(sex), 
+    major_group = factor(major_group)
+  )
+
+df %>% 
+  dplyr::group_by(sex, major_group) %>% 
+  dplyr::summarise(
+    across(.cols = c(eq, sqr, d), .fns = mean)
+  )
+```
+
+model 1 
+
+```{r}
+df %>% 
+  lm(sqr ~ sex*major_group, .) %>% car::Anova(type = 3)
+```
+
+
+model 2
+
+```{r}
+df %>% 
+  lm(e ~ sex*major_group, .) %>% car::Anova(type = 3)
+```
+
+model 3 
+
+```{r}
+df %>% 
+  lm(d ~ sex*major_group, .) %>% car::Anova(type =3)
+```
+
+
+```{r}
+haven::write_sav(df, "../data/p01583/df.sav")
+```
+

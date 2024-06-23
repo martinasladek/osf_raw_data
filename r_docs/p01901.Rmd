@@ -1,0 +1,52 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-23'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df <- readxl::read_excel("../data/raw_data/p01901_pone.0185345.s001.xlsx", sheet = 3)
+
+df %>% names()
+```
+
+There is a minor discrepancy in the estimates, however I have contacted the author and they confirmed that this is the correct way to run the models. 
+
+```{r}
+p01901_mod_z_1 <- df %>% 
+  dplyr::filter(Trial_Order_1 == 0 & Trial_Order_2 == 0) %>% 
+  lm(z(Egocentric_Bias) ~ z(Age_Group), .) 
+```
+
+Factorsing age: 
+
+```{r}
+p01901_mod_z_1 <- df %>% 
+  dplyr::filter(Trial_Order_1 == 0 & Trial_Order_2 == 0) %>% 
+  lm(z(Egocentric_Bias) ~ factor(Age_Group), .) 
+
+export_ols(p01901_mod_z_1, key_effects = "factor(Age_Group)2")
+```
+
+```{r}
+p01901_mod_z_2 <- df %>% 
+  dplyr::filter(Trial_Order_1 == 1) %>% 
+  lm(z(Egocentric_Bias) ~ factor(Age_Group), .) 
+
+export_ols(p01901_mod_z_2, key_effects = mod_coeffs(p01901_mod_z_2))
+```
+
+```{r}
+p01901_mod_z_3 <- df %>% 
+  dplyr::filter(Trial_Order_2 == 1) %>% 
+  lm(z(Egocentric_Bias) ~ factor(Age_Group), .) 
+
+export_ols(p01901_mod_z_3, key_effects = "factor(Age_Group)6")
+```
+
+

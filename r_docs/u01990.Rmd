@@ -1,0 +1,111 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-06-13'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df_1 <- haven::read_sav("../data/raw_data/u01990_Threat Study Data OSF.sav")
+names(df_1)
+```
+
+# Study 1 
+
+## 1 
+
+```{r}
+df_1_reg_1 <- df_1 %>% 
+  dplyr::mutate(
+    a=pid5_AvgTotal-.8256, #BPF
+    b=rcses_tot-3.5986, #rcses
+    c=mri_pre_benefit_pro-2.4716,
+    d=Condition_d1,
+    e=Condition_d2,
+    seC=rses_tot-3.7319, #threat
+    ab=a*b,
+    ac=a*c,
+    ad=a*d,
+    ae=a*e,
+    bc=b*c,
+    bd=b*d,
+    be=b*e,
+    cd=c*d,
+    ce=c*e,
+    de=d*e,
+    abc=a*b*c,
+    abd=a*b*d,
+    abe=a*b*e,
+    ade=a*d*e,
+    bcd=b*c*d,
+    bce=b*c*e,
+    bde=b*d*e,
+    cde=c*d*e,
+    cad=c*a*d,
+    cae=c*a*e
+  )
+```
+
+```{r}
+u01990_mod_z_1 <- df_1_reg_1 %>% 
+  lm(z(mri_post_benefit_pro) ~  z(a) + z(b) + z(c) + factor(d) + factor(e) + z(seC), data = .)
+
+export_ols(u01990_mod_z_1, 
+           key_effects = c("z(a)", "z(b)", "z(seC)"))
+```
+
+## 2
+
+```{r}
+df_1_reg_2 <- df_1 %>% 
+  dplyr::mutate(
+    a=pid5_AvgTotal-.8256,
+    b=rcses_tot-3.5986,
+    h=mri_pre_cost_inflicting-1.5615,
+    d=Condition_d1,
+    e=Condition_d2,
+    seC=rses_tot-3.7319,
+    ab=a*b,
+    ah=a*h,
+    ad=a*d,
+    ae=a*e,
+    bh=b*h,
+    bd=b*d,
+    be=b*e,
+    hd=h*d,
+    he=h*e,
+    de=d*e,
+    abh=a*b*h,
+    abd=a*b*d,
+    abe=a*b*e,
+    ade=a*d*e,
+    bhd=b*h*d,
+    bhe=b*h*e,
+    bde=b*d*e,
+    hde=h*d*e,
+    had=h*a*d,
+    hae=h*a*e
+  )
+```
+
+```{r}
+u01990_mod_z_2 <- df_1_reg_2 %>% 
+  lm(z(mri_post_cost_inflicting) ~  z(a) + z(b) + z(h) + factor(d) + factor(e) + z(seC), data = .)
+
+export_ols(u01990_mod_z_2, 
+           key_effects = c("z(a)", "z(b)", "z(seC)"))
+```
+
+# Study 2 
+
+MLMs
+
+
+
+
+
+

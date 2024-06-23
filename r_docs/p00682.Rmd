@@ -1,0 +1,141 @@
+---
+title: ""
+output: html_document
+---
+
+Previous research suggests that parenting style influences the development of the needs for achievement, power, and affiliation. The present study investigated the relationship between parenting style and another important motive disposition – the need for autonomy – in a sample of Singapore university students (N = 97, 69% female), using a cross-sectional and retrospective design. It was predicted that an authoritative perceived parenting style would relate positively to the implicit need for autonomy (nAut), the explicit need for autonomy (sanAut), and the congruence between these two motive dispositions. Authoritative maternal parenting was found to positively associate with sanAut, while maternal parenting was not found to associate with nAut, or with nAut/sanAut congruence. Paternal parenting was not associated with any of the dependent variables.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+library(gtools)
+library(robustbase)
+library(magrittr) # unless you routinely load tidyverse, in which case leave this one out. You just need it for the pipe. 
+library(moments)
+
+
+variables <- c("paper", "outcome", "n", "skew", "kurt", "z_1.96", "z_2.58", "z_3.29", "mode_n", "var", "var_ratio")
+
+library(magrittr)
+
+list.files("../data/raw_data/", pattern = "p00682")
+
+p00682_tib <- readxl::read_excel("../data/raw_data/p00682_ramsay2019_Data.xlsx")
+p00682_tib %>% names()
+
+p00682_tib %<>%
+   dplyr::mutate(
+      dplyr::across(.cols = p00682_tib[, 7:15] %>% names(), 
+                    .fns = z, 
+                    .names = "z_{.col}")
+   )
+```
+
+Model 1 
+
+```{r}
+lm(Congruence ~ 
+     Mother_Permissive 
+   + Mother_Authoritative 
+   + Mother_Authoritarian
+   + Father_Permissive
+   + Father_Authoritative
+   + Father_Authoritarian
+   , data = p00682_tib
+     ) %>% summary()
+```
+
+```{r}
+p00682_mod_1_z <- lm(z_Congruence ~ 
+                        z_Mother_Permissive 
+                     + z_Mother_Authoritative 
+                     + z_Mother_Authoritarian
+                     + z_Father_Permissive
+                     + z_Father_Authoritative
+                     + z_Father_Authoritarian
+                     , data = p00682_tib
+)
+
+p00682_mod_1_z %>% summary()
+```
+
+```{r}
+key_effects = c("z_Mother_Permissive" 
+                , "z_Mother_Authoritative" 
+                , "z_Mother_Authoritarian"
+                , "z_Father_Permissive"
+                , "z_Father_Authoritative"
+                , "z_Father_Authoritarian")
+
+export_ols(p00682_mod_1_z, key_effects)
+```
+
+
+
+
+
+```{r}
+lm(nAut ~ 
+     Mother_Permissive 
+   + Mother_Authoritative 
+   + Mother_Authoritarian
+   + Father_Permissive
+   + Father_Authoritative
+   + Father_Authoritarian
+   , data = p00682_tib
+     ) %>% summary()
+```
+
+```{r}
+p00682_mod_2_z <- lm(z_nAut ~ 
+                        z_Mother_Permissive 
+                     + z_Mother_Authoritative 
+                     + z_Mother_Authoritarian
+                     + z_Father_Permissive
+                     + z_Father_Authoritative
+                     + z_Father_Authoritarian
+                     , data = p00682_tib
+)
+
+p00682_mod_2_z %>% summary()
+```
+
+```{r}
+export_ols(p00682_mod_2_z, key_effects)
+```
+
+
+
+
+```{r}
+lm(sanAut ~ 
+     Mother_Permissive 
+   + Mother_Authoritative 
+   + Mother_Authoritarian
+   + Father_Permissive
+   + Father_Authoritative
+   + Father_Authoritarian
+   , data = p00682_tib
+     ) %>% summary()
+```
+
+```{r}
+p00682_mod_3_z <- lm(z_sanAut ~ 
+                        z_Mother_Permissive 
+                     + z_Mother_Authoritative 
+                     + z_Mother_Authoritarian
+                     + z_Father_Permissive
+                     + z_Father_Authoritative
+                     + z_Father_Authoritarian
+                     , data = p00682_tib
+)
+
+p00682_mod_3_z %>% summary()
+```
+
+```{r}
+export_ols(p00682_mod_3_z, key_effects)
+```
+

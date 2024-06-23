@@ -1,0 +1,167 @@
+---
+title: ""
+output: html_document
+---
+
+Broad individual differences exist in the ability to create a cognitive map of a new environment. The
+current studies investigated whether familiarizing participants with to-be-learned target landmarks
+(Experiment 1) or target landmarks plus the order they would be encountered along routes (Experiment
+2) before exploring the Silcton virtual environment would increase performance on tasks assaying spatial
+memory of Silcton. Participants in both experiments were randomly assigned to be pre-exposed either to
+information about target landmarks in Silcton or control landmarks on the university campus. In both
+experiments, participants explored Silcton via four prescribed routes and then performed a direction
+estimation task and a map building task based on memory for the locations of the target landmarks. In
+addition, participants completed the Spatial Orientation Test of perspective-taking. Pre-exposure to
+Silcton landmarks versus control landmarks did not affect scores on Silcton-based tasks in either
+experiment. Some sex differences in direction estimation were observed in Experiment 1 but not
+Experiment 2. While facilitating familiarity with landmarks did not improve cognitive map accuracy,
+both sex and perspective taking ability were found to contribute to individual differences in the ability
+to create a cognitive map.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(magrittr)
+source("../scripts/helpers.R")
+
+library(gtools)
+library(robustbase)
+library(magrittr) # unless you routinely load tidyverse, in which case leave this one out. You just need it for the pipe. 
+library(moments)
+
+
+variables <- c("paper", "outcome", "n", "skew", "kurt", "z_1.96", "z_2.58", "z_3.29", "mode_n", "var", "var_ratio")
+
+
+list.files("../data/raw_data/", pattern = "p01136")
+
+p01136_tib <- readxl::read_excel(
+  "../data/raw_data/p01136_youngson2019_Master Data Sheet for Landmark Familiarity Study 1.xlsx"
+) %>% 
+  dplyr::filter(!is.na(Sex))
+
+p01136_tib
+```
+
+# Experiment 1 
+
+follow-up ANOVAs
+
+There's an undisclosed removal of a participant (dfs don't match). I've ran "leave-one-out" by none of the values match the reported ones exactly. 
+
+```{r}
+p01136_mod_original_1 <- lm(ModelBuild ~ as.factor(Sex) + as.factor(Group), data = p01136_tib)
+p01136_mod_original_1 %>% car::Anova(type = 3)
+p01136_mod_original_1 %>% summary()
+```
+
+```{r eval = FALSE}
+for(i in unique(p01136_tib$Subject)){
+  
+  print(
+    list(
+      i,
+      lm(ModelBuild ~ as.factor(Sex) + as.factor(Group), 
+         data = filter(p01136_tib, Subject != i)) %>% 
+        car::Anova(type = 3)
+    )
+  )
+  
+}
+```
+
+```{r}
+p01136_mod_z_1 <- lm(z(ModelBuild) ~ as.factor(Sex) + as.factor(Group), data = p01136_tib)
+p01136_mod_z_1 %>% car::Anova(type = 3)
+p01136_mod_z_1 %>% summary()
+```
+```{r}
+key_effects = c("as.factor(Group)2")
+export_ols(p01136_mod_z_1, key_effects)
+```
+
+
+
+
+
+
+
+
+
+```{r}
+p01136_mod_original_2 <- lm(OffsiteDiff ~ as.factor(Sex) + as.factor(Group), data = p01136_tib)
+p01136_mod_original_2 %>% car::Anova(type = 3)
+p01136_mod_original_2 %>% summary()
+```
+
+```{r}
+p01136_mod_z_2 <- lm(z(OffsiteDiff) ~ as.factor(Sex) + as.factor(Group), data = p01136_tib)
+p01136_mod_z_2 %>% car::Anova(type = 3)
+p01136_mod_z_2 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(Group)2")
+export_ols(p01136_mod_z_2, key_effects)
+```
+
+
+
+
+
+
+
+
+```{r}
+p01136_mod_original_3 <- lm(KendallsTau ~ as.factor(Sex) + as.factor(Group), data = p01136_tib)
+p01136_mod_original_3 %>% summary()
+```
+
+```{r}
+p01136_mod_z_3 <- lm(z(KendallsTau) ~ as.factor(Sex) + as.factor(Group), data = p01136_tib)
+p01136_mod_z_3 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(Group)2")
+export_ols(p01136_mod_z_3, key_effects)
+```
+
+
+
+
+
+
+
+```{r}
+p01136_mod_original_4 <- lm(OffsiteSame ~ as.factor(Sex) + as.factor(Group), data = p01136_tib) 
+p01136_mod_original_4 %>% summary()
+```
+
+```{r}
+p01136_mod_z_4 <- lm(z(OffsiteSame) ~ as.factor(Sex) + as.factor(Group), data = p01136_tib)
+p01136_mod_z_4 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(Group)2")
+export_ols(p01136_mod_z_4, key_effects)
+```
+
+
+regression
+
+```{r}
+p01136_mod_original_5 <- lm(ModelBuild ~ as.factor(Sex) + SOT, data = p01136_tib)
+p01136_mod_original_5 %>% summary()
+```
+
+```{r}
+p01136_mod_z_5 <- lm(z(ModelBuild) ~ as.factor(Sex) + z(SOT), data = p01136_tib)
+p01136_mod_z_5 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(Sex)2", "z(SOT)")
+export_ols(p01136_mod_z_5, key_effects)
+```

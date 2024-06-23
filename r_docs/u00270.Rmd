@@ -1,0 +1,270 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-29'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+```
+
+
+# Study 1 
+
+Model 1
+
+```{r}
+d<-read.csv("../data/raw_data/u00270_Study 1.csv")
+
+sd(d$agerec,na.rm=T)
+
+##Recoding religion into religious and non-religious
+d$religious<-ifelse(d$relig==1,1,
+                    ifelse(d$relig==2,1,
+                           ifelse(d$relig==3,1,
+                                  ifelse(d$relig==4,1,
+                                         ifelse(d$relig==5,1,
+                                                ifelse(d$relig==6,1,
+                                                       ifelse(d$relig==7,1,
+                                                              ifelse(d$relig==8,1,
+                                                                     ifelse(d$relig==9,0,
+                                                                            ifelse(d$relig==10,0,
+                                                                                   ifelse(d$relig==11,1,
+                                                                                          ifelse(d$relig==12,0,
+                                                                                                 ifelse(d$relig==13,1,
+                                                                                                        ifelse(d$relig==14,1,
+                                                                                                               ifelse(d$relig==15,1,
+                                                                                                            NA)))))))))))))))
+
+##This is the DV, recoded into a dummy-variable for the sake of logistical regression
+d$conf.external_rev<-ifelse(d$conf.external==1,1,
+                      ifelse(d$conf.external==2,0,
+                             NA))
+
+##Recoding demographic information
+d$sex<-ifelse(d$sexz==1,1,
+              ifelse(d$sexz==2,0,
+                     NA))
+
+##Recoding politics into dummy variables
+d$republican<-ifelse(d$party==1,1,0)
+d$democrat<-ifelse(d$party==2,1,0)
+d$other<-ifelse(d$party>2,1,0)
+
+
+
+u00270_mod_z_1 <- lm(z(conf.external_rev)~factor(religious),data=d)
+
+export_ols(
+  u00270_mod_z_1, 
+  key_effects = c("factor(religious)1")
+)
+```
+
+# Study 2 
+
+```{r}
+d<-read.csv("../data/raw_data/u00270_Study 6.csv")
+
+d$Religion_dummy<-ifelse(d$Religion==1,1,
+                         ifelse(d$Religion==2,1,
+                                ifelse(d$Religion==3,1,
+                                       ifelse(d$Religion==4,1,
+                                              ifelse(d$Religion==5,1,
+                                                     ifelse(d$Religion==6,1,
+                                                            ifelse(d$Religion==7,1,
+                                                                   ifelse(d$Religion==8,1,
+                                                                          ifelse(d$Religion==0,0,
+                                                                                 ifelse(d$Religion==10,0,
+                                                                                        ifelse(d$Religion==11,1,
+                                                                                               NA)))))))))))
+##Demographics
+d<-d[is.na(d$Gender)==F,]
+mean(d$Age,na.rm=T)
+sd(d$Age,na.rm=T)
+table(d$Gender)
+table(d$Religion_dummy)
+
+##Reverse-coding the religion variable
+d$Nonreligious_dummy<-ifelse(d$Religion_dummy==1,0,1)
+
+##Creating the variables that will be used in the perspective taking analysis on religious people
+d$religious_forecast_1b<-ifelse(d$Religion_dummy==0,d$religious_forecast_1,d$You_1)
+d$religious_forecast_2b<-ifelse(d$Religion_dummy==0,d$religious_forecast_2,d$You_2)
+d$noreligious_forecast_1b<-ifelse(d$Religion_dummy==1,d$noreligious_forecast_1,d$You_1)
+d$noreligious_forecast_2b<-ifelse(d$Religion_dummy==1,d$noreligious_forecast_2,d$You_2)
+```
+
+
+```{r}
+##Analysis of perspective taking
+#Religious people
+
+u00270_mod_z_2 <-lm(z(religious_forecast_1b)~factor(Nonreligious_dummy),data=d)  # this
+
+
+export_ols(u00270_mod_z_2, 
+           key_effects = "factor(Nonreligious_dummy)1")
+```
+
+
+```{r}
+u00270_mod_z_3<-lm(z(religious_forecast_2b)~factor(Nonreligious_dummy),data=d) # this
+
+export_ols(u00270_mod_z_3, 
+           key_effects = c("factor(Nonreligious_dummy)1"))
+```
+
+
+```{r}
+#Non-religious people
+u00270_mod_z_4<-lm(z(noreligious_forecast_2b)~factor(Religion_dummy),data=d) # this
+
+export_ols(
+  u00270_mod_z_4, 
+  key_effects = c("factor(Religion_dummy)1")
+)
+```
+
+
+```{r}
+u00270_mod_z_5<-lm(z(noreligious_forecast_1b)~factor(Religion_dummy),data=d) # this
+
+export_ols(
+  u00270_mod_z_5, 
+  key_effects = c("factor(Religion_dummy)1")
+)
+```
+
+
+```{r}
+
+#Start by reshaping
+drel<-d[d$Religion_dummy==1,]
+dnrel<-d[d$Religion_dummy==0,]
+
+drel<-data.frame("ResponseID"=drel$ResponseID,"religious_forecast_1b"=drel$religious_forecast_1b,"religious_forecast_2b"=drel$religious_forecast_2b,"noreligious_forecast_2b"=drel$noreligious_forecast_2b,"noreligious_forecast_1b"=drel$noreligious_forecast_1b)
+dnrel<-data.frame("ResponseID"=dnrel$ResponseID,"religious_forecast_1b"=dnrel$religious_forecast_1b,"religious_forecast_2b"=dnrel$religious_forecast_2b,"noreligious_forecast_2b"=dnrel$noreligious_forecast_2b,"noreligious_forecast_1b"=dnrel$noreligious_forecast_1b)
+
+library(reshape2)
+
+drel1<-melt(drel[,c("ResponseID","religious_forecast_1b","religious_forecast_2b")],id="ResponseID")
+drel2<-melt(drel[,c("ResponseID","noreligious_forecast_1b","noreligious_forecast_2b")],id="ResponseID")
+colnames(drel1) <- c("ResponseID","science1","religious")
+colnames(drel2) <- c("ResponseID","science2","noreligious")
+drellong<-merge(drel1,drel2)
+
+dnrel1<-melt(dnrel[,c("ResponseID","religious_forecast_1b","religious_forecast_2b")],id="ResponseID")
+dnrel2<-melt(dnrel[,c("ResponseID","noreligious_forecast_1b","noreligious_forecast_2b")],id="ResponseID")
+colnames(dnrel1) <- c("ResponseID","science1","religious")
+colnames(dnrel2) <- c("ResponseID","science2","noreligious")
+dnrellong<-merge(dnrel1,dnrel2)
+
+#recoding the IVs (science vs. religion)
+drellong$science1num<-ifelse(drellong$science1=="religious_forecast_1b",0,1)
+drellong$science2num<-ifelse(drellong$science2=="noreligious_forecast_1b",0,1)
+dnrellong$science1num<-ifelse(dnrellong$science1=="religious_forecast_1b",0,1)
+dnrellong$science2num<-ifelse(dnrellong$science2=="noreligious_forecast_1b",0,1)
+
+#check that the models make sense
+summary(fit1<-lmer(religious~science1num+(1|ResponseID),data=drellong))
+summary(fit1<-lmer(religious~science1num+(1|ResponseID),data=dnrellong))
+
+summary(fit1<-lmer(noreligious~science2num+(1|ResponseID),data=drellong))
+summary(fit1<-lmer(noreligious~science2num+(1|ResponseID),data=dnrellong))
+
+##hydraulics - prediction from religion
+summary(fit5<-lm(Hydraulics_rel_1~Religion_dummy,data=d))
+confint(fit5)
+summary(fit6<-lm(Hydraulics_rel_1~Nonreligious_dummy,data=d))
+confint(fit6)
+
+##hydraulics - prediction from science
+summary(fit7<-lm(Hydraulics_sci_2~Religion_dummy,data=d))
+confint(fit7)
+summary(fit8<-lm(Hydraulics_sci_2~Nonreligious_dummy,data=d))
+confint(fit8)
+
+d_rel<-d[d$Religion_dummy==1,]
+d_nrel<-d[d$Religion_dummy==0,]
+
+summary(fit1<-lm(Hydraulics_rel_1~Hydraulics_rel_2,data=d_nrel))
+confint(fit1)
+summary(fit2<-lm(Hydraulics_sci_1~Hydraulics_sci_2,data=d_nrel))
+confint(fit2)
+
+summary(fit3<-lm(Hydraulics_rel_1~Hydraulics_rel_2,data=d_rel))
+confint(fit3)
+summary(fit4<-lm(Hydraulics_sci_1~Hydraulics_sci_2,data=d_rel))
+confint(fit4)
+
+#Bayes for religious ratings
+
+full_lm = lm(Hydraulics_rel_1~Hydraulics_rel_2,data=d_rel)
+null_lm = update(full_lm, formula = ~ . -Hydraulics_rel_2)  
+BF_BIC = exp((BIC(null_lm) - BIC(full_lm))/2)  # BICs to Bayes factor
+BF_BIC
+
+full_lm = lm(Hydraulics_sci_1~Hydraulics_sci_2,data=d_rel)
+null_lm = update(full_lm, formula = ~ . -Hydraulics_sci_2)  
+BF_BIC = exp((BIC(null_lm) - BIC(full_lm))/2)  # BICs to Bayes factor
+BF_BIC
+
+##Make Figure 5 Plots
+ggplot(d_rel, aes(y=Hydraulics_rel_2)) +  ##scatterplot
+  geom_point(aes(x=Hydraulics_rel_1),color="deepskyblue4",size=.80) +
+  geom_smooth(aes(x=Hydraulics_rel_1),color="black",method="lm",fill="deepskyblue4",size=.80) +
+  theme_classic()
+
+ggplot(d_nrel, aes(y=Hydraulics_rel_2)) +  ##scatterplot
+  geom_point(aes(x=Hydraulics_rel_1),color="darkorange3",size=.80) +
+  geom_smooth(aes(x=Hydraulics_rel_1),color="black",method="lm",fill="darkorange3",size=.80) +
+  theme_classic()
+
+ggplot(d_rel, aes(y=Hydraulics_sci_2)) +  ##scatterplot
+  geom_point(aes(x=Hydraulics_sci_1),color="deepskyblue4",size=.80) +
+  geom_smooth(aes(x=Hydraulics_sci_1),color="black",method="lm",fill="deepskyblue4",size=.80) +
+  theme_classic()
+
+ggplot(d_nrel, aes(y=Hydraulics_sci_2)) +  ##scatterplot
+  geom_point(aes(x=Hydraulics_sci_1),color="darkorange3",size=.80) +
+  geom_smooth(aes(x=Hydraulics_sci_1),color="black",method="lm",fill="darkorange3",size=.80) +
+  theme_classic()
+
+##Supplemental analyses of conflict
+
+summary(lm(Conflicts~Religion_dummy,data=d))
+summary(lm(Compete~Religion_dummy,data=d))
+summary(lm(Coexist~Religion_dummy,data=d))
+
+##Supplemental analyses of perspective taking
+
+summary(lm(religious_forecast_1~Nonreligious_dummy,data=d))
+summary(lm(religious_forecast_2~Nonreligious_dummy,data=d))
+
+summary(lm(noreligious_forecast_1~Religion_dummy,data=d))
+summary(lm(noreligious_forecast_2~Religion_dummy,data=d))
+
+#Extra: If you want to compute Bayes Factors
+
+#Run the Bayesian models for the instrumentality ratings
+
+#Perceptions of religious people by themselves
+full_lmer = lmer(religious~science1num+(1|ResponseID),data=drellong)
+null_lmer = update(full_lmer, formula = ~ . -science1num)  # Without interaction term
+BF_BIC = exp((BIC(null_lmer) - BIC(full_lmer))/2)  # BICs to Bayes factor
+BF_BIC
+
+#Perceptions of non-religious people by themselves
+full_lmer = lmer(noreligious~science2num+(1|ResponseID),data=dnrellong)
+null_lmer = update(full_lmer, formula = ~ . -science2num)  # Without interaction term
+BF_BIC = exp((BIC(null_lmer) - BIC(full_lmer))/2)  # BICs to Bayes factor
+BF_BIC
+
+
+```
+

@@ -1,0 +1,481 @@
+---
+author: "MS"
+date: '2022-05-10'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(afex)
+library(dplyr)
+library(magrittr)
+
+library(emmeans)
+library(rstatix)
+library(MASS)
+library(stargazer)
+
+source("../scripts/helpers.R")
+
+list.files("../data/raw_data/", pattern = "u00434*")
+```
+
+Original analysis script: 
+
+https://github.com/flowersteam/Humans-monitor-LP/blob/master/analyses.ipynb 
+
+```{r}
+df <- tibble::as_tibble(read.csv('../data/raw_data/u00434_clean_data.csv')) %>%
+        dplyr::filter(stage=='train') %>%
+        dplyr::select(sid,group,activity,correct) %>%
+        dplyr::mutate(
+            correct = as.numeric(correct=='True'),
+            group = dplyr::recode(as.factor(group), '0'='IG', '1'='EG'),
+            sid = as.factor(sid)
+        )
+
+    # Calculate PC per task per subject
+    df <- group_by(df, sid , activity) %>% dplyr::summarize(group = head(group, 1), pc = mean(correct))
+
+    # Perform mixed ANOVA
+    AOV_results <- aov(pc ~ group * activity + Error(sid), df)
+    print(summary(AOV_results), digits=6)
+    
+    # Post hoc analysis
+    linmod <- lm(pc ~ group * activity, data=df, contrasts=list(group=contr.treatment(2), activity=contr.treatment(4)))
+    posthoc <- emmeans(linmod, pairwise ~ activity | group, adjust = "tukey")
+    print(pairs(posthoc))
+```
+
+```{r}
+df <- read.csv('../data/raw_data/u00434_clean_data.csv') %>%
+        dplyr::filter(trial<=60+250) %>%
+        dplyr::select(sid,group,trial,activity) %>% 
+        dplyr::group_by(group,sid,activity) %>% 
+        dplyr::summarize(count=n()) %>%
+        dplyr::ungroup() %>%
+        dplyr::mutate(
+            relt=(count-15)/250,
+            group = dplyr::recode(as.factor(group), '0'='IG', '1'='EG'),
+            sid = as.factor(sid)
+        )
+
+    # Print stats
+    dplyr::group_by(df, group, activity) %>% 
+    dplyr::summarize(mean=mean(relt), std=sd(relt)) %>%
+    print(digits=6)
+
+    # Fit a linear mixed effects model
+    df <- within(df, activity <- relevel(activity, ref='A1'))
+    df <- within(df, group <- relevel(group, ref='IG'))
+    linmod <- lm(
+      relt ~ group * activity, 
+      data = df, 
+      contrasts = list(group=contr.treatment(2), activity=contr.sum(4))
+    )
+    print(summary(linmod), digits=6) # this
+
+    # Perform mixed ANOVA
+    AOV_results <- aov(relt ~ group * activity + Error(sid), df) # this 
+    print(summary(AOV_results), digits=6)
+```
+
+```{r}
+# Prepare data
+    df <- read.csv('../data/raw_data/u00434_learning_data.csv') %>% 
+        dplyr::select(sid, group, fpc) %>%
+        dplyr::mutate(group=dplyr::recode(as.factor(group), '0'='IG', '1'='EG'))
+    
+    print(dplyr::group_by(df, group) %>% dplyr::summarize(mean=mean(fpc), std=sd(fpc)))
+    
+    # Compare combined scores in the two groups
+    scores.IG <- df[df$group=='IG', 'fpc']
+    scores.EG <- df[df$group=='EG', 'fpc']
+    t.test(scores.IG, scores.EG)
+```
+
+```{r}
+ df <- read.csv('../data/raw_data/u00434_learning_data.csv') %>%
+        dplyr::select(sid, group, dwfpc) %>%
+        dplyr::mutate(group=dplyr::recode(as.factor(group), '0'='IG', '1'='EG'))
+    
+    print(dplyr::group_by(df, group) %>% dplyr::summarize(mean=mean(dwfpc), std=sd(dwfpc)))
+    
+    # Compare combined scores in the two groups
+    scores.IG <- df[df$group=='IG', 'dwfpc']
+    scores.EG <- df[df$group=='EG', 'dwfpc']
+    print(t.test(scores.IG, scores.EG), digits=6)
+```
+
+```{r}
+# df <- read.csv('../data/raw_data/u00434_learning_data.csv') %>%
+#         dplyr::select(sid,group,nam,dwfpc,fpc) %>%
+#         dplyr::filter(nam > 0) %>%
+#         dplyr::mutate(nam=as.factor(nam), group=as.factor(group))
+# 
+#     # Fit linear model and perform get post hoc contrasts
+#     linmod <- lm(dwfpc ~ group * nam, data=df)
+#     print(summary(aov(dwfpc ~ group * nam, data=df)))
+#     posthoc <- emmeans(linmod, pairwise ~ group | nam, adjust = "tukey")
+#     print(posthoc)
+```
+
+
+
+
+```{r}
+df <- read.csv('../data/raw_data/u00434_clean_data.csv') %>%
+        dplyr::filter(trial<=60+250) %>%
+        dplyr::select(sid,group,trial,activity) %>% 
+        dplyr::group_by(group,sid,activity) %>% 
+        dplyr::summarize(count=n()) %>%
+        dplyr::ungroup() %>%
+        dplyr::mutate(
+            relt=(count-15)/250,
+            group = dplyr::recode(as.factor(group), '0'='IG', '1'='EG'),
+            sid = as.factor(sid)
+        )
+
+    # Get NAM labels
+    nam_df <- read.csv('../data/raw_data/u00434_nam_data.csv') %>%
+        dplyr::select(sid, nam) %>%
+        dplyr::mutate(
+            sid = as.factor(sid),
+            nam = as.factor(nam)
+        )
+
+    # Join datasets and exclude NAM0 cases
+    df <- dplyr::inner_join(df, nam_df, by='sid') %>%
+        dplyr::filter(nam != '0')
+    rm(nam_df)
+
+    # Join NAM1 and NAM2 groups
+    df$nam <- dplyr::recode(df$nam, '2'='1')
+
+    # Perform an ANOVA for each instruction group
+    for (i in c('IG','EG')) {
+        cat('\nMixed ANOVA for group', i, '\n=======================================')
+        subdf <- dplyr::filter(df, group==i)
+        print(summary(
+            aov(relt ~ nam * activity + Error(sid), data=subdf)
+        ), digits=6)
+    } # this 
+```
+
+```{r}
+df <- read.csv('../data/raw_data/u00434_learning_data.csv') %>%
+        # we exclude people who did not master anything
+        dplyr::filter(nam > 0) %>%
+        dplyr::select(sid, group, nam, dwfpc, dwipc, fpc, ipc, sc_flat) %>%
+        dplyr::mutate(
+            group = dplyr::recode(as.factor(group), '0'='IG', '1'='EG'),
+            nam = as.factor(nam),
+            sid = as.factor(sid),
+            sc = (sc_flat-mean(sc_flat))/sd(sc_flat),
+            dwfpc = dwfpc,
+            fpc = fpc,
+            dwipc = dwipc,
+            ipc = ipc
+        ) %>%
+        dplyr::mutate(sc2 = sc^2)
+
+    # Fit linear model
+    linmod.flat <-lm(dwfpc ~ dwipc + group + sc, data=df)
+    
+    # Fit linear-quadratic model
+    linmod.quad <-lm(dwfpc ~ dwipc + group + sc + sc2, data=df)
+    
+    # Print quadratic model summary
+    print(summary(linmod.quad), digits=6) # this 
+    
+    # Print quadratic model summary of unweighted scores for comparison
+    print(summary(lm(fpc ~ ipc + group + sc + sc2, data=df)), digits=6)
+    
+    # Compaire AIC
+    delta_aic <- AIC(linmod.flat) - AIC(linmod.quad)
+    cat('Delta AIC =', delta_aic)
+```
+
+```{r}
+df <- read.csv('../data/raw_data/u00434_learning_data.csv') %>%
+        dplyr::filter(nam > 0) %>%
+        dplyr::select(sid, group, nam, sc_flat) %>%
+        dplyr::mutate(
+            group = dplyr::recode(as.factor(group), '0'='IG', '1'='EG'),
+            nam = as.factor(nam),
+            sid = as.factor(sid)
+        )
+
+    # Fit linear model
+    linmod <-lm(sc_flat ~ group * nam, data=df)
+    print(summary(linmod)) # this
+    
+    # Compare SC between groups across different levels of NAM
+    emmeans(linmod, pairwise ~ group | nam, adjust='Tukey') # this 
+```
+
+# key models start here 
+
+```{r}
+log_lik <- rep(.25, times=250) %>% log() %>% sum()
+    n_params <- 0
+    baseline_AIC <- -2*log_lik + 2*n_params
+    options(digits=6)
+    cat('Baseline AIC =', baseline_AIC)
+
+    # Load data
+    df.long <- tibble::as_tibble(read.csv('../data/raw_data/u00434_param_fits_clean.csv')) %>%
+        dplyr::mutate(sid=as.factor(sid)) %>%
+        dplyr::filter(!stringr::str_detect(vars, 'relt')) %>%
+        dplyr::filter(!stringr::str_detect(vars, 'abst')) %>%
+        dplyr::select(sid,vars,aic,group) %>%
+        dplyr::mutate(
+            vars=dplyr::recode(vars, 'rpc,rlp'='biv'),
+            group=dplyr::recode(as.factor(group), '0'='IG', '1'='EG')
+        )
+
+    # Get AIC means and SD per model form
+    message('Average AIC scores per model form')
+    df.long %>% 
+        dplyr::select(vars, group, aic) %>%
+#         dplyr::group_by(vars, group) %>% # group two way (by form and group)
+        dplyr::group_by(vars) %>% # group one way (by form)
+        dplyr::summarize(mean=mean(aic), std=sd(aic)) %>% 
+        ungroup() %>% print
+    message('ANOVA of AIC ~ GROUP x VARS')
+    aov(lm(aic ~ group*vars, data=df.long)) %>% summary() %>% print(digits=6) # this 
+
+    # Contrast bivariate models' AIC to the best univariate
+    df.wide <- tidyr::pivot_wider(df.long, id_cols=c(sid, group), names_from=vars, values_from=aic) %>% 
+        dplyr::mutate(min_uni_aic=pmin(rpc, rlp)) %>%
+        dplyr::mutate(
+            biv_best = biv < min_uni_aic,
+            biv_adv = min_uni_aic - biv,
+        ) %>%
+        dplyr::mutate(two_points = biv_adv >= 2)
+
+#     # Print summaries
+    message('Useful stats')
+    df.wide %>% 
+        dplyr::group_by(group) %>%
+        dplyr::summarize(
+            biv_best = mean(biv_best), 
+            biv_two_points = mean(two_points),
+            mean_diff = mean(biv_adv),
+            std_diff = sd(biv_adv)
+        ) %>% print()
+    
+    # Compare bivariate to the best univariate model (Wilcoxon signed-rank test)
+    # The test is appropriate when the difference between repeated measures is asymmetrical and non-normal
+    message('[EG] Wilcoxon sign test (for testing hypothesis that difference in medians is 0)')
+    test_results <- dplyr::filter(df.wide, group=='EG') %>%
+        dplyr::select(sid, min_uni_aic, biv) %>%
+        tidyr::pivot_longer(cols=c('min_uni_aic', 'biv'), names_to='nvars', values_to='aic') %>%
+        dplyr::mutate(nvars=dplyr::recode(as.factor(nvars), 'min_uni_aic'='1', 'biv'='2')) %>%
+        rstatix::sign_test(aic~nvars) %>% add_significance() %>%
+        print(digits=6)
+
+    message('[IG] Wilcoxon sign test (for testing hypothesis that difference in medians is 0)')
+    test_results <- dplyr::filter(df.wide, group=='IG') %>%
+        dplyr::select(sid, min_uni_aic, biv) %>%
+        tidyr::pivot_longer(cols=c('min_uni_aic', 'biv'), names_to='nvars', values_to='aic') %>%
+        dplyr::mutate(nvars=dplyr::recode(as.factor(nvars), 'min_uni_aic'='1', 'biv'='2')) %>%
+        rstatix::sign_test(aic~nvars) %>% add_significance() %>%
+        print(digits=6)
+    
+    
+    
+    
+    
+lm(aic ~ group*vars, data=df.long) %>% summary() 
+u00434_mod_z_1 <- lm(z(aic) ~ group*vars, data=df.long)
+
+key_effects = c("groupEG", "varsrlp", "varsrpc", "groupEG:varsrlp", "groupEG:varsrpc")
+export_ols(u00434_mod_z_1, key_effects)
+```
+
+```{r}
+df <- tibble::as_tibble(read.csv('../data/raw_data/u00434_param_fits_clean.csv')) %>%
+        dplyr::filter(vars=='rpc,rlp') %>%
+        dplyr::select(sid,group,nam,rpc,rlp,tau) %>%
+        dplyr::mutate(
+            sid=as.factor(sid),
+            group=dplyr::recode(as.factor(group), '0'='IG', '1'='EG'),
+            nam=as.factor(nam)
+        ) %>%
+        # normalize by Euclidean norm
+        dplyr::mutate(norm=sqrt(rpc^2+rlp^2)) %>%
+        dplyr::mutate(
+            nrpc = rpc / norm,
+            nrlp = rlp / norm
+        )
+
+    # Print coefficient stats
+    message('Descriptive stats')
+    df.stats <- dplyr::group_by(df, group) %>%
+        dplyr::summarize(
+            dplyr::across(c(nrpc,nrlp), list(mean=mean, std=sd), .names='{.col}.{.fn}')
+        )
+    print(df.stats, width=Inf)
+
+    # Examine correlations
+    message('Correlations')
+    for (g in c('IG','EG')) {
+        cat('Correlation analysis in', g, '\n')
+        print(
+            cor.test(data=dplyr::filter(df, group==g), ~ nrpc + nrlp, method = "pearson")
+        )
+    }
+
+    # Compare coefficients between groups with ANOVA
+    message('ANOVA of PC between groups') # this 
+    lm(nrpc ~ group, data=df) %>% aov() %>% summary() %>% print(digits=6)
+    message('ANOVA of LP between groups') # this 
+    lm(nrlp ~ group, data=df) %>% aov() %>% summary() %>% print(digits=6)
+    
+    
+    
+lm(nrpc ~ group, data=df) %>% summary()    
+u00434_mod_z_2 <- lm(z(nrpc) ~ group, data=df) 
+
+key_effects = c("groupEG")
+export_ols(u00434_mod_z_2, key_effects)
+
+
+
+
+
+lm(nrlp ~ group, data=df) %>% summary()
+u00434_mod_z_3 <- lm(z(nrlp) ~ group, data=df)
+
+key_effects = c("groupEG")
+export_ols(u00434_mod_z_3, key_effects)
+
+```
+
+```{r}
+df <- tibble::as_tibble(read.csv('../data/raw_data/u00434_param_fits_clean.csv')) %>%
+        dplyr::filter(vars=='rpc,rlp') %>%
+        dplyr::select(sid,group,nam,rpc,rlp,tau) %>%
+        dplyr::mutate(
+            sid=as.factor(sid),
+            group=dplyr::recode(as.factor(group), '0'='IG', '1'='EG'),
+            nam=as.factor(nam)
+        ) %>%
+        # normalize by Euclidean norm
+        dplyr::mutate(norm=sqrt(rpc^2+rlp^2)) %>%
+        dplyr::mutate(
+            nrpc = rpc / norm,
+            nrlp = rlp / norm
+        )
+
+    df <- tibble::as_tibble(read.csv('../data/raw_data/u00434_learning_data.csv')) %>%
+        dplyr::select(sid,progressive,dwfpc,dwipc,fpc,ipc,sc_flat) %>%
+        dplyr::mutate(sid=as.factor(sid)) %>%
+        dplyr::inner_join(df, by='sid') %>%
+        dplyr::mutate(
+            z_dwipc = (dwipc - mean(dwipc)) / sd(dwipc),
+            z_nrpc = (nrpc - mean(nrpc)) / sd(nrpc),
+            z_nrlp = (nrlp - mean(nrlp)) / sd(nrlp),
+            abs_nrlp = abs(nrlp)
+        ) %>% 
+        dplyr::mutate(z_nrlp2=z_nrlp^2)
+
+    # Compare coefficients between groups with ANOVA
+    message('Linear model of learning as a function of coefs')
+    lm(dwfpc ~ dwipc + nrpc + nrlp, data=df) %>% summary() %>% print(digits=6)
+#     lm(nrpc ~ abs_nrlp, data=df) %>% summary() %>% print(digits=6)
+
+```
+
+```{r}
+# Prepare coefficients data
+    df <- tibble::as_tibble(read.csv('../data/raw_data/u00434_param_fits_clean.csv')) %>%
+        dplyr::filter(vars=='rpc,rlp') %>%
+        dplyr::select(sid,group,nam,rpc,rlp,tau) %>%
+        dplyr::mutate(
+            sid=as.factor(sid),
+            group=dplyr::recode(as.factor(group), '0'='IG', '1'='EG'),
+#             nam=as.factor(nam)
+        ) %>%
+        # normalize by Euclidean norm
+        dplyr::mutate(norm=sqrt(rpc^2+rlp^2)) %>%
+        dplyr::mutate(
+            nrpc = rpc / norm,
+            nrlp = rlp / norm
+        ) %>%
+        dplyr::mutate(
+                nrpc_bin = cut(nrpc, breaks=3, labels=c(1,2,3)),
+                nrlp_bin = cut(nrlp, breaks=3, labels=c(1,2,3)),
+        ) %>%
+        dplyr::mutate(
+                nrpc_dom = (nrpc_bin==1) * (nrlp_bin==2),
+                nrlp_dom = (nrpc_bin==2) * (nrlp_bin==3),
+            )
+    
+    df %>% 
+        dplyr::group_by(nrlp_dom) %>% 
+        dplyr::summarize(
+            nam32_prop = sum(nam >= 2) / n(),
+#             nam2_prop = sum(nam == 2) / n(),
+            nam3_prop = sum(nam == 3) / n()
+        ) %>% print()
+
+    df2 <- read.csv('../data/raw_data/u00434_clean_data.csv') %>%
+        dplyr::filter(trial <= 60+250) %>%
+        dplyr::select(sid, trial, activity) %>% 
+        dplyr::group_by(sid, activity) %>% 
+        dplyr::summarize(count=n()) %>%
+        dplyr::ungroup() %>%
+        dplyr::mutate(
+            relt = count-15,
+            sid = as.factor(sid)
+        ) %>%
+        dplyr::select(sid, activity, relt) %>%
+        tidyr::spread(activity, relt)
+
+    # Join datasets
+    df <- dplyr::inner_join(df, df2, by='sid') %>%
+        dplyr::select(sid, group, nrpc_dom, nrlp_dom, A3, A4) %>%
+        dplyr::filter(nrpc_dom | nrlp_dom)
+    rm(df2)
+    print(head(df))
+    
+    # Print group sizes
+    dplyr::group_by(df, group) %>% dplyr::summarize(n1=sum(nrpc_dom), n2=sum(nrlp_dom)) %>% print()
+    
+    # Pivot-longer for modeling
+    df <- dplyr::select(df, sid, group, nrlp_dom, A3, A4) %>%
+        tidyr::pivot_longer(cols=c(A3,A4), names_to='activity', values_to='ntrials') %>%
+        dplyr::mutate(drive = dplyr::recode(as.factor(nrlp_dom), '0'='PC', '1'='LP')) %>%
+        within(drive <- relevel(drive, ref = 'PC'))
+    print(head(df))
+    
+    # Fit linear model
+    message('[IG] Linear model of time allocation as a function of Activity (A3, A4) and Drive (PC, LP)')
+    linmod <- lm(ntrials ~ activity*drive, data=dplyr::filter(df, group=='IG')) %>% summary() %>% print(digits=6) # this 
+  
+    
+    message('[EG] Linear model of time allocation as a function of Activity (A3, A4) and Drive (PC, LP)')
+    linmod <- lm(ntrials ~ activity*drive, data=dplyr::filter(df, group=='EG')) %>% summary() %>% print(digits=6) # this 
+    
+    
+    
+    
+    
+    
+lm(ntrials ~ activity*drive, data=dplyr::filter(df, group=='IG')) %>% summary()
+u00434_mod_z_4 <- lm(z(ntrials) ~ activity*drive, data=dplyr::filter(df, group=='IG'))   
+
+key_effects = c("activityA4", "driveLP", "activityA4:driveLP")
+export_ols(u00434_mod_z_4, key_effects)
+
+
+
+
+u00434_mod_z_5 <- lm(z(ntrials) ~ activity*drive, data=dplyr::filter(df, group=='EG'))   
+
+key_effects = c("activityA4", "driveLP", "activityA4:driveLP")
+export_ols(u00434_mod_z_5, key_effects)
+```
+

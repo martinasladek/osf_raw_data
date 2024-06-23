@@ -1,0 +1,494 @@
+---
+title: ""
+output: html_document
+---
+
+Political action (volunteering, protesting) is central to functioning democracies, and action is often
+motivated by negative emotion. However, theories of emotion regulation suggest that people often strive
+to decrease such negative emotions. Thus, effective emotion regulation (e.g., reappraisal)—while helping
+people feel better— could have the unintended consequence of hindering political action. We tested this
+hypothesis in Clinton voters after the 2016 U.S. election (Ntotal   1552). Studies 1a (conducted
+November 2016) and 1b (conducted November 2016, with a follow-up in January 2017) assessed
+individuals’ recent use of reappraisal in managing emotions evoked by the election. Studies 2a and 2b
+(conducted March 2017) exposed individuals to Trump-focused news footage and assessed individuals’
+reappraisal during the clip and subsequent emotional responses. Studies 3a and 3b (conducted June 2017)
+experimentally manipulated reappraisal and measured subsequent emotional responses to Trump-focused
+news footage. Each study assessed recent or intended political action. In Studies 1a and 1b, we found that
+reappraisal predicted lower political action; in Studies 2a and 2b we observed an indirect effect such that
+reappraisal predicted lower negative emotion which in turn accounted for lower intentions to engage in
+political action; and Studies 3a and 3b provided experimental evidence for this indirect effect. These
+results suggest that effective emotion regulation like reappraisal may be beneficial in the short-run by
+helping restore emotional well-being after upsetting political events but may also be costly in the
+long-run by reducing the potential for productive political action.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(magrittr)
+
+list.files("../data/raw_data/", pattern = "p00856")
+
+p00856_tib_1a <- haven::read_sav("../data/raw_data/p00856_ford2018_Study 1a - Data.sav")
+p00856_tib_1b <- haven::read_sav("../data/raw_data/p00856_ford2018_Study 1b - Data.sav")
+p00856_tib_2a <- haven::read_sav("../data/raw_data/p00856_ford2018_Study 2a - Data.sav")
+p00856_tib_2b <- haven::read_sav("../data/raw_data/p00856_ford2018_Study 2b - Data.sav")
+p00856_tib_3a <- haven::read_sav("../data/raw_data/p00856_ford2018_Study 3a - Data.sav")
+p00856_tib_3b <- haven::read_sav("../data/raw_data/p00856_ford2018_Study 3b - Data.sav")
+
+```
+
+# Study 1a 
+
+```{r}
+p00856_tib_1a %<>% 
+   dplyr::mutate(
+      dplyr::across(
+         .cols = c("Age", "USLadder"), 
+         .fns = z, 
+         .names = "z_{.col}"
+      )
+   )
+```
+
+
+```{r}
+lm(ZAllAct_demo ~ ZElection.Reap.mean_demo + 
+     Age + as.factor(Gender) + as.factor(Ethnicity_R) + USLadder, 
+   data = p00856_tib_1a) %>% summary()
+```
+
+```{r}
+p00856_mod_z_1 <- lm(ZAllAct_demo ~ ZElection.Reap.mean_demo + 
+     z_Age + as.factor(Gender) + as.factor(Ethnicity_R) + z_USLadder, 
+   data = p00856_tib_1a)
+```
+
+```{r}
+key_effects = c("ZElection.Reap.mean_demo")
+export_ols(p00856_mod_z_1, key_effects)
+```
+
+
+# Study 1b
+
+```{r}
+lm(ZT1.AllAct.Future.Sum_demo ~ ZT1.Election.ERQ.Reap.Mean_demo + 
+     z(T1.Age) + as.factor(T1.Gender) + as.factor(T1.Ethnicity_R) + z(T1.LadderUS), 
+   data = p00856_tib_1b) %>% summary()
+
+```
+
+```{r}
+p00856_mod_z_2 <- lm(ZT1.AllAct.Future.Sum_demo ~ ZT1.Election.ERQ.Reap.Mean_demo + 
+                        z(T1.Age) 
+                     + as.factor(T1.Gender) + as.factor(T1.Ethnicity_R) + z(T1.LadderUS), 
+                     data = p00856_tib_1b)
+```
+
+```{r}
+key_effects = c("ZT1.Election.ERQ.Reap.Mean_demo")
+export_ols(p00856_mod_z_2, key_effects)
+```
+
+
+
+
+
+
+```{r}
+lm(ZT2.AllAct.Now.Sum_T2Z_demo ~ ZT1.Election.ERQ.Reap.Mean_T2Z_demo + 
+     z(T1.Age) + as.factor(T1.Gender) + as.factor(T1.Ethnicity_R) + z(T1.LadderUS), 
+   data = p00856_tib_1b) %>% summary()
+```
+
+```{r}
+p00856_mod_z_3 <- lm(ZT2.AllAct.Now.Sum_T2Z_demo ~ ZT1.Election.ERQ.Reap.Mean_demo +
+                        z(T1.Age)
+                     + as.factor(T1.Gender) + as.factor(T1.Ethnicity_R) + z(T1.LadderUS),
+                     data = p00856_tib_1b)
+```
+
+```{r}
+key_effects = c("ZT1.Election.ERQ.Reap.Mean_demo")
+export_ols(p00856_mod_z_3, key_effects)
+```
+
+
+# Study 2a 
+
+```{r}
+p00856_mod_z_4 <- lm(ZNegNoA ~ ZReapSuc
+                     + z(Age) + as.factor(Gender) + as.factor(Race_R) + z(Income)
+                     , data = p00856_tib_2a)
+```
+
+```{r}
+key_effects = c("ZReapSuc")
+export_ols(p00856_mod_z_4, key_effects)
+```
+
+
+
+
+
+
+```{r}
+p00856_mod_z_5 <- lm(ZAngry ~ ZReapSuc+ z(Age) + as.factor(Gender) + as.factor(Race_R) + z(Income)
+                     , data = p00856_tib_2a)
+p00856_mod_z_5
+```
+
+```{r}
+key_effects = c("ZReapSuc")
+export_ols(p00856_mod_z_5, key_effects)
+```
+
+
+
+
+
+```{r}
+p00856_mod_z_6 <- lm(ZAllAct ~ ZNegNoA
+                     + z(Age) + as.factor(Gender) + as.factor(Race_R) + z(Income)
+                     , data = p00856_tib_2a)
+```
+
+```{r}
+key_effects = c("ZNegNoA")
+export_ols(p00856_mod_z_6, key_effects)
+```
+
+
+
+
+
+```{r}
+p00856_mod_z_7 <- lm(ZAllAct ~ ZAngry
+                     + z(Age) + as.factor(Gender) + as.factor(Race_R) + z(Income)
+                     , data = p00856_tib_2a)
+```
+
+```{r}
+key_effects = c("ZAngry")
+export_ols(p00856_mod_z_7, key_effects)
+```
+
+
+
+
+
+```{r}
+p00856_mod_z_8 <- lm(ZAllAct ~ ZReapSuc
+                     + z(Age) + as.factor(Gender) + as.factor(Race_R) + z(Income)
+                     , data = p00856_tib_2a)
+
+
+p00856_mod_z_8 %>% summary()
+confint(p00856_mod_z_8)
+```
+
+```{r}
+key_effects = c("ZReapSuc")
+export_ols(p00856_mod_z_8, key_effects)
+```
+
+
+# Study 2b
+
+```{r}
+lm(ZNegNoA ~ ZReapSuc, data = p00856_tib_2b) %>% summary()
+```
+
+```{r}
+lm(ZAngry ~ ZReapSuc, data = p00856_tib_2b) %>% summary()
+```
+
+```{r}
+lm(ZAllAct ~ ZNegNoA, data = p00856_tib_2b) %>% summary()
+```
+
+```{r}
+lm(ZAllAct ~ ZAngry, data = p00856_tib_2b) %>% summary()
+```
+
+```{r}
+lm(ZAllAct ~ ZReapSuc, data = p00856_tib_2b) %>% summary()
+```
+
+
+-----
+
+```{r}
+p00856_mod_z_9 <- lm(ZNegNoA ~ ZReapSuc
+                     + z(Age) + as.factor(Gender) + as.factor(Race_R) + z(Income),
+                      data = p00856_tib_2b)
+```
+
+```{r}
+key_effects = c("ZReapSuc")
+export_ols(p00856_mod_z_9, key_effects)
+```
+
+
+
+
+```{r}
+p00856_mod_z_10 <- lm(ZAngry ~ ZReapSuc
+                      + z(Age) + as.factor(Gender) + as.factor(Race_R) + z(Income),
+                      data = p00856_tib_2b)
+```
+
+```{r}
+key_effects = c("ZReapSuc")
+export_ols(p00856_mod_z_10, key_effects)
+```
+
+
+
+
+```{r}
+p00856_mod_z_11 <- lm(ZAllAct ~ ZNegNoA
+                      + z(Age) + as.factor(Gender) + as.factor(Race_R) + z(Income),
+                      data = p00856_tib_2b)
+```
+
+```{r}
+key_effects = c("ZNegNoA")
+export_ols(p00856_mod_z_11, key_effects)
+```
+
+
+
+
+```{r}
+p00856_mod_z_12 <- lm(ZAllAct ~ ZAngry
+                      + z(Age) + as.factor(Gender) + as.factor(Race_R) + z(Income),
+                      data = p00856_tib_2b)
+```
+
+```{r}
+key_effects = c("ZAngry")
+export_ols(p00856_mod_z_12, key_effects)
+```
+
+
+
+```{r}
+p00856_mod_z_13 <- lm(ZAllAct ~ ZReapSuc
+                      + z(Age) + as.factor(Gender) + as.factor(Race_R) + z(Income),
+                      data = p00856_tib_2b)
+
+summary(p00856_mod_z_13)
+confint(p00856_mod_z_13)
+```
+
+```{r}
+key_effects = c("ZReapSuc")
+export_ols(p00856_mod_z_13, key_effects)
+```
+
+
+
+
+
+
+# Study 3a 
+
+```{r}
+p00856_tib_3a %<>%
+   dplyr::mutate(
+      z_ReappTry = z(ReappTry)
+   )
+```
+
+
+```{r}
+p00856_mod_z_14 <- lm(z_ReappTry ~ as.factor(Cond) + 
+     as.factor(Gender) + as.factor(Race_R) + z(Age) + z(Income), 
+   data = p00856_tib_3a)
+
+```
+
+```{r}
+key_effects = c("as.factor(Cond)2")
+export_ols(p00856_mod_z_14, key_effects)
+```
+
+
+
+
+
+```{r}
+p00856_mod_z_15 <- lm(ZReapSuc ~ as.factor(Cond) + 
+     as.factor(Gender) + as.factor(Race_R) + z(Age) + z(Income), 
+   data = p00856_tib_3a) 
+
+p00856_mod_z_15 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(Cond)2")
+export_ols(p00856_mod_z_15, key_effects)
+```
+
+
+
+
+
+```{r}
+p00856_mod_z_16 <- lm(ZNegNoA ~ as.factor(Cond) + 
+     as.factor(Gender) + as.factor(Race_R) + z(Age) + z(Income), 
+   data = p00856_tib_3a)
+
+p00856_mod_z_16 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(Cond)2")
+export_ols(p00856_mod_z_16, key_effects)
+```
+
+
+
+```{r}
+p00856_mod_z_17 <- lm(ZAngry ~ as.factor(Cond) + 
+     as.factor(Gender) + as.factor(Race_R) + z(Age) + z(Income), 
+   data = p00856_tib_3a)
+```
+
+```{r}
+key_effects = c("as.factor(Cond)2")
+export_ols(p00856_mod_z_17, key_effects)
+```
+
+
+
+```{r}
+p00856_mod_z_18 <- lm(ZAllAct ~ as.factor(Cond) + 
+     as.factor(Gender) + as.factor(Race_R) + z(Age) + z(Income), 
+   data = p00856_tib_3a) 
+```
+
+```{r}
+key_effects = c("as.factor(Cond)2")
+export_ols(p00856_mod_z_18, key_effects)
+```
+
+
+
+
+# Study 3b 
+
+```{r}
+p00856_tib_3b %<>%
+   dplyr::mutate(
+      z_ReappTry = z(ReappTry)
+   )
+```
+
+
+```{r}
+lm(z(ReappTry) ~ as.factor(Cond) + 
+     as.factor(Gender) + as.factor(Race_R) + Age + Income, 
+   data = p00856_tib_3b) %>% summary()
+
+```
+
+```{r}
+lm(ZReapSuc ~ as.factor(Cond) + 
+     as.factor(Gender) + as.factor(Race_R) + Age + Income, 
+   data = p00856_tib_3b) %>% summary()
+```
+
+```{r}
+lm(ZNegNoA ~ as.factor(Cond) + 
+     as.factor(Gender) + as.factor(Race_R) + Age + Income, 
+   data = p00856_tib_3b) %>% summary()
+```
+
+```{r}
+lm(ZAngry ~ as.factor(Cond) + 
+     as.factor(Gender) + as.factor(Race_R) + Age + Income, 
+   data = p00856_tib_3b) %>% summary()
+```
+
+```{r}
+lm(ZAllAct ~ as.factor(Cond) + 
+     as.factor(Gender) + as.factor(Race_R) + Age + Income, 
+   data = p00856_tib_3b) %>% summary()
+```
+
+
+models: 
+
+
+```{r}
+p00856_mod_z_19 <- lm(z_ReappTry ~ as.factor(Cond) + 
+     as.factor(Gender) + as.factor(Race_R) + z(Age) + z(Income), 
+   data = p00856_tib_3b)
+```
+
+```{r}
+key_effects = c("as.factor(Cond)2")
+export_ols(p00856_mod_z_19, key_effects)
+```
+
+
+
+```{r}
+p00856_mod_z_20 <- lm(ZReapSuc ~ as.factor(Cond) + 
+     as.factor(Gender) + as.factor(Race_R) + z(Age) + z(Income), 
+   data = p00856_tib_3b) 
+
+
+```
+
+```{r}
+key_effects = c("as.factor(Cond)2")
+export_ols(p00856_mod_z_20, key_effects)
+```
+
+
+
+
+
+```{r}
+p00856_mod_z_21 <- lm(ZNegNoA ~ as.factor(Cond) + 
+     as.factor(Gender) + as.factor(Race_R) + z(Age) + z(Income), 
+   data = p00856_tib_3b)
+```
+
+```{r}
+key_effects = c("as.factor(Cond)2")
+export_ols(p00856_mod_z_21, key_effects)
+```
+
+
+
+```{r}
+p00856_mod_z_22 <- lm(ZAngry ~ as.factor(Cond) + 
+     as.factor(Gender) + as.factor(Race_R) + z(Age) + z(Income), 
+   data = p00856_tib_3b)
+```
+
+```{r}
+key_effects = c("as.factor(Cond)2")
+export_ols(p00856_mod_z_22, key_effects)
+```
+
+
+
+
+
+```{r}
+p00856_mod_z_23 <- lm(ZAllAct ~ as.factor(Cond) + 
+     as.factor(Gender) + as.factor(Race_R) + z(Age) + z(Income), 
+   data = p00856_tib_3b) 
+```
+
+```{r}
+key_effects = c("as.factor(Cond)2")
+export_ols(p00856_mod_z_23, key_effects)
+```
+
+

@@ -1,0 +1,78 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-06-07'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df_1 <- readxl::read_xlsx("../data/raw_data/r00774_schuman_weight_study_data_W15.xlsx") 
+  
+df_2 <- readxl::read_xlsx("../data/raw_data/r00774_data.xlsx")
+```
+
+# Study 1 
+
+```{r}
+df_1 %<>% 
+  dplyr::mutate(
+    across(.cols = c(interest_read, print_wtp, nyt), 
+           .fns = z, 
+           .names = "z_{.col}"
+    )
+  ) %>% 
+  dplyr::rowwise() %>% 
+  dplyr::mutate(
+    bookint = mean(c(z_interest_read, z_print_wtp, z_nyt), na.rm = T)
+  ) %>% 
+  dplyr::ungroup()
+```
+
+
+```{r}
+p00774_mod_z_1 <- df_1 %>% 
+  lm(z(bookint) ~ order*weight, .) 
+
+export_ols(p00774_mod_z_1, 
+           key_effects = c("orderpersonal questions first", "weightlight", 
+                           "orderpersonal questions first:weightlight"))
+```
+
+# Study 2 
+
+```{r}
+df_2 %<>% 
+  dplyr::mutate(
+    framing = case_when(
+      script_no %in% c(1, 2) ~ 1, 
+      script_no %in% c(3, 4) ~ 2, 
+    ) %>% factor(),
+    order = case_when(
+      script_no %in% c(1, 4) ~ 1, 
+      script_no %in% c(2, 3) ~ 2, 
+    ) %>% factor(), 
+    across(.cols = c(interest_rate, print_wtp, time_rate), 
+           .fns = z, 
+           .names = "z_{.col}"
+    )
+  ) %>% 
+  dplyr::rowwise() %>% 
+  dplyr::mutate(
+    imp = mean(c(z_interest_rate, z_print_wtp, z_time_rate), na.rm = T)
+  ) %>% 
+  dplyr::ungroup() 
+```
+
+
+```{r}
+p00774_mod_z_2 <- df_2 %>% 
+  lm(z(imp) ~ weight*framing*order, .)
+
+export_ols(p00774_mod_z_2, 
+           key_effects = c("weightlight:order2", "framing2:order2", "weightlight:framing2:order2"))
+```
+

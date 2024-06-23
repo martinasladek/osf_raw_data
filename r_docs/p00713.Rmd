@@ -1,0 +1,65 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-06-05'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df_1 <- haven::read_sav("../data/raw_data/p00713_Experiment 1 n = 107 MP_TGM.sav") %>% 
+  dplyr::mutate(id = 1:nrow(.))
+
+
+df_2 <- haven::read_sav("../data/raw_data/p00713_Experiment 2 n = 56 MP_TGM.sav") %>% 
+  dplyr::mutate(id = 1:nrow(.))
+```
+
+
+# Experiment 1 
+
+```{r}
+df_1_long <- df_1%>% 
+  dplyr::select(id, Variability, neg, pos) %>% 
+  tidyr::pivot_longer(cols = -c(id, Variability))
+
+p00713_mod_rm_z_1 <- df_1_long %>% 
+  afex::aov_4(z(value) ~ Variability*name + (name|id), .)
+
+export_ols(p00713_mod_rm_z_1, 
+           key_effects = c("Variability", "name", "Variability:name"))
+
+
+p00713_mod_lmer_z_1 <- df_1_long %>% 
+  lme4::lmer(z(value) ~ as.factor(Variability)*name + (1|id), .)
+
+export_ols(p00713_mod_lmer_z_1, 
+           key_effects = c("as.factor(Variability)2", "as.factor(Variability)3",
+                           "namepos", "as.factor(Variability)2:namepos", "as.factor(Variability)3:namepos"))
+```
+
+# Experiment 2
+
+```{r}
+df_2_long <- df_2 %>% 
+  dplyr::select(id, Variability, Negative_prime, primo_po) %>% 
+  tidyr::pivot_longer(cols = -c(id, Variability))
+
+p00713_mod_rm_z_2 <- df_2_long %>% 
+  afex::aov_4(z(value) ~ Variability*name + (name|id), .)
+
+export_ols(p00713_mod_rm_z_2, 
+           key_effects = c("Variability", "name", "Variability:name"))
+
+p00713_mod_lmer_z_2 <- df_2_long %>% 
+  lme4::lmer(z(value) ~ as.factor(Variability)*name + (1|id), .)
+
+export_ols(p00713_mod_lmer_z_2, 
+           key_effects = c("as.factor(Variability)2", 
+                           "nameprimo_po", "as.factor(Variability)2:nameprimo_po"))
+```
+
+

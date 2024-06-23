@@ -1,0 +1,82 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-07'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+df_1 <- readxl::read_excel("../data/raw_data/p01304_exported_data.xlsx", sheet = 1)
+df_2 <- readxl::read_excel("../data/raw_data/p01304_exported_data.xlsx", sheet = 2)
+df_3 <- readxl::read_excel("../data/raw_data/p01304_exported_data.xlsx", sheet = 3)
+df_4 <- readxl::read_excel("../data/raw_data/p01304_exported_data.xlsx", sheet = 4)
+df_5 <- readxl::read_excel("../data/raw_data/p01304_exported_data.xlsx", sheet = 5)
+```
+
+1. 
+
+```{r}
+p01304_mod_z_1 <- df_1 %>% 
+  lm(z(rt) ~ light_indoor, data = .)
+
+export_ols(p01304_mod_z_1,
+           key_effects = c("light_indoorindoor_dark"))
+
+```
+
+2. 
+
+```{r}
+df_2 %>% 
+  t.test(rt ~ indoor_outdoor, data = .)
+
+p01304_mod_z_2 <- df_2 %>% 
+  lm(z(rt) ~ indoor_outdoor, data = .)
+
+export_ols(p01304_mod_z_2,
+           key_effects = c("indoor_outdooroutdoor"))
+```
+
+
+3. 
+
+```{r}
+df_3 %>% 
+  t.test(rt ~ device, data = .)
+
+p01304_mod_z_3 <- df_3 %>% 
+  lm(z(rt) ~ device, data = .)
+
+export_ols(p01304_mod_z_3,
+           key_effects = c("deviceother"))
+```
+
+
+4. 
+
+```{r}
+df_4 %>% 
+  t.test(rt ~ gender, data = .)
+
+p01304_mod_z_4 <- df_4 %>% 
+  lm(z(rt) ~ gender, data = .)
+
+export_ols(p01304_mod_z_4,
+           key_effects = c("gendermale"))
+```
+
+
+5. 
+
+```{r}
+df_5 %>% 
+  t.test(rt ~ group, data = .)
+
+p01304_mod_z_5 <- df_5 %>% 
+  lm(z(rt) ~ group, data = .)
+
+export_ols(p01304_mod_z_5,
+           key_effects = c("groupwebinlab"))
+```

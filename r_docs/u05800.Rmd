@@ -1,0 +1,117 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-13'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+```
+
+# Study 1
+
+```{r}
+dsc_summarized <- readRDS("../data/raw_data/u05800_dsc_summarized.rds")
+srt_summarized <- readRDS("../data/raw_data/u05800_srt_summarized.rds")
+vocab_summarized <- readRDS("../data/raw_data/u05800_vocab_summarized.rds")
+```
+
+Model 1 
+
+```{r}
+srt_summarized %<>% 
+  dplyr::mutate(ua_label = factor(ua_label, 
+                                  levels = c("Windows", "Macintosh", 
+                                             "iPad", "iPhone", "Android"))) 
+
+u05800_mod_z_1 <- lm(z(medianrt) ~ ua_label + z(age) + gender, data = srt_summarized)
+
+export_ols(u05800_mod_z_1, 
+           key_effects = grep("ua", names(u05800_mod_z_1$coefficients), value = T))
+
+```
+
+Model 2
+
+```{r}
+dsc_summarized %<>% 
+  dplyr::mutate(ua_label = factor(ua_label, 
+                                  levels = c("Windows", "Macintosh", 
+                                             "iPad", "iPhone", "Android"))) 
+
+
+u05800_mod_z_2 <- lm(z(medianrt) ~ ua_label + z(age) + gender, data = dsc_summarized)
+
+export_ols(u05800_mod_z_2, 
+           key_effects = grep("ua", names(u05800_mod_z_1$coefficients), value = T))
+```
+
+Model 3 
+
+```{r}
+vocab_summarized %<>% 
+  dplyr::mutate(ua_label = factor(ua_label, 
+                                  levels = c("Windows", "Macintosh", 
+                                             "iPad", "iPhone", "Android"))) 
+
+
+u05800_mod_z_3 <- lm(z(accuracy) ~ ua_label + z(age) + gender, data = vocab_summarized)
+
+export_ols(u05800_mod_z_3, 
+           key_effects = grep("ua", names(u05800_mod_z_1$coefficients), value = T))
+
+```
+
+# Study 2
+
+```{r}
+srt_summarized <- readRDS("../data/raw_data/u05800_srt_summarized_2.rds")
+dsc_summarized <- readRDS("../data/raw_data/u05800_dsc_summarized_2.rds")
+vocab_summarized <- readRDS("../data/raw_data/u05800_vocab_summarized_2.rds")
+```
+
+
+```{r}
+vocab_for_controls <- data.frame(vocab_summarized$id, vocab_summarized$score)
+colnames(vocab_for_controls) <- c("id", "vocab_score")
+
+#simple reaction time
+srt_summarized <- merge(srt_summarized, vocab_for_controls, by = "id")
+
+
+srt_summarized %<>% 
+  dplyr::mutate(ua_label = factor(ua_label, 
+                                  levels = c("Windows", "Macintosh", 
+                                             "iPad", "iPhone", "Android")))
+```
+
+model 4 
+
+```{r}
+u05800_mod_z_4 <- lm(z(medianrt) ~  ua_label + z(age) + gender + z(vocab_score), 
+   data = srt_summarized)
+
+export_ols(u05800_mod_z_4, 
+           key_effects = grep("ua", names(u05800_mod_z_4$coefficients), value = T))
+```
+
+
+Not reproducing because the IDs were incorrectly defined and therefore are not matching for the merge. 
+
+```{r}
+
+# dsc_summarized %<>% 
+#   dplyr::mutate(ua_label = factor(ua_label, 
+#                                   levels = c("Windows", "Macintosh", 
+#                                              "iPad", "iPhone", "Android"))) 
+# 
+# lm(z(medianrt) ~  ua_label + z(age) + gender, 
+#    data = dsc_summarized)
+
+```
+
+
+

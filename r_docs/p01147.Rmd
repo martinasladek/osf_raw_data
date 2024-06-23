@@ -1,0 +1,92 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-05'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+df_1 <- read.csv("../data/raw_data/p01147_Exp. 1 - Moving targets-Table 1.csv")
+df_2 <- read.csv("../data/raw_data/p01147_Exp. 2 - Stationary targets-Table 1.csv")
+
+```
+
+# Study 1 
+
+target == 1 
+
+```{r}
+df_1_long <- df_1 %>% 
+  dplyr::select(subNum, curvature, width, response) %>% 
+  dplyr::group_by(subNum, curvature, width, response) %>% 
+  dplyr::summarise(n = n()) %>% 
+  dplyr::arrange(subNum, curvature, width, response) %>% 
+  tidyr::pivot_wider(id_cols = c(subNum, curvature, width), names_from = response, values_from = n, values_fill = 0) %>%
+  dplyr::mutate(
+    prop = `1`/6,
+    curvature = factor(curvature), 
+    width = factor(width)
+  )
+
+p01147_mod_rm_z_1 <- df_1_long %>% 
+  afex::aov_4(z(prop) ~ curvature*width + (curvature*width|subNum), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(p01147_mod_rm_z_1, 
+           key_effects = c("curvature", "width", "curvature:width"))
+
+
+p01147_mod_lmer_z_1 <- df_1_long %>% 
+  lme4::lmer(z(prop) ~ curvature*width + (1|subNum), .)
+
+export_ols(p01147_mod_lmer_z_1, 
+           key_effects = c("curvature-30", "curvature-15", "curvature0", "curvature15", "curvature30", "curvature45", 
+                           "width1", "width1.2", 
+                           "curvature-30:width1", "curvature-15:width1",      
+                           "curvature0:width1",     "curvature15:width1",     "curvature30:width1",     "curvature45:width1",
+                           "curvature-30:width1.2", "curvature-15:width1.2",    "curvature0:width1.2",   "curvature15:width1.2", 
+                           "curvature30:width1.2", "curvature45:width1.2"))
+
+
+```
+
+
+# study 2
+
+```{r}
+df_2_long <- df_2 %>% 
+  dplyr::select(subNum, curvature, width, response) %>% 
+  dplyr::group_by(subNum, curvature, width, response) %>% 
+  dplyr::summarise(n = n()) %>% 
+  dplyr::arrange(subNum, curvature, width, response) %>% 
+  tidyr::pivot_wider(id_cols = c(subNum, curvature, width), names_from = response, values_from = n, values_fill = 0) %>%
+  dplyr::mutate(
+    prop = `1`/6,
+    curvature = factor(curvature), 
+    width = factor(width)
+  )
+
+
+p01147_mod_rm_z_2 <- df_2_long %>% 
+  afex::aov_4(z(prop) ~ curvature*width + (curvature*width|subNum), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(p01147_mod_rm_z_2, 
+           key_effects = c("curvature", "width", "curvature:width"))
+
+
+p01147_mod_lmer_z_2 <- df_2_long %>% 
+  lme4::lmer(z(prop) ~ curvature*width + (1|subNum), .)
+
+export_ols(p01147_mod_lmer_z_2, 
+           key_effects = c("curvature-30", "curvature-15", "curvature0", "curvature15", "curvature30", "curvature45", 
+                           "width1", "width1.2", 
+                           "curvature-30:width1", "curvature-15:width1",      
+                           "curvature0:width1",     "curvature15:width1",     "curvature30:width1",     "curvature45:width1",
+                           "curvature-30:width1.2", "curvature-15:width1.2",    "curvature0:width1.2",   "curvature15:width1.2", 
+                           "curvature30:width1.2", "curvature45:width1.2"))
+```
+

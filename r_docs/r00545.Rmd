@@ -1,0 +1,434 @@
+---
+title: "r00545"
+author: "MS"
+date: '2022-05-24'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+library(magrittr)
+
+source("../scripts/helpers.R")
+
+revscore <- function(x) {
+  rx <- 1:7
+  rev(rx)[sapply(1:length(x), function(y) match(x[y],rx))]
+}
+
+
+
+
+```
+
+
+# Study 1
+
+```{r}
+r00545_tib_1 <- read.csv("../data/raw_data/r00545_Indirect Benefits - Study 1.csv",
+               header=TRUE, stringsAsFactors=FALSE) %>% 
+  tbl_df() 
+
+r00545_tib_1 %<>% 
+  filter(Progress == 100 & nchar(prolific_id) > 5 & OUS10 == 2 & EC_EC_8 == 2) 
+
+r00545_tib_1$Condition <- factor(r00545_tib_1$condition,
+                                 levels = c("government", "private"),
+                                 labels = c("Government", "Personal"))
+
+r00545_tib_1 <- mutate(r00545_tib_1, OUS_IB = rowMeans(select(r00545_tib_1, OUS1, OUS2, OUS3, OUS4, OUS5), 
+                                                       na.rm = TRUE))
+r00545_tib_1 <- mutate(r00545_tib_1, OUS_IH = rowMeans(select(r00545_tib_1, OUS6, OUS7, OUS8, OUS9),
+                                                       na.rm = TRUE))
+
+r00545_tib_1$EC_EC_2r <- revscore(r00545_tib_1$EC_EC_2)
+r00545_tib_1$EC_EC_5r <- revscore(r00545_tib_1$EC_EC_5)
+r00545_tib_1$EC_EC_6r <- revscore(r00545_tib_1$EC_EC_6)
+r00545_tib_1 <- mutate(r00545_tib_1, EC = rowMeans(select(r00545_tib_1, EC_EC_1, EC_EC_2r, EC_EC_3,
+                                      EC_EC_4, EC_EC_5r, EC_EC_6r, EC_EC_7), na.rm = TRUE))
+
+r00545_tib_1$rating <- coalesce(r00545_tib_1$private, r00545_tib_1$government)
+t.test(rating ~ condition, r00545_tib_1)
+```
+
+```{r}
+r00545_mod_z_1 <- r00545_tib_1 %>% 
+  lm(z(rating) ~ condition, data = .) 
+
+export_ols(r00545_mod_z_1, 
+           key_effects = c("conditionprivate"))
+```
+
+# Study 2 
+
+```{r}
+r00545_tib_2 <- read.csv("../data/raw_data/r00545_Indirect Benefits - Study 2.csv",
+               header=TRUE, stringsAsFactors=FALSE)
+r00545_tib_2 <- tbl_df(r00545_tib_2)
+
+n_raw = nrow(r00545_tib_2)
+r00545_tib_2 <- filter(r00545_tib_2, Progress == 100 & nchar(prolific) > 5)
+
+r00545_tib_2$Generality <- factor(r00545_tib_2$generality,
+                       levels = c("one-off", "rule"),
+                       labels = c("One-off", "Rule"))
+
+r00545_tib_2$Actor <- factor(r00545_tib_2$actor,
+                        levels = c("government", "private"),
+                        labels = c("Government", "Personal"))
+
+r00545_tib_2$rating <- coalesce(r00545_tib_2$Private.one, r00545_tib_2$Private.rule, r00545_tib_2$Government.one, r00545_tib_2$Government.rule)
+
+
+filter(r00545_tib_2, actor == "private" & generality == "rule")$reasons
+filter(r00545_tib_2, actor == "private" & generality == "one-off")$reasons
+filter(r00545_tib_2, actor == "government" & generality == "rule")$reasons
+filter(r00545_tib_2, actor == "government" & generality == "one-off")$reasons
+
+r00545_tib_2_pr <- filter(r00545_tib_2, actor == "private" & generality == "rule")
+r00545_tib_2_po <- filter(r00545_tib_2, actor == "private" & generality == "one-off")
+r00545_tib_2_gr <- filter(r00545_tib_2, actor == "government" & generality == "rule")
+r00545_tib_2_go <- filter(r00545_tib_2, actor == "government" & generality == "one-off")
+
+model <- aov(rating ~ actor * generality, r00545_tib_2)
+summary(model)
+```
+
+```{r}
+r00545_mod_z_2 <- r00545_tib_2 %>% 
+  lm(z(rating) ~ actor * generality, .) 
+
+export_ols(r00545_mod_z_2, 
+           key_effects = c("actorprivate", "generalityrule", "actorprivate:generalityrule"))
+```
+
+# Study 3 
+
+```{r}
+r00545_tib_3 <- read.csv("../data/raw_data/r00545_Indirect Benefits - Study 3.csv",
+               header=TRUE, stringsAsFactors=FALSE)
+r00545_tib_3 <- tbl_df(r00545_tib_3)
+
+n_raw = nrow(r00545_tib_3)
+r00545_tib_3 <- filter(r00545_tib_3, Progress == 100 & nchar(participant_id) > 5 & Attention_check == 4)
+
+r00545_tib_3 <- mutate(r00545_tib_3, Agree_aggr = rowMeans(dplyr::select(r00545_tib_3, Agree_doctor, Agree_fire, Agree_donor), na.rm = TRUE))
+
+r00545_tib_3$Generality <- factor(r00545_tib_3$generality,
+                        levels = c("one-off", "rule"),
+                        labels = c("One-off", "Rule"))
+
+r00545_tib_3$Context <- factor(r00545_tib_3$context,
+                   levels = c("healthcare", "volcano"),
+                   labels = c("Healthcare", "Volcano"))
+```
+
+
+```{r}
+model <- aov(Agree_doctor ~ generality * context, r00545_tib_3)
+summary(model)
+
+r00545_mod_z_3 <- r00545_tib_3 %>% 
+  lm(z(Agree_doctor) ~ generality * context, .)
+
+export_ols(r00545_mod_z_3, 
+           key_effects = c("generalityrule", "contextvolcano", "generalityrule:contextvolcano"))
+
+```
+
+```{r}
+model <- aov(Agree_fire ~ generality * context, r00545_tib_3)
+summary(model)
+
+r00545_mod_z_4 <- r00545_tib_3 %>% 
+  lm(z(Agree_fire) ~ generality * context, .)
+
+export_ols(r00545_mod_z_4,
+           key_effects = c("generalityrule", "contextvolcano", "generalityrule:contextvolcano"))
+```
+
+```{r}
+model <- aov(Agree_donor ~ generality * context, r00545_tib_3)
+summary(model)
+
+r00545_mod_z_5 <- r00545_tib_3 %>% 
+  lm(z(Agree_donor) ~ generality * context, .)
+
+export_ols(r00545_mod_z_5,
+           key_effects = c("generalityrule", "contextvolcano", "generalityrule:contextvolcano"))
+```
+
+
+# Study 4
+
+```{r}
+r00545_tib_4 <- read.csv("../data/raw_data/r00545_Indirect Benefits - Study 4.csv",
+               header=TRUE, stringsAsFactors=FALSE)
+r00545_tib_4 <- tbl_df(r00545_tib_4)
+
+n_raw = nrow(r00545_tib_4)
+r00545_tib_4 <- filter(r00545_tib_4, Progress == 100 & nchar(participant_id) > 5 & comp_check == 4)
+
+df_oo <- filter(r00545_tib_4, condition == "oneoff")
+df_pb <- filter(r00545_tib_4, condition == "policy-base")
+df_ps <- filter(r00545_tib_4, condition == "policy-repeal")
+
+
+r00545_tib_4$Condition <- factor(r00545_tib_4$condition,
+                       levels = c("oneoff", "policy-base", "policy-repeal"),
+                       labels = c("One-off", "Precedent", "Repeal"))
+```
+
+```{r}
+model <- aov(agreement ~ condition, r00545_tib_4)
+summary(model)
+
+r00545_mod_z_6 <- r00545_tib_4 %>% 
+  lm(z(agreement) ~ condition, .) 
+
+export_ols(r00545_mod_z_6, 
+           key_effects = c("conditionconcrete-rule", "conditionhypothetical-rule"))
+```
+
+```{r}
+model <- aov(trustworthiness ~ condition, r00545_tib_4)
+summary(model)
+
+r00545_mod_z_7 <- r00545_tib_4 %>% 
+  lm(z(trustworthiness) ~ condition, .) 
+
+export_ols(r00545_mod_z_7, 
+           key_effects = c("conditionconcrete-rule", "conditionhypothetical-rule"))
+```
+
+```{r}
+model <- aov(negative_cons ~ condition, r00545_tib_4)
+summary(model)
+
+r00545_mod_z_8 <- r00545_tib_4 %>% 
+  lm(z(negative_cons) ~ condition, .) 
+
+export_ols(r00545_mod_z_8, 
+           key_effects = c("conditionconcrete-rule", "conditionhypothetical-rule"))
+```
+
+# Study 5 
+
+```{r}
+r00545_tib_5 <- read.csv("../data/raw_data/r00545_Indirect Benefits - Study 5.csv",
+               header=TRUE, stringsAsFactors=FALSE)
+r00545_tib_5 <- tbl_df(r00545_tib_5)
+
+n_raw = nrow(r00545_tib_5)
+r00545_tib_5 <- filter(r00545_tib_5, Progress == 100 & nchar(participant_id) > 5 & attn_check == 4)
+
+r00545_tib_5$Condition <- factor(r00545_tib_5$condition,
+                       levels = c("oneoff", "policy-base", "policy-repeal"),
+                       labels = c("One-off", "Precedent", "Repeal"))
+```
+
+```{r}
+model <- aov(agreement ~ condition, r00545_tib_5)
+summary(model)
+
+r00545_mod_z_9 <- r00545_tib_5 %>% 
+  lm(z(agreement) ~ condition, .)
+
+export_ols(r00545_mod_z_9, 
+           key_effects = c("conditionpolicy-base", "conditionpolicy-repeal"))
+```
+
+```{r}
+model <- aov(negative_cons ~ condition, r00545_tib_5)
+summary(model)
+
+r00545_mod_z_10 <- r00545_tib_5 %>% 
+  lm(z(negative_cons) ~ condition, .)
+
+export_ols(r00545_mod_z_10, 
+           key_effects = c("conditionpolicy-base", "conditionpolicy-repeal"))
+```
+
+# Study 6
+
+```{r}
+r00545_tib_6 <- read.csv("../data/raw_data/r00545_Indirect Benefits - Study 6.csv",
+               header=TRUE, stringsAsFactors=FALSE)
+r00545_tib_6 <- tbl_df(r00545_tib_6)
+
+r00545_tib_6$age <- ifelse(r00545_tib_6$age < 100 & r00545_tib_6$age > 10, r00545_tib_6$age, NA)
+n_raw = nrow(r00545_tib_6)
+
+r00545_tib_6 <- filter(r00545_tib_6, Progress == 100 & attn_check == 4)
+
+r00545_tib_6$Condition <- factor(r00545_tib_6$condition,
+                       levels = c("oneoff", "precedent", "rule"),
+                       labels = c("One-off", "Precedent", "Rule"))
+
+r00545_tib_6$agreement <- coalesce(r00545_tib_6$h_agreement, r00545_tib_6$f_agreement)
+```
+
+```{r}
+model <- aov(h_agreement ~ condition, r00545_tib_6)
+summary(model)
+
+r00545_mod_z_11 <- r00545_tib_6 %>% 
+  lm(z(h_agreement) ~ condition, .)
+
+export_ols(r00545_mod_z_11, 
+           key_effects = c("conditionprecedent", "conditionrule"))
+```
+
+```{r}
+model <- aov(h_wrong ~ condition, r00545_tib_6)
+summary(model)
+
+r00545_mod_z_12 <- r00545_tib_6 %>% 
+  lm(z(h_wrong) ~ condition, .)
+
+export_ols(r00545_mod_z_12, 
+           key_effects = c("conditionprecedent", "conditionrule"))
+```
+
+# Study 7 
+
+```{r}
+r00545_tib_7 <- read.csv("../data/raw_data/r00545_Indirect Benefits - Study 7 (joint sep).csv",
+               header=TRUE, stringsAsFactors=FALSE)
+r00545_tib_7 <- tbl_df(r00545_tib_7)
+
+r00545_tib_7$age <- ifelse(r00545_tib_7$age < 100, r00545_tib_7$age, NA)
+n_raw = nrow(r00545_tib_7)
+r00545_tib_7 <- filter(r00545_tib_7, Progress == 100 & attn_check == 4)
+
+r00545_tib_7$o_agreement <- coalesce(r00545_tib_7$o_agreement, r00545_tib_7$o_agreement.1, r00545_tib_7$o_agreement.2)
+r00545_tib_7$r_agreement <- coalesce(r00545_tib_7$r_agreement, r00545_tib_7$r_agreement.1, r00545_tib_7$r_agreement.2)
+
+df_jc <- filter(r00545_tib_7, condition == 'joint')
+df_sep <- filter(r00545_tib_7, condition != "joint")
+df_sepc <- filter(r00545_tib_7, condition == "sep_current")
+df_sepg <- filter(r00545_tib_7, condition == "sep_general")
+```
+
+
+```{r}
+t.test(df_sepc$o_agreement, df_sepg$r_agreement)
+
+temp_df <- data.frame(
+  y = c(df_sepc$o_agreement, df_sepg$r_agreement[1:length(df_sepc$o_agreement)]), 
+  x = rep(c("2", "1"), each = length(df_sepc$o_agreement))
+)
+
+
+r00545_mod_z_13 <- lm(z(y) ~ x, data = temp_df) 
+export_ols(r00545_mod_z_13, 
+           key_effects = "x2")
+```
+
+
+```{r}
+t.test(df_jc$o_agreement, df_jc$r_agreement, paired = TRUE)
+
+temp_df <- df_jc %>% 
+  dplyr::transmute(id = 1:nrow(.), o_agreement, r_agreement) %>% 
+  tidyr::pivot_longer(cols = -id) 
+
+r00545_mod_rm_z_14 <- temp_df %>% 
+  afex::aov_4(z(value) ~ name + (name|id), .)
+
+export_ols(r00545_mod_rm_z_14, key_effects = c("name"))
+
+
+r00545_mod_lmer_z_14 <- temp_df %>% 
+  lme4::lmer(z(value) ~ name + (1|id), .)
+
+export_ols(r00545_mod_lmer_z_14, key_effects = c("namer_agreement"))
+```
+
+
+```{r}
+df_sep$Condition <- factor(df_sep$condition,
+                       levels = c("sep_current", "sep_general"),
+                       labels = c("One-off", "Rule"))
+df_sep$sep_agreement <- coalesce(df_sep$o_agreement, df_sep$r_agreement)
+
+t.test(df_sepc$o_agreement, df_jc$o_agreement)
+
+
+temp_df <- data.frame(
+  y = c(df_sepc$o_agreement[1:length(df_jc$o_agreement)], df_jc$o_agreement), 
+  x = rep(c("2", "1"), each = length(df_jc$o_agreement))
+)
+
+r00545_mod_z_15 <- 
+  lm(z(y) ~ x, data = temp_df) 
+
+export_ols(r00545_mod_z_15, 
+           key_effects = "x2")
+```
+
+
+```{r}
+df_jc$j_agreement <- df_jc$o_agreement
+df_jc$condition = "joint_current"
+df_jg <- filter(r00545_tib_7, condition == 'joint')
+df_jg$j_agreement <- df_jg$r_agreement
+df_jg$condition = "joint_general"
+
+t.test(df_sepg$r_agreement, df_jg$r_agreement)
+
+temp_df <- data.frame(
+  y = c(df_sepg$r_agreement[1:length(df_jg$r_agreement)], df_jg$r_agreement), 
+  x = rep(c("2", "1"), each = length(df_jg$r_agreement))
+)
+
+r00545_mod_z_16 <- 
+  lm(z(y) ~ x, data = temp_df)
+
+export_ols(r00545_mod_z_16, key_effects = "x2")
+
+```
+
+# Study 8 
+
+```{r}
+df <- read.csv("../data/raw_data/r00545_Indirect Benefits - Study 8.csv",
+               header=TRUE, stringsAsFactors=FALSE)
+df <- tbl_df(df)
+
+df$age <- ifelse(df$age < 100, df$age, NA)
+n_raw = nrow(df)
+df <- filter(df, Progress == 100 & attn_check == 1)
+
+df$Condition <- factor(df$condition,
+                       levels = c("oneoff", "rule"),
+                       labels = c("One-off", "Rule"))
+
+
+df_o <- filter(df, condition == "oneoff")
+df_r <- filter(df, condition == "rule")
+```
+
+```{r}
+t.test(f_agreement ~ condition, df)
+
+r00545_mod_z_17 <- lm(z(f_agreement) ~ condition, df)
+export_ols(r00545_mod_z_17, key_effects = "conditionrule")
+```
+
+```{r}
+t.test(unfair ~ condition, df)
+
+r00545_mod_z_18 <- lm(z(unfair) ~ condition, df)
+export_ols(r00545_mod_z_18, key_effects = "conditionrule")
+```
+
+```{r}
+t.test(neg_conseq ~ condition, df)
+
+r00545_mod_z_19 <- lm(z(neg_conseq) ~ condition, df)
+export_ols(r00545_mod_z_19, key_effects = "conditionrule")
+```
+

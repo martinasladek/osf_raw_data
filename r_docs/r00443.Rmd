@@ -1,0 +1,161 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-05-11'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(afex)
+library(dplyr)
+library(magrittr)
+
+#source("../scripts/process.R")
+source("../scripts/helpers.R")
+
+r00443_tib_1 <- haven::read_sav("../data/raw_data/r00443_PSPB Study 1 Data.sav") %>% 
+  dplyr::mutate(
+    rel_ID = haven::as_factor(rel_ID) %>% 
+      factor(., 
+             levels = c("I have never identified as religious",
+                        "I was formerly religious, but no longer identify as religious",
+                        "I identify as religious"), 
+             labels = c("none", "done", "rel")
+      )
+  )
+
+
+
+r00443_tib_2 <- haven::read_sav("../data/raw_data/r00443_PSPB Study 2 Data.sav") %>% 
+  dplyr::mutate(
+    rel_ID = haven::as_factor(rel_ID) %>% 
+      factor(., 
+             levels = c("I have never identified as religious",
+                        "I was formerly religious, but no longer identify as religious",
+                        "I identify as religious"), 
+             labels = c("none", "done", "rel")
+      )
+  )
+
+```
+
+# Study 1
+
+ANOVAs
+
+```{r}
+r00443_tib_1 %>% 
+  lm(MFQ_HARM_AVG ~ rel_ID, data = .) %>% car::Anova(type = 3)
+
+r00443_mod_z_1 <- r00443_tib_1 %>% 
+  lm(z(MFQ_HARM_AVG) ~ rel_ID, data = .) 
+
+key_effects = c("rel_IDdone", "rel_IDrel")
+export_ols(r00443_mod_z_1, key_effects)
+```
+
+```{r}
+r00443_tib_1 %>% 
+  lm(MFQ_FAIRNESS_AVG ~ rel_ID, data = .) %>% car::Anova(type = 3)
+
+r00443_mod_z_2 <- r00443_tib_1 %>% 
+  lm(z(MFQ_FAIRNESS_AVG) ~ rel_ID, data = .) 
+
+key_effects = c("rel_IDdone", "rel_IDrel")
+export_ols(r00443_mod_z_2, key_effects)
+```
+
+```{r}
+r00443_tib_1 %>% 
+  lm(MFQ_INGROUP_AVG ~ rel_ID, data = .) %>% car::Anova(type = 3)
+
+r00443_mod_z_3 <- r00443_tib_1 %>% 
+  lm(z(MFQ_INGROUP_AVG) ~ rel_ID, data = .) 
+
+key_effects = c("rel_IDdone", "rel_IDrel")
+export_ols(r00443_mod_z_3, key_effects)
+```
+
+```{r}
+r00443_tib_1 %>% 
+  lm(MFQ_AUTHORITY_AVG ~ rel_ID, data = .) %>% car::Anova(type = 3)
+
+r00443_mod_z_4 <- r00443_tib_1 %>% 
+  lm(z(MFQ_AUTHORITY_AVG) ~ rel_ID, data = .) 
+
+key_effects = c("rel_IDdone", "rel_IDrel")
+export_ols(r00443_mod_z_4, key_effects)
+```
+
+```{r}
+r00443_tib_1 %>% 
+  lm(MFQ_PURITY_AVG ~ rel_ID, data = .) %>% car::Anova(type = 3)
+
+r00443_mod_z_5 <- r00443_tib_1 %>% 
+  lm(z(MFQ_PURITY_AVG) ~ rel_ID, data = .) 
+
+key_effects = c("rel_IDdone", "rel_IDrel")
+export_ols(r00443_mod_z_5, key_effects)
+```
+
+
+
+# Study 2 
+
+```{r}
+r00443_tib_2 %>% 
+  lm(MFQ_HARM_AVG ~ rel_ID, data = .) %>% car::Anova(type = 3)
+
+r00443_mod_z_6 <- r00443_tib_2 %>% 
+  lm(z(MFQ_HARM_AVG) ~ rel_ID, data = .) 
+
+key_effects = c("rel_IDdone", "rel_IDrel")
+export_ols(r00443_mod_z_6, key_effects)
+```
+
+```{r}
+r00443_tib_2 %>% 
+  lm(MFQ_FAIRNESS_AVG ~ rel_ID, data = .) %>% car::Anova(type = 3)
+
+r00443_mod_z_7 <- r00443_tib_2 %>% 
+  lm(z(MFQ_FAIRNESS_AVG) ~ rel_ID, data = .) 
+
+key_effects = c("rel_IDdone", "rel_IDrel")
+export_ols(r00443_mod_z_7, key_effects)
+```
+
+```{r}
+r00443_tib_2 %>% 
+  lm(MFQ_INGROUP_AVG ~ rel_ID, data = .) %>% car::Anova(type = 3)
+
+r00443_mod_z_8 <- r00443_tib_2 %>% 
+  lm(z(MFQ_INGROUP_AVG) ~ rel_ID, data = .) 
+
+key_effects = c("rel_IDdone", "rel_IDrel")
+export_ols(r00443_mod_z_8, key_effects)
+```
+
+```{r}
+r00443_tib_2 %>% 
+  lm(MFQ_AUTHORITY_AVG ~ rel_ID, data = .) %>% car::Anova(type = 3)
+
+r00443_mod_z_9 <- r00443_tib_2 %>% 
+  lm(z(MFQ_AUTHORITY_AVG) ~ rel_ID, data = .) 
+
+key_effects = c("rel_IDdone", "rel_IDrel")
+export_ols(r00443_mod_z_9, key_effects)
+```
+
+```{r}
+r00443_tib_2 %>% 
+  lm(MFQ_PURITY_AVG ~ rel_ID, data = .) %>% car::Anova(type = 3)
+
+r00443_mod_z_10 <- r00443_tib_2 %>% 
+  lm(z(MFQ_PURITY_AVG) ~ rel_ID, data = .) 
+
+key_effects = c("rel_IDdone", "rel_IDrel")
+export_ols(r00443_mod_z_10, key_effects)
+```
+

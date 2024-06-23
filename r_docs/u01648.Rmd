@@ -1,0 +1,105 @@
+---
+title: ""
+output: html_document
+---
+The connection between pornography use and sexual violence remains an ongoing concern within and outside academia. The current research sought to test Confluence Model reasoning that *pornography use will be most strongly related to sexual aggression among men who are high in the predisposing risk factors of hostile masculinity and impersonal sexuality.* To this end, a sample of young adult (18-24 years of age) males from Mechanical Turk (N = 1,528) and two national samples of young adult Canadian males who were currently enrolled (N = 1,049) or not currently enrolled (N = 905) in post-secondary education completed self-report measures of pornography use, hostile masculinity, impersonal sexuality, and sexual aggression in an online survey. Results supported some aspects of Confluence Model theorizing but challenged others. When pornography use was operationalized with a contemporary approach that assessed use of all forms of pornography, the results *did not confirm a positive relationship between pornography use and sexual aggression among men* with high levels of hostile masculinity and impersonal sexuality. When operationalized as the use of pornographic magazines, a relatively uncommon contemporary form of pornography consumption, pornography use was found to be correlated with sexual aggression, and the magnitude of this association was larger among men who were high in either hostile masculinity or impersonal sexuality, depending on the sample. These discrepant findings serve as a challenge to causal explanations for previously published correlations of pornography use and sexual aggression and a warning about the non-equivalence of pornography use measures.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+library(gtools)
+library(robustbase)
+library(magrittr) # unless you routinely load tidyverse, in which case leave this one out. You just need it for the pipe. 
+library(moments)
+
+
+variables <- c("paper", "outcome", "n", "skew", "kurt", "z_1.96", "z_2.58", "z_3.29", "mode_n", "var", "var_ratio")
+
+list.files("../data/raw_data/", pattern = "u01648")
+
+u01648_tib_1 <- haven::read_sav("../data/raw_data/u01648_kohut2020_PPS - Study 1.sav") %>% 
+  dplyr::filter(`filter_$` == 1)
+
+
+u01648_tib_2_3 <- haven::read_sav("../data/raw_data/u01648_kohut2020PPS - Study 2 and 3.sav") %>% 
+  dplyr::filter(`filter_$` == 1)
+
+u01648_tib_2 <- u01648_tib_2_3 %>% dplyr::filter(DEM_06a == 1)
+u01648_tib_3 <- u01648_tib_2_3 %>% dplyr::filter(DEM_06a == 2)
+
+```
+
+Study 1
+
+```{r}
+u01648_mod_original_1 <- lm(SES_SUM ~ ZHostileMasc + ZImperSex + ZPFREQ_01 + HMxIS + HMxPorn + ISxPorn + HMxISxPorn,
+   data = u01648_tib_1) 
+
+u01648_mod_original_1 %>% summary()
+```
+
+```{r}
+u01648_mod_z_1 <- lm(z(SES_SUM) ~ z(ZHostileMasc) + z(ZImperSex) + z(ZPFREQ_01) + 
+                       z(HMxIS) + z(HMxPorn) + z(ISxPorn) + z(HMxISxPorn),
+   data = u01648_tib_1) 
+
+u01648_mod_z_1 %>% summary()
+```
+
+```{r}
+key_effects = c("z(HMxIS)", "z(HMxPorn)", "z(ISxPorn)", "z(HMxISxPorn)")
+export_ols(u01648_mod_z_1, key_effects)
+```
+
+
+
+
+
+
+Study 2
+
+```{r}
+u01648_mod_original_2 <- lm(SES_Sum ~ ZHostileMasc + ZImperSex + ZPFREQ_01 + HMxIS + HMxPorn + ISxPorn + HMxISxPorn,
+   data = u01648_tib_2) 
+
+u01648_mod_original_2 %>% summary()
+```
+
+```{r}
+u01648_mod_z_2 <- lm(z(SES_Sum) ~ z(ZHostileMasc) + z(ZImperSex) + z(ZPFREQ_01) + 
+                       z(HMxIS) + z(HMxPorn) + z(ISxPorn) + z(HMxISxPorn),
+   data = u01648_tib_2) 
+
+u01648_mod_z_2 %>% summary()
+```
+
+```{r}
+key_effects = c("z(HMxIS)", "z(HMxPorn)", "z(ISxPorn)", "z(HMxISxPorn)")
+export_ols(u01648_mod_z_2, key_effects)
+```
+
+
+
+Study 3 
+
+```{r}
+u01648_mod_original_3 <- lm(SES_Sum ~ ZHostileMasc + ZImperSex + ZPFREQ_01 + HMxIS + HMxPorn + ISxPorn + HMxISxPorn,
+   data = u01648_tib_3) 
+
+u01648_mod_original_3 %>% summary()
+```
+
+```{r}
+u01648_mod_z_3 <- lm(z(SES_Sum) ~ z(ZHostileMasc) + z(ZImperSex) + z(ZPFREQ_01) + 
+                       z(HMxIS) + z(HMxPorn) + z(ISxPorn) + z(HMxISxPorn),
+   data = u01648_tib_3) 
+
+u01648_mod_z_3 %>% summary()
+```
+
+```{r}
+key_effects = c("z(HMxIS)", "z(HMxPorn)", "z(ISxPorn)", "z(HMxISxPorn)")
+export_ols(u01648_mod_z_3, key_effects)
+```

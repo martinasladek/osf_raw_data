@@ -1,0 +1,142 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-07'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df_1 <- readxl::read_excel("../data/raw_data/p01218_Data_Thin_Slices_Ego_Depletion_Exp1.xlsx")
+df_2 <- readxl::read_excel("../data/raw_data/p01218_Data_Thin_Slices_Ego_Depletion_Exp2.xlsx")
+df_3 <- readxl::read_excel("../data/raw_data/p01218_Data_Thin_Slices_Ego_Depletion_Exp3.xlsx")
+```
+
+# exp 1
+
+```{r}
+df_1_long <- df_1 %>% 
+  dplyr::select(id = `Participant Number`, contains("score")) %>% 
+  tidyr::pivot_longer(-id) %>% 
+  dplyr::mutate(
+    cond = if_else(str_detect(name, "depletion"), "depletion", "control"), 
+    time = if_else(str_detect(name, "early"), "early", "late")
+  ) 
+
+p01218_mod_rm_z_1 <- df_1_long %>% 
+  afex::aov_4(z(value) ~ cond*time + (cond*time|id), .)
+
+export_ols(p01218_mod_rm_z_1, 
+           key_effects = c("cond", "time", "cond:time"))
+
+
+p01218_mod_lmer_z_1 <- df_1_long %>% 
+  lme4::lmer(z(value) ~ cond*time + (1|id), .)
+
+export_ols(p01218_mod_lmer_z_1, 
+           key_effects = c("conddepletion", "timelate", "conddepletion:timelate"))
+```
+
+# exp 2
+
+```{r}
+df_2_long <- df_2 %>% 
+  dplyr::select(id = `Participant Number`, contains("score")) %>% 
+  tidyr::pivot_longer(-id) %>% 
+  dplyr::mutate(
+    cond = if_else(str_detect(name, "depletion"), "depletion", "control"), 
+    time = if_else(str_detect(name, "early"), "early", "late")
+  ) 
+
+
+p01218_mod_rm_z_2 <- df_2_long %>% 
+  afex::aov_4(z(value) ~ cond*time + (cond*time|id), .)
+
+export_ols(p01218_mod_rm_z_2, 
+           key_effects = c("cond", "time", "cond:time"))
+
+
+p01218_mod_lmer_z_2 <- df_2_long %>% 
+  lme4::lmer(z(value) ~ cond*time + (1|id), .)
+
+export_ols(p01218_mod_lmer_z_2, 
+           key_effects = c("conddepletion", "timelate", "conddepletion:timelate"))
+```
+
+# exp 3
+
+mod 3 
+
+```{r}
+df_3_long <- df_3 %>% 
+  dplyr::select(id = `Participant Number`,
+                contains("drowsy"), contains("tired"), contains("sluggish")) %>% 
+  dplyr::mutate(
+    control_early_score = rowMeans(select(., contains("control_early"))), 
+    depletion_early_score = rowMeans(select(., contains("depletion_early"))), 
+    control_late_score = rowMeans(select(., contains("control_late"))), 
+    depletion_late_score = rowMeans(select(., contains("depletion_late")))
+  ) %>% 
+  dplyr::select(id, contains("score")) %>% 
+  tidyr::pivot_longer(-id) %>% 
+  dplyr::mutate(
+    cond = if_else(str_detect(name, "depletion"), "depletion", "control"), 
+    time = if_else(str_detect(name, "early"), "early", "late")
+  ) 
+
+
+
+p01218_mod_rm_z_3 <- df_3_long %>% 
+  afex::aov_4(z(value) ~ cond*time + (cond*time|id), .)
+
+export_ols(p01218_mod_rm_z_3, 
+           key_effects = c("cond", "time", "cond:time"))
+
+
+p01218_mod_lmer_z_3 <- df_3_long %>% 
+  lme4::lmer(z(value) ~ cond*time + (1|id), .)
+
+export_ols(p01218_mod_lmer_z_3, 
+           key_effects = c("conddepletion", "timelate", "conddepletion:timelate"))
+```
+
+mod 4 
+
+
+```{r}
+df_4_long <- df_3 %>% 
+  dplyr::select(id = `Participant Number`,
+                contains("distressed"), contains("ashamed"), 
+                contains("irritable"), contains("upset"), contains("afraid")) %>% 
+  dplyr::mutate(
+    control_early_score = rowMeans(select(., contains("control_early"))), 
+    depletion_early_score = rowMeans(select(., contains("depletion_early"),
+                                            contains("depetion_early"))), 
+    control_late_score = rowMeans(select(., contains("control_late"))), 
+    depletion_late_score = rowMeans(select(., contains("depletion_late"), 
+                                           contains("depetion_late")))
+  ) %>% 
+  dplyr::select(id, contains("score")) %>% 
+  tidyr::pivot_longer(-id) %>% 
+  dplyr::mutate(
+    cond = if_else(str_detect(name, "depletion"), "depletion", "control"), 
+    time = if_else(str_detect(name, "early"), "early", "late")
+  ) 
+
+p01218_mod_rm_z_4 <- df_4_long %>% 
+  afex::aov_4(z(value) ~ cond*time + (cond*time|id), .)
+
+export_ols(p01218_mod_rm_z_4, 
+           key_effects = c("cond", "time", "cond:time"))
+
+
+p01218_mod_lmer_z_4 <- df_4_long %>% 
+  lme4::lmer(z(value) ~ cond*time + (1|id), .)
+
+export_ols(p01218_mod_lmer_z_4, 
+           key_effects = c("conddepletion", "timelate", "conddepletion:timelate"))
+```
+

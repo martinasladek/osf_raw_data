@@ -1,0 +1,505 @@
+---
+title: "p00516"
+author: "MS"
+date: '2022-05-24'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(afex)
+library(dplyr)
+library(magrittr)
+
+source("../scripts/helpers.R")
+
+p00516_tib_1_raw <- read.delim("../data/raw_data/p00516_FitousiAlgom_Experiment1.txt") %>% 
+  purrr::set_names("id", "counter", "task", "block", "stimulus", 
+                   "decade_digit", "unit_digit", "rt", "reponse", "accuracy")
+
+
+p00516_tib_1_raw
+```
+
+# Experiment 1
+
+```{r}
+p00516_tib_1 <- p00516_tib_1_raw %>% 
+  dplyr::filter(accuracy == 0, rt > 150, rt < 2500, 
+                block %in% c(1,2,3)) %>%
+  dplyr::mutate(
+    block = case_when(block == 3 ~ as.integer(2), TRUE ~ as.integer(block)),
+    con = case_when(
+      decade_digit > 5 & unit_digit > 5 ~ "con", 
+      decade_digit < 5 & unit_digit < 5 ~ "con", 
+      TRUE ~ "inc"
+    ), 
+    across(.cols = c("task", "block", "con"), .fns = factor)
+  ) %>% 
+  dplyr::group_by(id, task, block, con) %>% 
+  dplyr::summarise(
+    mean_rt = mean(rt, na.rm = T)
+  )
+
+
+p00516_tib_1 %>% 
+  afex::aov_4(mean_rt ~ task*block*con + (task*block*con|id), 
+              anova_table = list(correction = "none"),
+              data = .)
+
+p00516_tib_1 %>% 
+  dplyr::group_by(task) %>% 
+  dplyr::summarise(mean = mean(mean_rt))
+
+```
+
+```{r}
+# Import data files
+data = read.table("../data/raw_data/p00516_exp1_totala.txt")
+names(data) <- c("sub", "tr", "task", "block", "stim", "decade", "unit", "rt", "resp", "ac")
+
+newdata <- data[ which( data$rt>150 & data$rt<2500 & data$ac==0 & data$sub !=14 & data$sub !=19 & data$sub != 20 & data$sub != 10  ), ]
+
+# Recode
+
+newdata$block[newdata$block==2] <- 2
+newdata$block[newdata$block==3] <- 2
+
+
+newdata$cong[(newdata$decade >5) & (newdata$unit >5)] <- 1
+newdata$cong[(newdata$decade <5) & (newdata$unit <5)] <- 1
+newdata$cong[(newdata$decade >5) & (newdata$unit <5)] <- 2
+newdata$cong[(newdata$decade <5) & (newdata$unit >5)] <- 2
+
+data <- newdata
+
+
+data2 <- aggregate(data$rt, list( data$cong, data$block, data$task, data$sub), mean)
+colnames(data2) <- c( "cong", "block", "task", "sub", "rt")
+
+
+
+new <- data2 [ which(data2$block<3),]
+data2<-new
+
+stderr <- function(x) {sqrt(var(x)/length(x))}
+myfun1= function(x) { c(m = mean(x), s = stderr(x)) } 
+
+n = 20
+
+subj <- gl(n, 8, n*8) # 16 subjects, each tested 6 times, total length 96
+block  <- gl(2,  2, n*8) # 
+task  <- gl(2, 4, n*8)
+cong  <- gl(2,1, n*8)
+x  <- (data2$rt)
+d1 <- data.frame(subj, cong, block, task, x)
+```
+
+
+```{r}
+a1 <- aov(x~ task*block*cong + Error(subj/(task*block*cong)), d1)
+summary(a1)
+
+
+p00516_mod_rm_z_1 <-  d1 %>% 
+  afex::aov_4(z(x)~ task*block*cong + (task*block*cong|subj), data = .)
+
+export_ols(p00516_mod_rm_z_1, 
+           key_effects = c("task:block", "task:cong", "task", "task:block:cong"))
+
+
+p00516_mod_lmer_z_1 <-  d1 %>% 
+  lme4::lmer(z(x)~ task*block*cong + (1|subj), data = .)
+
+export_ols(p00516_mod_lmer_z_1, 
+           key_effects = c("task2", "task2:block2", "task2:cong2", "task2:block2:cong2"))
+```
+
+# Experiment 2 
+
+1. 
+
+```{r}
+datan = read.table("../data/raw_data/p00516_5_data.txt")
+
+
+#5 7 9 10
+
+
+# Give Names to Variables
+names(datan) <- c("sub", "day","trial", "path", "num","sft", "rt", "resp", "ac")
+
+
+
+# based on variable values
+newdata <- datan[ which( datan$rt>150 & datan$rt<2900 & datan$ac==0  ), ]
+
+datan <- newdata
+
+datan$u = datan$num %% 10
+datan$d = (datan$num - datan$u) /10 
+
+datan$cond[(datan$u>5) & (datan$d >5) & datan$sft ==1]<-"1a"
+datan$cond[(datan$u>5) & (datan$d >5) & datan$sft ==2]<-"1b"
+datan$cond[(datan$u>5) & (datan$d >5) & datan$sft ==3]<-"1c"
+datan$cond[(datan$u>5) & (datan$d >5) & datan$sft ==4]<-"1d"
+
+
+datan$cond[(datan$u<5) & (datan$d <5) & datan$sft ==1]<-"4a"
+datan$cond[(datan$u<5) & (datan$d <5) & datan$sft ==2]<-"4b"
+datan$cond[(datan$u<5) & (datan$d <5) & datan$sft ==3]<-"4c"
+datan$cond[(datan$u<5) & (datan$d <5) & datan$sft ==4]<-"4d"
+
+
+
+
+
+t = seq (0,2800, by=10)
+
+#data <- newdata
+
+
+
+############################################
+EDF <- function(t,y){
+  FF = rep(1,each=length(t))
+  for (i in 1:length(t) ) {
+    k = which(y<=t[i])
+    FF[i] = length(k)/length (y)
+  }
+  return(FF)
+}
+###########################################
+
+
+m = datan[ which(datan$cond=="1a"),]
+m1 = m$rt
+m = datan[ which(datan$cond=="1b"),]
+m2= m$rt
+m = datan[ which(datan$cond=="1c"),]
+m3= m$rt
+m = datan[ which(datan$cond=="1d"),]
+m4= m$rt
+
+#means = c(mean(m1), mean(m2), mean(m3), mean(m4))
+
+
+means = c(mean(m1), mean(m2), mean(m3), mean(m4))
+
+
+mic = mean(m4) - mean(m3) - mean(m2) + mean(m1)
+k = min(length(m1), length(m2), length(m3), length (m4))
+
+
+##ANOVA 
+
+rtt= c(m1[1:k],m3[1:k],m2[1:k],m4[1:k])
+
+unit  <- gl(2,  k, k*4) # 
+decade  <- gl(2, 2*k, k*4) # 
+
+an = data.frame(unit,decade,rtt)
+names(an) <- c("unit", "decade","rtt")
+```
+
+
+```{r}
+fit <- aov(rtt ~unit*decade, data=an)
+summary(fit)
+
+p00516_mod_z_2 <- lm(z(rtt)~unit*decade, data=an)
+
+export_ols(p00516_mod_z_2, 
+           key_effects = c("unit2", "decade2", "unit2:decade2"))
+```
+
+2. 
+
+```{r}
+datan = read.table("../data/raw_data/p00516_7_data.txt")
+
+
+#5 7 9 10
+
+
+# Give Names to Variables
+names(datan) <- c("sub", "day","trial", "path", "num","sft", "rt", "resp", "ac")
+
+
+
+# based on variable values
+newdata <- datan[ which( datan$rt>150 & datan$rt<2900 & datan$ac==0  ), ]
+
+datan <- newdata
+
+datan$u = datan$num %% 10
+datan$d = (datan$num - datan$u) /10 
+
+datan$cond[(datan$u>5) & (datan$d >5) & datan$sft ==1]<-"1a"
+datan$cond[(datan$u>5) & (datan$d >5) & datan$sft ==2]<-"1b"
+datan$cond[(datan$u>5) & (datan$d >5) & datan$sft ==3]<-"1c"
+datan$cond[(datan$u>5) & (datan$d >5) & datan$sft ==4]<-"1d"
+
+
+datan$cond[(datan$u<5) & (datan$d <5) & datan$sft ==1]<-"4a"
+datan$cond[(datan$u<5) & (datan$d <5) & datan$sft ==2]<-"4b"
+datan$cond[(datan$u<5) & (datan$d <5) & datan$sft ==3]<-"4c"
+datan$cond[(datan$u<5) & (datan$d <5) & datan$sft ==4]<-"4d"
+
+
+
+
+
+t = seq (0,2800, by=10)
+
+#data <- newdata
+
+
+
+############################################
+EDF <- function(t,y){
+  FF = rep(1,each=length(t))
+  for (i in 1:length(t) ) {
+    k = which(y<=t[i])
+    FF[i] = length(k)/length (y)
+  }
+  return(FF)
+}
+###########################################
+
+
+m = datan[ which(datan$cond=="1a"),]
+m1 = m$rt
+m = datan[ which(datan$cond=="1b"),]
+m2= m$rt
+m = datan[ which(datan$cond=="1c"),]
+m3= m$rt
+m = datan[ which(datan$cond=="1d"),]
+m4= m$rt
+
+#means = c(mean(m1), mean(m2), mean(m3), mean(m4))
+
+
+means = c(mean(m1), mean(m2), mean(m3), mean(m4))
+
+
+mic = mean(m4) - mean(m3) - mean(m2) + mean(m1)
+k = min(length(m1), length(m2), length(m3), length (m4))
+
+
+##ANOVA 
+
+rtt= c(m1[1:k],m3[1:k],m2[1:k],m4[1:k])
+
+unit  <- gl(2,  k, k*4) # 
+decade  <- gl(2, 2*k, k*4) # 
+
+an = data.frame(unit,decade,rtt)
+names(an) <- c("unit", "decade","rtt")
+```
+
+
+```{r}
+fit <- aov(rtt ~unit*decade, data=an)
+summary(fit)
+
+p00516_mod_z_3 <- lm(z(rtt)~unit*decade, data=an)
+
+export_ols(p00516_mod_z_3, 
+           key_effects = c("unit2", "decade2", "unit2:decade2"))
+```
+
+3. 
+
+```{r}
+datan = read.table("../data/raw_data/p00516_9_data.txt")
+
+
+#5 7 9 10
+
+
+# Give Names to Variables
+names(datan) <- c("sub", "day","trial", "path", "num","sft", "rt", "resp", "ac")
+
+
+
+# based on variable values
+newdata <- datan[ which( datan$rt>150 & datan$rt<2900 & datan$ac==0  ), ]
+
+datan <- newdata
+
+datan$u = datan$num %% 10
+datan$d = (datan$num - datan$u) /10 
+
+datan$cond[(datan$u>5) & (datan$d >5) & datan$sft ==1]<-"1a"
+datan$cond[(datan$u>5) & (datan$d >5) & datan$sft ==2]<-"1b"
+datan$cond[(datan$u>5) & (datan$d >5) & datan$sft ==3]<-"1c"
+datan$cond[(datan$u>5) & (datan$d >5) & datan$sft ==4]<-"1d"
+
+
+datan$cond[(datan$u<5) & (datan$d <5) & datan$sft ==1]<-"4a"
+datan$cond[(datan$u<5) & (datan$d <5) & datan$sft ==2]<-"4b"
+datan$cond[(datan$u<5) & (datan$d <5) & datan$sft ==3]<-"4c"
+datan$cond[(datan$u<5) & (datan$d <5) & datan$sft ==4]<-"4d"
+
+
+
+
+
+t = seq (0,2800, by=10)
+
+#data <- newdata
+
+
+
+############################################
+EDF <- function(t,y){
+  FF = rep(1,each=length(t))
+  for (i in 1:length(t) ) {
+    k = which(y<=t[i])
+    FF[i] = length(k)/length (y)
+  }
+  return(FF)
+}
+###########################################
+
+
+m = datan[ which(datan$cond=="1a"),]
+m1 = m$rt
+m = datan[ which(datan$cond=="1b"),]
+m2= m$rt
+m = datan[ which(datan$cond=="1c"),]
+m3= m$rt
+m = datan[ which(datan$cond=="1d"),]
+m4= m$rt
+
+#means = c(mean(m1), mean(m2), mean(m3), mean(m4))
+
+
+means = c(mean(m1), mean(m2), mean(m3), mean(m4))
+
+
+mic = mean(m4) - mean(m3) - mean(m2) + mean(m1)
+k = min(length(m1), length(m2), length(m3), length (m4))
+
+
+##ANOVA 
+
+rtt= c(m1[1:k],m3[1:k],m2[1:k],m4[1:k])
+
+unit  <- gl(2,  k, k*4) # 
+decade  <- gl(2, 2*k, k*4) # 
+
+an = data.frame(unit,decade,rtt)
+names(an) <- c("unit", "decade","rtt")
+```
+
+
+```{r}
+fit <- aov(rtt ~unit*decade, data=an)
+summary(fit)
+
+p00516_mod_z_4 <- lm(z(rtt)~unit*decade, data=an)
+
+export_ols(p00516_mod_z_4, 
+           key_effects = c("unit2", "decade2", "unit2:decade2"))
+```
+
+4. 
+
+```{r}
+datan = read.table("../data/raw_data/p00516_10_data.txt")
+
+
+#5 7 9 10
+
+
+# Give Names to Variables
+names(datan) <- c("sub", "day","trial", "path", "num","sft", "rt", "resp", "ac")
+
+
+
+# based on variable values
+newdata <- datan[ which( datan$rt>150 & datan$rt<2900 & datan$ac==0  ), ]
+
+datan <- newdata
+
+datan$u = datan$num %% 10
+datan$d = (datan$num - datan$u) /10 
+
+datan$cond[(datan$u>5) & (datan$d >5) & datan$sft ==1]<-"1a"
+datan$cond[(datan$u>5) & (datan$d >5) & datan$sft ==2]<-"1b"
+datan$cond[(datan$u>5) & (datan$d >5) & datan$sft ==3]<-"1c"
+datan$cond[(datan$u>5) & (datan$d >5) & datan$sft ==4]<-"1d"
+
+
+datan$cond[(datan$u<5) & (datan$d <5) & datan$sft ==1]<-"4a"
+datan$cond[(datan$u<5) & (datan$d <5) & datan$sft ==2]<-"4b"
+datan$cond[(datan$u<5) & (datan$d <5) & datan$sft ==3]<-"4c"
+datan$cond[(datan$u<5) & (datan$d <5) & datan$sft ==4]<-"4d"
+
+
+
+
+
+t = seq (0,2800, by=10)
+
+#data <- newdata
+
+
+
+############################################
+EDF <- function(t,y){
+  FF = rep(1,each=length(t))
+  for (i in 1:length(t) ) {
+    k = which(y<=t[i])
+    FF[i] = length(k)/length (y)
+  }
+  return(FF)
+}
+###########################################
+
+
+m = datan[ which(datan$cond=="1a"),]
+m1 = m$rt
+m = datan[ which(datan$cond=="1b"),]
+m2= m$rt
+m = datan[ which(datan$cond=="1c"),]
+m3= m$rt
+m = datan[ which(datan$cond=="1d"),]
+m4= m$rt
+
+#means = c(mean(m1), mean(m2), mean(m3), mean(m4))
+
+
+means = c(mean(m1), mean(m2), mean(m3), mean(m4))
+
+
+mic = mean(m4) - mean(m3) - mean(m2) + mean(m1)
+k = min(length(m1), length(m2), length(m3), length (m4))
+
+
+##ANOVA 
+
+rtt= c(m1[1:k],m3[1:k],m2[1:k],m4[1:k])
+
+unit  <- gl(2,  k, k*4) # 
+decade  <- gl(2, 2*k, k*4) # 
+
+an = data.frame(unit,decade,rtt)
+names(an) <- c("unit", "decade","rtt")
+```
+
+
+```{r}
+fit <- aov(rtt ~unit*decade, data=an)
+summary(fit)
+
+p00516_mod_z_5 <- lm(z(rtt)~unit*decade, data=an)
+
+export_ols(p00516_mod_z_5, 
+           key_effects = c("unit2", "decade2", "unit2:decade2"))
+```
+
+

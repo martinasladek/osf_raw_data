@@ -1,0 +1,80 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-04'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+if (!require(brms)) {install.packages("brms"); require(brms)}
+if (!require(caTools)) {install.packages("caTools"); require(caTools)}
+if (!require(lme4)) {install.packages("lme4"); require(lme4)}
+if (!require(lmerTest)) {install.packages("lmerTest"); require(lmerTest)}
+if (!require(MCMCpack)) {install.packages("MCMCpack"); require(MCMCpack)}
+if (!require(pastecs)) {install.packages("pastecs"); require(pastecs)}
+if (!require(pwr)) {install.packages("pwr"); require(pwr)}
+
+load("../data/raw_data/p01071_Kurdi & Banaji (2019), JPSP.RData")
+```
+
+# study 1 
+
+```{r}
+study1 <- study1[study1$conInc == "Squareface good", ]
+study1$manCheck <- factor(study1$manCheck, levels = levels(study1$manCheck)[c(2, 1, 3)])
+
+study1NF <- study1[!(study1$manCheck == "Fail"), ]
+
+study1NF$pairNumCent <- study1NF$pairNum - 4
+```
+
+model 1 
+
+```{r}
+p01071_mod_z_1 <- lm(z(DScore) ~ z(pairNumCent), data = study1NF)
+
+export_ols(p01071_mod_z_1, 
+           key_effects = c("z(pairNumCent)"))
+```
+
+# Study 2
+
+```{r}
+study2$manCheck <- factor(study2$manCheck, levels = levels(study2$manCheck)[c(2, 1, 3)])
+
+study2NF <- study2[!(study2$manCheck == "Fail"), ]
+```
+
+
+model 2
+
+```{r}
+p01071_mod_z_2 <- lm(z(DScore) ~ timingCond*diagCond, data = study2NF)
+
+export_ols(p01071_mod_z_2, 
+           key_effects = c("timingCondBefore", "diagCondNondiag", "timingCondBefore:diagCondNondiag"))
+
+```
+
+model 3
+
+```{r}
+p01071_mod_z_3 <- lm(z(DScore) ~ diagCond, data = study2NF[study2NF$timingCond == "Before", ])
+
+export_ols(p01071_mod_z_3, 
+           key_effects = c("diagCondNondiag"))
+```
+
+model 4
+
+```{r}
+p01071_mod_z_4 <- lm(z(DScore) ~ diagCond, data = study2NF[study2NF$timingCond == "After", ])
+
+export_ols(p01071_mod_z_4, 
+           key_effects = c("diagCondNondiag"))
+```
+

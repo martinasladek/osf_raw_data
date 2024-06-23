@@ -1,0 +1,474 @@
+---
+title: "p00827_thai2019_fix"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+library(dplyr)
+library(gtools)
+library(robustbase)
+library(magrittr) # unless you routinely load tidyverse, in which case leave this one out. You just need it for the pipe. 
+library(moments)
+library(stringr)
+
+
+variables <- c("paper", "outcome", "n", "skew", "kurt", "z_1.96", "z_2.58", "z_3.29", "mode_n", "var", "var_ratio")
+
+list.files("../data/raw_data/", pattern = "p00827")
+
+p00827_tib_1 <- haven::read_sav("../data/raw_data/p00827_thai2019_Study 1.sav") %>% 
+  dplyr::filter(Condition == as.numeric(MC))
+
+p00827_tib_2 <- haven::read_sav("../data/raw_data/p00827_thai2019_Study 2.sav") %>% 
+  dplyr::filter(Condition == MC2)
+
+p00827_tib_3 <- haven::read_sav("../data/raw_data/p00827_thai2019_Study 3.sav")
+```
+
+# Study 1 
+
+```{r}
+p00827_tib_1 %<>% 
+  dplyr::mutate(
+    Condition = factor(Condition), 
+    Joke = factor(Joke),
+    Accp3 = reverse_score(Accp3, max_score = 8)) %>% 
+  dplyr::mutate(
+    acceptability = rowMeans(.[c("Accp1", "Accp2", "Accp3")]), 
+    offend = rowMeans(.[c("Off1", "Off2", "Off3", "Off4")]), 
+    humour = rowMeans(.[c("Humor1", "Humor2", "Humor3", "Humor4")]), 
+    homophobia = rowMeans(.[c("Homo1", "Homo2")]),
+    person = rowMeans(.[c("Person1", "Person2", "Person3", "Person4", "Person5", 
+                              "Person6", "Person7", "Person8")]),
+  ) 
+
+p00827_tib_1 %<>% 
+  dplyr::mutate(
+    dplyr::across(.cols = p00827_tib_1[, 41:45] %>% names(), 
+                  .fns = z, 
+                  .names = "z_{.col}"
+    )
+  )
+
+```
+
+```{r}
+contrasts(p00827_tib_1$Joke) <- c(0.5,-0.5)
+contrasts(p00827_tib_1$Condition) <- c(0.5,-0.5)
+```
+
+
+```{r}
+lm(acceptability ~ Joke*Condition, data = p00827_tib_1) %>% car::Anova(type = 3)
+```
+
+Reproduce these
+
+```{r}
+lm(acceptability ~ Joke*Condition, data = p00827_tib_1) %>% summary
+```
+
+```{r}
+p00827_mod_z_1 <- lm(z_acceptability ~ Joke*Condition, data = p00827_tib_1)
+```
+
+```{r}
+key_effects <- c("Joke1:Condition1")
+export_ols(p00827_mod_z_1, key_effects)
+```
+
+
+
+
+
+
+```{r}
+lm(offend ~ Joke*Condition, data = p00827_tib_1) %>% summary
+```
+
+```{r}
+p00827_mod_z_2 <- lm(z_offend ~ Joke*Condition, data = p00827_tib_1)
+p00827_mod_z_2 %>% summary()
+```
+
+```{r}
+key_effects <- c("Joke1:Condition1")
+export_ols(p00827_mod_z_2, key_effects)
+```
+
+
+
+
+
+
+
+
+
+```{r}
+lm(humour ~ Joke*Condition, data = p00827_tib_1) %>% summary
+```
+
+```{r}
+p00827_mod_z_3 <- lm(z_humour ~ Joke*Condition, data = p00827_tib_1)
+p00827_mod_z_3 %>% summary()
+```
+
+```{r}
+key_effects <- c("Joke1:Condition1")
+export_ols(p00827_mod_z_3, key_effects)
+```
+
+
+
+
+```{r}
+lm(homophobia ~ Joke*Condition, data = p00827_tib_1) %>% summary
+```
+
+```{r}
+p00827_mod_z_4 <- lm(z_homophobia~ Joke*Condition, data = p00827_tib_1)
+p00827_mod_z_4 %>% summary()
+```
+
+```{r}
+key_effects <- c("Joke1:Condition1")
+export_ols(p00827_mod_z_4, key_effects)
+```
+
+
+
+
+
+```{r}
+lm(person ~ Joke*Condition, data = p00827_tib_1) %>% summary
+```
+
+```{r}
+p00827_mod_z_5 <- lm(z_person~ Joke*Condition, data = p00827_tib_1)
+p00827_mod_z_5 %>% summary()
+```
+
+```{r}
+key_effects <- c("Joke1:Condition1")
+export_ols(p00827_mod_z_5, key_effects)
+```
+
+
+# Study 2
+
+```{r}
+p00827_tib_2  %<>% 
+  dplyr::mutate(
+    Condition = factor(Condition, levels = c(3,2,1)), 
+    Joke = factor(Joke), 
+    Accp3_R = reverse_score(Accp3, max_score = 8)) %>%
+  dplyr::mutate( 
+    acceptability = rowMeans(.[c("Accp1", "Accp2", "Accp3_R")]), 
+    offend = rowMeans(.[c("Off1", "Off2", "Off3", "Off4")]), 
+    humour = rowMeans(.[c("Humor1", "Humor2", "Humor3", "Humor4")]), 
+    racist = rowMeans(.[c("Racist1", "Racist2")]), 
+    person = rowMeans(.[c("Person1", "Person2", "Person3", "Person4", "Person5", 
+                              "Person6", "Person7", "Person8")]),
+  ) 
+
+p00827_tib_2 %<>% 
+  dplyr::mutate(
+    dplyr::across(.cols = c("acceptability", "offend", "humour", "racist", "person"), 
+                  .fns = z, 
+                  .names = "z_{.col}"
+    )
+  )
+```
+
+```{r}
+condition_3_vs_others <- c(2/3,-1/3,-1/3)
+contition_2_vs_1 <- c(0, 1/2, -1/2)
+contrasts(p00827_tib_2$Condition) <- cbind(condition_3_vs_others, contition_2_vs_1)
+
+joke_3_vs_others <- c(2/3,-1/3,-1/3)
+joke_2_vs_1 <- c(0, 1/2, -1/2)
+contrasts(p00827_tib_2$Joke) <- cbind(joke_3_vs_others, joke_2_vs_1)
+```
+
+
+```{r}
+lm(acceptability ~ Condition, data = p00827_tib_2) %>% summary()
+```
+
+```{r}
+p00827_mod_z_6 <- lm(z_acceptability ~ Condition, data = p00827_tib_2)
+p00827_mod_z_6 %>% summary()
+```
+
+```{r}
+key_effects <- c("Conditioncondition_3_vs_others", "Conditioncontition_2_vs_1")
+export_ols(p00827_mod_z_6, key_effects)
+```
+
+
+
+
+```{r}
+lm(offend ~ Condition, data = p00827_tib_2) %>% summary()
+```
+
+```{r}
+p00827_mod_z_7 <- lm(z_offend ~ Condition, data = p00827_tib_2)
+p00827_mod_z_7 %>% summary()
+```
+
+```{r}
+key_effects <- c("Conditioncondition_3_vs_others", "Conditioncontition_2_vs_1")
+export_ols(p00827_mod_z_7, key_effects)
+```
+
+
+
+```{r}
+lm(humour ~ Condition, data = p00827_tib_2) %>% summary()
+```
+
+```{r}
+p00827_mod_z_8 <- lm(z_humour ~ Condition, data = p00827_tib_2)
+p00827_mod_z_8 %>% summary()
+```
+
+```{r}
+key_effects <- c("Conditioncondition_3_vs_others", "Conditioncontition_2_vs_1")
+export_ols(p00827_mod_z_8, key_effects)
+```
+
+
+
+
+```{r}
+lm(racist ~ Condition, data = p00827_tib_2) %>% summary()
+```
+
+```{r}
+p00827_mod_z_9 <- lm(z_racist ~ Condition, data = p00827_tib_2)
+p00827_mod_z_9 %>% summary()
+```
+
+```{r}
+key_effects <- c("Conditioncondition_3_vs_others", "Conditioncontition_2_vs_1")
+export_ols(p00827_mod_z_9, key_effects)
+```
+
+
+
+
+```{r}
+lm(person ~ Condition, data = p00827_tib_2) %>% summary()
+```
+
+```{r}
+p00827_mod_z_10 <- lm(z_person ~ Condition, data = p00827_tib_2)
+p00827_mod_z_10 %>% summary()
+```
+
+```{r}
+key_effects <- c("Conditioncondition_3_vs_others", "Conditioncontition_2_vs_1")
+export_ols(p00827_mod_z_10, key_effects)
+```
+
+# Study 3
+
+```{r}
+reverse_offensive <- function(x){8-x}
+
+p00827_tib_3 %<>%
+  dplyr::rowwise() %>% 
+  dplyr::mutate(
+    across(.cols = contains("2"), 
+           .fns = reverse_offensive), 
+
+    # race
+    accept_ww = mean(c(WW1, WW2), na.rm = T), 
+    accept_bw = mean(c(BW1, BW2), na.rm = T), 
+    accept_aw = mean(c(AW1, AW2), na.rm = T), 
+    
+    accept_wb = mean(c(WB1, WB2), na.rm = T), 
+    accept_bb = mean(c(BB1, BB2), na.rm = T), 
+    accept_ab = mean(c(AB1, AB2), na.rm = T), 
+    
+    accept_wa = mean(c(WA1, WA2), na.rm = T), 
+    accept_ba = mean(c(BA1, BA2), na.rm = T), 
+    accept_aa = mean(c(AA1, AA2), na.rm = T), 
+    
+    # sexual orientation
+    accept_ss = mean(c(SS1, SS2), na.rm = T), 
+    accept_gs = mean(c(GS1, GS2), na.rm = T), 
+    accept_sg = mean(c(SG1, SG2), na.rm = T), 
+    accept_gg = mean(c(GG1, GG2), na.rm = T),
+    
+    # gender
+    accept_mm = mean(c(MM1, MM2), na.rm = T), 
+    accept_fm = mean(c(FM1, FM2), na.rm = T), 
+    accept_mf = mean(c(MF1, MF2), na.rm = T), 
+    accept_ff = mean(c(FF1, FF2), na.rm = T),
+  ) 
+
+p00827_tib_3 %<>% 
+  dplyr::ungroup() %>% 
+  dplyr::mutate(
+    id = 1:nrow(.)
+  )
+
+```
+
+## race
+
+1 = source
+2 = target
+
+```{r}
+p00827_tib_3_a <- p00827_tib_3 %>% 
+  dplyr::select(id, contains("_w"), contains( "_b"), contains("_a")) %>% 
+  tidyr::pivot_longer(., cols = -id, names_to = "var", values_to = "accept") %>% 
+  dplyr::mutate(
+    source = case_when(
+      str_detect(var, "_w") ~ "white", 
+      str_detect(var, "_b") ~ "black", 
+      str_detect(var, "_a") ~ "asian", 
+      TRUE ~ "other"
+    ), 
+    target = rep(c("white", "black", "asian"), 70*3), 
+    z_accept = z(accept)
+  )
+
+p00827_tib_3_a
+```
+
+Authors report removing a case due to missing data. There are several cases with missing data for which only acceptability or only offensiveness score is provided but authors don't report this, and the case in question does not seem to be labelled in the dataset. The loop below effectively does a "leave one out", to find which analysis matches the one reported. 
+
+```{r eval = FALSE}
+
+for(i in unique(p00827_tib_3_a$id)){
+  
+  print(
+    list(
+      i, 
+      afex::aov_4(accept ~ (source*target|id), 
+                  data = filter(p00827_tib_3_a, id != i), 
+                  anova_table = list(correction = "none"))
+    )
+  )
+  
+}
+```
+
+Case 29 removed from the analysis
+
+```{r}
+afex::aov_4(accept ~ (source*target|id), 
+            data = filter(p00827_tib_3_a, id != 29), 
+            anova_table = list(correction = "none"))
+```
+
+```{r}
+p00827_mod_rm_z_11 <- afex::aov_4(z_accept ~ (source*target|id), 
+                                 data = filter(p00827_tib_3_a, id != 29), 
+                                 anova_table = list(correction = "none"))
+
+key_effects = c("source:target")
+export_ols(p00827_mod_rm_z_11, key_effects)
+
+
+
+p00827_mod_lmer_z_11 <- lme4::lmer(z_accept ~ source*target+(1|id), 
+                                   data = filter(p00827_tib_3_a, id != 29))
+
+key_effects = rownames(summary(p00827_mod_lmer_z_11)$coefficients)[-1]
+export_ols(p00827_mod_lmer_z_11, key_effects)
+
+
+```
+
+## sexual orientation
+
+```{r}
+p00827_tib_3_b <- p00827_tib_3 %>% 
+  dplyr::select(id, contains("_s"), contains( "_g")) %>% 
+  tidyr::pivot_longer(., cols = -id, names_to = "var", values_to = "accept") %>% 
+  dplyr::mutate(
+    source = case_when(
+      str_detect(var, "_s") ~ "straight", 
+      str_detect(var, "_g") ~ "gay"
+    ), 
+    target = rep(c("straight", "gay"), 70*2), 
+    z_accept = z(accept)
+  )
+
+```
+
+```{r}
+afex::aov_4(accept ~ (source*target|id), 
+            data = filter(p00827_tib_3_b, id != 29), 
+            anova_table = list(correction = "none"))
+```
+
+```{r}
+p00827_mod_rm_z_12 <- afex::aov_4(z_accept ~ (source*target|id), 
+                                 data = filter(p00827_tib_3_b, id != 29), 
+                                 anova_table = list(correction = "none"))
+
+key_effects = c("source:target")
+export_ols(p00827_mod_rm_z_12, key_effects)
+
+
+p00827_mod_lmer_z_12 <- lme4::lmer(z_accept ~ source*target + (1|id), 
+                                 data = filter(p00827_tib_3_b, id != 29))
+
+key_effects = rownames(summary(p00827_mod_lmer_z_12)$coefficients)[-1]
+export_ols(p00827_mod_lmer_z_12, key_effects)
+```
+
+## gender
+
+```{r}
+p00827_tib_3_c <- p00827_tib_3 %>% 
+  dplyr::select(id, contains("_m"), contains( "_f")) %>% 
+  tidyr::pivot_longer(., cols = -id, names_to = "var", values_to = "accept") %>% 
+  dplyr::mutate(
+    source = case_when(
+      str_detect(var, "_m") ~ "male", 
+      str_detect(var, "_f") ~ "female"
+    ), 
+    target = rep(c("male", "female"), 70*2), 
+    z_accept = z(accept)
+  )
+
+```
+
+```{r}
+afex::aov_4(accept ~ (source*target|id), 
+            data = filter(p00827_tib_3_c, id != 29), 
+            anova_table = list(correction = "none"))
+```
+
+```{r}
+p00827_mod_rm_z_13 <- afex::aov_4(z_accept ~ (source*target|id), 
+                                 data = filter(p00827_tib_3_c, id != 29), 
+                                 anova_table = list(correction = "none"))
+
+
+key_effects = c("source:target")
+export_ols(p00827_mod_rm_z_13, key_effects)
+
+
+
+
+p00827_mod_lmer_z_13 <- lme4::lmer(z_accept ~ source*target + (1|id), 
+                                 data = filter(p00827_tib_3_c, id != 29))
+
+
+key_effects = c("sourcemale", "targetmale", "sourcemale:targetmale")
+export_ols(p00827_mod_lmer_z_13, key_effects)
+```
+
+

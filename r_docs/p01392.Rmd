@@ -1,0 +1,103 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-15'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df <- haven::read_sav("../data/raw_data/p01392_pone.0203287.s002.sav") %>% 
+  dplyr::filter(Include == 1) %>% 
+  dplyr::mutate(
+    across(.cols = c(RSTOTAL, IND_Sum, COL_Sum, ECR_Anxious_Mean, ECR_Avoidant_Mean), 
+           .fns = gmc)
+  )
+
+```
+
+```{r}
+p01392_mod_z_1 <- df %>% 
+  lm(Ln_HR_CyberballDifference ~ 
+       + z(RSTOTAL) * as.factor(Condition) 
+     + z(IND_Sum) * as.factor(Condition)
+     + z(COL_Sum) * as.factor(Condition)
+     + z(ECR_Anxious_Mean) * as.factor(Condition)
+     + z(ECR_Avoidant_Mean) * as.factor(Condition)
+     ,.) 
+
+
+export_ols(p01392_mod_z_1, 
+           key_effects = c("as.factor(Condition)2", 
+                           "z(RSTOTAL):as.factor(Condition)2", 
+                           "as.factor(Condition)2:z(IND_Sum)", 
+                           "as.factor(Condition)2:z(COL_Sum)", 
+                           "as.factor(Condition)2:z(ECR_Anxious_Mean)", 
+                           "as.factor(Condition)2:z(ECR_Avoidant_Mean)"))
+```
+
+```{r}
+p01392_mod_z_2 <- df %>% 
+  lm(z(HFnu_HRV_CyberballDifference) ~ 
+       + z(RSTOTAL) * as.factor(Condition) 
+     + z(IND_Sum) * as.factor(Condition)
+     + z(COL_Sum) * as.factor(Condition)
+     + z(ECR_Anxious_Mean) * as.factor(Condition)
+     + z(ECR_Avoidant_Mean) * as.factor(Condition)
+     ,.) 
+
+
+export_ols(p01392_mod_z_2, 
+           key_effects = c("as.factor(Condition)2", 
+                           "z(RSTOTAL):as.factor(Condition)2", 
+                           "as.factor(Condition)2:z(IND_Sum)", 
+                           "as.factor(Condition)2:z(COL_Sum)", 
+                           "as.factor(Condition)2:z(ECR_Anxious_Mean)", 
+                           "as.factor(Condition)2:z(ECR_Avoidant_Mean)"))
+```
+
+```{r}
+p01392_mod_z_3 <- df %>% 
+  lm(z(PANAS_Pos_Change) ~ 
+       + z(RSTOTAL) * as.factor(Condition) 
+     + z(IND_Sum) * as.factor(Condition)
+     + z(COL_Sum) * as.factor(Condition)
+     + z(ECR_Anxious_Mean) * as.factor(Condition)
+     + z(ECR_Avoidant_Mean) * as.factor(Condition)
+     ,.) 
+
+
+export_ols(p01392_mod_z_3, 
+           key_effects = c("as.factor(Condition)2", 
+                           "z(RSTOTAL):as.factor(Condition)2", 
+                           "as.factor(Condition)2:z(IND_Sum)", 
+                           "as.factor(Condition)2:z(COL_Sum)", 
+                           "as.factor(Condition)2:z(ECR_Anxious_Mean)", 
+                           "as.factor(Condition)2:z(ECR_Avoidant_Mean)"))
+```
+
+```{r}
+p01392_mod_z_4 <- df %>% 
+  lm(z(PANAS_Neg_Change) ~ 
+       + z(RSTOTAL) * as.factor(Condition) 
+     + z(IND_Sum) * as.factor(Condition)
+     + z(COL_Sum) * as.factor(Condition)
+     + z(ECR_Anxious_Mean) * as.factor(Condition)
+     + z(ECR_Avoidant_Mean) * as.factor(Condition)
+     ,.) 
+
+
+export_ols(p01392_mod_z_4, 
+           key_effects = c("as.factor(Condition)2", 
+                           "z(RSTOTAL):as.factor(Condition)2", 
+                           "as.factor(Condition)2:z(IND_Sum)", 
+                           "as.factor(Condition)2:z(COL_Sum)", 
+                           "as.factor(Condition)2:z(ECR_Anxious_Mean)", 
+                           "as.factor(Condition)2:z(ECR_Avoidant_Mean)"))
+```
+
+
+

@@ -1,0 +1,418 @@
+---
+title: ""
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+library(afex)
+library(gtools)
+library(robustbase)
+library(magrittr) # unless you routinely load tidyverse, in which case leave this one out. You just need it for the pipe. 
+library(moments)
+
+
+variables <- c("paper", "outcome", "n", "skew", "kurt", "z_1.96", "z_2.58", "z_3.29", "mode_n", "var", "var_ratio")
+
+
+list.files("../data/raw_data/", pattern = "p01033")
+
+p01033_tib_1 <- haven::read_sav("../data/raw_data/p01033_abel2019_Experiment1 - DF delay, CC.sav")
+p01033_tib_2 <- haven::read_sav("../data/raw_data/p01033_abel2019_Experiment2 - DF delay, intentional vs incidental learning.sav")
+p01033_tib_3 <- haven::read_sav("../data/raw_data/p01033_abel2019_Experiment3 - DF delay, distractors.sav")
+```
+
+# Experiment 1
+
+## List 1
+
+Don't reproduce this, reproduce the follow up ANOVAs because of the non-orth. contrats
+
+```{r}
+lm(Recall_List1 ~ as.factor(Instruction) * as.factor(Delay), 
+   data = p01033_tib_1) %>% car::Anova(type = 2)
+
+```
+
+Reproduce this:
+
+```{r}
+p01033_tib_1a <- p01033_tib_1 %>% 
+  dplyr::filter(
+    Instruction %in% c("0", "1")
+  ) %>% dplyr::mutate(
+  Instruction = as.factor(Instruction), 
+  Delay = as.factor(Delay)
+)
+
+contrasts(p01033_tib_1a$Instruction) <- c(0.5,-0.5)
+contrasts(p01033_tib_1a$Delay) <- c(0.5,-0.5)
+```
+
+
+```{r}
+p01033_mod_original_1 <- lm(Recall_List1 ~ Instruction * Delay, 
+   data = p01033_tib_1a)
+
+p01033_mod_original_1 %>% summary()
+```
+
+```{r}
+p01033_mod_z_1 <- lm(z(Recall_List1) ~ Instruction * Delay, 
+   data = p01033_tib_1a)
+
+p01033_mod_z_1 %>% summary()
+```
+
+```{r}
+key_effects = c("Instruction1:Delay1")
+export_ols(p01033_mod_z_1, key_effects)
+```
+
+
+
+
+```{r}
+p01033_tib_1b <- p01033_tib_1 %>% 
+  dplyr::filter(
+    Instruction %in% c("0", "2")
+  ) %>% dplyr::mutate(
+  Instruction = as.factor(Instruction), 
+  Delay = as.factor(Delay)
+)
+
+contrasts(p01033_tib_1b$Instruction) <- c(0.5,-0.5)
+contrasts(p01033_tib_1b$Delay) <- c(0.5,-0.5)
+
+p01033_mod_original_2 <- lm(Recall_List1 ~ Instruction * Delay, 
+   data = p01033_tib_1b)
+
+p01033_mod_original_2 %>% summary()
+```
+
+```{r}
+p01033_mod_z_2 <- lm(z(Recall_List1) ~ Instruction * Delay, 
+   data = p01033_tib_1b)
+p01033_mod_z_2 %>% summary()
+```
+
+
+```{r}
+key_effects = c("Instruction1:Delay1")
+export_ols(p01033_mod_z_2, key_effects)
+```
+
+
+
+
+```{r}
+p01033_tib_1c <- p01033_tib_1 %>% 
+  dplyr::filter(
+    Instruction %in% c("0", "3")
+  ) %>% dplyr::mutate(
+  Instruction = as.factor(Instruction), 
+  Delay = as.factor(Delay)
+)
+
+contrasts(p01033_tib_1c$Instruction) <- c(0.5,-0.5)
+contrasts(p01033_tib_1c$Delay) <- c(0.5,-0.5)
+```
+
+
+```{r}
+p01033_mod_original_3 <- lm(Recall_List1 ~ Instruction * Delay, 
+   data = p01033_tib_1c)
+
+p01033_mod_original_3 %>% summary()
+```
+
+```{r}
+p01033_mod_z_3 <- lm(z(Recall_List1) ~ Instruction * Delay, 
+   data = p01033_tib_1c)
+
+p01033_mod_z_3 %>% summary()
+```
+
+```{r}
+key_effects = c("Instruction1:Delay1")
+export_ols(p01033_mod_z_3, key_effects)
+```
+
+
+## List 2
+
+Don't reproduce this:
+
+```{r}
+lm(Recall_List2 ~ as.factor(Instruction) * as.factor(Delay), 
+   data = p01033_tib_1) %>% car::Anova(type = 2)
+```
+
+Reproduce this:
+
+```{r}
+p01033_tib_2a <- p01033_tib_1 %>% 
+  dplyr::filter(
+    Instruction %in% c("0", "1")
+  ) %>% dplyr::mutate(
+  Instruction = as.factor(Instruction), 
+  Delay = as.factor(Delay)
+)
+
+contrasts(p01033_tib_2a$Instruction) <- c(0.5,-0.5)
+contrasts(p01033_tib_2a$Delay) <- c(0.5,-0.5)
+```
+
+
+```{r}
+p01033_mod_original_4 <- lm(Recall_List2 ~ Instruction * Delay, 
+   data = p01033_tib_2a) 
+
+p01033_mod_original_4 %>% summary()
+```
+
+```{r}
+p01033_mod_z_4 <- lm(z(Recall_List2) ~ Instruction * Delay, 
+   data = p01033_tib_2a) 
+
+p01033_mod_z_4 %>% summary()
+```
+
+```{r}
+key_effects = c("Instruction1:Delay1")
+export_ols(p01033_mod_z_4, key_effects)
+```
+
+
+
+
+
+
+
+```{r}
+p01033_tib_2b <- p01033_tib_1 %>% 
+  dplyr::filter(
+    Instruction %in% c("0", "2")
+  ) %>% dplyr::mutate(
+  Instruction = as.factor(Instruction), 
+  Delay = as.factor(Delay)
+)
+
+contrasts(p01033_tib_2b$Instruction) <- c(0.5,-0.5)
+contrasts(p01033_tib_2b$Delay) <- c(0.5,-0.5)
+```
+
+
+```{r}
+p01033_mod_original_5 <- lm(Recall_List2 ~ Instruction * Delay, 
+   data = p01033_tib_2b) 
+
+p01033_mod_original_5 %>% summary()
+```
+
+```{r}
+p01033_mod_z_5 <- lm(z(Recall_List2) ~ Instruction * Delay, 
+   data = p01033_tib_2b) 
+
+p01033_mod_z_5 %>% summary()
+```
+
+```{r}
+key_effects = c("Instruction1:Delay1")
+export_ols(p01033_mod_z_5, key_effects)
+```
+
+
+
+```{r}
+p01033_tib_2c <- p01033_tib_1 %>% 
+  dplyr::filter(
+    Instruction %in% c("0", "3")
+  ) %>% dplyr::mutate(
+  Instruction = as.factor(Instruction), 
+  Delay = as.factor(Delay)
+)
+
+contrasts(p01033_tib_2c$Instruction) <- c(0.5,-0.5)
+contrasts(p01033_tib_2c$Delay) <- c(0.5,-0.5)
+```
+
+
+```{r}
+p01033_mod_original_6 <- lm(Recall_List2 ~ Instruction * Delay, 
+   data = p01033_tib_2c) 
+
+p01033_mod_original_6 %>% summary()
+```
+
+```{r}
+p01033_mod_z_6 <- lm(z(Recall_List2) ~ Instruction * Delay, 
+   data = p01033_tib_2c) 
+
+p01033_mod_z_6 %>% summary()
+```
+
+```{r}
+key_effects = c("Instruction1:Delay1")
+export_ols(p01033_mod_z_6, key_effects)
+```
+
+
+
+# Experiment 2 
+
+! RM
+
+word type is a repeated measures element. 
+
+```{r}
+p01033_tib_2_list_1 <- p01033_tib_2 %>% 
+  dplyr::select(SubjectID, Instruction, Delay, List1_LearnItems_correct, List1_JudgeItems_correct) %>% 
+  tidyr::pivot_longer(cols = -c(SubjectID, Instruction, Delay), 
+                      values_to = "recall", 
+                      names_to = "word_type")
+```
+
+```{r}
+p01033_mod_rm_9 <- afex::aov_4(recall ~ Instruction*Delay*(word_type|SubjectID),
+            data = p01033_tib_2_list_1)
+
+p01033_mod_rm_9
+```
+
+```{r}
+p01033_mod_rm_z_9 <- afex::aov_4(z(recall) ~ Instruction*Delay*(word_type|SubjectID),
+            data = p01033_tib_2_list_1)
+
+key_effects = c("Instruction:Delay:word_type", "Instruction:word_type", "Delay:word_type")
+export_ols(p01033_mod_rm_z_9, key_effects)
+
+
+
+p01033_mod_lmer_z_9 <- lme4::lmer(z(recall) ~
+                                    factor(Instruction)*factor(Delay)*factor(word_type)+(1|SubjectID),
+            data = p01033_tib_2_list_1)
+
+
+
+key_effects = mod_coeffs(p01033_mod_lmer_z_9)[4:7]
+export_ols(p01033_mod_lmer_z_9, key_effects)
+
+
+
+```
+
+
+
+
+
+```{r}
+p01033_tib_2_list_2 <- p01033_tib_2 %>% 
+  dplyr::select(SubjectID, Instruction, Delay, List2_LearnItems_correct, List2_JudgeItems_correct) %>% 
+  tidyr::pivot_longer(cols = -c(SubjectID, Instruction, Delay), 
+                      values_to = "recall", 
+                      names_to = "word_type")
+
+
+p01033_tib_2_list_2 %>% View()
+```
+
+```{r}
+p01033_mod_rm_10 <- afex::aov_4(recall ~ Instruction*Delay*(word_type|SubjectID),
+            data = p01033_tib_2_list_2)
+
+p01033_mod_rm_10
+```
+
+```{r}
+p01033_mod_rm_z_10 <- afex::aov_4(z(recall) ~ Instruction*Delay*(word_type|SubjectID),
+            data = p01033_tib_2_list_2)
+
+key_effects = c("Instruction:Delay:word_type", "Instruction:word_type", "Delay:word_type")
+export_ols(p01033_mod_rm_z_10, key_effects)
+
+
+
+p01033_mod_lmer_z_10 <- lme4::lmer(z(recall) ~ 
+                                     factor(Instruction)*factor(Delay)*factor(word_type)+
+                                     (1|SubjectID),
+            data = p01033_tib_2_list_2)
+
+key_effects = mod_coeffs(p01033_mod_lmer_z_10)[4:7]
+export_ols(p01033_mod_lmer_z_10, key_effects)
+```
+
+
+
+
+
+# Experiment 3 
+
+7: lm(formula = z(Recall_List1) ~ Instruction * DistractorActivity, 
+    data = p01033_tib_3)
+
+```{r}
+names(p01033_tib_3)
+
+p01033_tib_3 %<>% 
+ dplyr::mutate(
+  Instruction = as.factor(Instruction), 
+  DistractorActivity = as.factor(DistractorActivity)
+)
+
+contrasts(p01033_tib_3$Instruction) <- c(0.5,-0.5)
+contrasts(p01033_tib_3$DistractorActivity) <- c(0.5,-0.5)
+```
+
+
+```{r}
+p01033_mod_original_7 <- lm(Recall_List1 ~ Instruction * DistractorActivity, 
+   data = p01033_tib_3) 
+
+p01033_mod_original_7 %>% summary()
+
+
+```
+
+```{r}
+p01033_mod_z_7 <- lm(z(Recall_List1) ~ Instruction * DistractorActivity, 
+   data = p01033_tib_3) 
+
+p01033_mod_z_7 %>% summary()
+```
+
+```{r}
+key_effects = c("Instruction1:DistractorActivity1")
+export_ols(p01033_mod_z_7, key_effects)
+```
+
+
+
+
+```{r}
+p01033_mod_original_8 <- lm(Recall_List2 ~ as.factor(Instruction) * as.factor(DistractorActivity), 
+   data = p01033_tib_3) 
+
+p01033_mod_original_8 %>% summary()
+```
+
+```{r}
+p01033_mod_z_8 <- lm(z(Recall_List2) ~ as.factor(Instruction) * as.factor(DistractorActivity), 
+   data = p01033_tib_3) 
+
+p01033_mod_z_8 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(Instruction)1:as.factor(DistractorActivity)1")
+export_ols(p01033_mod_z_8, key_effects)
+```
+
+
+```{r}
+#mods_info_export("p01033")
+```
+

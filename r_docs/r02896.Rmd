@@ -1,0 +1,333 @@
+---
+title: "u02896_pollet2020"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+Verbal denigration of personal body size and shape ("fat talk") is
+correlated with, and can 16 have a causal influence on body
+dissatisfaction and disordered eating. What is less clear is 17 who is
+most likely to fat talk. To address this, Corning and Gondoli (2012)
+conducted a 18 study confirming that a woman's body dissatisfaction
+directly predicted their fat talk. But 19 this effect was scaled so that
+the likelihood of engaging in fat talk intensified if she had a 20
+stronger tendency to socially compare: the relationship was
+multiplicative. Here, we carried 21 out two replications of Corning and
+Gondoli's (2012) study, the first with 189 UK 22 participants and the
+second with 371 US participants. We found that multiple regression 23
+models predicting fat talk showed additive, but not multiplicative
+relationships. A mini 24 meta-analysis combining the results of our two
+studies with the results of the original study 25 confirmed this. A
+power simulation suggested that the original claim of a significant 26
+interaction term was probably a false positive. In conclusion, these
+studies show an additive 27 relationship between fat talk and social
+comparison on fat talk. We discuss how 28 multiplicative relationships
+may occur and why they matter clinically if they do exist.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+require(haven) # comment
+require(readxl)
+require(dplyr)
+require(magrittr)
+require(skimr)
+require(psych)
+require(stargazer)
+require(tidyimpute)
+require(tidyr)
+require(sjlabelled)
+require(apaTables)
+require(sjPlot)
+require(sjmisc)
+require(jtools)
+require(sandwich) # Robust estimation.
+require(lmtest)
+require(ggplot2)
+require(ggthemes)
+require(readxl)
+require(esc)
+require(metafor)
+require(meta)
+require(interactions)
+require(rockchalk)
+require(cowplot)
+require(car)
+require(performance)
+
+```
+
+# Study 1: Data Wrangling
+
+```{r}
+Study1 <- read_xlsx("../data/raw_data/r02896_pollet2020_1.xlsx") 
+```
+
+197 reached the end of the survey
+
+```{r}
+Study1 %<>% filter(is.na(Q43)==F)
+```
+
+8 participants did not provide height or weight.
+
+```{r}
+Study1 %<>% filter(is.na(Weight_kg)==F)
+Study1 %<>% filter(is.na(Height_cm)==F)
+```
+
+```{r}
+mean(Study1$Q4)
+sd(Study1$Q4)
+min(Study1$Q4)
+max(Study1$Q4)
+```
+
+# Study 1: BMI
+
+```{r}
+Study1 %<>% mutate(BMI = ((Weight_kg/Height_cm/Height_cm) * 10000))
+```
+
+# Study 1: Sum scales.
+
+Note that this overrides (!!!).
+
+## EDI recode
+
+```{r}
+Study1$Q6 <- car::recode(Study1$Q6, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study1$Q15 <- car::recode(Study1$Q15, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study1$Q16 <- car::recode(Study1$Q16, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study1$Q19 <- car::recode(Study1$Q19, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study1$Q21 <- car::recode(Study1$Q21, "1=5; 2=4; 3=3; 4=2; 5=1")
+```
+
+## INCOM
+
+Qualtrics had scored 1 = always, never = 5 so we recode here. Therefore
+we rescore all but Q27/Q33.
+
+```{r}
+Study1$Q23 <- car::recode(Study1$Q23, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study1$Q24 <- car::recode(Study1$Q24, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study1$Q25 <- car::recode(Study1$Q25, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study1$Q26 <- car::recode(Study1$Q26, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study1$Q28 <- car::recode(Study1$Q28, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study1$Q29 <- car::recode(Study1$Q29, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study1$Q30 <- car::recode(Study1$Q30, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study1$Q31 <- car::recode(Study1$Q31, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study1$Q32 <- car::recode(Study1$Q32, "1=5; 2=4; 3=3; 4=2; 5=1")
+```
+
+## Fat Talk.
+
+Qualtrics had scored 1 = always, never = 5 so we recode here.
+
+```{r}
+Study1$Q35 <- car::recode(Study1$Q35, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study1$Q36 <- car::recode(Study1$Q36, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study1$Q37 <- car::recode(Study1$Q37, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study1$Q38 <- car::recode(Study1$Q38, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study1$Q39 <- car::recode(Study1$Q39, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study1$Q40 <- car::recode(Study1$Q40, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study1$Q41 <- car::recode(Study1$Q41, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study1$Q42 <- car::recode(Study1$Q42, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study1$Q43 <- car::recode(Study1$Q43, "1=5; 2=4; 3=3; 4=2; 5=1")
+```
+
+```{r}
+Study1 %<>% mutate(EDI= rowSums(subset(select(Study1, c(Q6:Q21)))))
+Study1 %<>% mutate(INCOM= rowSums(subset(select(Study1, c(Q23:Q33)))))
+Study1 %<>% mutate(Fat_talk= rowSums(subset(select(Study1, c(Q35:Q43)))))
+```
+
+# Study 1: Centered variables.
+
+Centered the variables.
+
+```{r}
+Study1 %<>% mutate(EDI_cent= EDI-mean(EDI), INCOM_cent= INCOM-mean(INCOM), BMI_cent= BMI-mean(BMI), Fat_talk_cent= Fat_talk-mean(Fat_talk)) # center
+Study1 %<>% mutate(EDI_cent_z= scale(EDI_cent), INCOM_cent_z= scale(INCOM_cent), BMI_cent_z= scale(BMI_cent), Fat_talk_cent_z= scale(Fat_talk_cent)) # z_score
+```
+
+# Study 1: Multiple regression, Fat talk
+
+Standardised coefficients
+
+```{r}
+Study1 <- Study1 |> 
+  dplyr::mutate(
+    dplyr::across(
+      .cols = c(Fat_talk_cent_z, BMI_cent_z, EDI_cent_z, INCOM_cent_z), 
+      .fns = as.numeric
+    )
+  )
+
+Study1$BMI_cent_z |> class()
+```
+
+
+```{r}
+#model_2_f <-lm(Fat_talk_cent_z ~ BMI_cent_z + EDI_cent_z + INCOM_cent_z-1, data=Study1)
+model_3_f <-lm(Fat_talk_cent_z ~ BMI_cent_z + EDI_cent_z * INCOM_cent_z-1, data=Study1)
+```
+
+# ------ HERE
+
+```{r}
+summary(model_3_f)
+```
+
+```{r}
+r02896_mod_z_1 <- model_3_f
+key_effects = c("BMI_cent_z", "EDI_cent_z", "INCOM_cent_z", "EDI_cent_z:INCOM_cent_z")
+export_ols(r02896_mod_z_1, key_effects)
+```
+
+
+note down variables:
+
+```{r}
+Study1$Fat_talk_cent_z
+Study1$BMI_cent_z
+Study1$EDI_cent_z
+Study1$INCOM_cent_z
+```
+
+# Study 2
+
+```{r}
+Study2<-read_xlsx("../data/raw_data/r02896_pollet2020_2.xlsx") 
+```
+
+376 reached the end of the survey
+
+```{r}
+Study2 %<>% filter(is.na(Q43)==F)
+```
+
+```{r}
+Study2 %<>% filter(is.na(Weight_kg)==F)
+Study2 %<>% filter(is.na(Height_cm)==F)
+```
+
+```{r}
+Study2 %<>% filter(Woman==4)
+```
+
+# Study 2 : BMI
+
+```{r}
+Study2 %<>% mutate(BMI = ((Weight_kg/Height_cm/Height_cm) * 10000))
+```
+
+There are some extreme values here. Therefore we also Winsorised the BMI
+data.
+
+```{r}
+sum(Study2$BMI > 18.5 & Study2$BMI < 24.9) / nrow(Study2) # normal weight
+sum(Study2$BMI < 18.5) / nrow(Study2) # underweight
+sum(Study2$BMI > 25 & Study2$BMI < 29.9) / nrow(Study2) # overweight
+sum(Study2$BMI > 30) / nrow(Study2) # obese
+```
+
+# Study 2: Sum scales.
+
+Note that this overrides (!!!).
+
+## EDI recode
+
+```{r}
+Study2$Q6 <- car::recode(Study2$Q6, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study2$Q15 <- car::recode(Study2$Q15, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study2$Q16 <- car::recode(Study2$Q16, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study2$Q19 <- car::recode(Study2$Q19, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study2$Q21 <- car::recode(Study2$Q21, "1=5; 2=4; 3=3; 4=2; 5=1")
+```
+
+## INCOM
+
+Qualtrics had scored 1 = always, never = 5 so we recode here. Therefore
+we rescore all but Q27/Q33.
+
+```{r}
+Study2$Q23 <- car::recode(Study2$Q23, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study2$Q24 <- car::recode(Study2$Q24, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study2$Q25 <- car::recode(Study2$Q25, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study2$Q26 <- car::recode(Study2$Q26, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study2$Q28 <- car::recode(Study2$Q28, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study2$Q29 <- car::recode(Study2$Q29, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study2$Q30 <- car::recode(Study2$Q30, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study2$Q31 <- car::recode(Study2$Q31, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study2$Q32 <- car::recode(Study2$Q32, "1=5; 2=4; 3=3; 4=2; 5=1")
+```
+
+## Fat Talk.
+
+Qualtrics had scored 1 = always, never = 5 so we recode here.
+
+```{r}
+Study2$Q35 <- car::recode(Study2$Q35, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study2$Q36 <- car::recode(Study2$Q36, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study2$Q37 <- car::recode(Study2$Q37, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study2$Q38 <- car::recode(Study2$Q38, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study2$Q39 <- car::recode(Study2$Q39, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study2$Q40 <- car::recode(Study2$Q40, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study2$Q41 <- car::recode(Study2$Q41, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study2$Q42 <- car::recode(Study2$Q42, "1=5; 2=4; 3=3; 4=2; 5=1")
+Study2$Q43 <- car::recode(Study2$Q43, "1=5; 2=4; 3=3; 4=2; 5=1")
+```
+
+```{r}
+Study2 %<>% mutate(EDI= rowSums(subset(select(Study2, c(Q6:Q21)))))
+Study2 %<>% mutate(INCOM= rowSums(subset(select(Study2, c(Q23:Q33)))))
+Study2 %<>% mutate(Fat_talk= rowSums(subset(select(Study2, c(Q35:Q43)))))
+```
+
+# Study 2: Centered variables.
+
+Centered the variables.
+
+```{r}
+Study2 %<>% mutate(EDI_cent= EDI-mean(EDI), INCOM_cent= INCOM-mean(INCOM), BMI_cent= BMI-mean(BMI), Fat_talk_cent= Fat_talk-mean(Fat_talk)) # center
+Study2 %<>% mutate(EDI_cent_z= scale(EDI_cent), INCOM_cent_z= scale(INCOM_cent), BMI_cent_z= scale(BMI_cent), Fat_talk_cent_z= scale(Fat_talk_cent)) # z_score
+```
+
+# Study 2: Multiple regression, Fat talk
+
+Standardised coefficients
+
+
+```{r}
+Study2 <- Study2 |> 
+  dplyr::mutate(
+    dplyr::across(
+      .cols = c(Fat_talk_cent_z, BMI_cent_z, EDI_cent_z, INCOM_cent_z), 
+      .fns = as.numeric
+    )
+  )
+
+Study2$BMI_cent_z |> class()
+```
+
+
+```{r}
+model_1_f<-lm(Fat_talk_cent_z~BMI_cent_z-1,data=Study2)
+model_2_f<-lm(Fat_talk_cent_z~BMI_cent_z+EDI_cent_z+INCOM_cent_z-1,data=Study2)
+model_3_f<-lm(Fat_talk_cent_z~BMI_cent_z+EDI_cent_z*INCOM_cent_z-1,data=Study2)
+```
+
+# ----- HERE
+
+```{r}
+summary(model_3_f)
+```
+
+```{r}
+r02896_mod_z_2 <- model_3_f
+key_effects = c("BMI_cent_z", "EDI_cent_z", "INCOM_cent_z", "EDI_cent_z:INCOM_cent_z")
+export_ols(r02896_mod_z_2, key_effects)
+```

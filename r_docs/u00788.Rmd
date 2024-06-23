@@ -1,0 +1,101 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-08-01'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df_1a <- haven::read_sav("../data/raw_data/u00788_RIMA_Shape_bias_mag.sav")
+df_1b <- haven::read_sav("../data/raw_data/u00788_RIMA_Color_bias_mag.sav")
+df_2 <- haven::read_sav("../data/raw_data/u00788_RIMA_Bias_Mag.sav")
+```
+
+# Study 1a
+
+model 1 
+
+```{r}
+u00788_mod_rm_z_1 <- df_1a %>% 
+  dplyr::select(id = Sub, SimOffset, DisOffset) %>% 
+  tidyr::pivot_longer(-id) %>% 
+  afex::aov_4(z(value) ~ name + (name|id), .)
+
+export_ols(u00788_mod_rm_z_1, key_effects = c("name"))
+
+
+u00788_mod_lmer_z_1 <- df_1a %>% 
+  dplyr::select(id = Sub, SimOffset, DisOffset) %>% 
+  tidyr::pivot_longer(-id) %>% 
+  lme4::lmer(z(value) ~ name + (1|id), .)
+
+export_ols(u00788_mod_lmer_z_1, key_effects = mod_coeffs(u00788_mod_lmer_z_1))
+```
+
+
+model 2 
+
+```{r}
+u00788_mod_rm_z_2 <- df_1a %>% 
+  dplyr::select(id = Sub, ConfSimOffset, ConfDisOffset) %>% 
+  tidyr::pivot_longer(-id) %>% 
+  afex::aov_4(z(value) ~ name + (name|id), .)
+
+export_ols(u00788_mod_rm_z_2, key_effects = c("name"))
+
+
+u00788_mod_lmer_z_2 <- df_1a %>% 
+  dplyr::select(id = Sub, ConfSimOffset, ConfDisOffset) %>% 
+  tidyr::pivot_longer(-id) %>% 
+  lme4::lmer(z(value) ~ name + (1|id), .)
+
+export_ols(u00788_mod_lmer_z_2, key_effects = mod_coeffs(u00788_mod_lmer_z_2))
+```
+
+# Study 1b
+
+model 3
+
+```{r}
+u00788_mod_rm_z_3 <- df_1b %>% 
+  dplyr::select(id = Sub, SimOffset, DisOffset) %>% 
+  tidyr::pivot_longer(-id) %>% 
+  afex::aov_4(z(value) ~ name + (name|id), .)
+
+export_ols(u00788_mod_rm_z_3, key_effects = c("name"))
+
+
+u00788_mod_lmer_z_3 <- df_1b %>% 
+  dplyr::select(id = Sub, SimOffset, DisOffset) %>% 
+  tidyr::pivot_longer(-id) %>% 
+  lme4::lmer(z(value) ~ name + (1|id), .)
+
+export_ols(u00788_mod_lmer_z_3, key_effects = mod_coeffs(u00788_mod_lmer_z_3))
+```
+
+model 4 
+
+```{r}
+u00788_mod_rm_z_4 <- df_1b %>% 
+  dplyr::select(id = Sub, ConfSimOffset, ConfDisOffset) %>% 
+  tidyr::pivot_longer(-id) %>% 
+  afex::aov_4(z(value) ~ name + (name|id), .)
+
+export_ols(u00788_mod_rm_z_4, key_effects = c("name"))
+
+
+u00788_mod_lmer_z_4 <- df_1b %>% 
+  dplyr::select(id = Sub, ConfSimOffset, ConfDisOffset) %>% 
+  tidyr::pivot_longer(-id) %>% 
+  lme4::lmer(z(value) ~ name + (1|id), .)
+
+export_ols(u00788_mod_lmer_z_4, key_effects = mod_coeffs(u00788_mod_lmer_z_4))
+```
+
+Study 2 is 1 sample t-tests only; study 3 is computational modelling 
+
+

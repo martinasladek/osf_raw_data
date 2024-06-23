@@ -1,0 +1,93 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-05-17'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(dplyr)
+library(magrittr)
+
+p00487_tib_1 <- read.csv("../data/raw_data/p00487_Experiment1b.csv") %>% 
+  dplyr::mutate(
+    Kind = factor(Kind), 
+    Structure = factor(Structure)
+  )
+
+p00487_tib_2 <- read.csv("../data/raw_data/p00487_Experiment2.csv")
+
+p00487_tib_3 <- read.csv("../data/raw_data/p00487_Experiment3.csv") %>% 
+  dplyr::mutate(Context = factor(Context), 
+                Population = factor(Population))
+```
+
+# Study 1 
+
+```{r}
+p00487_mod_z_1 <- p00487_tib_1 %>% 
+  lm(z(Is) ~ Kind * Structure,
+     contrasts=list(Kind=contr.sum, Structure=contr.sum), 
+     data = .)
+
+export_ols(p00487_mod_z_1, 
+           key_effects = c("Kind1", "Kind2", "Structure1", 
+                           "Kind1:Structure1", "Kind2:Structure1"))
+
+
+
+p00487_mod_z_2 <- p00487_tib_1 %>% 
+  lm(z(Is_not) ~ Kind * Structure,
+     contrasts=list(Kind=contr.sum, Structure=contr.sum), 
+     data = .)
+
+export_ols(p00487_mod_z_2, 
+           key_effects = c("Kind1", "Kind2", "Structure1", 
+                           "Kind1:Structure1", "Kind2:Structure1"))
+```
+
+# Study 2 
+
+```{r}
+p00487_mod_z_3 <- p00487_tib_2 %>% 
+  lm(z(Rating) ~ Kind * Context,
+     contrasts=list(Kind=contr.sum, Context=contr.sum), 
+     data = .)
+
+export_ols(p00487_mod_z_3, 
+           key_effects = c("Kind1", "Kind2", "Context1", "Context2", 
+                           "Kind1:Context1", "Kind2:Context1", 
+                           "Kind1:Context2", "Kind2:Context2"))
+```
+
+# Study 3
+
+a
+
+```{r}
+p00487_mod_z_4 <- p00487_tib_3 %>% 
+  dplyr::filter(!stringr::str_detect(Check, "B")) %>% 
+  lm(z(Rating) ~ Context,
+     contrasts=list(Context=contr.sum), 
+     data = .)
+
+export_ols(p00487_mod_z_4, 
+           key_effects = c("Context1", "Context2"))
+```
+
+
+b
+
+```{r}
+p00487_mod_z_5 <- p00487_tib_3 %>% 
+  dplyr::filter(stringr::str_detect(Check, "B")) %>% 
+  lm(z(Rating) ~ Context,
+     contrasts=list(Context=contr.sum), 
+     data = .) 
+
+export_ols(p00487_mod_z_5, 
+           key_effects = c("Context1", "Context2"))
+```
+

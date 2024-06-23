@@ -1,0 +1,265 @@
+---
+title: "u00975"
+author: "MS"
+date: '2022-08-01'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df_1 <- read.csv("../data/raw_data/u00975_exp1_eff_latnorm.csv") %>% dplyr::mutate(id = 1:nrow(.))
+df_2 <- read.csv("../data/raw_data/u00975_exp2_inv.csv") %>% dplyr::mutate(id = 1:nrow(.))
+df_2a <- read.csv("../data/raw_data/u00975_exp2_all.csv") %>% dplyr::mutate(id = 1:nrow(.))
+df_3 <- read.csv("../data/raw_data/u00975_exp3_all.csv") %>% dplyr::mutate(id = 1:nrow(.))
+df_4a <- read.csv("../data/raw_data/u00975_exp4a.csv") %>% dplyr::mutate(id = 1:nrow(.))
+df_4b <- read.csv("../data/raw_data/u00975_exp4b.csv") %>% dplyr::mutate(id = 1:nrow(.))
+```
+
+
+# exp 1 
+
+```{r}
+df_1_long_a <- df_1 %>% 
+  dplyr::select(id, contains("inv")) %>% 
+  tidyr::pivot_longer(-id) 
+  
+
+u00975_mod_rm_z_1 <- df_1_long_a %>% 
+  afex::aov_4(z(value) ~ name + (name|id), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(
+  u00975_mod_rm_z_1, 
+  key_effects = "name"
+)
+
+
+
+u00975_mod_lmer_z_1 <- df_1_long_a %>% 
+  lme4::lmer(z(value) ~ name + (1|id), .)
+
+export_ols(
+  u00975_mod_lmer_z_1, 
+  key_effects = mod_coeffs(u00975_mod_lmer_z_1)
+)
+```
+
+model 2 
+
+```{r}
+df_1_long_b <- df_1 %>% 
+  dplyr::select(id, contains("con")) %>% 
+  tidyr::pivot_longer(-id) 
+  
+
+u00975_mod_rm_z_2 <- df_1_long_a %>% 
+  afex::aov_4(z(value) ~ name + (name|id), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(
+  u00975_mod_rm_z_2, 
+  key_effects = "name"
+)
+
+u00975_mod_lmer_z_2 <- df_1_long_b %>% 
+  lme4::lmer(z(value) ~ name + (1|id), .)
+
+export_ols(
+  u00975_mod_lmer_z_2, 
+  key_effects = mod_coeffs(u00975_mod_lmer_z_2)
+)
+```
+
+
+# exp 2 
+
+model 3 
+
+```{r}
+df_2_long <- df_2 %>% 
+  tidyr::pivot_longer(-id) %>% 
+  dplyr::mutate(
+    paradigm = case_when(
+      str_detect(name, "rsvp") ~ "rsvp", 
+      str_detect(name, "bm") ~ "bm", 
+      str_detect(name, "cfs") ~ "cfs", 
+    ) %>% factor(., levels = c("cfs", "bm", "rsvp")), 
+    orient = if_else(str_detect(name, "upr"), "upright", "inverse")
+  )
+
+u00975_mod_rm_z_3 <- df_2_long %>% 
+  afex::aov_4(z(value) ~ paradigm*orient + (paradigm*orient|id), ., 
+              anova_table = list(correct = "none"))
+
+export_ols(
+  u00975_mod_rm_z_3, 
+  key_effects = c("paradigm:orient")
+)
+
+
+
+u00975_mod_lmer_z_3 <- df_2_long %>% 
+  lme4::lmer(z(value) ~ paradigm*orient + (1|id), .)
+
+export_ols(
+  u00975_mod_lmer_z_3, 
+  key_effects = c("paradigmbm:orientupright", "paradigmrsvp:orientupright")
+)
+```
+
+
+model 4 
+
+
+```{r}
+df_2a_long <- df_2a %>% 
+  tidyr::pivot_longer(-id) %>% 
+  dplyr::mutate(
+    paradigm = case_when(
+      str_detect(name, "RSVP") ~ "rsvp", 
+      str_detect(name, "BM") ~ "bm", 
+      str_detect(name, "CFS") ~ "cfs", 
+    ) %>% factor(., levels = c("cfs", "bm", "rsvp")), 
+    orient = if_else(str_detect(name, "upr"), "upright", "inverse"), 
+    time = factor(readr::parse_number(name))
+  )
+
+
+df_2a_long %>% 
+  afex::aov_4(z(value) ~ paradigm*orient*time + (paradigm*orient*time|id), ., 
+              anova_table = list(correction = "none"))
+
+
+u00975_mod_rm_z_4 <- df_2a_long %>% 
+  afex::aov_4(value ~ paradigm*orient*time + (paradigm*orient*time|id), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(
+  u00975_mod_rm_z_4, 
+  key_effects = c("paradigm:orient")
+)
+
+
+
+u00975_mod_lmer_z_4 <- df_2a_long %>% 
+  lme4::lmer(z(value) ~ paradigm*orient*time + (1|id), .)
+
+export_ols(
+  u00975_mod_lmer_z_4, 
+  key_effects = c("paradigmbm:orientupright", "paradigmrsvp:orientupright", 
+                  "paradigmbm:orientupright:time2", "paradigmrsvp:orientupright:time2", 
+                  "paradigmbm:orientupright:time3", "paradigmrsvp:orientupright:time3")
+)
+```
+
+# exp 3 
+
+model 5 
+
+```{r}
+df_3_long_a <- df_3 %>% 
+  dplyr::select(id, contains("Det")) %>% 
+  tidyr::pivot_longer(-id) %>% 
+  dplyr::mutate(
+    orient = if_else(str_detect(name, "Upr"), "upright", "inverse"), 
+    time = factor(10*tidyr::extract_numeric(name))
+  )
+
+
+u00975_mod_rm_z_5 <- df_3_long_a %>% 
+  afex::aov_4(z(value) ~ orient*time + (orient*time|id), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(u00975_mod_rm_z_5, 
+           key_effects = c("orient:time"))
+
+
+u00975_mod_lmer_z_5 <- df_3_long_a %>% 
+  lme4::lmer(z(value) ~ orient*time + (1|id), .)
+
+export_ols(u00975_mod_lmer_z_5, 
+           key_effects = c("orientupright:time2", "orientupright:time3", 
+                           "orientupright:time4", "orientupright:time5"))
+```
+
+model 6 
+
+```{r}
+df_3_long_b <- df_3 %>% 
+  dplyr::select(id, contains("Loc")) %>% 
+  tidyr::pivot_longer(-id) %>% 
+  dplyr::mutate(
+    orient = if_else(str_detect(name, "Upr"), "upright", "inverse"), 
+    time = factor(10*tidyr::extract_numeric(name))
+  )
+
+
+df_3_long_b %>% 
+  afex::aov_4(value ~ orient*time + (orient*time|id), .)
+
+u00975_mod_rm_z_6 <- df_3_long_b %>% 
+  afex::aov_4(z(value) ~ orient*time + (orient*time|id), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(u00975_mod_rm_z_6, 
+           key_effects = c("orient:time"))
+
+
+u00975_mod_lmer_z_6 <- df_3_long_b %>% 
+  lme4::lmer(z(value) ~ orient*time + (1|id), .)
+
+export_ols(u00975_mod_lmer_z_6, 
+           key_effects = c("orientupright:time2", "orientupright:time3", 
+                           "orientupright:time4", "orientupright:time5"))
+```
+
+# Exp 4
+
+model 7 
+
+```{r}
+df_4a_long <- df_4a %>% 
+  dplyr::select(id, contains("loc")) %>% 
+  tidyr::pivot_longer(-id) %>% 
+  dplyr::mutate(
+    validity = if_else(str_detect(name, "val"), "valid", "invalid"), 
+    time = factor(extract_num(name))
+  )
+
+u00975_mod_rm_z_7 <- df_4a_long %>% 
+  afex::aov_4(z(value) ~ validity*time + (validity*time|id), ., 
+              anova_table = list(correct = "none"))
+
+export_ols(u00975_mod_rm_z_7, key_effects =  "validity:time")
+
+u00975_mod_lmer_z_7 <- df_4a_long %>% 
+  lme4::lmer(z(value) ~ validity*time + (1|id), .)
+
+export_ols(u00975_mod_lmer_z_7, key_effects =  c("validityvalid:time2", "validityvalid:time3", "validityvalid:time4"))
+```
+
+model 8 
+
+```{r}
+df_4b_long <- df_4b %>% 
+  dplyr::select(id, contains("loc")) %>% 
+  tidyr::pivot_longer(-id) %>% 
+  dplyr::mutate(
+    validity = if_else(str_detect(name, "upr"), "upright", "inverse"), 
+    time = factor(extract_num(name))
+  )
+
+u00975_mod_rm_z_8 <- df_4b_long %>% 
+  afex::aov_4(z(value) ~ validity*time + (validity*time|id), ., 
+              anova_table = list(correct = "none"))
+
+export_ols(u00975_mod_rm_z_8, key_effects =  "validity:time")
+
+u00975_mod_lmer_z_8 <- df_4b_long %>% 
+  lme4::lmer(z(value) ~ validity*time + (1|id), .)
+
+export_ols(u00975_mod_lmer_z_8, key_effects =  c("validityupright:time2", "validityupright:time3", "validityupright:time4"))
+```

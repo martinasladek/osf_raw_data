@@ -1,0 +1,209 @@
+---
+title: ""
+output: html_document
+---
+
+Colleges and universities around the world switched to remote teaching in early 2020. In this study we assessed the experiences of students who experienced different operationalizations of remote teaching during the first full term of instruction during the COVID pandemic. Students (N = 649) in 11 sections of Introductory Psychology participated in an online assessment of their learning after completing their final exam. We examined the level of alignment between student preferences (e.g., for synchronous lectures) with the format of the classes they were in (e.g., featuring synchronous lectures) and used this measure of fit (**aligned, misaligned, no preference) and students' modality based self-efficacy as predictors of learning.** Self-efficacy predicted final exam scores and students' ratings of the skills learned, value of science, student learning outcomes, class behaviors, and attitudes toward their class. Fit predicted differences in attitude and class related behaviors (e.g., studying). Self-efficacy also predicted the extent to which students changed their learning behaviors during the pandemic. Our results provide educators with key ways to prepare for additional remote teaching.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+library(gtools)
+library(robustbase)
+library(magrittr) # unless you routinely load tidyverse, in which case leave this one out. You just need it for the pipe. 
+library(moments)
+
+list.files("../data/raw_data/", pattern = "r01883")
+
+r01883_tib <- haven::read_sav("../data/raw_data/r01883_gurung2020_LearningPandemic_Gurung&Stone2020.sav")
+
+r01883_tib %<>% 
+  dplyr::filter(!is.na(Skills), 
+                              !is.na(ScienceTude), 
+                              !is.na(GenPsychBehaviors), 
+                              !is.na(GenAttitdues),
+                              !is.na(Q96), 
+                              !is.na(FIT)) %>% 
+  dplyr::mutate(
+    Q96 = as.factor(Q96), 
+    INSTRUCTOR = as.factor(INSTRUCTOR)
+  )
+
+r01883_tib %>% View()
+```
+
+Contrasts
+
+```{r}
+# neither_vs_any = c(-1/3, 2/3, -1/3)
+# online_vs_f2f = c(1/2, 0, -1/2)
+# contrasts(r01883_tib$Q96) <- cbind(neither_vs_any, online_vs_f2f)
+# 
+# contrasts(r01883_tib$INSTRUCTOR) <- c(1/2, -1/2)
+
+```
+
+# Analysis 1:
+
+Unclear removal of participants
+
+```{r}
+r01883_mod_original_1 <- lm(Skills ~ as.factor(Q96) + FinalExamPercent + as.factor(INSTRUCTOR), data = r01883_tib) 
+r01883_mod_original_1 %>% car::Anova(type = 3)
+r01883_mod_original_1 %>% summary()
+```
+
+```{r}
+r01883_mod_z_1 <- lm(z(Skills) ~ as.factor(Q96) + z(FinalExamPercent) + as.factor(INSTRUCTOR), data = r01883_tib) 
+r01883_mod_z_1 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(Q96)2", "as.factor(Q96)3")
+export_ols(r01883_mod_z_1, key_effects)
+```
+
+
+
+Not reproducing:
+
+<!-- ```{r} -->
+<!-- r01883_mod_original_2 <- lm(ScienceTude ~ as.factor(Q96) + FinalExamPercent + as.factor(INSTRUCTOR), data = r01883_tib)  -->
+<!-- r01883_mod_original_2 %>% car::Anova(type = 3) -->
+<!-- r01883_mod_original_2 %>% summary() -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- r01883_mod_z_2 <- lm(z(ScienceTude) ~ as.factor(Q96) + z(FinalExamPercent) + as.factor(INSTRUCTOR), data = r01883_tib)  -->
+<!-- r01883_mod_z_2 %>% summary() -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- key_effects = c("as.factor(Q96)2", "as.factor(Q96)3") -->
+<!-- export_ols(r01883_mod_z_2, key_effects) -->
+<!-- ``` -->
+
+
+
+
+
+
+
+```{r}
+r01883_mod_original_3 <- lm(GenPsychBehaviors ~ as.factor(Q96) + FinalExamPercent + as.factor(INSTRUCTOR), data = r01883_tib)
+r01883_mod_original_3 %>% car::Anova(type = 3)
+r01883_mod_original_3 %>% summary()
+```
+
+```{r}
+r01883_mod_z_3 <- lm(z(GenPsychBehaviors) ~ as.factor(Q96) + z(FinalExamPercent) + as.factor(INSTRUCTOR), data = r01883_tib)
+r01883_mod_z_3 %>% car::Anova(type = 3)
+r01883_mod_z_3 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(Q96)2", "as.factor(Q96)3")
+export_ols(r01883_mod_z_3, key_effects)
+```
+
+
+
+
+```{r}
+r01883_mod_original_4 <- lm(GenAttitdues ~ as.factor(Q96) + FinalExamPercent + as.factor(INSTRUCTOR), data = r01883_tib)
+r01883_mod_original_4 %>% car::Anova(type = 3)
+r01883_mod_original_4 %>% summary()
+```
+
+```{r}
+r01883_mod_z_4 <- lm(z(GenAttitdues) ~ as.factor(Q96) + z(FinalExamPercent) + as.factor(INSTRUCTOR), data = r01883_tib)
+r01883_mod_z_4 %>% car::Anova(type = 3)
+r01883_mod_z_4 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(Q96)2", "as.factor(Q96)3")
+export_ols(r01883_mod_z_4, key_effects)
+```
+
+There's more analysis re pandemic changes, but the labelling is unclear and it's not possible to tell which variables are the relevant ones
+
+# Analysis 2
+
+```{r}
+r01883_mod_original_5 <- lm(Skills ~ as.factor(FIT) + FinalExamPercent + as.factor(INSTRUCTOR), data = r01883_tib) 
+r01883_mod_original_5 %>% car::Anova()
+r01883_mod_original_5 %>% summary()
+```
+
+```{r}
+r01883_mod_z_5 <- lm(z(Skills) ~ as.factor(FIT) + z(FinalExamPercent) + as.factor(INSTRUCTOR), data = r01883_tib)
+r01883_mod_z_5 %>% car::Anova(type = 3)
+r01883_mod_z_5 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(FIT)2", "as.factor(FIT)3")
+export_ols(r01883_mod_z_5, key_effects)
+```
+
+
+
+
+```{r}
+r01883_mod_original_6 <- lm(ScienceTude ~ as.factor(FIT) + FinalExamPercent + as.factor(INSTRUCTOR), data = r01883_tib)
+
+r01883_mod_original_6 %>% car::Anova(type = 3)
+r01883_mod_original_6 %>% summary()
+```
+
+```{r}
+r01883_mod_z_6 <- lm(z(ScienceTude) ~ as.factor(FIT) + z(FinalExamPercent) + as.factor(INSTRUCTOR), data = r01883_tib)
+r01883_mod_z_6 %>% car::Anova(type = 3)
+r01883_mod_z_6 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(FIT)2", "as.factor(FIT)3")
+export_ols(r01883_mod_z_6, key_effects)
+```
+
+
+```{r}
+r01883_mod_original_7 <- lm(GenPsychBehaviors ~ as.factor(FIT) + FinalExamPercent + as.factor(INSTRUCTOR), data = r01883_tib) 
+
+r01883_mod_original_7 %>% car::Anova(type = 3)
+r01883_mod_original_7 %>% summary()
+```
+
+```{r}
+r01883_mod_z_7 <- lm(z(GenPsychBehaviors) ~ as.factor(FIT) + z(FinalExamPercent) + as.factor(INSTRUCTOR), data = r01883_tib)
+r01883_mod_z_7 %>% car::Anova(type = 3)
+r01883_mod_z_7 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(FIT)2", "as.factor(FIT)3")
+export_ols(r01883_mod_z_7, key_effects)
+```
+
+
+
+```{r}
+r01883_mod_original_8 <- lm(GenAttitdues ~ as.factor(FIT) + FinalExamPercent + as.factor(INSTRUCTOR), data = r01883_tib) 
+
+r01883_mod_original_8 %>% car::Anova(type = 3)
+r01883_mod_original_8 %>% summary()
+```
+
+```{r}
+r01883_mod_z_8 <- lm(z(GenAttitdues) ~ as.factor(FIT) + z(FinalExamPercent) + as.factor(INSTRUCTOR), data = r01883_tib)
+r01883_mod_z_8 %>% car::Anova(type = 3)
+r01883_mod_z_8 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(FIT)2", "as.factor(FIT)3")
+export_ols(r01883_mod_z_8, key_effects)
+```

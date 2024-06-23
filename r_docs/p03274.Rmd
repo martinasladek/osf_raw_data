@@ -1,0 +1,186 @@
+---
+title: ""
+output: html_document
+---
+
+A variety of studies have demonstrated gains in cognitive ability following cognitive training
+interventions. However, other studies have not shown such gains, and questions remain
+regarding the efficacy of specific cognitive training interventions. Cognitive training research
+often involves programs made up of just one or a few exercises, targeting limited and specific
+cognitive endpoints. In addition, cognitive training studies typically involve small samples
+that may be insufficient for reliable measurement of change. Other studies have
+utilized training periods that were too short to generate reliable gains in cognitive
+performance.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+library(gtools)
+library(robustbase)
+library(magrittr) # unless you routinely load tidyverse, in which case leave this one out. You just need it for the pipe. 
+library(moments)
+
+
+variables <- c("paper", "outcome", "n", "skew", "kurt", "z_1.96", "z_2.58", "z_3.29", "mode_n", "var", "var_ratio")
+
+list.files("../data/raw_data/", pattern = "p03274")
+
+p03274_tib <- readr::read_csv("../data/raw_data/p03274_hardy2016_pone.0134467.s004.csv") %>%
+  dplyr::filter(exclude == 0)
+
+p03274_tib
+```
+
+
+```{r}
+p03274_mod_original_1 <- lm(GI_d ~ group + GI_1, data = p03274_tib) 
+p03274_mod_original_1 %>% summary()
+```
+
+```{r}
+p03274_mod_z_1 <- lm(z(GI_d) ~ group + z(GI_1), data = p03274_tib) 
+p03274_mod_z_1 %>% summary()
+```
+
+```{r}
+key_effects = c("grouplumosity")
+export_ols(p03274_mod_z_1, key_effects)
+```
+
+
+
+
+
+
+```{r}
+p03274_mod_original_2 <- lm(MS_d ~ group + MS_1, data = p03274_tib)
+p03274_mod_original_2 %>% summary()
+```
+
+```{r}
+p03274_mod_z_2 <- lm(z(MS_d) ~ group + z(MS_1), data = p03274_tib) 
+p03274_mod_z_2 %>% summary()
+```
+
+```{r}
+key_effects = c("grouplumosity")
+export_ols(p03274_mod_z_2, key_effects)
+```
+
+
+
+
+
+
+
+```{r}
+p03274_mod_original_3 <- lm(RMS_d ~ group + RMS_1, data = p03274_tib) 
+p03274_mod_original_3 %>% summary()
+```
+
+```{r}
+p03274_mod_z_3 <- lm(z(RMS_d) ~ group + z(RMS_1), data = p03274_tib) 
+p03274_mod_z_3 %>% summary()
+```
+
+```{r}
+key_effects = c("grouplumosity")
+export_ols(p03274_mod_z_3, key_effects)
+```
+
+
+
+
+
+```{r}
+p03274_mod_original_4 <- lm(GR_d ~ group + GR_1, data = p03274_tib)
+p03274_mod_original_4 %>% summary()
+```
+
+```{r}
+p03274_mod_z_4 <- lm(z(GR_d) ~ group + z(GR_1), data = p03274_tib) 
+p03274_mod_z_4 %>% summary()
+```
+
+```{r}
+key_effects = c("grouplumosity")
+export_ols(p03274_mod_z_4, key_effects)
+```
+
+
+
+
+
+
+```{r}
+p03274_mod_original_5 <- lm(PM_d ~ group + PM_1, data = p03274_tib)
+p03274_mod_original_5 %>% summary()
+```
+
+```{r}
+p03274_mod_z_5 <- lm(z(PM_d) ~ group + z(PM_1), data = p03274_tib) 
+p03274_mod_z_5 %>% summary()
+```
+
+```{r}
+key_effects = c("grouplumosity")
+export_ols(p03274_mod_z_5, key_effects)
+```
+
+
+
+
+```{r}
+p03274_mod_original_6 <- lm(GNG_d ~ group + GNG_1, data = p03274_tib)
+p03274_mod_original_6 %>% summary()
+```
+
+```{r}
+p03274_mod_z_6 <- lm(z(GNG_d) ~ group + z(GNG_1), data = p03274_tib) 
+p03274_mod_z_6 %>% summary()
+```
+
+```{r}
+key_effects = c("grouplumosity")
+export_ols(p03274_mod_z_6, key_effects)
+```
+
+
+
+
+```{r}
+p03274_mod_original_7 <- lm(AR_d ~ group + AR_1, data = p03274_tib)
+p03274_mod_original_7 %>% summary()
+```
+
+```{r}
+p03274_mod_z_7 <- lm(z(AR_d) ~ group + z(AR_1), data = p03274_tib) 
+p03274_mod_z_7 %>% summary()
+```
+
+```{r}
+key_effects = c("grouplumosity")
+export_ols(p03274_mod_z_7, key_effects)
+```
+
+
+
+
+
+
+```{r}
+p03274_mod_original_8 <- lm(TTS_d ~ group + TTS_1, data = p03274_tib)
+p03274_mod_original_8 %>% summary()
+```
+
+```{r}
+p03274_mod_z_8 <- lm(z(TTS_d) ~ group + z(TTS_1), data = p03274_tib) 
+p03274_mod_z_8 %>% summary()
+```
+
+```{r}
+key_effects = c("grouplumosity")
+export_ols(p03274_mod_z_8, key_effects)
+```

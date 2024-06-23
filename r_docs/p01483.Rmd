@@ -1,0 +1,85 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-19'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df <- readxl::read_excel("../data/raw_data/p01483_pone.0197354.s001.xlsx", sheet = 1) %>% 
+  dplyr::mutate(Lifestyle = factor(Lifestyle))
+
+df %>% 
+  dplyr::select(!contains("@"))
+```
+
+
+```{r}
+p01483_mod_z_1 <- df %>% 
+  lm(z(Factor_1_Fearfulness) ~ Lifestyle, .) 
+
+export_ols(
+  p01483_mod_z_1, 
+  key_effects = "Lifestyle2"
+)
+```
+
+
+```{r}
+p01483_mod_z_2 <- df %>% 
+  lm(z(Factor_3_ActivityExcitability) ~ Lifestyle, .) 
+
+export_ols(
+  p01483_mod_z_2, 
+  key_effects = "Lifestyle2"
+)
+```
+
+
+```{r}
+p01483_mod_z_3 <- df %>% 
+  lm(z(Factor_5_AggressionTowardsAnimals) ~ Lifestyle, .) 
+
+export_ols(
+  p01483_mod_z_3, 
+  key_effects = "Lifestyle2"
+)
+```
+
+
+```{r}
+p01483_mod_z_4 <- df %>% 
+  lm(z(F_1_1_FearOfPeople) ~ Lifestyle, .) 
+
+export_ols(
+  p01483_mod_z_4, 
+  key_effects = "Lifestyle2"
+)
+```
+
+
+```{r}
+p01483_mod_z_5 <- df %>% 
+  lm(z(F_3_1_Excitability) ~ Lifestyle, .) 
+
+export_ols(
+  p01483_mod_z_5, 
+  key_effects = "Lifestyle2"
+)
+```
+
+
+```{r}
+p01483_mod_z_6 <- df %>% 
+  lm(z(F_5_2_PreyDrive) ~ Lifestyle, .) 
+
+export_ols(
+  p01483_mod_z_6, 
+  key_effects = "Lifestyle2"
+)
+```
+

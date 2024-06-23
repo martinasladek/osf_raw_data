@@ -1,0 +1,57 @@
+---
+title: ""
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+library(gtools)
+library(robustbase)
+library(magrittr) # unless you routinely load tidyverse, in which case leave this one out. You just need it for the pipe. 
+library(moments)
+
+
+variables <- c("paper", "outcome", "n", "skew", "kurt", "z_1.96", "z_2.58", "z_3.29", "mode_n", "var", "var_ratio")
+
+list.files("../data/raw_data/", pattern = "r01085")
+
+r01085_tib <- readr::read_csv("../data/raw_data/r01085_group_df_wide_validation.csv")
+r01085_tib
+```
+
+Already in Z scores 
+
+```{r}
+r01085_mod_original_1 <- lm(q29 ~ age_scaled + q1 + q2 + q3 + q4 + q5 + q6 + q7 + q8 + q9 + q10, 
+            data = r01085_tib)
+r01085_mod_original_1 %>% summary()
+```
+
+```{r}
+r01085_mod_z_1 <- r01085_mod_original_1
+key_effects = c("q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10")
+export_ols(r01085_mod_z_1, key_effects = key_effects)
+```
+
+
+
+
+
+
+
+```{r}
+r01085_mod_original_2 <- lm(q30 ~ age_scaled + q1 + + q2 + q3 + q4 + q5 + q6 + q7 + q8 + q9 + q10, 
+            data = r01085_tib)
+r01085_mod_original_2 %>% summary()
+```
+
+
+```{r}
+r01085_mod_z_2 <- r01085_mod_original_2
+key_effects = c("q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10")
+export_ols(r01085_mod_z_2, key_effects = key_effects)
+```
+

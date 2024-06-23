@@ -1,0 +1,287 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-15'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df <- readxl::read_excel("../data/raw_data/p01422_pone.0200618.s006.xlsx")
+
+```
+ 
+neutered = neurtered, sex, age = `age (y)`
+
+model 1 HRV
+
+```{r}
+df_long_1 <- df %>% 
+  dplyr::select(id = ID, group = Grupo,
+                contains("LFHF") & !contains("index")) %>% 
+  tidyr::pivot_longer(-c(id, group)) %>% 
+  dplyr::mutate(time = factor(name, levels = c("LFHFbasal", "LFHFbasal2", "LFHFsound", "LFHFpos"))) 
+
+p01422_mod_rm_z_1 <- df_long_1 %>% 
+  afex::aov_4(z(value) ~ group*time + (time|id), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(
+  p01422_mod_rm_z_1, 
+  key_effects = c("group", "time", "group:time")
+)
+
+p01422_mod_lmer_z_1 <- df_long_1 %>% 
+  lme4::lmer(z(value) ~ group*time + (1|id), .)
+
+export_ols(
+  p01422_mod_lmer_z_1, 
+  key_effects = c("groupsound sensitive", "timeLFHFbasal2", "timeLFHFsound", 
+                  "timeLFHFpos", "groupsound sensitive:timeLFHFbasal2", 
+                  "groupsound sensitive:timeLFHFsound", 
+                  "groupsound sensitive:timeLFHFpos")
+)
+```
+
+
+model 2 cortisol: not reproducing 
+
+???
+
+```{r}
+df %>% names()
+```
+
+behaviours: basal, sound, aftersound
+
+model 3: alert and attention
+
+
+```{r}
+df_long_3 <- df %>% 
+  dplyr::select(id = ID, group = Grupo, "restbasal...42", "restsound...63", "restpos...84") %>% 
+  tidyr::pivot_longer(-c(id, group)) %>% 
+  dplyr::mutate(
+    time = factor(name, 
+                  levels = c("restbasal...42", "restsound...63", "restpos...84"), 
+                  labels = c("basal", "sound", "pos"))
+  ) 
+
+p01422_mod_rm_z_3 <- df_long_3 %>% 
+  afex::aov_4(z(value) ~ group*time + (time|id), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(
+  p01422_mod_rm_z_3, 
+  key_effects = c("group", "time", "group:time")
+)
+
+
+p01422_mod_lmer_z_3 <- df_long_3 %>% 
+  lme4::lmer(z(value) ~ group*time + (1|id), .)
+
+export_ols(
+  p01422_mod_lmer_z_3, 
+  key_effects = c("groupsound sensitive", "timesound", "timepos", 
+                  "groupsound sensitive:timesound", "groupsound sensitive:timepos")
+)
+```
+
+
+other behaviours: 
+
+panting, search, trembling, hiding, runaway, 
+
+
+model 4: panting : not reproducing 
+
+```{r}
+df_long_4 <- df %>% 
+  dplyr::filter(ID != "Yelow") %>% 
+  dplyr::select(id = ID, group = Grupo, "pantingbasal", "pantingsound", "pantingpos") %>% 
+  tidyr::pivot_longer(-c(id, group)) %>% 
+  dplyr::mutate(
+    time = factor(name, 
+                  levels = c("pantingbasal", "pantingsound", "pantingpos"), 
+                  labels = c("basal", "sound", "pos"))
+  ) 
+
+df_long_4 %>% 
+  afex::aov_4(value ~ group*time + (time|id), ., 
+              anova_table = list(correction = "none"))
+
+p01422_mod_rm_z_4 <- df_long_4 %>% 
+  afex::aov_4(z(value) ~ group*time + (time|id), ., 
+              anova_table = list(correction = "none"))
+
+# export_ols(
+#   p01422_mod_rm_z_4, 
+#   key_effects = c("group", "time", "group:time")
+# )
+
+
+p01422_mod_lmer_z_4 <- df_long_4 %>% 
+  lme4::lmer(z(value) ~ group*time + (1|id), .)
+
+# export_ols(
+#   p01422_mod_lmer_z_4, 
+#   key_effects = c("groupsound sensitive", "timesound", "timepos", 
+#                   "groupsound sensitive:timesound", "groupsound sensitive:timepos")
+# )
+```
+
+model 5 search sound: not reproducing 
+
+```{r}
+df_long_5 <- df %>% 
+  dplyr::select(id = ID, group = Grupo, "searchsoundbasal", "searchsoundsound", "searchsoundpos") %>% 
+  tidyr::pivot_longer(-c(id, group)) %>% 
+  dplyr::mutate(
+    time = factor(name, 
+                  levels = c("searchsoundbasal", "searchsoundsound", "searchsoundpos"), 
+                  labels = c("basal", "sound", "pos"))
+  ) 
+
+df_long_5 %>% 
+  afex::aov_4(value ~ group*time + (time|id), ., 
+              anova_table = list(correction = "none"))
+
+
+p01422_mod_rm_z_5 <- df_long_5 %>% 
+  afex::aov_4(z(value) ~ group*time + (time|id), ., 
+              anova_table = list(correction = "none"))
+
+# export_ols(
+#   p01422_mod_rm_z_5, 
+#   key_effects = c("group", "time", "group:time")
+# )
+
+
+p01422_mod_lmer_z_5 <- df_long_5 %>% 
+  lme4::lmer(z(value) ~ group*time + (1|id), .)
+
+# export_ols(
+#   p01422_mod_lmer_z_5, 
+#   key_effects = c("groupsound sensitive", "timesound", "timepos", 
+#                   "groupsound sensitive:timesound", "groupsound sensitive:timepos")
+# )
+```
+
+model 6: trembling 
+
+```{r}
+df_long_6 <- df %>% 
+  dplyr::select(id = ID, group = Grupo, "tremblingbasal", "tremblingsound", "tremblingpos") %>% 
+  tidyr::pivot_longer(-c(id, group)) %>% 
+  dplyr::mutate(
+    time = factor(name, 
+                  levels = c("tremblingbasal", "tremblingsound", "tremblingpos"), 
+                  labels = c("basal", "sound", "pos"))
+  ) 
+
+df_long_6 %>% 
+  afex::aov_4(value ~ group*time + (time|id), ., 
+              anova_table = list(correction = "none"))
+
+
+p01422_mod_rm_z_6 <- df_long_6 %>% 
+  afex::aov_4(z(value) ~ group*time + (time|id), ., 
+              anova_table = list(correction = "none"))
+```
+
+```{r}
+export_ols(
+  p01422_mod_rm_z_6, 
+  key_effects = c("group", "time", "group:time")
+)
+
+
+p01422_mod_lmer_z_6 <- df_long_6 %>% 
+  lme4::lmer(z(value) ~ group*time + (1|id), .)
+
+export_ols(
+  p01422_mod_lmer_z_6, 
+  key_effects = c("groupsound sensitive", "timesound", "timepos", 
+                  "groupsound sensitive:timesound", "groupsound sensitive:timepos")
+)
+```
+
+model 7: hiding 
+
+```{r}
+df_long_7 <- df %>% 
+  dplyr::select(id = ID, group = Grupo, "hidingbasal", "hidingsound", "hidingpos") %>% 
+  tidyr::pivot_longer(-c(id, group)) %>% 
+  dplyr::mutate(
+    time = factor(name, 
+                  levels = c("hidingbasal", "hidingsound", "hidingpos"), 
+                  labels = c("basal", "sound", "pos"))
+  ) 
+
+df_long_7 %>% 
+  afex::aov_4(value ~ group*time + (time|id), ., 
+              anova_table = list(correction = "none"))
+
+
+
+p01422_mod_rm_z_7 <- df_long_7 %>% 
+  afex::aov_4(z(value) ~ group*time + (time|id), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(
+  p01422_mod_rm_z_7, 
+  key_effects = c("group", "time", "group:time")
+)
+
+
+p01422_mod_lmer_z_7 <- df_long_7 %>% 
+  lme4::lmer(z(value) ~ group*time + (1|id), .)
+
+export_ols(
+  p01422_mod_lmer_z_7, 
+  key_effects = c("groupsound sensitive", "timesound", "timepos", 
+                  "groupsound sensitive:timesound", "groupsound sensitive:timepos")
+)
+```
+
+
+model 8: runaway 
+
+```{r}
+df_long_8 <- df %>% 
+  dplyr::select(id = ID, group = Grupo, "runawaybasal", "runawaysound", "runawaypos") %>% 
+  tidyr::pivot_longer(-c(id, group)) %>% 
+  dplyr::mutate(
+    time = factor(name, 
+                  levels = c("runawaybasal", "runawaysound", "runawaypos"), 
+                  labels = c("basal", "sound", "pos"))
+  ) 
+
+df_long_8 %>% 
+  afex::aov_4(value ~ group*time + (time|id), ., 
+              anova_table = list(correction = "none"))
+
+
+p01422_mod_rm_z_8 <- df_long_8 %>% 
+  afex::aov_4(z(value) ~ group*time + (time|id), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(
+  p01422_mod_rm_z_8, 
+  key_effects = c("group", "time", "group:time")
+)
+
+
+p01422_mod_lmer_z_8 <- df_long_8 %>% 
+  lme4::lmer(z(value) ~ group*time + (1|id), .)
+
+export_ols(
+  p01422_mod_lmer_z_8, 
+  key_effects = c("groupsound sensitive", "timesound", "timepos", 
+                  "groupsound sensitive:timesound", "groupsound sensitive:timepos")
+)
+```
+

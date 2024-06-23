@@ -1,0 +1,122 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-06'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df_1 <- haven::read_sav("../data/raw_data/p01162_Exp_1_anonymized_data.sav")
+df_2 <- haven::read_sav("../data/raw_data/p01162_Exp_2_anonymized_data.sav")
+df_3 <- haven::read_sav("../data/raw_data/p01162_Exp_3_anonymized_data.sav")
+```
+
+They interpreted and reported pillai's trace from SPSS so slight mismatch between the Fs below. 
+
+# exp 1
+
+```{r}
+df_1_long <- df_1 %>% 
+  dplyr::select(ID:medrt.CONTROL.PUSH) %>% 
+  tidyr::pivot_longer(-ID) %>% 
+  dplyr::mutate(
+    type = case_when(
+      str_detect(name, "ZELF") ~ "self", 
+      str_detect(name, "VROUW") ~ "female", 
+      str_detect(name, "MAN") ~ "male", 
+      str_detect(name, "CONTROL") ~ "control", 
+    ) %>% factor(), 
+    direction = ifelse(str_detect(name, "PULL"), "pull", "push")
+  )
+
+p01162_mod_rm_z_1 <- df_1_long %>% 
+  afex::aov_4(z(value) ~ type*direction + (type*direction|ID), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(p01162_mod_rm_z_1, 
+           key_effects = c("type", "direction", "type:direction"))
+
+
+p01162_mod_lmer_z_1 <- df_1_long %>% 
+  lme4::lmer(z(value) ~ type*direction + (1|ID), .)
+
+export_ols(p01162_mod_lmer_z_1, 
+           key_effects = c("typefemale", "typemale", "typeself", 
+                           "directionpush", "typefemale:directionpush", "typemale:directionpush", 
+                           "typeself:directionpush"))
+```
+
+# exp 2
+
+```{r}
+df_2_long <- df_2 %>% 
+  dplyr::select(id:SELF.PUSH) %>% 
+  tidyr::pivot_longer(-id) %>% 
+  dplyr::mutate(
+    type = case_when(
+      str_detect(name, "SELF") ~ "self", 
+      str_detect(name, "WOMAN") ~ "female", 
+      str_detect(name, "MAN") ~ "male", 
+      str_detect(name, "CONTROL") ~ "control", 
+    ) %>% factor(), 
+    direction = ifelse(str_detect(name, "PULL"), "pull", "push")
+  )
+
+
+p01162_mod_rm_z_2 <- df_2_long %>% 
+  afex::aov_4(z(value) ~ type*direction + (type*direction|id), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(p01162_mod_rm_z_2, 
+           key_effects = c("type", "direction", "type:direction"))
+
+
+p01162_mod_lmer_z_2 <- df_2_long %>% 
+  lme4::lmer(z(value) ~ type*direction + (1|id), .)
+
+export_ols(p01162_mod_lmer_z_2, 
+           key_effects = c("typefemale", "typemale", "typeself", 
+                           "directionpush", "typefemale:directionpush", "typemale:directionpush", 
+                           "typeself:directionpush"))
+```
+
+# exp 3
+
+```{r}
+df_3_long <- df_3 %>% 
+  dplyr::select(id, CONTROL.PULL:WOMAN.PUSH) %>% 
+  tidyr::pivot_longer(-id) %>% 
+  dplyr::mutate(
+    type = case_when(
+      str_detect(name, "OSELF") ~ "oself", 
+      str_detect(name, "MSELF") ~ "mself", 
+      str_detect(name, "WOMAN") ~ "female", 
+      str_detect(name, "MAN") ~ "male", 
+      str_detect(name, "CONTROL") ~ "control", 
+    ) %>% factor(), 
+    direction = ifelse(str_detect(name, "PULL"), "pull", "push")
+  )
+
+df_3_long %>% 
+  afex::aov_4(value ~ type*direction + (type*direction|id), ., 
+              anova_table = list(correction = "none"))
+
+
+p01162_mod_rm_z_3 <- df_3_long %>% 
+  afex::aov_4(z(value) ~ type*direction + (type*direction|id), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(p01162_mod_rm_z_3, 
+           key_effects = c("type", "direction", "type:direction"))
+
+
+p01162_mod_lmer_z_3 <- df_3_long %>% 
+  lme4::lmer(z(value) ~ type*direction + (1|id), .)
+
+export_ols(p01162_mod_lmer_z_3, 
+           key_effects = mod_coeffs(p01162_mod_lmer_z_3))
+```

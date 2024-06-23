@@ -1,0 +1,103 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-08-05'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df_1 <- readRDS("../data/raw_data/u01501_MemD.long.rds")
+df_2 <- readRDS("../data/raw_data/u01501_MemT.long.rds")
+df_3 <- readRDS("../data/raw_data/u01501_D.old.rds")
+df_4 <- readRDS("../data/raw_data/u01501_D.old.b.rds")
+
+```
+
+model 1 
+
+```{r}
+df_1 <- df_1 |> 
+  dplyr::mutate(Age_Group = factor(Age_Group, ordered = FALSE))
+```
+
+
+```{r}
+anova_test(
+    data = df_1, dv = Accuracy, wid = Sub_Num,
+    between = Age_Group, within = Format, effect.size = "pes", type=3)
+
+u01501_mod_rm_z_1 <- df_1 %>% 
+  afex::aov_4(z(Accuracy) ~ Age_Group*Format + (Format|Sub_Num), .)
+
+export_ols(u01501_mod_rm_z_1, 
+           key_effects = c("Format", "Age_Group", "Age_Group:Format"))
+
+
+u01501_mod_lmer_z_1 <- df_1 %>% 
+  lme4::lmer(z(Accuracy) ~ Age_Group*Format + (1|Sub_Num), .)
+
+export_ols(u01501_mod_lmer_z_1, 
+           key_effects = mod_coeffs(u01501_mod_lmer_z_1))
+```
+
+
+
+model 2 
+
+```{r}
+df_2 <- df_2 |> 
+  dplyr::mutate(Age_Group = factor(Age_Group, ordered = FALSE))
+```
+
+```{r}
+anova_test(
+    data = MemT.long, dv = Accuracy, wid = Sub_Num,
+    between = Age_Group, within = Type, effect.size = "pes", type=3)
+
+df_2 %>% 
+  afex::aov_4(Accuracy ~ Age_Group*Type + (Type|Sub_Num), .)
+
+u01501_mod_rm_z_2 <- df_2 %>% 
+  afex::aov_4(z(Accuracy) ~ Age_Group*Type + (Type|Sub_Num), .)
+
+export_ols(u01501_mod_rm_z_2, 
+           key_effects = c("Type", "Age_Group", "Age_Group:Type"))
+
+
+u01501_mod_lmer_z_2 <- df_2 %>% 
+  lme4::lmer(z(Accuracy) ~ Age_Group*Type + (1|Sub_Num), .)
+
+export_ols(u01501_mod_lmer_z_2, 
+           key_effects = mod_coeffs(u01501_mod_lmer_z_2))
+```
+
+
+model 3 
+
+```{r}
+u01501_mod_z_3 <- df_3 %>% 
+  lm(z(FC_dprime)~z(Age)+z(zPD_corr)+z(ExecF),data=.) 
+
+u01501_mod_z_3$model <- u01501_mod_z_3$model |> 
+  dplyr::mutate(`z(Age)` = as.numeric(`z(Age)`))
+
+export_ols(u01501_mod_z_3, 
+           mod_coeffs(u01501_mod_z_3))
+```
+
+model 4 
+
+```{r}
+u01501_mod_z_4 <- df_4 %>% 
+  lm(formula = z(YN_dprime)~z(Age)+z(ExecF), data=.)
+
+export_ols(u01501_mod_z_4, 
+           mod_coeffs(u01501_mod_z_4))
+```
+
+
+

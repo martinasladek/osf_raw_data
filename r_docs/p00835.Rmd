@@ -1,0 +1,109 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-06-08'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df_1 <- readr::read_csv("../data/raw_data/p00835_degrees_travelled.csv")
+df_2 <- readr::read_csv("../data/raw_data/p00835_error.csv")
+```
+
+```{r}
+df_1_long <- df_1 %>% 
+  tidyr::pivot_longer(-id) %>% 
+  dplyr::mutate(
+    walk = case_when(
+      str_detect(name, "_Wh") ~ "wheel", 
+      str_detect(name, "_W") ~ "walk"
+    ), 
+    vision = case_when(
+      str_detect(name, "V_") ~ "vision", 
+      str_detect(name, "B_") ~ "blind"
+    ), 
+    radius = factor(readr::parse_number(name))
+  )
+
+p00835_mod_rm_z_1 <- df_1_long %>% 
+  afex::aov_4(z(value) ~ walk*vision*radius + (walk*vision*radius|id), .)
+
+export_ols(p00835_mod_rm_z_1, 
+           key_effects = c("vision", "walk", "walk:vision"))
+
+
+p00835_mod_lmer_z_1 <- df_1_long %>% 
+  lme4::lmer(z(value) ~ walk*vision*radius + (1|id), .)
+
+export_ols(p00835_mod_lmer_z_1, 
+           key_effects = c("walkwheel", "visionvision", "walkwheel:visionvision"))
+```
+
+# position error
+
+```{r}
+# dir <- "data/original_sources/p00835/Data/PositionError_AngleErrorSummaries/anova_files"
+# filenames <- list.files(here::here(dir), pattern = "cond")
+# df_header <- names(read.csv(here::here(paste0(dir, "/header.csv"))))
+# 
+# assign_condition_col <- function(df, name){
+#   df %<>% dplyr::mutate(name = name)
+# }
+# 
+# df_list <- purrr::map(filenames, 
+#                       ~read.csv(here::here(paste0(dir, "/", .x)), 
+#                                 header = F))
+# 
+# names(df_list) <- filenames
+# 
+# df_list <- purrr::map(df_list, ~magrittr::set_colnames(.x, df_header))
+# df_list <- purrr::imap(df_list, ~assign_condition_col(.x, .y))
+# df_list <- purrr::map(df_list,
+#                       ~dplyr::select(.x, subject, value = mean_angl, name))
+# 
+# df <- do.call(rbind, df_list)
+# 
+# write.csv(df, here::here("data/raw_data/p00835_error.csv"), row.names = F)
+```
+
+
+```{r}
+df_2_long <- df_2 %>% 
+  dplyr::mutate(
+    walk = case_when(
+      str_detect(name, "wheel") ~ "wheel", 
+      str_detect(name, "walk") ~ "walk"
+    ), 
+    vision = case_when(
+      str_detect(name, "Vision") ~ "vision", 
+      str_detect(name, "Blind") ~ "blind"
+    ), 
+    radius = factor(readr::parse_number(name)),
+    id = readr::parse_number(subject)
+  ) %>% 
+  dplyr::filter(radius %in% c(1,2,3), 
+                !id %in% c(23,25))
+
+
+
+p00835_mod_rm_z_2 <- df_2_long %>% 
+  afex::aov_4(z(value) ~ walk*vision*radius + (walk*vision*radius|id), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(p00835_mod_rm_z_2, 
+           key_effects = c("vision", "walk", "walk:vision"))
+
+
+p00835_mod_lmer_z_2 <- df_2_long %>% 
+  lme4::lmer(z(value) ~ walk*vision*radius + (1|id), .)
+
+export_ols(p00835_mod_lmer_z_2, 
+           key_effects = c("walkwheel", "visionvision", "walkwheel:visionvision"))
+```
+
+
+

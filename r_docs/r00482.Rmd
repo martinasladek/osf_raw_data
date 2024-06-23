@@ -1,0 +1,359 @@
+---
+title: "u00482"
+author: "MS"
+date: '2022-05-16'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(afex)
+library(dplyr)
+library(lme4)
+library(magrittr)
+
+source("../scripts/helpers.R")
+source("../scripts/process.R")
+
+r00482_tib_1 <- haven::read_sav("../data/raw_data/r00482_Study 1c SPSS data.sav") %>% 
+  dplyr::mutate(id = 1:nrow(.))
+
+r00482_tib_2 <- haven::read_sav("../data/raw_data/r00482_Study 2a SPSS data.sav") %>% 
+  dplyr::mutate(id = 1:nrow(.))
+
+r00482_tib_2b <- haven::read_sav("../data/raw_data/r00482_study 2 [final+medi][N300+Profic]+.sav") %>% 
+  dplyr::mutate(id = 1:nrow(.))
+
+r00482_tib_2c <- read.csv("../data/raw_data/r00482_Study 2c data.csv")
+
+r00482_tib_3 <- read.csv("../data/raw_data/r00482_Study 3 data.csv") %>% 
+  dplyr::mutate(id = 1:nrow(.))
+
+r00482_tib_4 <- read.csv("../data/raw_data/r00482_Study 4 data.csv") %>% 
+  dplyr::filter(`filter_.` == 1) %>% 
+  dplyr::mutate(id = 1:nrow(.))
+```
+
+# Study 1 
+
+```{r}
+r00482_tib_1_long <- r00482_tib_1 %>% 
+  dplyr::select(id, imptot10:imptot40) %>% 
+  tidyr::pivot_longer(
+    cols = -id
+  ) %>% 
+  dplyr::mutate(name = factor(name))
+
+r00482_mod_rm_1 <- r00482_tib_1_long %>% 
+  afex::aov_4(value ~ name + (name|id), 
+              data = ., 
+              anova_table = list(
+                correction = "none"
+              )
+  )
+
+
+r00482_mod_rm_z_1 <- r00482_tib_1_long %>% 
+  afex::aov_4(z(value) ~ name + (name|id), 
+              data = ., 
+              anova_table = list(
+                correction = "none"
+              )
+  )
+
+key_effects = c("name")
+export_ols(r00482_mod_rm_z_1, key_effects)
+```
+
+lme4
+
+```{r}
+r00482_mod_lmer_z_1 <- r00482_tib_1_long %>% 
+  lme4::lmer(z(value) ~ name + (1|id), data = .
+  ) 
+
+key_effects = c("nameimptot20", "nameimptot30", "nameimptot40")
+export_ols(r00482_mod_lmer_z_1, key_effects)
+```
+
+# Study 2
+
+## 2a
+
+```{r}
+r00482_tib_2_long_1 <- r00482_tib_2 %>% 
+  dplyr::select(id, imptot10:imptot40) %>% 
+  tidyr::pivot_longer(
+    cols = -id)
+
+r00482_tib_2_long_1 %>% 
+  afex::aov_4(value ~ name + (name|id), data =., 
+              anova_table = list(
+                correction = "none"
+              ))
+
+r00482_mod_rm_z_2 <- r00482_tib_2_long_1 %>% 
+  afex::aov_4(z(value) ~ name + (name|id), data =., 
+              anova_table = list(
+                correction = "none"
+              ))
+
+key_effects = c("name")
+export_ols(r00482_mod_rm_z_2, key_effects)
+
+r00482_mod_lmer_z_2 <- r00482_tib_2_long_1 %>% 
+  lme4::lmer(z(value) ~ name + (1|id), data =.) 
+
+key_effects = c("nameimptot20", "nameimptot30", "nameimptot40")
+export_ols(r00482_mod_lmer_z_2, key_effects)
+```
+
+```{r}
+r00482_tib_2_long_2 <- r00482_tib_2 %>% 
+  dplyr::select(id, cf10:cf40) %>% 
+  tidyr::pivot_longer(
+    cols = -id)
+
+r00482_mod_rm_z_3 <- r00482_tib_2_long_2 %>% 
+  afex::aov_4(z(value) ~ name + (name|id), data =., 
+              anova_table = list(
+                correction = "none"
+              ))
+
+export_ols(r00482_mod_rm_z_3, 
+           key_effects = "name")
+
+
+
+r00482_mod_lmer_z_3 <- r00482_tib_2_long_2 %>% 
+  lme4::lmer(z(value) ~ name + (1|id), data =.) 
+
+export_ols(r00482_mod_lmer_z_3, 
+           key_effects = c(
+             "namecf20", "namecf30", "namecf40"
+           ))
+```
+
+## 2b
+
+1
+
+```{r}
+r00482_tib_2b_long_1 <- r00482_tib_2b %>% 
+  dplyr::select(id, position, Impact_hockey, impact_inv, impact_sale) %>% 
+  tidyr::pivot_longer(cols = -c(id, position), 
+                      names_to = "scenario")
+
+r00482_mod_rm_z_4 <- r00482_tib_2b_long_1 %>% 
+  afex::aov_4(z(value) ~ scenario*position + (scenario|id), data = ., 
+              anova_table = list(correction = "none"))
+
+export_ols(r00482_mod_rm_z_4, 
+           key_effects = c("position", "scenario", "position:scenario"))
+
+
+r00482_mod_lmer_z_4 <- r00482_tib_2b_long_1 %>% 
+  dplyr::filter(!id %in% c(105, 130)) %>%
+  lme4::lmer(z(value) ~ scenario*position + (1|id), data = .) 
+
+export_ols(r00482_mod_lmer_z_4, 
+           key_effects = c("scenarioimpact_inv", "scenarioimpact_sale", "positionlate", 
+                           "scenarioimpact_inv:positionlate", "scenarioimpact_sale:positionlate"))
+```
+
+2
+
+```{r}
+r00482_tib_2b_long_2 <- r00482_tib_2b %>% 
+  dplyr::select(id, position, CF_hockey, CF_inv, CF_sale) %>% 
+  tidyr::pivot_longer(cols = -c(id, position), 
+                      names_to = "scenario")
+
+r00482_mod_rm_z_5 <- r00482_tib_2b_long_2 %>% 
+  afex::aov_4(z(value) ~ scenario*position + (scenario|id), data = ., 
+              anova_table = list(correction = "none"))
+
+export_ols(r00482_mod_rm_z_5, 
+           key_effects = c("position", "scenario", "position:scenario"))
+
+
+
+r00482_mod_lmer_z_5 <- r00482_tib_2b_long_2 %>% 
+  dplyr::filter(!id %in% c(105, 130)) %>%
+  lme4::lmer(z(value) ~ scenario*position + (1|id), data = .)
+
+export_ols(r00482_mod_lmer_z_5, 
+           key_effects = mod_coeffs(r00482_mod_lmer_z_5))
+```
+
+# mediation testing 
+
+timing (x) > cf (m) > perceived_impact (y)
+
+posnum > CF_tot > Imp_tot? 
+
+```{r}
+r00482_tib_2b %>% 
+  lm(Imp_tot ~ posnum + CF_tot, data = .) %>% summary()
+```
+
+
+```{r}
+process_mod <- r00482_tib_2b %>% 
+  process(x = "posnum", y = "Imp_tot", m = "CF_tot", model = 4, 
+          data = .)
+
+```
+
+lavaan test
+
+https://stat.ethz.ch/pipermail/r-help/2012-July/318681.html
+
+```{r}
+my_mod <- 'Imp_tot ~ c*posnum + b*CF_tot
+           CF_tot ~ a*posnum
+           
+           indirect_effect := a*b
+           total_effect := c + (a*b)
+          '
+
+
+med_fit <- lavaan::sem(my_mod, data = r00482_tib_2b, estimator = "ML", 
+                      meanstructure = TRUE)
+
+summary(med_fit)
+lavaan::parameterEstimates(med_fit)
+
+lavaan::lavInspect(med_fit, what = "resid")
+lavaan::lavResiduals(med_fit)
+```
+
+
+```{r}
+library(mediation)
+
+med.fit <- lm(CF_tot ~ posnum, data = r00482_tib_2b)
+out.fit <- lm(Imp_tot ~ posnum + CF_tot, data = r00482_tib_2b)
+
+
+med_model <- mediation::mediate(model.m = med.fit, model.y = out.fit, mediator = "CF_tot", treat = "posnum")
+```
+
+## 2c 
+
+Not reproducing: 
+
+```{r}
+r00482_tib_2c %<>% 
+  dplyr::mutate(
+    timing_num = case_when(Timing == "Early" ~ 0, TRUE ~ 1), 
+    cf_num = case_when(Counterfactual.thinking == "Not induced" ~ 0, TRUE ~ 1)
+  )
+```
+
+
+```{r}
+r00482_tib_2c %>% 
+  process(x = "timing_num", y = "Impact", m = "mcheck_late", 
+          w = "Counterfactual.measure", model = 7, 
+          data = .)
+
+```
+
+
+# Study 3
+
+1
+
+```{r}
+r00482_tib_3_long_1 <- r00482_tib_3 %>% 
+  dplyr::select(id, Position, S_StillLose, B_StillLose) %>% 
+  tidyr::pivot_longer(cols = -c("id", "Position")) #%>% 
+  
+r00482_mod_rm_z_6 <- r00482_tib_3_long_1 %>% 
+  afex::aov_4(z(value) ~ Position*name + (name|id), 
+              data = .)
+
+export_ols(r00482_mod_rm_z_6, 
+           key_effects = c("Position", "name", "Position:name"))
+
+
+
+
+r00482_mod_lmer_z_6 <- r00482_tib_3_long_1 %>% 
+  lme4::lmer(z(value) ~ Position*name + (1|id), 
+              data = .)
+
+export_ols(r00482_mod_lmer_z_6, 
+           key_effects = 
+             c("Positionlate", "nameS_StillLose", "Positionlate:nameS_StillLose"))
+
+```
+
+2
+
+```{r}
+r00482_tib_3_long_2 <- r00482_tib_3 %>% 
+  dplyr::select(id, Position, S_Impact, B_impact) %>% 
+  tidyr::pivot_longer(cols = -c("id", "Position")) 
+
+r00482_mod_rm_z_7 <- r00482_tib_3_long_2 %>% 
+  afex::aov_4(z(value) ~ Position*name + (name|id), 
+              data = .)
+
+export_ols(r00482_mod_rm_z_7, 
+           key_effects = c("Position", "name", "Position:name"))
+
+
+
+r00482_mod_lmer_z_7 <- r00482_tib_3_long_2 %>% 
+  lme4::lmer(z(value) ~ Position*name + (1|id), 
+              data = .)
+
+export_ols(r00482_mod_lmer_z_7, 
+           key_effects = 
+             c("Positionlate", "nameS_Impact", "Positionlate:nameS_Impact"))
+
+```
+
+mediation 
+
+```{r}
+r00482_tib_3 %>% 
+  dplyr::rowwise() %>% 
+  dplyr::mutate(
+    timing = case_when(Position == "late" ~ 1, TRUE ~ 0), 
+    reverse = mean(S_StillLose, B_StillLose), 
+    impact = mean(S_Impact, B_impact)
+  ) %>% 
+  process(x = "timing", m = "reverse", y = "impact", data = ., model = 4)
+```
+
+# Study 4 
+
+```{r}
+r00482_tib_4_long_1 <- r00482_tib_4 %>% 
+  dplyr::select(id, Timing, Outcome.change, IMPACT_B, IMPACT_S) %>% 
+  tidyr::pivot_longer(cols = -c(id, Timing, Outcome.change))
+
+r00482_mod_rm_z_8 <- r00482_tib_4_long_1 %>% 
+  afex::aov_4(z(value) ~ Timing*name*Outcome.change + (name|id), data =.)
+
+export_ols(r00482_mod_rm_z_8, 
+           key_effects = c("name", "Timing", "Timing:Outcome.change",
+                           "Timing:Outcome.change:name" 
+                           ))
+
+
+
+r00482_mod_lmer_z_8 <- r00482_tib_4_long_1 %>% 
+  lme4::lmer(z(value) ~ Timing*name*Outcome.change + (1|id), data = .)
+
+
+export_ols(r00482_mod_lmer_z_8, 
+           key_effects = c("Timinglate", "nameIMPACT_S",
+                           "Timinglate:Outcome.changepositive change", 
+                           "Timinglate:nameIMPACT_S:Outcome.changepositive change"))
+```
+

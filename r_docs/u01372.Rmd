@@ -1,0 +1,170 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-08-05'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df_1 <- read.csv("../data/raw_data/u01372_exp_1.csv") %>% 
+  dplyr::mutate(draw = factor(draw, levels = c(0, -1, 1)))
+
+df_2 <- read.csv("../data/raw_data/u01372_exp_2.csv") %>% 
+  dplyr::mutate(draw = factor(draw, levels = c(-1, 1)))
+
+df_3 <- read.csv("../data/raw_data/u01372_exp_3.csv") 
+```
+
+
+# exp 1 
+
+model 1 
+
+```{r}
+df_1_long_1 <- df_1 %>% 
+  dplyr::select(id, draw, contains("rt.after")) %>% 
+  tidyr::pivot_longer(-c(id, draw))
+
+u01372_mod_rm_z_1 <- df_1_long_1 %>% 
+  afex::aov_4(z(value) ~ name*draw + (name*draw|id), ., 
+              anova_table = list(correct = "none"))
+
+export_ols(u01372_mod_rm_z_1, 
+           key_effects = c("name:draw"))
+
+
+u01372_mod_lmer_z_1 <- df_1_long_1 %>% 
+  lme4::lmer(z(value) ~ name*draw + (1|id), .)
+
+export_ols(u01372_mod_lmer_z_1, 
+           key_effects = grep(":", mod_coeffs(u01372_mod_lmer_z_1), value = T))
+
+```
+
+model 2 
+
+```{r}
+df_1_long_2 <- df_1 %>% 
+  dplyr::mutate(win_shift = 1-WinStay) %>% 
+  dplyr::select(id, draw, contains("shift")) %>% 
+  tidyr::pivot_longer(-c(id, draw))
+
+u01372_mod_rm_z_2 <- df_1_long_2 %>% 
+  afex::aov_4(z(value) ~ name*draw + (name*draw|id), ., 
+              anova_table = list(correct = "none"))
+
+export_ols(u01372_mod_rm_z_2, key_effects = c("name:draw"))
+
+u01372_mod_lmer_z_2 <- df_1_long_2 %>% 
+  lme4::lmer(z(value) ~ name*draw + (1|id), .)
+
+export_ols(u01372_mod_lmer_z_2, 
+           key_effects = grep(":", mod_coeffs(u01372_mod_lmer_z_2), value = T))
+```
+
+# exp 2 
+
+model 3
+
+```{r}
+df_2_long_1 <- df_2 %>% 
+  dplyr::select(1:3, contains("RT")) %>% 
+  tidyr::pivot_longer(-c(id, draw, score))
+
+u01372_mod_rm_z_3 <- df_2_long_1 %>% 
+  afex::aov_4(z(value) ~ draw*score*name + (draw*score*name|id), ., 
+              anova_table = list(correct = "none"))
+
+export_ols(u01372_mod_rm_z_3, 
+           key_effects = c("draw:score", "draw:name", "score:name", "draw:score:name"))
+
+
+u01372_mod_lmer_z_3 <- df_2_long_1 %>% 
+  lme4::lmer(z(value) ~ draw*score*name + (1|id), .)
+
+export_ols(u01372_mod_lmer_z_3, 
+           key_effects = grep(":", mod_coeffs(u01372_mod_lmer_z_3), value = T))
+```
+
+model 4 
+
+```{r}
+df_2_long_2 <- df_2 %>% 
+  dplyr::mutate(win_shift = 1-WinStay) %>% 
+  dplyr::select(1:3, contains("shift")) %>% 
+  tidyr::pivot_longer(-c(id, draw, score))
+
+df_2_long_2 %>% 
+  afex::aov_4(value ~ draw*score*name + (draw*score*name|id), ., 
+              anova_table = list(correct = "none"))
+
+u01372_mod_rm_z_4 <- df_2_long_2 %>% 
+  afex::aov_4(z(value) ~ draw*score*name + (draw*score*name|id), ., 
+              anova_table = list(correct = "none"))
+
+export_ols(u01372_mod_rm_z_4, 
+           key_effects = c("draw:score", "draw:name", "score:name", "draw:score:name"))
+
+
+u01372_mod_lmer_z_4 <- df_2_long_2 %>% 
+  lme4::lmer(z(value) ~ draw*score*name + (1|id), .)
+
+export_ols(u01372_mod_lmer_z_4, 
+           key_effects = grep(":", mod_coeffs(u01372_mod_lmer_z_4), value = T))
+```
+
+# exp 3 
+
+model 5
+
+```{r}
+df_3_long_1 <- df_3 %>% 
+  dplyr::select(1:3, contains("RT")) %>% 
+  tidyr::pivot_longer(-c(id, win, score)) 
+
+u01372_mod_rm_z_5 <- df_3_long_1 %>% 
+  afex::aov_4(z(value) ~ win*score*name + (win*score*name|id), ., 
+              anova_table = list(correct = "none"))
+
+export_ols(u01372_mod_rm_z_5, 
+           key_effects = c("win:score", "win:name", "score:name", "win:score:name"))
+
+
+u01372_mod_lmer_z_5 <- df_3_long_1 %>% 
+  lme4::lmer(z(value) ~ win*score*name + (1|id), .)
+
+export_ols(u01372_mod_lmer_z_5, 
+           key_effects = grep(":", mod_coeffs(u01372_mod_lmer_z_5), value = T))
+```
+
+model 6 
+
+```{r}
+df_3_long_2 <- df_3 %>% 
+  dplyr::mutate(win_shift = 1-WinStay) %>% 
+  dplyr::select(1:3, contains("shift")) %>% 
+  tidyr::pivot_longer(-c(id, win, score)) 
+
+df_3_long_2 %>% 
+  afex::aov_4(value ~ win*score*name + (win*score*name|id), ., 
+              anova_table = list(correct = "none"))
+
+
+u01372_mod_rm_z_6 <- df_3_long_2 %>% 
+  afex::aov_4(z(value) ~ win*score*name + (win*score*name|id), ., 
+              anova_table = list(correct = "none"))
+
+export_ols(u01372_mod_rm_z_6, 
+           key_effects = c("win:score", "win:name", "score:name", "win:score:name"))
+
+
+u01372_mod_lmer_z_6 <- df_3_long_2 %>% 
+  lme4::lmer(z(value) ~ win*score*name + (1|id), .)
+
+export_ols(u01372_mod_lmer_z_6, 
+           key_effects = grep(":", mod_coeffs(u01372_mod_lmer_z_6), value = T))
+```

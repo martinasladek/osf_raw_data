@@ -1,0 +1,123 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-23'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+df_1 <- haven::read_sav("../data/raw_data/p01678_1618-3169_a000424_esm1.sav") %>% 
+  dplyr::mutate(id = 1:nrow(.)) %>% 
+  dplyr::mutate(Actor_Group = factor(Actor_Group))
+
+df_2 <- haven::read_sav("../data/raw_data/p01678_1618-3169_a000424_esm2.sav") %>% 
+  dplyr::mutate(id = 1:nrow(.)) %>% 
+  dplyr::mutate(Perceiver_Group = factor(Perceiver_Group))
+```
+
+model 1 
+
+```{r}
+t.test(df_1$RRH_Actor_Actual, df_1$RRH_Additive_Model, paired = T)
+
+df_1_long_1 <- df_1 %>% 
+  dplyr::select(id, RRH_Actor_Actual, RRH_Additive_Model) %>% 
+  tidyr::pivot_longer(-id) 
+
+p01678_mod_rm_z_1 <- df_1_long_1 %>% 
+  afex::aov_4(z(value) ~ name + (name|id), .)
+
+export_ols(
+  p01678_mod_rm_z_1, 
+  key_effects = c("name")
+)
+
+
+p01678_mod_lmer_z_1 <- df_1_long_1 %>% 
+  lme4::lmer(z(value) ~ name + (1|id), .)
+
+export_ols(
+  p01678_mod_lmer_z_1, 
+  key_effects = c("nameRRH_Additive_Model")
+)
+```
+
+model 2 
+
+```{r}
+df_1_long_2 <- df_1 %>% 
+  dplyr::select(id, group = Actor_Group, ARH_Actor, RRH_Actor) %>% 
+  dplyr::filter(!id %in% c(15, 16, 17, 18, 19, 20, 21, 22)) %>% 
+  tidyr::pivot_longer(-c(id, group)) 
+
+p01678_mod_rm_z_2 <- df_1_long_2 %>% 
+  afex::aov_4(z(value) ~ name*group + (name|id), .)
+
+export_ols(
+  p01678_mod_rm_z_2, 
+  key_effects = c("group", "name", "group:name")
+)
+
+p01678_mod_lmer_z_2 <- df_1_long_2 %>% 
+  lme4::lmer(z(value) ~ name*group + (1|id), .)
+
+export_ols(
+  p01678_mod_lmer_z_2, 
+  key_effects = c("nameRRH_Actor", "group2", "nameRRH_Actor:group2")
+)
+```
+
+model 3 
+
+```{r}
+p01678_mod_z_3 <- df_1 %>% 
+  lm(z(Ratio_Actor) ~ Actor_Group, .)
+
+export_ols(
+  p01678_mod_z_3, 
+  key_effects = c("Actor_Group2")
+)
+```
+
+model 4 
+
+```{r}
+df_2_long_1 <- df_2 %>% 
+  dplyr::select(id, group = Perceiver_Group, ARH_Actor, RRH_Actor) %>% 
+  tidyr::pivot_longer(-c(id, group))
+
+p01678_mod_rm_z_4 <- df_2_long_1 %>% 
+  afex::aov_4(z(value) ~ name*group + (name|id), .)
+
+export_ols(
+  p01678_mod_rm_z_4, 
+  key_effects = c("group", "name", "group:name")
+)
+
+
+p01678_mod_lmer_z_4 <- df_2_long_1 %>% 
+  lme4::lmer(z(value) ~ name*group + (1|id), .)
+
+export_ols(
+  p01678_mod_lmer_z_4, 
+  key_effects = c("nameRRH_Actor", "group2", "nameRRH_Actor:group2")
+)
+```
+
+model 5 
+
+```{r}
+p01678_mod_z_5 <- df_2 %>% 
+  lm(z(RAtio_Actor) ~ Perceiver_Group, .) 
+
+export_ols(
+  p01678_mod_z_5, 
+  key_effects = c("Perceiver_Group2")
+)
+```
+
+
+
+

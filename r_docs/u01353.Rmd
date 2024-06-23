@@ -1,0 +1,174 @@
+---
+title: ""
+output: html_document
+---
+
+Many past studies tested effects of political value (i.e., ideology) and identity (i.e., party identity) on
+support for political candidates. Little has compared their effects by considering them from the
+perspectives of citizens and the candidate. This paper takes them into consideration by introducing
+and using the multiple matching perspective. It compares how much the predictive power of
+citi􀁝ens􀂷 ideology and political identity are moderated by a candidate􀂷s ideology as well as the
+candidate􀂷s party affiliation. Therefore, four types of matches (i.e., statistical moderations) are
+compared under this perspective: A. citizens􀂷 ideology-candidates􀂷 ideolog􀁜 match, B. citizens􀂷 partycandidates
+􀂷 ideology cross-match, C. citizens􀂷 ideology-candidates􀂷 party cross-match, and D.
+citizens􀂷 party-candidates􀂷 party match. The following novel and nuanced patterns about the role of
+ideology and party identity are uncovered under this perspective using four studies (total N=41,986):
+1. The effect of ideological match (A) is large, robust, and consistent. 2. The moderating effect of
+candidates􀂷 ideolog􀁜 (A and B) is more po􀁚erf􀁘l than candidates􀂷 party affiliation (C and D) except
+during the final stage of a presidential race (when A and D are similar). 3. Citizens􀂷 party identity
+may guide them to support a candidate whose ideology is congruent with the party that citizens
+identify with (B), but it is less so for the reverse of it (less evidence for C). Finally, a supplemental
+study shows that citi􀁝ens􀂷 ideolog􀁜 is more central to their self-concept and more moralized than
+their party identity, and this may explain the primacy of ideology over party identity.
+Key words: Party identification, ideology, candidate support, politics
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+library(gtools)
+library(robustbase)
+library(magrittr) # unless you routinely load tidyverse, in which case leave this one out. You just need it for the pipe. 
+library(moments)
+
+
+variables <- c("paper", "outcome", "n", "skew", "kurt", "z_1.96", "z_2.58", "z_3.29", "mode_n", "var", "var_ratio")
+
+list.files("../data/raw_data/", pattern = "u01353")
+
+u01353_tib <- readr::read_csv("../data/raw_data/u01353_bai2020_Study 1 data.csv")
+u01353_tib_2 <- haven::read_dta("../data/raw_data/u01353_bai2020_Study 2 data.dta")
+
+names(u01353_tib) <- tolower(names(u01353_tib))
+names(u01353_tib)
+```
+
+# Study 1 
+
+```{r}
+u01353_tib %<>% 
+  dplyr::mutate(
+    age = dplyr::if_else(age == "1997", 21, as.numeric(age)), 
+    P1 = dplyr::case_when(
+      ps == 1 ~ 0, 
+      ps == 2 ~ 0, 
+      ps == 3 ~ 1,
+      ps == 4 ~ 1
+    ), 
+    P2 = dplyr::case_when(
+      ps == 1 ~ 0, 
+      ps == 2 ~ 1, 
+      ps == 3 ~ 0,
+      ps == 4 ~ 1
+    ), 
+    gender01 = as.numeric(gender) - 1, 
+    age01 = (age-16)/37, 
+    income01 = (as.numeric(income)-1)/9, 
+    ideo01_s = (as.numeric(ideo)-1)/6,
+    pid01_s = (as.numeric(partyid) -1)/6,
+     ideo01 = dplyr::case_when(
+       P2 == 1 ~ (as.numeric(ideo)-1)/6, 
+       P2 == 0 ~ 1-(as.numeric(ideo)-1)/6
+     ), 
+     pid01 = dplyr::case_when(
+       P1 == 1 ~ (as.numeric(partyid)-1)/6, 
+       P1 == 0 ~ 1-(as.numeric(partyid)-1)/6,
+     ), 
+    Poli_Ev_01 = (as.numeric(feeling) + as.numeric(voting)) / 200
+  ) 
+
+```
+
+model:
+
+```{r}
+u01353_mod_original_1 <- lm(Poli_Ev_01 ~ 
+     gender01 + age01 + income01 + ideo01_s + pid01_s + P1 + P2 
+   + ideo01_s:P2
+   + pid01_s:P2
+   + ideo01_s:P1
+   + pid01_s:P1
+   + P1:P2 
+   + ideo01_s:P1:P2 
+   + pid01_s:P1:P2
+   , data = u01353_tib) 
+
+u01353_mod_original_1 %>% summary()
+```
+
+
+```{r}
+u01353_mod_z_1 <- lm(z(Poli_Ev_01) ~ 
+     factor(gender01) + z(age01) + z(income01) + z(ideo01_s) + z(pid01_s) + factor(P1) + factor(P2) 
+   + z(ideo01_s):factor(P2)
+   + z(pid01_s):factor(P2)
+   + z(ideo01_s):factor(P1)
+   + z(pid01_s):factor(P1)
+   + factor(P1):factor(P2) 
+   + z(ideo01_s):factor(P1):factor(P2) 
+   + z(pid01_s):factor(P1):factor(P2)
+   , data = u01353_tib) 
+
+u01353_mod_z_1 %>% summary()
+```
+
+```{r}
+key_effects = c("z(ideo01_s):factor(P2)1", "z(pid01_s):factor(P2)1", "z(ideo01_s):factor(P1)1", "z(pid01_s):factor(P1)1", 
+                "factor(P1)1:factor(P2)1", 
+                "z(ideo01_s):factor(P1)1:factor(P2)1", 
+                "z(pid01_s):factor(P1)1:factor(P2)1")
+
+export_ols(u01353_mod_z_1, key_effects)
+```
+
+
+
+
+# Study 2 
+
+```{r}
+u01353_mod_original_2 <- lm(Poli_Ev_01 ~
+     gender01 + age01 + income01 + education01 + ideo01 + pid01 
+   + ideo01:D_ideo 
+   + pid01:D_ideo 
+   + ideo01:D_party 
+   + pid01:D_party 
+   + D_ideo:D_party 
+   + D_ideo:D_party 
+   + ideo01:D_ideo:D_party 
+   + pid01:D_ideo:D_party 
+   + D_party 
+   + D_race 
+   + D_gender 
+   + D_ideo, 
+   data = u01353_tib_2) 
+u01353_mod_original_2 %>% summary()
+```
+
+```{r}
+u01353_mod_z_2 <- lm(z(Poli_Ev_01) ~
+     factor(gender01) + z(age01) + z(income01) + z(education01) + z(ideo01) + z(pid01) 
+   + z(ideo01):factor(D_ideo) 
+   + z(pid01):factor(D_ideo) 
+   + z(ideo01):factor(D_party) 
+   + z(pid01):factor(D_party) 
+   + factor(D_ideo):factor(D_party) 
+   + z(ideo01):factor(D_ideo):factor(D_party) 
+   + z(pid01):factor(D_ideo):factor(D_party) 
+   + factor(D_party) 
+   + factor(D_race) 
+   + factor(D_gender) 
+   + factor(D_ideo), 
+   data = u01353_tib_2) 
+
+u01353_mod_z_2 %>% summary()
+```
+
+```{r}
+# c("z(ideo01):z(D_ideo)", "z(pid01):z(D_ideo)", "z(ideo01):z(D_party)", 
+#                 "z(pid01):z(D_party)", "z(D_ideo):z(D_party)", 
+#                 "z(ideo01):z(D_ideo):z(D_party)", "z(pid01):z(D_ideo):z(D_party)")
+key_effects =  mod_coeffs(u01353_mod_z_2)[11:17]
+export_ols(u01353_mod_z_2, key_effects)
+```

@@ -1,0 +1,27 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-06-30'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df <- haven::read_sav("../data/raw_data/u02655_Study 1 - Manuscript Variables.sav")
+
+```
+
+
+```{r}
+u02655_mod_z_1 <- df %>% 
+  lm(z(st_imp) ~ z(tsc), .) 
+
+export_ols(
+  u02655_mod_z_1, 
+  key_effects = c("z(tsc)")
+)
+```
+

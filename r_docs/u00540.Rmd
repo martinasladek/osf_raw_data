@@ -1,0 +1,457 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-29'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+```
+
+# study 1 
+
+```{r}
+library(tidyverse)
+library(jmv)
+library(cowplot)
+library(Rmisc)
+library(remotes)
+
+#remotes::install_github('jonathon-love/jsq')
+
+eip_data <- readr::read_csv("../data/raw_data/u00540_vip_cognitive.csv")
+attach(eip_data)
+```
+
+```{r DL ANOVA, warning = FALSE}
+
+(dl_anova <- anovaRM(
+    data = eip_data,
+    rm = list(
+        list(
+            label="ear",
+            levels=c("right", "left")),
+        list(
+            label="condition",
+            levels=c(
+                "non-forced",
+                "forced-left",
+                "forced-right"))),
+    rmCells = list(
+        list(
+            measure="dl_nf_re",
+            cell=c("right", "non-forced")),
+        list(
+            measure="dl_fl_re",
+            cell=c("right", "forced-left")),
+        list(
+            measure="dl_fr_re",
+            cell=c("right", "forced-right")),
+        list(
+            measure="dl_nf_le",
+            cell=c("left", "non-forced")),
+        list(
+            measure="dl_fl_le",
+            cell=c("left", "forced-left")),
+        list(
+            measure="dl_fr_le",
+            cell=c("left", "forced-right"))),
+    bs = group,
+    effectSize = "partEta",
+    rmTerms = ~ ear + condition + ear:condition,
+    bsTerms = ~ group))
+```
+
+
+
+
+```{r}
+eip_data_long <- eip_data %>% 
+  dplyr::select(id = pp_id, group, dl_nf_re, dl_fl_re, dl_fr_re, dl_nf_le, dl_fl_le, dl_fr_le) %>% 
+  tidyr::pivot_longer(-c(id, group)) %>% 
+  dplyr::mutate(
+    ear = case_when(str_detect(name, "re") ~ "right_ear", TRUE ~ "left_ear") %>% factor(), 
+    condition = case_when(
+      str_detect(name, "nf") ~ "non_forced", 
+      str_detect(name, "fl") ~ "forced_left", 
+      str_detect(name, "fr") ~ "forced_right", 
+    ) %>% factor()
+  ) %>% 
+  dplyr::filter(!id %in% c(1006, 1052, 1056, 1057))
+
+
+eip_data_long %>% 
+  afex::aov_4(value ~ group*condition*ear + (condition*ear|id), ., 
+              anova_table = list(correct = "none"))
+```
+
+
+Model 1
+
+```{r}
+u00540_mod_rm_z_1 <- eip_data_long %>% 
+  dplyr::filter(condition == "non_forced") %>% 
+  afex::aov_4(z(value) ~ group*ear + (ear|id), ., 
+              anova_table = list(correct = "none"))
+
+export_ols(
+  u00540_mod_rm_z_1, 
+  key_effects = c("group", "ear", "group:ear")
+)
+
+
+u00540_mod_lmer_z_1 <- eip_data_long %>% 
+  dplyr::filter(condition == "non_forced") %>% 
+  lme4::lmer(z(value) ~ group*ear + (1|id), .)
+
+export_ols(
+  u00540_mod_lmer_z_1, 
+  key_effects = c("group1", "group1", "group1:ear1")
+)
+
+```
+
+Model 2 
+
+```{r}
+u00540_mod_rm_z_2 <- eip_data_long %>% 
+  dplyr::filter(condition == "forced_left") %>% 
+  afex::aov_4(z(value) ~ group*ear + (ear|id), ., 
+              anova_table = list(correct = "none"))
+
+export_ols(
+  u00540_mod_rm_z_2, 
+  key_effects = c("group", "ear", "group:ear")
+)
+
+
+u00540_mod_lmer_z_2 <- eip_data_long %>% 
+  dplyr::filter(condition == "forced_left") %>% 
+  lme4::lmer(z(value) ~ group*ear + (1|id), .)
+
+export_ols(
+  u00540_mod_lmer_z_2, 
+  key_effects = c("group1", "group1", "group1:ear1")
+)
+```
+
+Model 3
+
+```{r}
+u00540_mod_rm_z_3 <- eip_data_long %>% 
+  dplyr::filter(condition == "forced_right") %>% 
+  afex::aov_4(z(value) ~ group*ear + (ear|id), ., 
+              anova_table = list(correct = "none"))
+
+export_ols(
+  u00540_mod_rm_z_3, 
+  key_effects = c("group", "ear", "group:ear")
+)
+
+
+u00540_mod_lmer_z_3 <- eip_data_long %>% 
+  dplyr::filter(condition == "forced_right") %>% 
+  lme4::lmer(z(value) ~ group*ear + (1|id), .)
+
+export_ols(
+  u00540_mod_lmer_z_3, 
+  key_effects = c("group1", "group1", "group1:ear1")
+)
+```
+
+Inhibition
+
+
+```{r ICIM ANOVA, warning = FALSE}
+
+(icim_anova <- jmv::anovaRM(
+    data = eip_data,
+    rm = list(
+        list(
+            label="block",
+            levels=c("run 1", "run 2"))),
+    rmCells = list(
+        list(
+            measure="icim_run1_fa",
+            cell="run 1"),
+        list(
+            measure="icim_run2_fa",
+            cell="run 2")),
+    bs = group,
+    effectSize = "partEta",
+    depLabel = "False alarms",
+    rmTerms = ~ block,
+    bsTerms = ~ group))
+
+```
+
+Model 4 
+
+```{r}
+eip_data_long_2 <- eip_data %>% 
+  dplyr::select(id = pp_id, group, icim_run1_fa, icim_run2_fa) %>% 
+  tidyr::pivot_longer(-c(id, group)) %>% 
+  dplyr::filter(!id %in% c(1057, 1058))
+
+u00540_mod_rm_z_4 <- eip_data_long_2 %>% 
+  afex::aov_4(z(value) ~ name*group + (name|id), .)
+
+export_ols(
+  u00540_mod_rm_z_4, 
+  key_effects = c("group", "name", "group:name")
+)
+
+u00540_mod_lmer_z_4 <- eip_data_long_2 %>% 
+  lme4::lmer(z(value) ~ name*group + (1|id), .)
+
+export_ols(
+  u00540_mod_lmer_z_4, 
+  key_effects = mod_coeffs(u00540_mod_lmer_z_4)
+)
+```
+
+
+reality monitoring
+
+```{r}
+(smt_ancova <- jmv::ancova(
+    factors = group,
+    covs = smt_new_hear,
+    dep = smt_say_hear,
+    data = eip_data,
+    effectSize = "partEta"))
+```
+
+Model 5 
+
+```{r}
+u00540_mod_z_5 <- eip_data %>% 
+  lm(z(smt_say_hear) ~ group + z(smt_new_hear), .) 
+
+export_ols(
+  u00540_mod_z_5, 
+  key_effects = c("group1", "z(smt_new_hear)")
+)
+```
+
+
+# Study 2 
+
+```{r}
+ncvh_data <- readr::read_csv("../data/raw_data/u00540_ncvh_cognitive.csv")
+```
+
+```{r DL ANOVA, warning = FALSE}
+
+(dl_anova <- anovaRM(
+    data = ncvh_data,
+    rm = list(
+        list(
+            label="ear",
+            levels=c("right", "left")),
+        list(
+            label="condition",
+            levels=c(
+                "non-forced",
+                "forced-left",
+                "forced-right"))),
+    rmCells = list(
+        list(
+            measure="dl_nf_re",
+            cell=c("right", "non-forced")),
+        list(
+            measure="dl_fl_re",
+            cell=c("right", "forced-left")),
+        list(
+            measure="dl_fr_re",
+            cell=c("right", "forced-right")),
+        list(
+            measure="dl_nf_le",
+            cell=c("left", "non-forced")),
+        list(
+            measure="dl_fl_le",
+            cell=c("left", "forced-left")),
+        list(
+            measure="dl_fr_le",
+            cell=c("left", "forced-right"))),
+    bs = group,
+    effectSize = "partEta",
+    rmTerms = ~ ear + condition + ear:condition,
+    bsTerms = ~ group))
+```
+
+```{r}
+ncvh_data_long <- ncvh_data %>% 
+  dplyr::select(id = pp_id, group, dl_nf_re, dl_fl_re, dl_fr_re, dl_nf_le, dl_fl_le, dl_fr_le) %>% 
+  tidyr::pivot_longer(-c(id, group)) %>% 
+  dplyr::mutate(
+    ear = case_when(str_detect(name, "re") ~ "right_ear", TRUE ~ "left_ear") %>% factor(), 
+    condition = case_when(
+      str_detect(name, "nf") ~ "non_forced", 
+      str_detect(name, "fl") ~ "forced_left", 
+      str_detect(name, "fr") ~ "forced_right", 
+    ) %>% factor()
+  ) %>% 
+  dplyr::filter(!id %in% c(2007, 2008, 2009, 2024, 2050, 2054))
+
+
+ncvh_data_long %>% 
+  afex::aov_4(value ~ group*condition*ear + (condition*ear|id), ., 
+              anova_table = list(correct = "none"))
+```
+
+Model 6
+
+```{r}
+u00540_mod_rm_z_6 <- ncvh_data_long %>% 
+  dplyr::filter(condition == "non_forced") %>% 
+  afex::aov_4(z(value) ~ group*ear + (ear|id), ., 
+              anova_table = list(correct = "none"))
+
+export_ols(
+  u00540_mod_rm_z_6, 
+  key_effects = c("group", "ear", "group:ear")
+)
+
+u00540_mod_lmer_z_6 <- ncvh_data_long %>% 
+  dplyr::filter(condition == "non_forced") %>% 
+  lme4::lmer(z(value) ~ group*ear + (1|id), .)
+
+export_ols(
+  u00540_mod_lmer_z_6, 
+  key_effects = c("group1", "ear1", "group1:ear1")
+)
+```
+
+Model 7
+
+```{r}
+u00540_mod_rm_z_7 <- ncvh_data_long %>% 
+  dplyr::filter(condition == "forced_left") %>% 
+  afex::aov_4(z(value) ~ group*ear + (ear|id), ., 
+              anova_table = list(correct = "none"))
+
+export_ols(
+  u00540_mod_rm_z_7, 
+  key_effects = c("group", "ear", "group:ear")
+)
+
+u00540_mod_lmer_z_7 <- ncvh_data_long %>% 
+  dplyr::filter(condition == "forced_left") %>% 
+  lme4::lmer(z(value) ~ group*ear + (1|id), .)
+
+export_ols(
+  u00540_mod_lmer_z_7, 
+  key_effects = c("group1", "ear1", "group1:ear1")
+)
+```
+
+Model 8
+
+```{r}
+u00540_mod_rm_z_8 <- ncvh_data_long %>% 
+  dplyr::filter(condition == "forced_right") %>% 
+  afex::aov_4(z(value) ~ group*ear + (ear|id), ., 
+              anova_table = list(correct = "none"))
+
+export_ols(
+  u00540_mod_rm_z_8, 
+  key_effects = c("group", "ear", "group:ear")
+)
+
+u00540_mod_lmer_z_8 <- ncvh_data_long %>% 
+  dplyr::filter(condition == "forced_right") %>% 
+  lme4::lmer(z(value) ~ group*ear + (1|id), .)
+
+export_ols(
+  u00540_mod_lmer_z_8, 
+  key_effects = c("group1", "ear1", "group1:ear1")
+)
+```
+
+
+
+inhibition 
+
+```{r}
+(icim_anova <- jmv::anovaRM(
+    data = ncvh_data,
+    rm = list(
+        list(
+            label="block",
+            levels=c("run 1", "run 2", "run 3"))),
+    rmCells = list(
+        list(
+            measure="icim_run1_fa",
+            cell="run 1"),
+        list(
+            measure="icim_run2_fa",
+            cell="run 2"),
+        list(
+            measure="icim_run3_fa",
+            cell="run 3")),
+    bs = group,
+    effectSize = "partEta",
+    depLabel = "False alarms",
+    rmTerms = ~ block,
+    bsTerms = ~ group))
+```
+
+
+
+model 9 
+
+```{r}
+ncvh_data_long_2 <- ncvh_data %>% 
+  dplyr::select(id = pp_id, group, icim_run1_fa, icim_run2_fa, icim_run3_fa) %>% 
+  tidyr::pivot_longer(-c(id, group)) %>% 
+  dplyr::filter(!id %in% c(2045, 2049))
+
+u00540_mod_rm_z_9 <- ncvh_data_long_2 %>% 
+  afex::aov_4(z(value) ~ name*group + (name|id), ., 
+              anova_table = list(correct = "none"))
+
+export_ols(
+  u00540_mod_rm_z_9, 
+  key_effects = c("group", "name", "group:name")
+)
+  
+u00540_mod_lmer_z_9 <- ncvh_data_long_2 %>% 
+  lme4::lmer(z(value) ~ name*group + (1|id), .)
+
+export_ols(
+  u00540_mod_lmer_z_9, 
+  key_effects = mod_coeffs(u00540_mod_lmer_z_9)
+)
+```
+
+
+
+
+
+
+```{r}
+(smt_ancova <- jmv::ancova(
+    factors = group,
+    covs = smt_new_hear,
+    dep = smt_say_hear,
+    data = ncvh_data,
+    effectSize = "partEta"))
+```
+
+model 10 
+
+```{r}
+u00540_mod_z_10 <- ncvh_data %>% 
+  lm(z(smt_say_hear) ~ group + z(smt_new_hear), .) 
+
+export_ols(
+  u00540_mod_z_10, 
+  key_effects = c("group1", "z(smt_new_hear)")
+)
+```
+

@@ -1,0 +1,491 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-13'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df_1 <- read.csv("../data/raw_data/p00562_exp_1_accuracy.csv")
+df_2 <- read.csv("../data/raw_data/p00562_exp_1_rt.csv")
+df_3 <- read.csv("../data/raw_data/p00562_exp_2_accuracy.csv")
+df_4 <- read.csv("../data/raw_data/p00562_exp_2_rt.csv")
+df_5 <- read.csv("../data/raw_data/p00562_exp_3_behavioural_accuracy.csv")
+df_6 <- read.csv("../data/raw_data/p00562_exp_3_behavioural_rt.csv")
+df_7 <- read.csv("../data/raw_data/p00562_exp_3_num_inspections.csv")
+```
+
+# Experiment 1
+
+model 1
+
+```{r}
+get_effects = function(lmerMod){
+  grep(":", 
+       rownames(
+         summary(lmerMod)$coefficients
+       ), 
+       value = T)
+}
+```
+
+
+```{r}
+df_1_long <- df_1 %>% 
+  dplyr::select(Subject:Mismatch_75) %>% 
+  tidyr::pivot_longer(-c(Subject, PrevCode)) %>% 
+  dplyr::mutate(
+    ColourPerception = case_when(
+      str_detect(name, "25") ~ "25",
+      str_detect(name, "50") ~ "50",
+      str_detect(name, "75") ~ "75",
+    ), 
+    TargetType = if_else(str_detect(name, "Match"), "match", "mismatch"), 
+    PrevCode = factor(PrevCode)
+  )
+
+p00562_mod_rm_z_1 <- df_1_long %>% 
+  afex::aov_4(z(value) ~ PrevCode*ColourPerception*TargetType + (ColourPerception*TargetType|Subject), .)
+
+export_ols(
+  p00562_mod_rm_z_1, 
+  key_effects = c("PrevCode:ColourPerception", "PrevCode:TargetType", 
+                  "ColourPerception:TargetType", "ColourPerception:TargetType")
+)
+
+
+p00562_mod_lmer_z_1 <- df_1_long %>% 
+  lme4::lmer(z(value) ~ PrevCode*ColourPerception*TargetType + (1|Subject), .)
+
+export_ols(
+  p00562_mod_lmer_z_1, 
+  key_effects = get_effects(p00562_mod_lmer_z_1)
+)
+
+
+```
+
+model 2 
+
+```{r}
+df_2_long <- df_2 %>% 
+  dplyr::select(Subject:Mismatch_75) %>% 
+  tidyr::pivot_longer(-c(Subject, PrevCode)) %>% 
+  dplyr::mutate(
+    ColourPerception = case_when(
+      str_detect(name, "25") ~ "25",
+      str_detect(name, "50") ~ "50",
+      str_detect(name, "75") ~ "75",
+    ), 
+    TargetType = if_else(str_detect(name, "Match"), "match", "mismatch"), 
+    PrevCode = factor(PrevCode)
+  )
+
+
+
+p00562_mod_rm_z_2 <- df_2_long %>% 
+  dplyr::filter(PrevCode == 1) %>% 
+  afex::aov_4(z(value) ~ ColourPerception*TargetType + (ColourPerception*TargetType|Subject), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(
+  p00562_mod_rm_z_2, 
+  key_effects = c("ColourPerception:TargetType")
+)
+
+
+p00562_mod_lmer_z_2 <- df_2_long %>% 
+  dplyr::filter(PrevCode == 1) %>%
+  lme4::lmer(z(value) ~ ColourPerception*TargetType + (1|Subject), .)
+
+export_ols(
+  p00562_mod_lmer_z_2, 
+  key_effects = get_effects(p00562_mod_lmer_z_2)
+)
+```
+
+
+model 3
+
+```{r}
+p00562_mod_rm_z_3 <- df_2_long %>% 
+  dplyr::filter(PrevCode == 2) %>% 
+  afex::aov_4(z(value) ~ ColourPerception*TargetType + (ColourPerception*TargetType|Subject), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(
+  p00562_mod_rm_z_3, 
+  key_effects = c("ColourPerception:TargetType")
+)
+
+
+p00562_mod_lmer_z_3 <- df_2_long %>% 
+  dplyr::filter(PrevCode == 2) %>%
+  lme4::lmer(z(value) ~ ColourPerception*TargetType + (1|Subject), .)
+
+export_ols(
+  p00562_mod_lmer_z_3, 
+  key_effects = get_effects(p00562_mod_lmer_z_3)
+)
+```
+
+model 4
+
+```{r}
+p00562_mod_rm_z_4 <- df_2_long %>% 
+  dplyr::filter(PrevCode == 3) %>% 
+  afex::aov_4(z(value) ~ ColourPerception*TargetType + (ColourPerception*TargetType|Subject), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(
+  p00562_mod_rm_z_4, 
+  key_effects = c("ColourPerception:TargetType")
+)
+
+
+p00562_mod_lmer_z_4 <- df_2_long %>% 
+  dplyr::filter(PrevCode == 3) %>%
+  lme4::lmer(z(value) ~ ColourPerception*TargetType + (1|Subject), .)
+
+export_ols(
+  p00562_mod_lmer_z_4, 
+  key_effects = get_effects(p00562_mod_lmer_z_4)
+)
+```
+
+# Experiment 2
+
+model 5 
+
+```{r}
+df_3_long <- df_3 %>% 
+  dplyr::select(Subject:Mismatch_75) %>% 
+  tidyr::pivot_longer(-c(Subject, PrevCode)) %>% 
+  dplyr::mutate(
+    ColourPerception = case_when(
+      str_detect(name, "25") ~ "25",
+      str_detect(name, "50") ~ "50",
+      str_detect(name, "75") ~ "75",
+    ), 
+    TargetType = if_else(str_detect(name, "Match"), "match", "mismatch"), 
+    PrevCode = factor(PrevCode)
+  )
+
+
+p00562_mod_rm_z_5 <- df_3_long %>% 
+  afex::aov_4(z(value) ~ PrevCode*ColourPerception*TargetType + (ColourPerception*TargetType|Subject), .)
+
+export_ols(
+  p00562_mod_rm_z_5, 
+  key_effects = c("PrevCode:ColourPerception", "PrevCode:TargetType", 
+                  "ColourPerception:TargetType", "ColourPerception:TargetType")
+)
+
+
+p00562_mod_lmer_z_5 <- df_3_long %>% 
+  lme4::lmer(z(value) ~ PrevCode*ColourPerception*TargetType + (1|Subject), .)
+
+export_ols(
+  p00562_mod_lmer_z_5, 
+  key_effects = get_effects(p00562_mod_lmer_z_5)
+)
+```
+
+model 6 
+
+
+```{r}
+df_4_long <- df_4 %>% 
+  dplyr::select(Subject:Mismatch_75) %>% 
+  tidyr::pivot_longer(-c(Subject, PrevCode)) %>% 
+  dplyr::mutate(
+    ColourPerception = case_when(
+      str_detect(name, "25") ~ "25",
+      str_detect(name, "50") ~ "50",
+      str_detect(name, "75") ~ "75",
+    ), 
+    TargetType = if_else(str_detect(name, "Match"), "match", "mismatch"), 
+    PrevCode = factor(PrevCode)
+  )
+
+
+p00562_mod_rm_z_6 <- df_4_long %>% 
+  dplyr::filter(PrevCode == 1) %>% 
+  afex::aov_4(z(value) ~ ColourPerception*TargetType + (ColourPerception*TargetType|Subject), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(
+  p00562_mod_rm_z_6, 
+  key_effects = c("ColourPerception:TargetType")
+)
+
+
+p00562_mod_lmer_z_6 <- df_4_long %>% 
+  dplyr::filter(PrevCode == 1) %>%
+  lme4::lmer(z(value) ~ ColourPerception*TargetType + (1|Subject), .)
+
+export_ols(
+  p00562_mod_lmer_z_6, 
+  key_effects = get_effects(p00562_mod_lmer_z_6)
+)
+```
+
+model 7
+
+```{r}
+p00562_mod_rm_z_7 <- df_4_long %>% 
+  dplyr::filter(PrevCode == 2) %>% 
+  afex::aov_4(z(value) ~ ColourPerception*TargetType + (ColourPerception*TargetType|Subject), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(
+  p00562_mod_rm_z_7, 
+  key_effects = c("ColourPerception:TargetType")
+)
+
+
+p00562_mod_lmer_z_7 <- df_4_long %>% 
+  dplyr::filter(PrevCode == 2) %>%
+  lme4::lmer(z(value) ~ ColourPerception*TargetType + (1|Subject), .)
+
+export_ols(
+  p00562_mod_lmer_z_7, 
+  key_effects = get_effects(p00562_mod_lmer_z_7)
+)
+```
+
+model 8
+
+```{r}
+p00562_mod_rm_z_8 <- df_4_long %>% 
+  dplyr::filter(PrevCode == 3) %>% 
+  afex::aov_4(z(value) ~ ColourPerception*TargetType + (ColourPerception*TargetType|Subject), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(
+  p00562_mod_rm_z_8, 
+  key_effects = c("ColourPerception:TargetType")
+)
+
+
+p00562_mod_lmer_z_8 <- df_4_long %>% 
+  dplyr::filter(PrevCode == 3) %>%
+  lme4::lmer(z(value) ~ ColourPerception*TargetType + (1|Subject), .)
+
+export_ols(
+  p00562_mod_lmer_z_8, 
+  key_effects = get_effects(p00562_mod_lmer_z_8)
+)
+```
+
+# Experiment 3 
+
+model 9 
+
+```{r}
+df_5_long <- df_5 %>% 
+  dplyr::select(Subject:Mismatch_75) %>% 
+  tidyr::pivot_longer(-c(Subject, PrevCode)) %>% 
+  dplyr::mutate(
+    ColourPerception = case_when(
+      str_detect(name, "25") ~ "25",
+      str_detect(name, "50") ~ "50",
+      str_detect(name, "75") ~ "75",
+    ), 
+    TargetType = if_else(str_detect(name, "Match"), "match", "mismatch"), 
+    PrevCode = factor(PrevCode)
+  )
+
+p00562_mod_rm_z_9 <- df_5_long %>% 
+  afex::aov_4(z(value) ~ PrevCode*ColourPerception*TargetType + (ColourPerception*TargetType|Subject), .)
+
+export_ols(
+  p00562_mod_rm_z_9, 
+  key_effects = c("PrevCode:ColourPerception", "PrevCode:TargetType", 
+                  "ColourPerception:TargetType", "ColourPerception:TargetType")
+)
+
+
+p00562_mod_lmer_z_9 <- df_5_long %>% 
+  lme4::lmer(z(value) ~ PrevCode*ColourPerception*TargetType + (1|Subject), .)
+
+export_ols(
+  p00562_mod_lmer_z_9, 
+  key_effects = get_effects(p00562_mod_lmer_z_9)
+  )
+```
+
+model 10 
+
+```{r}
+df_6_long <- df_6 %>% 
+  dplyr::select(Subject:Mismatch_75) %>% 
+  tidyr::pivot_longer(-c(Subject, PrevCode)) %>% 
+  dplyr::mutate(
+    ColourPerception = case_when(
+      str_detect(name, "25") ~ "25",
+      str_detect(name, "50") ~ "50",
+      str_detect(name, "75") ~ "75",
+    ), 
+    TargetType = if_else(str_detect(name, "Match"), "match", "mismatch"), 
+    PrevCode = factor(PrevCode)
+  )
+
+p00562_mod_rm_z_10 <- df_6_long %>% 
+  dplyr::filter(PrevCode == 1) %>% 
+  afex::aov_4(z(value) ~ ColourPerception*TargetType + (ColourPerception*TargetType|Subject), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(
+  p00562_mod_rm_z_10, 
+  key_effects = c("ColourPerception:TargetType")
+)
+
+
+p00562_mod_lmer_z_10 <- df_6_long %>% 
+  dplyr::filter(PrevCode == 1) %>%
+  lme4::lmer(z(value) ~ ColourPerception*TargetType + (1|Subject), .)
+
+export_ols(
+  p00562_mod_lmer_z_10, 
+  key_effects = get_effects(p00562_mod_lmer_z_10)
+)
+```
+
+model 11
+
+```{r}
+p00562_mod_rm_z_11 <- df_6_long %>% 
+  dplyr::filter(PrevCode == 2) %>% 
+  afex::aov_4(z(value) ~ ColourPerception*TargetType + (ColourPerception*TargetType|Subject), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(
+  p00562_mod_rm_z_11, 
+  key_effects = c("ColourPerception:TargetType")
+)
+
+
+p00562_mod_lmer_z_11 <- df_6_long %>% 
+  dplyr::filter(PrevCode == 2) %>%
+  lme4::lmer(z(value) ~ ColourPerception*TargetType + (1|Subject), .)
+
+export_ols(
+  p00562_mod_lmer_z_11, 
+  key_effects = get_effects(p00562_mod_lmer_z_11)
+)
+```
+
+model 12 
+
+```{r}
+p00562_mod_rm_z_12 <- df_6_long %>% 
+  dplyr::filter(PrevCode == 3) %>% 
+  afex::aov_4(z(value) ~ ColourPerception*TargetType + (ColourPerception*TargetType|Subject), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(
+  p00562_mod_rm_z_12, 
+  key_effects = c("ColourPerception:TargetType")
+)
+
+
+p00562_mod_lmer_z_12 <- df_6_long %>% 
+  dplyr::filter(PrevCode == 3) %>%
+  lme4::lmer(z(value) ~ ColourPerception*TargetType + (1|Subject), .)
+
+export_ols(
+  p00562_mod_lmer_z_12, 
+  key_effects = get_effects(p00562_mod_lmer_z_12)
+)
+```
+
+
+model 13 
+
+```{r}
+df_7_long <- df_7 %>% 
+  dplyr::select(Subject:Mismatch_75) %>% 
+  tidyr::pivot_longer(-c(Subject, PrevCode)) %>% 
+  dplyr::mutate(
+    ColourPerception = case_when(
+      str_detect(name, "25") ~ "25",
+      str_detect(name, "50") ~ "50",
+      str_detect(name, "75") ~ "75",
+    ), 
+    TargetType = if_else(str_detect(name, "Match"), "match", "mismatch"), 
+    PrevCode = factor(PrevCode)
+  )
+
+
+
+p00562_mod_rm_z_13 <- df_7_long %>% 
+  dplyr::filter(PrevCode == 1) %>% 
+  afex::aov_4(z(value) ~ ColourPerception*TargetType + (ColourPerception*TargetType|Subject), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(
+  p00562_mod_rm_z_13, 
+  key_effects = c("ColourPerception:TargetType")
+)
+
+
+p00562_mod_lmer_z_13 <- df_7_long %>% 
+  dplyr::filter(PrevCode == 1) %>%
+  lme4::lmer(z(value) ~ ColourPerception*TargetType + (1|Subject), .)
+
+export_ols(
+  p00562_mod_lmer_z_13, 
+  key_effects = get_effects(p00562_mod_lmer_z_13))
+```
+
+model 14
+
+```{r}
+p00562_mod_rm_z_14 <- df_7_long %>% 
+  dplyr::filter(PrevCode == 2) %>% 
+  afex::aov_4(z(value) ~ ColourPerception*TargetType + (ColourPerception*TargetType|Subject), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(
+  p00562_mod_rm_z_14, 
+  key_effects = c("ColourPerception:TargetType")
+)
+
+
+p00562_mod_lmer_z_14 <- df_7_long %>% 
+  dplyr::filter(PrevCode == 2) %>%
+  lme4::lmer(z(value) ~ ColourPerception*TargetType + (1|Subject), .)
+
+export_ols(
+  p00562_mod_lmer_z_14, 
+  key_effects = get_effects(p00562_mod_lmer_z_14))
+```
+
+model 15
+
+```{r}
+p00562_mod_rm_z_15 <- df_7_long %>% 
+  dplyr::filter(PrevCode == 3) %>% 
+  afex::aov_4(z(value) ~ ColourPerception*TargetType + (ColourPerception*TargetType|Subject), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(
+  p00562_mod_rm_z_15, 
+  key_effects = c("ColourPerception:TargetType")
+)
+
+
+p00562_mod_lmer_z_15 <- df_7_long %>% 
+  dplyr::filter(PrevCode == 3) %>%
+  lme4::lmer(z(value) ~ ColourPerception*TargetType + (1|Subject), .)
+
+export_ols(
+  p00562_mod_lmer_z_15, 
+  key_effects = get_effects(p00562_mod_lmer_z_15))
+```
+

@@ -1,0 +1,119 @@
+---
+title: "u00620_faunalytics2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+# Data cleaning
+
+```{r message = FALSE}
+#Load library
+library("tidyverse") 
+library("psych")
+
+source("../scripts/helpers.R")
+
+#Load data
+data <- readr::read_csv("../data/raw_data/u00620_IvS Study Data - weighted.csv")
+```
+
+
+## Analysis 1
+
+```{r}
+data %<>% dplyr::mutate(
+  cond = factor(cond),
+)
+
+#INFERENTIALS
+
+data_farmed <- filter(data, CvF == "Farmed")
+data_companion <- filter(data, CvF == "Companion")
+
+
+data_farmed$cond <- droplevels(data_farmed$cond) #removes unused condition levels (CIA, CISA, etc.)
+data_companion$cond <- droplevels(data_companion$cond) #same for farmed (FIA, FISA, etc.)
+
+t.test(data_farmed$don, data_companion$don)
+```
+
+```{r}
+data_1 <- dplyr::bind_rows(
+  data_farmed, data_companion
+)
+  
+# here
+u00620_mod_z_1 <- lm(z(don) ~ CvF, data = data_1)
+
+export_ols(u00620_mod_z_1, 
+           key_effects = c("CvFFarmed"))
+```
+
+```{r}
+pairwise.t.test(data_companion$don, g = data_companion$cond, p.adjust.method = "none") #no correction
+
+# here 
+u00620_mod_z_2 <- data_companion %>% 
+  lm(z(don) ~ cond, .) 
+
+export_ols(u00620_mod_z_2, 
+           key_effects = c("condCISA", "condCNTA", "condCSA"))
+
+
+
+pairwise.t.test(data_farmed$don, data_farmed$cond, p.adjust.method = "fdr")
+
+# here
+u00620_mod_z_3 <- data_farmed %>% 
+  lm(z(don) ~ cond, .) 
+
+export_ols(u00620_mod_z_3, 
+           key_effects = c("condFISA", "condFNTA", "condFSA"))
+
+```
+
+
+
+```{r}
+describeBy(data$don, data$anim.don)
+#previous donors = 1
+did.don <- filter(data, data$anim.don == "1")
+#not previous donors = 0
+did.nae.don <- filter(data, data$anim.don == "0")
+
+#Big difference--22.9 cents versus 12.0 cents
+t.test(did.don$don, did.nae.don$don)
+```
+
+
+```{r}
+data_farmed <- filter(data, CvF == "Farmed")
+data_companion <- filter(data, CvF == "Companion")
+
+#Get rid of the "data$" on anim.don, because it's now been filtered into data farmed. 
+did.don.f <- filter(data_farmed, anim.don == "1")
+did.nae.don.f <- filter(data_farmed, anim.don == "0")
+
+t.test(did.don.f$don, did.nae.don.f$don)
+
+# here
+u00620_mod_z_4 <- data_farmed %>% 
+  lm(z(don) ~ factor(anim.don), .) 
+
+export_ols(u00620_mod_z_4, 
+           key_effects = c("factor(anim.don)1"))
+
+# here
+u00620_mod_z_5 <- data_companion %>% 
+  lm(z(don) ~ factor(anim.don), .) 
+
+
+export_ols(u00620_mod_z_5, 
+           key_effects = c("factor(anim.don)"))
+```
+
+

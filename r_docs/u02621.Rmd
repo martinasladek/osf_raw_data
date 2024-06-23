@@ -1,0 +1,634 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-06-28'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+library(reshape) #Reshaping functions melt and cast
+library(lme4)
+```
+
+Re-analysis notes: We needed to export versions of the models with and without outliers. For this, the script needs to be run twice - one time exporting models labelled as "nout" (original models), then chaging all zthresh values to a high value (e.g. 20), re-running again and exporting the versions of the models labelled with "out". 
+
+# Experiment 1 
+
+```{r}
+zthresh=2.5
+zthresh=250 #Set threshold for outlier removal
+nimp <- read.csv("../data/raw_data/u02621_all_nimp.csv", header = T)
+```
+
+```{r}
+nimp$alshift[is.na(nimp$closebound) & nimp$FaceLeft==1] <- -1 * nimp$alshift[is.na(nimp$closebound) & nimp$FaceLeft==1]
+
+aggregate(t1bound ~ cond, FUN="length", data = nimp)
+
+noo <- nimp[abs(zscore(nimp$t1bound)) < zthresh,] #remove t1bound outliers
+dim(nimp)
+dim(noo)
+
+#Zscore aligned shift by condition
+noo$Zalshift[noo$cond=="none"] <- zscore(noo$alshift[noo$cond=="none"])
+noo$Zalshift[noo$cond=="one25"] <- zscore(noo$alshift[noo$cond=="one25"])
+noo$Zalshift[noo$cond=="one15"] <- zscore(noo$alshift[noo$cond=="one15"])
+noo$Zalshift[noo$cond=="two15"] <- zscore(noo$alshift[noo$cond=="two15"])
+
+
+noo <- noo[abs(noo$Zalshift) < zthresh,]
+dim(noo)
+
+dim(nimp)[1] - dim(noo)[1]
+```
+
+Model 1
+
+```{r}
+# original 
+u02621_mod_nout_z_1 <- lm(z(alshift) ~ cond, data = subset(noo, noo$cond=="one15" | noo$cond=="two15")) 
+
+export_ols(
+  u02621_mod_nout_z_1, 
+  key_effects = c("condtwo15")
+)
+```
+
+```{r}
+# with outliers 
+#u02621_mod_out_z_1 <- lm(z(alshift) ~ cond, data = subset(nimp, nimp$cond=="one15" | nimp$cond=="two15")) 
+u02621_mod_out_z_1 <- lm(z(alshift) ~ cond, data = subset(noo, noo$cond=="one15" | noo$cond=="two15")) 
+
+export_ols(
+  u02621_mod_out_z_1, 
+  key_effects = c("condtwo15")
+)
+```
+
+# Experiment 2 
+
+```{r}
+get.pwt <- function(x, s, i=0, p=1){
+    #Function that returns the proportional weight of a source given the
+    #source's distance from the learner's boundary
+    #and parameters for the offset and slope
+    #x = vector of source distances for which weights should be returned
+    #s = constant determining slope of decay
+    #i = "intercept" or offset term that shifts curve left/right
+    #p = experimental parameter, don't use
+    #o = output vector of weights
+    ###########
+    
+    x <- x-i
+    o <- 1 - (x/(x + s))
+    o <- o^p
+    o[o>1] <- 1.0
+    o
+}
+
+zscore <- function(v, sigd = 2){
+    #Zscores the data in a vector after removing NA cells
+    #v = numeric vector of data
+    #output is rounded to sigd significant digits
+    round((v - mean(v, na.rm=T))/sqrt(var(v, na.rm=T)),sigd)
+}
+
+plot.pfit <- function(noo, s=25, o=4.5){
+    #Plots weight estimate against source distance along with a curve generated
+    #by get.pwt, using the parameters specified by s and o
+    #inc: subjects to include; removes items flagged as outliers by default
+    #s = slope of the curve
+    #o = offset of the curve
+    ###########
+    dmat.noo <- noo
+    
+    #Scatterplot
+    plot(dmat.noo$AlVar, dmat.noo$VarPClip,  pch=16, xlab = "Distance of varying  source", 
+        ylab = "Weight of varying source",  xlim = c(0,165), ylim = c(0,1))
+    
+    #Add line indicating model prediction
+    lines(c(0:165), get.pwt(c(0:165), s, o),  col=2, lwd=2)
+
+    #Text indicating the model
+    modtext <- paste("pWt_var = 1 - (Dvar - ", o, ")/(Dvar - ", o, " + ", s, ")", sep="")
+    text(70,1,labels = modtext, col=2, adj = 0)
+
+    #Text indicating the model fit
+    sse <- sum((dmat.noo$VarPClip - get.pwt(dmat.noo$AlVar,  s, o))^2)
+    toterr <- sum((dmat.noo$VarPClip - mean(dmat.noo$VarPClip))^2)
+    fittext <- paste("r^2 = ", round(1-(sse/toterr),2),  sep="")
+    text(70,.95,labels = fittext, col=2, adj = 0)
+}
+
+```
+
+```{r}
+zthresh <- 2.0
+zthresh <- 20
+alldat <- read.csv("../data/raw_data/u02621_all_data.csv", header = T)
+```
+
+```{r}
+sjex <- as.character(alldat$SID[abs(zscore(alldat$B1)) > zthresh]) #Add outlier SIDs to exlcude list
+noo <- alldat[is.na(match(alldat$SID, sjex)),] #Copy all other subjects to noo object
+dim(alldat) #Check original size of dataset
+dim(noo)    #Check reduced data to make sure 2 were removed
+
+sjex <- c(sjex, as.character(noo$SID[abs(zscore(noo$AlShift))>zthresh]))
+sjex <- unique(sjex)
+noo <- alldat[is.na(match(alldat$SID, sjex)),]
+```
+
+Model 2
+
+```{r}
+# original 
+u02621_mod_nout_z_2 <- lm(z(VarPClip) ~ z(AlVar), data = noo)
+
+export_ols(
+  u02621_mod_nout_z_2, 
+  key_effects = c("z(AlVar)")
+)
+```
+
+```{r}
+# with outliers 
+#u02621_mod_out_z_2 <- lm(z(VarPClip) ~ z(AlVar), data = alldat)
+u02621_mod_out_z_2 <- lm(z(VarPClip) ~ z(AlVar), data = noo)
+
+export_ols(
+  u02621_mod_out_z_2, 
+  key_effects = c("z(AlVar)")
+)
+```
+
+
+# Experiment 3 
+
+```{r}
+
+
+get.pars <- function(data){
+#This data computes slopes, intercepts, boundaries, and shifts for
+#two grid tests in the crazy beliefs study.
+#
+# data should be a matrix containing data from two grid tests as follows:
+#Subject	TrialNo	Ttype	CookRaw	FarSrc	Pic	Response	RT
+#1	1	Grid1	C	L	100	1	4009
+#1	2	Grid1	C	L	80	1	1503
+#
+#Function returns a matrix where each row is a subject and fields note
+#experiment conditions and the decision curves for each subject in each
+#grid test.
+
+sjs<-unique(data$Subject)  #make a vector contaning all the unique subject numbers
+nsjs<-length(sjs)
+
+t1 <- matrix(0, nsjs, 2)	#create two temporary matrices to hold
+t2<-t1				#test 1 and test 2 paramter estimates
+
+#create temporary matrix to hold other data
+
+cond<-cbind(sjs, rep("E", times = nsjs), rep("E", times = nsjs))
+
+
+#Loop over subjects to get logistic parameters estimates for 
+#test 1 and test 2
+for(i1 in c(1:nsjs)){
+	sdat <- subset(data, data$Subject==sjs[i1] & data$Ttype=="Grid1") 	#pull out grid 1 data for current subject
+	tmod1<- glm(Response~Pic, data = sdat, family="binomial") 		#fit test 1 model
+	sdat <- subset(data, data$Subject==sjs[i1] & data$Ttype=="Grid2") 	#pull out grid 2 data for current subject
+	tmod2<- glm(Response~Pic, data = sdat, family="binomial") 		#fit test 2 model
+	t1[i1,]<-tmod1$coefficients 					#store test 1 coefficients
+	t2[i1,]<-tmod2$coefficients					#store test 2 coefficients
+	sdat[,4]<-as.character(sdat[,4])					#change conditions from factor to string object
+	sdat[,5]<-as.character(sdat[,5])
+	cond[i1,2:3]<-as.character(sdat[1, 4:5])			#pull out other info about this sj and condition
+	}								#and store in cond matrix
+
+b1<- -1 * t1[,1]/t1[,2]		#estimate boundary for test 1
+b2<- -1 * t2[,1]/t2[,2]		#estimate boundary for test 2
+
+cond<-as.data.frame(cond)	#convert cond matrix to data-frame object
+
+#out <- cbind(t1,b1,t2,b2)
+
+out<-cbind(cond,t1,b1,t2,b2) 	#glue condition, t1, and t2 matrices together in data frame
+names(out)<-c("sno", "axlab","group","t1int","t1slope","t1bound","t2int","t2slope","t2bound") #name columns
+bshift <- b2 - b1		#compute shift in boundary
+midshift <- bshift		#copy bshift to midshift
+
+#Flip direction for people in right-biased group
+#so positive numbers mean toward midline and negative numbers mean
+#away from midline:
+midshift[out$group=="R"] <- midshift[out$group=="R"] * -1
+
+out<-cbind(out, bshift, midshift) #glue boundary shift data to output dataframe
+
+Zmidshift <- (out$midshift - mean(out$midshift))/sqrt(var(out$midshift))  #compute Zscore for midshift across all conditions
+out<-cbind(out, Zmidshift) #glue Zscores onto ouput data frame
+out #output result
+}
+
+zscore <-function(v){(v-mean(v, na.rm=T))/(sqrt(var(v, na.rm=T)))}
+zthresh <- 2.0
+zthresh <- 20
+```
+
+```{r}
+tmp <- read.table("../data/raw_data/u02621_item_grid.txt", header = T) #Read item grid data for all subjects into tmp object
+allpars <- get.pars(tmp)  #Compute parameters of logistic fit
+rm(tmp) #remove tmp objects
+```
+
+```{r}
+dim(allpars)
+head(allpars)
+```
+
+```{r}
+sjex <- as.character(allpars$sno[allpars$t2bound < 0]) #Add subject number to exclude list
+noo <- allpars[is.na(match(allpars$sno, sjex)),]  #Copy remaining subjects to noo object
+dim(noo) #Check that only one has been removed
+
+tmp <- rep(0, times = dim(noo)[1]) #create a placeholder for zscores
+tmp[noo$group=="L"] <- abs(zscore(noo$t1bound[noo$group=="L"]))  #put zscores for t1bound group L in
+tmp[noo$group=="R"] <- abs(zscore(noo$t1bound[noo$group=="R"]))  #put zscores for t1bound group R in
+
+sjex <- c(sjex, as.character(noo$sno[tmp > zthresh])) #Add outlier to exclude list
+sjex <- unique(sjex)  #remove accidental duplicates
+noo <- allpars[is.na(match(allpars$sno, sjex)),]  #Copy remaining subjects to noo object
+dim(noo) #Check that only one has been removed
+
+sjex <- c(sjex, as.character(noo$sno[abs(zscore(noo$midshift)) > zthresh]))  #Add subject to exclude list
+sjex <- unique(sjex)  #Remove any accidental duplicates
+noo <- allpars[is.na(match(allpars$sno, sjex)),]  #Copy remaining subjects to noo object
+ #Check that only one has been removed
+```
+
+Model 3
+
+```{r}
+t.test(t1bound ~ group, data = noo)
+
+u02621_mod_nout_z_3 <- lm(z(t1bound) ~ group, data = noo)
+
+export_ols(
+  u02621_mod_nout_z_3, 
+  key_effects = c("groupR")
+)
+
+#u02621_mod_out_z_3 <- lm(z(t1bound) ~ group, data = allpars)
+u02621_mod_out_z_3 <- lm(z(t1bound) ~ group, data = noo)
+
+export_ols(
+  u02621_mod_out_z_3, 
+  key_effects = c("groupR")
+)
+```
+
+model 4 
+
+```{r}
+t.test(t2bound ~ group, data = noo)
+
+
+u02621_mod_nout_z_4 <- lm(z(t2bound) ~ group, data = noo)
+
+export_ols(
+  u02621_mod_nout_z_4, 
+  key_effects = c("groupR")
+)
+
+#u02621_mod_out_z_4 <- lm(z(t2bound) ~ group, data = allpars)
+u02621_mod_out_z_4 <- lm(z(t2bound) ~ group, data = noo)
+
+export_ols(
+  u02621_mod_out_z_4, 
+  key_effects = c("groupR")
+)
+```
+
+-----
+
+```{r}
+fr <- read.table("../data/raw_data/u02621_Face_Items.txt", header = T)
+head(fr)
+length(unique(fr$Subject))
+
+frrs <- cast(fr, Subject + Group ~ Qtype * Sside, value="Response") #reshape to wide form in case that is useful
+names(frrs)[3:10] <- c("KnowL", "KnowR", "TrustL","TrustR","AccL","AccR","AttL","AttR") #name columns
+head(frrs)
+```
+
+
+```{r}
+cast(fr, Group ~ Qtype * Sside, value = "Response", fun.aggregate=mean)
+```
+
+Model 5 
+
+```{r}
+u02621_mod_z_5 <- lm(z(Response) ~ Sside * Group, data = subset(fr, fr$Qtype==3))
+
+export_ols(u02621_mod_z_5, 
+           key_effects = c("SsideRsource", "GroupR", "SsideRsource:GroupR"))
+
+
+```
+
+# Experiment 4 
+
+```{r}
+get.data <- function (fname) 
+{
+	###This code reads in one SJ's data from files formatted as in the CleanRaw directory
+	###and puts different phases of the experiment into a list object
+
+	###Pull out subject-specific info from file name
+	sinfo<-strsplit(fname, "[_-]")[[1]]  						#Splits file name into chunks by the _ and - characters
+	sinfo<-c(paste(sinfo[1], sinfo[2], sep="-"), sinfo[3:5]) 		#Take the parts we want
+
+	##Read data and add to subject info
+	tmp<-read.csv(fname, skip = 1, header = T)
+    names(tmp)[8:9] <- c("acc", "RT")							#Rename columns 8 and 9 to make shorter
+	nitems<-dim(tmp)[1]											#nitems = number of rows in data
+	sdat<-matrix(sinfo, nitems, 4, byrow=T)  					#Put sinfo into a matrix with nitems rows
+	sdattmp<-as.data.frame(sdat)								#convert to data frame
+    for(i1 in c(1:4)) sdattmp[,i1]<-as.character(sdat[,i1])  #convert factors to characters
+	sdattmp[,4]<-as.numeric(sdattmp[,4])						#convert sno to numeric
+	sdat<-sdattmp
+	
+	names(sdat)<-c("axlab", "group","sources","sno")			#name columns
+	faceassign <- 2 - sdat$sno %% 2								#Note whether subject number is even/odd for face assignment
+	sdat<-cbind(sdat, faceassign)								#Add this column to subject data matrix
+	names(sdat)[5]<-"FaceLeft"									#Name colun appropriately
+	tmp<-cbind(sdat, tmp)							#join subject info to main data
+
+	##Sort out the face data
+    faces <- subset(tmp, tmp$Block > 6)				#Pull out face rating trials, store in faces
+
+    tmp <- subset(tmp, tmp$Block < 7)				#Remove those trials from main data frame
+    tmp$Pic <- as.numeric(as.character(tmp$Pic))	#Change Pic data to numeric format
+
+	#Splits the data frame into a list with each element containing
+	#data from a different phase of the experiment
+    out <- list(subset(tmp, tmp$Block == 1), subset(tmp, tmp$Block == 
+        2), subset(tmp, tmp$Block == 4), subset(tmp, tmp$Block == 
+        5), faces, subset(tmp, tmp$Block == 3 | tmp$Block == 
+        6))
+	#Order of list elements is:
+	#1: initial learning with Captain's feedback
+	#2: first grid test
+	#3: learning with companion feedback
+	#4: second grid test
+	#5: face rating data
+	#6: explicit boundary data
+
+	#This loop sorts each block of data so items are in increasing order
+	#by stimulus number
+		for (i1 in c(1:4)) out[[i1]] <- out[[i1]][order(out[[i1]]$Pic), 
+        ]
+    out	
+}
+
+```
+
+```{r}
+get.pars <- function(dlist, sjs=NA){
+#This function reads a list object containing data from a 
+#Crazy Beliefs experiment, in the format read in by
+#get.data. Each element of the list corresponds to a different
+#subject, and contains a sub-list with that subject's data.
+#
+#This function fits, for each subject in dlist, a logistic curve to
+#their test 1 and test 2 performance and stores the parameters, including
+#slope, intercept, and boundary, in an output matrix.
+#
+#dlist is the data list containing subject data
+#sjs us a list of subjects to include in the analysis.
+
+
+if(is.na(sjs)){                #if sjs is not specified, include all sjs
+	nitems<-length(dlist)  # and set nitems to the number of subjects
+	sjs <- 1:nitems}
+else nitems<-length(sjs)
+
+t1 <- matrix(0, nitems,2)	#create two temporary matrices to hold
+t2<-t1				#test 1 and test 2 paramter estimates
+
+#create temporary matrix to hold other data
+cond<-matrix(c("E","E","E","0","E"), nitems, 5, byrow=T) 
+
+#Loop over subjects to get logistic parameters estimates for 
+#test 1 and test 2
+for(i1 in c(1:nitems)){
+	sdat <- dlist[[sjs[i1]]] #pull out data for current subject
+	tmod1<- glm(acc~Pic, data = sdat[[2]], family="binomial") 	#fit test 1 model
+	tmod2<- glm(acc~Pic, data = sdat[[4]], family="binomial") 	#fit test 2 model
+	t1[i1,]<-tmod1$coefficients 					#store test 1 coefficients
+	t2[i1,]<-tmod2$coefficients					#store test 2 coefficients
+	cond[i1,]<-as.matrix((sdat[[1]])[1,1:5])			#pull out other info about this sj and condition
+    print(i1)
+	}								#and store in cond matrix
+
+b1<- -1 * t1[,1]/t1[,2]		#estimate boundary for test 1
+b2<- -1 * t2[,1]/t2[,2]		#estimate boundary for test 2
+
+
+cond<-as.data.frame(cond)	#convert cond matrix to data-frame object
+
+out<-as.data.frame(cbind(cond,t1,b1,t2,b2)) #glue condition, t1, and t2 matrices together in data frame
+names(out)<-c("axlab","group","bounds","sno","FaceLeft","t1int","t1slope","t1bound","t2int","t2slope","t2bound") #name columns
+
+bshift <- b2 - b1		#compute shift in boundary
+midshift <- bshift		#copy bshift to midshift
+
+#Flip direction for people in right-biased group
+#so positive numbers mean toward midline and negative numbers mean
+#away from midline:
+midshift[out$group=="RB"] <- midshift[out$group=="RB"] * -1
+
+out<-cbind(out, bshift, midshift) #glue boundary shift data to output dataframe
+
+Zmidshift <- (out$midshift - mean(out$midshift))/sqrt(var(out$midshift))  #compute Zscore for midshift across all conditions
+
+#Compute Zscore for midshift separately for each boundary condition
+Zmsbycond <- rep(0, times = nitems) #make zero vector to hold data
+for(i1 in levels(out$bounds)){
+        mscond <- out$midshift[out$bounds==i1] #pull out data for current condition
+	Zmsbycond[out$bounds == i1] <- (mscond - mean(mscond))/sqrt(var(mscond))  #compute zscores for current condition
+       }
+out<-cbind(out, Zmidshift, Zmsbycond) #glue Zscores onto ouput data frame
+out #output result
+}
+```
+
+```{r}
+zscore <- function(v){
+    (v - mean(v))/sqrt(var(v))
+}
+zthresh <- 2.0
+zthresh <- 20.0
+
+
+
+```
+
+```{r}
+alldat <- readRDS("../data/raw_data/u02621_alldat.rds")
+allpars <- get.pars(alldat)
+
+pid <- paste(allpars$axlab, allpars$group, allpars$bounds, allpars$sno, sep="_")
+allpars <- cbind(pid, allpars)
+allpars$pid <- as.character(pid) #convert from factor to character vector
+head(allpars)
+
+allpars$bounds <- factor(allpars$bounds, levels = unique(allpars$bounds)[c(2,1,3,5,4)])
+#aggregate(t1bound~bounds, FUN ="length", data = allpars)
+
+sjex <- as.character(allpars$pid[abs(allpars$t1bound) > 300 | abs(allpars$t2bound) > 300])
+sjex <- unique(sjex)
+nimp <- allpars[is.na(match(allpars$pid, sjex)),]
+```
+
+
+```{r}
+#Compute Zscores for initial boundary for people in LB and RB groups
+tmp <- nimp$t1bound
+tmp[nimp$group=="LB"] <- zscore(nimp$t1bound[nimp$group=="LB"])
+tmp[nimp$group=="RB"] <- zscore(nimp$t1bound[nimp$group=="RB"])
+```
+
+```{r}
+sjex <- c(sjex, c(nimp$pid[abs(tmp) > zthresh]))
+sjex <- unique(sjex)
+noo <- allpars[is.na(match(allpars$pid, sjex)),]
+
+
+```
+
+```{r}
+clevs <- levels(noo$bounds)
+
+#Compute Zscores for each boundary condition
+for(i1 in c(1:length(clevs))){
+    noo$Zmsbycond[noo$bounds==clevs[i1]] <- 
+        zscore(noo$midshift[noo$bounds==clevs[i1]])
+}
+```
+
+```{r}
+sjex <- c(sjex, noo$pid[abs(noo$Zmsbycond) > zthresh])
+sjex <- unique(sjex)
+noo <- allpars[is.na(match(allpars$pid, sjex)),]
+aggregate(t1bound~bounds, FUN="length", data = noo)
+```
+
+
+
+```{r}
+t.test(t2bound~group, data = subset(noo, noo$bounds=="Control"))
+
+u02621_mod_nout_z_6 <- lm(z(t2bound) ~ group, data = subset(noo, noo$bounds=="Control"))
+
+export_ols(
+  u02621_mod_nout_z_6, 
+  key_effects = c("groupRB")
+)
+
+
+#u02621_mod_out_z_6 <- lm(z(t2bound) ~ group, data = subset(allpars, allpars$bounds=="Control"))
+u02621_mod_out_z_6 <- lm(z(t2bound) ~ group, data = subset(noo, noo$bounds=="Control"))
+
+export_ols(
+  u02621_mod_out_z_6, 
+  key_effects = c("groupRB")
+)
+```
+
+```{r}
+t.test(t2bound~group, data = subset(noo, noo$bounds=="Close"))
+
+
+u02621_mod_nout_z_7 <- lm(z(t2bound) ~ group, data = subset(noo, noo$bounds=="Close"))
+
+export_ols(
+  u02621_mod_nout_z_7, 
+  key_effects = c("groupRB")
+)
+
+
+#u02621_mod_out_z_7 <- lm(z(t2bound) ~ group, data = subset(allpars, allpars$bounds=="Close"))
+u02621_mod_out_z_7 <- lm(z(t2bound) ~ group, data = subset(noo, noo$bounds=="Close"))
+
+export_ols(
+  u02621_mod_out_z_7, 
+  key_effects = c("groupRB")
+)
+```
+
+```{r}
+t.test(t2bound~group, data = subset(noo, noo$bounds=="Dead"))
+
+u02621_mod_nout_z_8 <- lm(z(t2bound) ~ group, data = subset(noo, noo$bounds=="Dead"))
+
+export_ols(
+  u02621_mod_nout_z_8, 
+  key_effects = c("groupRB")
+)
+
+
+#u02621_mod_out_z_8 <- lm(z(t2bound) ~ group, data = subset(allpars, allpars$bounds=="Dead"))
+u02621_mod_out_z_8 <- lm(z(t2bound) ~ group, data = subset(noo, noo$bounds=="Dead"))
+
+export_ols(
+  u02621_mod_out_z_8, 
+  key_effects = c("groupRB")
+)
+```
+
+```{r}
+t.test(t2bound~group, data = subset(noo, noo$bounds=="Mid"))
+
+u02621_mod_nout_z_9 <- lm(z(t2bound) ~ group, data = subset(noo, noo$bounds=="Mid"))
+
+export_ols(
+  u02621_mod_nout_z_9, 
+  key_effects = c("groupRB")
+)
+
+
+#u02621_mod_out_z_9 <- lm(z(t2bound) ~ group, data = subset(allpars, allpars$bounds=="Mid"))
+u02621_mod_out_z_9 <- lm(z(t2bound) ~ group, data = subset(noo, noo$bounds=="Mid"))
+
+export_ols(
+  u02621_mod_out_z_9, 
+  key_effects = c("groupRB")
+)
+```
+
+```{r}
+noo <- allpars[is.na(match(allpars$pid, sjex)),]
+t.test(t2bound~group, data = subset(noo, noo$bounds=="Far"))
+
+u02621_mod_nout_z_10 <- lm(z(t2bound) ~ group, data = subset(noo, noo$bounds=="Far"))
+
+export_ols(
+  u02621_mod_nout_z_10, 
+  key_effects = c("groupRB")
+)
+
+
+#u02621_mod_out_z_10 <- lm(z(t2bound) ~ group, data = subset(noo, noo$bounds=="Far"))
+u02621_mod_out_z_10 <-lm(z(t2bound) ~ group, data = subset(noo, noo$bounds=="Far"))
+
+export_ols(
+  u02621_mod_out_z_10, 
+  key_effects = c("groupRB")
+)
+```
+

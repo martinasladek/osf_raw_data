@@ -1,0 +1,46 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-08-01'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+s6 <- read_csv("../data/raw_data/u00730_s6_removed_clean.csv")
+source("../scripts/helpers.R")
+
+```
+
+These models are not reported in the manuscript. 
+
+model 1 
+
+```{r}
+u00730_mod_z_1 <- lm(z(social_connection) ~ condition, data = s6)
+
+export_ols(
+  u00730_mod_z_1, key_effects = "conditionyou_other"
+)
+```
+
+model 2 
+
+```{r}
+u00730_mod_z_2 <- lm(z(enjoyment) ~ condition, data = s6)
+
+export_ols(
+  u00730_mod_z_2, key_effects = "conditionyou_other"
+)
+```
+
+model 3 
+
+```{r}
+u00730_mod_z_3 <- lm(z(engagement) ~ condition, data = s6)
+
+export_ols(
+  u00730_mod_z_3, key_effects = "conditionyou_other"
+)
+```

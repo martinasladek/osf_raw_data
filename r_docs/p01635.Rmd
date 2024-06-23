@@ -1,0 +1,29 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-24'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df <- readxl::read_excel("../data/raw_data/p01635_Dataset_heat&fraud_0804.xlsx") 
+
+```
+
+
+```{r}
+p01635_mod_z_1 <- df %>% 
+  lm(z(Subjective_warmth) ~ as.factor(Groups), .) 
+
+export_ols(
+  p01635_mod_z_1, 
+  key_effects = c("as.factor(Groups)2", "as.factor(Groups)3")
+)
+```
+
+
+

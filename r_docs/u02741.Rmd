@@ -1,0 +1,57 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-06'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df <- read.csv("../data/raw_data/u02741_TOM_FINAL.csv")
+
+demo <- readxl::read_excel("../data/raw_data/u02741_NavarroConway_demodat.xlsx")
+
+```
+
+```{r}
+df_1_long <- df %>% 
+  dplyr::filter(TrialType != 0) %>% 
+  dplyr::group_by(ID, Condition_Director, TrialType, ACC) %>% 
+  dplyr::summarise(n = n())%>% 
+  dplyr::arrange(ID, Condition_Director, TrialType, ACC) %>% 
+  tidyr::pivot_wider(id_cols = c(ID, Condition_Director, TrialType), names_from = ACC, values_from = n, values_fill = 0) %>% 
+  dplyr::mutate(
+    prop = `1`/8
+  ) %>% 
+  dplyr::left_join(., demo)
+```
+
+
+```{r}
+df_1_long %<>% 
+  dplyr::mutate(
+    Condition_Director = factor(Condition_Director), 
+    TrialType = factor(TrialType), 
+    BILINGUAL = factor(BILINGUAL), 
+  )
+
+u02741_mod_rm_z_1 <- df_1_long  %>% 
+  afex::aov_4(z(prop) ~ Condition_Director*TrialType*BILINGUAL + (Condition_Director*TrialType|ID), .) 
+
+export_ols(u02741_mod_rm_z_1, 
+           key_effects = c("BILINGUAL:Condition_Director", "BILINGUAL:TrialType",
+                           "BILINGUAL:Condition_Director:TrialType"))
+
+
+
+u02741_mod_lmer_z_1 <- df_1_long  %>% 
+  lme4::lmer(z(prop) ~ Condition_Director*TrialType*BILINGUAL + (1|ID), .) 
+
+export_ols(u02741_mod_lmer_z_1, 
+           key_effects = c("Condition_Director2:TrialType2", "Condition_Director2:BILINGUALYES",
+                           "TrialType2:BILINGUALYES", "Condition_Director2:TrialType2:BILINGUALYES"))
+```
+

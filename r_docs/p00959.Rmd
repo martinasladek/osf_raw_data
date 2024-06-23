@@ -1,0 +1,338 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-06-07'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df_1 <- readxl::read_xlsx("../data/raw_data/p00959_Puig et al. Data Worksheet_revised.xlsx", sheet = 1)
+df_2 <- readxl::read_xlsx("../data/raw_data/p00959_Puig et al. Data Worksheet_revised.xlsx", sheet = 2)
+```
+
+# Study 1 
+
+## 1
+
+```{r}
+df_1_long_1 <- df_1 %>% 
+  dplyr::select(`Participant number`, 
+                `Condition (1 = self, 2 = acquaintance, 3 = Obama)`, 
+                contains("details")) %>% 
+  magrittr::set_colnames(., c("id", "cond", 
+                              "neg_internal", "neg_external", 
+                              "pos_internal", "pos_external")) %>% 
+  tidyr::pivot_longer(cols = -c(id, cond)) %>% 
+  dplyr::mutate(
+    valence = if_else(str_detect(name, "pos"), "pos", "neg"),
+    category = if_else(str_detect(name, "internal"), "internal", "external"),
+    cond = factor(cond)
+  )
+```
+
+
+```{r}
+p00959_mod_rm_z_1 <- df_1_long_1 %>% 
+  afex::aov_4(z(value) ~ cond*valence*category + (valence*category|id), .)
+
+export_ols(p00959_mod_rm_z_1, 
+           key_effects = c("cond:valence", "cond:category", "valence:category"))
+
+
+p00959_mod_lmer_z_1 <- df_1_long_1 %>% 
+  lme4::lmer(z(value) ~ cond*valence*category + (1|id), .)
+
+export_ols(p00959_mod_lmer_z_1, 
+           key_effects = c("cond2:valencepos", "cond3:valencepos", "cond2:categoryinternal", 
+                           "cond3:categoryinternal", "valencepos:categoryinternal"))
+```
+
+## 2 
+
+```{r}
+df_1_long_2 <- 
+  df_1 %>% 
+  dplyr::select(`Participant number`, 
+                `Condition (1 = self, 2 = acquaintance, 3 = Obama)`, 
+                contains("Subjective Detail")) %>% 
+  magrittr::set_colnames(., c("id", "cond", 
+                              "neg_subj", "pos_subj")) %>% 
+  tidyr::pivot_longer(cols = -c(id, cond)) %>% 
+  dplyr::mutate(
+    valence = if_else(str_detect(name, "pos"), "pos", "neg"),
+    cond = factor(cond)
+  )
+```
+
+
+```{r}
+p00959_rm_z_2 <- df_1_long_2 %>% 
+  dplyr::filter(id != 49) %>% 
+  afex::aov_4(z(value) ~ cond*valence + (valence|id), .)
+
+export_ols(p00959_rm_z_2, 
+           key_effects = c("cond:valence"))
+
+
+
+p00959_lmer_z_2 <- df_1_long_2 %>% 
+  dplyr::filter(id != 49) %>% 
+  lme4::lmer(z(value) ~ cond*valence + (1|id), .)
+
+export_ols(p00959_lmer_z_2, 
+           key_effects = c("cond2:valencepos", "cond3:valencepos"))
+```
+
+## 3
+
+```{r}
+df_1_long_3 <- 
+  df_1 %>% 
+  dplyr::select(`Participant number`, 
+                `Condition (1 = self, 2 = acquaintance, 3 = Obama)`, 
+                contains("Subjective Plausibility")) %>% 
+  magrittr::set_colnames(., c("id", "cond", 
+                              "neg_subj", "pos_subj")) %>% 
+  tidyr::pivot_longer(cols = -c(id, cond)) %>% 
+  dplyr::mutate(
+    valence = if_else(str_detect(name, "pos"), "pos", "neg"),
+    cond = factor(cond)
+  )
+```
+
+
+```{r}
+p00959_rm_z_3 <- df_1_long_3 %>% 
+  dplyr::filter(id != 49) %>% 
+  afex::aov_4(z(value) ~ cond*valence + (valence|id), .)
+
+export_ols(p00959_rm_z_3, 
+           key_effects = c("cond:valence"))
+
+
+
+p00959_lmer_z_3 <- df_1_long_3 %>% 
+  dplyr::filter(id != 49) %>% 
+  lme4::lmer(z(value) ~ cond*valence + (1|id), .)
+
+export_ols(p00959_lmer_z_3, 
+           key_effects = c("cond2:valencepos", "cond3:valencepos"))
+```
+
+
+## 4
+
+```{r}
+df_1_long_4 <- 
+  df_1 %>% 
+  dplyr::select(`Participant number`, 
+                `Condition (1 = self, 2 = acquaintance, 3 = Obama)`, 
+                contains("Subjective Valence")) %>% 
+  magrittr::set_colnames(., c("id", "cond", 
+                              "neg_subj", "pos_subj")) %>% 
+  tidyr::pivot_longer(cols = -c(id, cond)) %>% 
+  dplyr::mutate(
+    valence = if_else(str_detect(name, "pos"), "pos", "neg"),
+    cond = factor(cond)
+  )
+```
+
+
+```{r}
+p00959_rm_z_4 <- df_1_long_4 %>% 
+  dplyr::filter(id != 49) %>% 
+  afex::aov_4(z(value) ~ cond*valence + (valence|id), .)
+
+export_ols(p00959_rm_z_4, 
+           key_effects = c("cond:valence"))
+
+
+
+p00959_lmer_z_4 <- df_1_long_4 %>% 
+  dplyr::filter(id != 49) %>% 
+  lme4::lmer(z(value) ~ cond*valence + (1|id), .)
+
+export_ols(p00959_lmer_z_4, 
+           key_effects = c("cond2:valencepos", "cond3:valencepos"))
+```
+
+
+# Study 2 
+
+## 5 
+
+```{r}
+df_2_long_5 <- df_2 %>% 
+  dplyr::select(`Participant number`, 
+                contains("ternal details")) %>% 
+  magrittr::set_colnames(., c("id", 
+                              "neg_self_internal", "neg_self_external", 
+                              "pos_self_internal", "pos_self_external", 
+                              "neg_other_internal", "neg_other_external", 
+                              "pos_other_internal", "pos_other_external")) %>% 
+  tidyr::pivot_longer(cols = -c(id)) %>% 
+  dplyr::mutate(
+    valence = if_else(str_detect(name, "pos"), "pos", "neg"),
+    category = if_else(str_detect(name, "internal"), "internal", "external"),
+    cond = if_else(str_detect(name, "self"), "self", "other"),
+  )
+```
+
+```{r}
+p00959_mod_rm_z_5 <- df_2_long_5 %>% 
+  afex::aov_4(z(value) ~ valence*category*cond + (valence*category*cond|id), .)
+
+export_ols(p00959_mod_rm_z_5, 
+           key_effects = c("valence:category", "valence:cond", "category:cond"))
+
+
+p00959_mod_lmer_z_5 <- df_2_long_5 %>% 
+  lme4::lmer(z(value) ~ valence*category*cond + (1|id), .)
+
+export_ols(p00959_mod_lmer_z_5, 
+           key_effects = c("valencepos:categoryinternal", "valencepos:condself", "categoryinternal:condself"))
+```
+
+## 6 
+
+```{r}
+df_2_long_6 <- df_2 %>% 
+  dplyr::select(`Participant number`, 
+                contains("Subjective Detail")) %>% 
+  magrittr::set_colnames(., c("id", 
+                              "neg_self",
+                              "pos_self",
+                              "neg_other",
+                              "pos_other")) %>% 
+  tidyr::pivot_longer(cols = -c(id)) %>% 
+  dplyr::mutate(
+    valence = if_else(str_detect(name, "pos"), "pos", "neg"),
+    cond = if_else(str_detect(name, "self"), "self", "other"),
+  ) %>% 
+  dplyr::filter(id != 13)
+```
+
+```{r}
+p00959_mod_rm_z_6 <- df_2_long_6 %>% 
+  afex::aov_4(z(value) ~ cond*valence + (valence*cond|id), .)
+
+export_ols(p00959_mod_rm_z_6, 
+           key_effects = c("valence:cond"))
+
+
+
+p00959_mod_lmer_z_6 <- df_2_long_6 %>% 
+  lme4::lmer(z(value) ~ cond*valence + (1|id), .)
+
+export_ols(p00959_mod_lmer_z_6, 
+           key_effects = c("condself:valencepos"))
+```
+
+## 7 
+
+```{r}
+df_2_long_7 <- df_2 %>% 
+  dplyr::select(`Participant number`, 
+                contains("Subjective Plausibility")) %>% 
+  magrittr::set_colnames(., c("id", 
+                              "neg_self",
+                              "pos_self",
+                              "neg_other",
+                              "pos_other")) %>% 
+  tidyr::pivot_longer(cols = -c(id)) %>% 
+  dplyr::mutate(
+    valence = if_else(str_detect(name, "pos"), "pos", "neg"),
+    cond = if_else(str_detect(name, "self"), "self", "other"),
+  ) %>% 
+  dplyr::filter(id != 13)
+```
+
+```{r}
+p00959_mod_rm_z_7 <- df_2_long_7 %>% 
+  afex::aov_4(z(value) ~ cond*valence + (valence*cond|id), .)
+
+export_ols(p00959_mod_rm_z_7, 
+           key_effects = c("valence:cond"))
+
+
+
+p00959_mod_lmer_z_7 <- df_2_long_7 %>% 
+  lme4::lmer(z(value) ~ cond*valence + (1|id), .)
+
+export_ols(p00959_mod_lmer_z_7, 
+           key_effects = c("condself:valencepos"))
+```
+
+## 8 
+
+```{r}
+df_2_long_8 <- df_2 %>% 
+  dplyr::select(`Participant number`, 
+                contains("Subjective Valence")) %>% 
+  magrittr::set_colnames(., c("id", 
+                              "neg_self",
+                              "pos_self",
+                              "neg_other",
+                              "pos_other")) %>% 
+  tidyr::pivot_longer(cols = -c(id)) %>% 
+  dplyr::mutate(
+    valence = if_else(str_detect(name, "pos"), "pos", "neg"),
+    cond = if_else(str_detect(name, "self"), "self", "other"),
+  ) %>% 
+  dplyr::filter(id != 13)
+```
+
+```{r}
+p00959_mod_rm_z_8 <- df_2_long_8 %>% 
+  afex::aov_4(z(value) ~ cond*valence + (valence*cond|id), .)
+
+export_ols(p00959_mod_rm_z_8, 
+           key_effects = c("valence:cond"))
+
+
+
+p00959_mod_lmer_z_8 <- df_2_long_8 %>% 
+  lme4::lmer(z(value) ~ cond*valence + (1|id), .)
+
+export_ols(p00959_mod_lmer_z_8, 
+           key_effects = c("condself:valencepos"))
+```
+
+## 9 
+
+```{r}
+df_2_long_9 <- df_2 %>% 
+  dplyr::select(`Participant number`, 
+                contains("Subjective Arousal")) %>% 
+  magrittr::set_colnames(., c("id", 
+                              "neg_self",
+                              "pos_self",
+                              "neg_other",
+                              "pos_other")) %>% 
+  tidyr::pivot_longer(cols = -c(id)) %>% 
+  dplyr::mutate(
+    valence = if_else(str_detect(name, "pos"), "pos", "neg"),
+    cond = if_else(str_detect(name, "self"), "self", "other"),
+  ) %>% 
+  dplyr::filter(id != 13)
+```
+
+```{r}
+p00959_mod_rm_z_9 <- df_2_long_9 %>% 
+  afex::aov_4(z(value) ~ cond*valence + (valence*cond|id), .)
+
+export_ols(p00959_mod_rm_z_9, 
+           key_effects = c("valence:cond"))
+
+
+
+p00959_mod_lmer_z_9 <- df_2_long_9 %>% 
+  lme4::lmer(z(value) ~ cond*valence + (1|id), .)
+
+export_ols(p00959_mod_lmer_z_9, 
+           key_effects = c("condself:valencepos"))
+```

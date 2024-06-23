@@ -1,0 +1,23 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-06-28'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+coop_reg <- read_rds("../data/raw_data/u02564_coop_reg.rds")
+
+```
+
+
+```{r}
+u02564_mod_z_1 <- lm(z(coop) ~ z(degree) + z(NARS) + z(anthro_score), data = coop_reg)
+
+export_ols(u02564_mod_z_1, 
+           key_effects = c("z(degree)", "z(NARS)", "z(anthro_score)"))
+```
+

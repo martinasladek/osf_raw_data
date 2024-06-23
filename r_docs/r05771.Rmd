@@ -1,0 +1,2966 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+
+Participants number 6 existed 2 times: 
+15.05.17: TRUE number 6
+23.11.17: should have been 90, changed to 186 because of group correspondance
+
+Condition 1 (1 out of 4): ed, no self-affirmation
+Condition 2 (2 out of 4): ed, self-affirmation
+Condition 3 (3 out of 4): no ed, no self-affirmation 
+Condition 4 (4 out of 4): no ed, self-affirmation
+
+```{r setup, include = TRUE}
+
+source("../scripts/helpers.R")
+
+library(RColorBrewer)
+library(Rmisc)
+library(jmv)
+library(sjstats)
+library(effsize)
+library(knitr)
+library(readxl)
+library(lme4)
+library(BayesFactor)
+library(bain)
+library(broom)
+library(tidytext)
+library(tidyverse)
+
+# Defining the geom_flat_violin function. Note: the below code modifies the 
+# existing github page by removing a parenthesis in line 50
+
+"%||%" <- function(a, b) {
+  if (!is.null(a)) a else b
+}
+
+geom_flat_violin <- function(mapping = NULL, data = NULL, stat = "ydensity",
+                             position = "dodge", trim = TRUE, scale = "area",
+                             show.legend = NA, inherit.aes = TRUE, ...) {
+  layer(
+    data = data,
+    mapping = mapping,
+    stat = stat,
+    geom = GeomFlatViolin,
+    position = position,
+    show.legend = show.legend,
+    inherit.aes = inherit.aes,
+    params = list(
+      trim = trim,
+      scale = scale,
+      ...
+    )
+  )
+}
+
+#' @rdname ggplot2-ggproto
+#' @format NULL
+#' @usage NULL
+#' @export
+GeomFlatViolin <-
+  ggproto("GeomFlatViolin", Geom,
+          setup_data = function(data, params) {
+            data$width <- data$width %||%
+              params$width %||% (resolution(data$x, FALSE) * 0.9)
+            
+            # ymin, ymax, xmin, and xmax define the bounding rectangle for each group
+            data %>%
+              group_by(group) %>%
+              mutate(ymin = min(y),
+                     ymax = max(y),
+                     xmin = x,
+                     xmax = x + width / 2)
+            
+          },
+          
+          draw_group = function(data, panel_scales, coord) {
+            # Find the points for the line to go all the way around
+            data <- transform(data, xminv = x,
+                              xmaxv = x + violinwidth * (xmax - x))
+            
+            # Make sure it's sorted properly to draw the outline
+            newdata <- rbind(plyr::arrange(transform(data, x = xminv), y),
+                             plyr::arrange(transform(data, x = xmaxv), -y))
+            
+            # Close the polygon: set first and last point the same
+            # Needed for coord_polar and such
+            newdata <- rbind(newdata, newdata[1,])
+            
+            ggplot2:::ggname("geom_flat_violin", GeomPolygon$draw_panel(newdata, panel_scales, coord))
+          },
+          
+          draw_key = draw_key_polygon,
+          
+          default_aes = aes(weight = 1, colour = "grey20", fill = "white", size = 0.5,
+                            alpha = NA, linetype = "solid"),
+          
+          required_aes = c("x", "y")
+  )
+
+```
+
+
+
+```{r include = TRUE}
+
+# load data (questionnaires & blood pressure)
+#ed_pep_aff_raw <- read_excel("data_raw_anonymous.xlsx")
+ed_pep_aff_raw <- read_excel("../data/raw_data/r05771_giesler2017_new_data_raw_anonymous.xlsx")
+
+# select relevant columns
+ed_pep_aff <- ed_pep_aff_raw %>%
+                  select(date, time, subject, group, blocknum, blockcode, trialnum, trialcode, latency, response, correct)
+
+# as.numeric: subject, blocknum, trialnum, latency, response, correct
+ed_pep_aff <- mutate_at(ed_pep_aff, vars(c(subject, group, blocknum, trialnum, latency, response, correct)), as.numeric)
+
+# sort cases by subject
+ed_pep_aff <- ed_pep_aff %>%
+  arrange(subject)
+
+# as date
+ed_pep_aff$date <- as.Date(ed_pep_aff$date)
+
+# subject number 6 was assigned twice - change one of them to 186
+ed_pep_aff <- within(ed_pep_aff, subject[subject == 6 & date == '2017-11-23'] <- 186)
+
+# subject number 49 entered id in 'group' instead of 'subject'
+ed_pep_aff <- within(ed_pep_aff, subject[subject == 1 & group == '49'] <- 49)
+
+# delete 'group' column
+ed_pep_aff$group <- NULL
+
+# delete subjects used for testing
+ed_pep_aff <- ed_pep_aff %>%
+  filter(., subject < 300)
+```
+
+# Questionnaires
+```{r include = TRUE}
+
+# select blocks
+ed_pep_aff_q <- ed_pep_aff %>%
+  filter(., blockcode == "Anstrengung" | blockcode == "FAT1" | blockcode == "MC" | blockcode == "FAT2" | 
+           blockcode == "ranking" | blockcode == "affirmation" | blockcode == "StroopFragen" | blockcode == "TSC" |
+           blockcode == "physio" | blockcode == "endquestions" | blockcode == "VL" | blockcode == "Blutdruck")
+
+# select relevant columns
+ed_pep_aff_q <- ed_pep_aff_q %>%
+  select(., subject, trialcode, response)
+
+write.csv(ed_pep_aff_q, "ed_pep_aff_q.csv")
+
+# long to wide format
+ed_pep_aff_q <- ed_pep_aff_q %>%
+  spread(., trialcode, response)
+
+# as.numeric: subject, blocknum, trialnum, latency
+ed_pep_aff_q <- mutate_at(ed_pep_aff_q, vars(c(subject, age, Anstrengung_a:bp2, datenqualität:Puls6, 
+                                               SBP_A1:sprache, Strooperfahrung, Temperatur:VL1, VL3)), as.numeric)
+
+ed_pep_aff_q <- ed_pep_aff_q %>%
+  rename(exh_a = Anstrengung_a, exh_b = `Anstrengung_b`, exh_c = `Anstrengung_c`, exh_d = `Anstrengung_d`, 
+         exh_e = `Anstrengung_e`, exh_f = `Anstrengung_f`, job = `beruf`, data_quality = `datenqualität`, 
+         fat1_a = `FAT1a`, fat1_b = `FAT1b`, fat1_c = `FAT1c`, fat1_d = `FAT1d`, fat1_e = `FAT1e`, 
+         fat2_a = `FAT2a`, fat2_b = `FAT2b`, fat2_c = `FAT2c`, fat2_d = `FAT2d`, fat2_e = `FAT2e`, mca_1 = `MCa`, 
+         mca_2 = `MCb`, mca_3 = `MCc`, mca_4 = `MCd`, language = `sprache`, study = `studieren`, tsc_1 = `TSK1`, 
+         tsc_2 = `TSK2`, tsc_3 = `TSK3`, tsc_4 = `TSK4`, tsc_5 = `TSK5`, tsc_6 = `TSK6`, tsc_7 = `TSK7`, 
+         tsc_8 = `TSK8`, tsc_9 = `TSK9`, tsc_10 = `TSK10`, tsc_11 = `TSK11`, tsc_12 = `TSK12`, tsc_13 = `TSK13`,  
+         view_1 = `Sehschwaeche1`, view_2 = `Sehschwaeche2`, sex = `sex`, 
+         value_01 = `d01`, value_02 = `d02`, value_03 = `d03`, value_04 = `d04`, value_05 = `d05`, 
+         value_06 = `d06`, value_07 = `d07`, value_08 = `d08`, value_09 = `d09`, value_10 = `d10`, 
+         value_11 = `d11`, morningness = `Morningness`, remarks_physio = `anm_physio`, 
+         sbp_base_1 = SBP1, sbp_base_2 = SBP2, sbp_base_3 = SBP3, sbp_base_4 = SBP4, sbp_base_5 = SBP5, sbp_base_6 = SBP6,
+         sbp_aff_1 = SBP_A1, sbp_aff_2 = SBP_A2, sbp_aff_3 = SBP_A3, sbp_aff_4 = SBP_A4, sbp_aff_5 = SBP_A5, 
+         sbp_aff_6 = SBP_A6, sbp_stroop_1 = SBP_S1, sbp_stroop_2 = SBP_S2, sbp_stroop_3 = SBP_S3, sbp_stroop_4 = SBP_S4, 
+         sbp_stroop_5 = SBP_S5, sbp_stroop_6 = SBP_S6, sbp_stroop_7 = SBP_S7,sbp_stroop_8 = SBP_S8, 
+         sbp_count_1 = `SBP_C1`, sbp_count_2 = `SBP_C2`, 
+         sbp_count_3 = `SBP_C3`, sbp_count_4 = `SBP_C4`, sbp_count_5 = `SBP_C5`, sbp_count_6 = `SBP_C6`, 
+         sbp_count_7 = `SBP_C7`, sbp_count_8 = `SBP_C8`, 
+         dbp_base_1 = DBP1, dbp_base_2 = DBP2, dbp_base_3 = DBP3, dbp_base_4 = DBP4, dbp_base_5 = DBP5, dbp_base_6 = DBP6,
+         dbp_aff_1 = DBP_A1, dbp_aff_2 = DBP_A2, dbp_aff_3 = DBP_A3, dbp_aff_4 = DBP_A4, dbp_aff_5 = DBP_A5, 
+         dbp_aff_6 = DBP_A6, dbp_stroop_1 = DBP_S1, dbp_stroop_2 = DBP_S2, dbp_stroop_3 = DBP_S3, dbp_stroop_4 = DBP_S4, 
+         dbp_stroop_5 = DBP_S5, dbp_stroop_6 = DBP_S6, dbp_stroop_7 = DBP_S7, dbp_stroop_8 = DBP_S8, 
+         dbp_count_1 = `DBP_C1`, dbp_count_2 = `DBP_C2`, 
+         dbp_count_3 = `DBP_C3`, dbp_count_4 = `DBP_C4`, dbp_count_5 = `DBP_C5`, dbp_count_6 = `DBP_C6`, 
+         dbp_count_7 = `DBP_C7`, dbp_count_8 = `DBP_C8`, 
+         hr_base_1 = Puls1, hr_base_2 = Puls2, hr_base_3 = Puls3, hr_base_4 = Puls4, hr_base_5 = Puls5, hr_base_6 = Puls6,
+         hr_aff_1 = Puls_A1, hr_aff_2 = Puls_A2, hr_aff_3 = Puls_A3, hr_aff_4 = Puls_A4, hr_aff_5 = Puls_A5, 
+         hr_aff_6 = Puls_A6, hr_stroop_1 = Puls_S1, hr_stroop_2 = Puls_S2, hr_stroop_3 = Puls_S3, hr_stroop_4 = Puls_S4, 
+         hr_stroop_5 = Puls_S5, hr_stroop_6 = Puls_S6, hr_stroop_7 = Puls_S7, hr_stroop_8 = Puls_S8, 
+         hr_count_1 = `Puls_C1`, hr_count_2 = `Puls_C2`, 
+         hr_count_3 = `Puls_C3`, hr_count_4 = `Puls_C4`, hr_count_5 = `Puls_C5`, hr_count_6 = `Puls_C6`, 
+         hr_count_7 = `Puls_C7`, hr_count_8 = `Puls_C8`, temperature = `Temperatur`, experimentor = `VL1`, 
+         exp_remarks = `VL2`, daytime = `VL3`, stroop_q_1 = `SFa`, stroop_q_2 = `SFb`, stroop_q_3 = `SFc`, 
+         stroop_q_4 = `SFd`, stroop_q_5 = `SFe`, pep_unpleasant = `pep1`, pep_concentration = `pep2`, 
+         stroop_experience = `Strooperfahrung`, stroop_strategy = `Strategie`)
+
+
+# RECODE ANSWERS
+# Trait Self-Control
+## Mean of 13 items (2, 3, 4, 5, 6, 7, 8, 10, & 11 inverted)
+## tsc: [1 - 6] = [not at all - very much agree]
+ed_pep_aff_q <- ed_pep_aff_q %>%
+  mutate_at(vars(c(tsc_2, tsc_3, tsc_4, tsc_5, tsc_6, tsc_7, tsc_8, tsc_10, tsc_11)),
+            funs(r = case_when(
+              . == 1 ~ 6, 
+              . == 2 ~ 5,
+              . == 3 ~ 4, 
+              . == 4 ~ 3,
+              . == 5 ~ 2, 
+              . == 6 ~ 1
+            )
+            ))
+
+# Current mental fatigue
+## Mean of 5 items (b & d inverted)
+# fatigue: [1 - 7] = [not fatigued - very fatigued]
+## math ability: [1 - 7] = [not all all - very much agree]
+ed_pep_aff_q <- ed_pep_aff_q %>%
+  mutate_at(vars(c(fat1_b, fat1_d, fat2_b, fat2_d)),
+            funs(r = case_when(
+              . == 1 ~ 7, 
+              . == 2 ~ 6,
+              . == 3 ~ 5, 
+              . == 4 ~ 4,
+              . == 5 ~ 3, 
+              . == 6 ~ 2,
+              . == 7 ~ 1
+            )
+            ))
+
+# exhaustion: [1 - 6] = [unlimited - limited]; recode c, d, f
+ed_pep_aff_q <- ed_pep_aff_q %>%
+  mutate_at(vars(c(exh_c, exh_d, exh_f)),
+            funs(r = case_when(
+              . == 1 ~ 6, 
+              . == 2 ~ 5,
+              . == 3 ~ 4, 
+              . == 4 ~ 3,
+              . == 5 ~ 2, 
+              . == 6 ~ 1
+            )
+            ))
+
+glimpse(ed_pep_aff_q)
+
+# mean values for questionnaires
+ed_pep_aff_q <- ed_pep_aff_q %>% 
+  rowwise() %>%
+  dplyr::mutate(fat1 = mean(c(fat1_a, fat1_b_r, fat1_c, fat1_d_r, fat1_e), na.rm = TRUE), 
+         fat2 = mean(c(fat2_a, fat2_b_r, fat2_c, fat2_d_r, fat2_e), na.rm = TRUE),   
+         exh = mean(c(exh_a, exh_b, exh_c_r, exh_d_r, exh_e, exh_f_r), na.rm = TRUE),
+         mca = mean(c(mca_1, mca_2), na.rm = TRUE),
+         tsc = mean(c(tsc_1, tsc_2_r, tsc_3_r, tsc_4_r, tsc_5_r, tsc_6_r, tsc_7_r, tsc_8_r, tsc_9, tsc_10_r, tsc_11_r,
+                      tsc_12, tsc_13), na.rm = TRUE)) %>%
+  ungroup()
+
+# group variable
+
+# experimental conditions: 
+## 1: ego depletion | no affirmation
+## 2: ego depletion | affirmation
+## 3: no depletion  | no affirmation
+## 4: no depletion  | affirmation 
+
+ed_pep_aff_q$group <- ed_pep_aff_q$subject%%4
+ed_pep_aff_q$group[ed_pep_aff_q$group == "0"] <- "4"
+ed_pep_aff_q$group <- as.numeric(ed_pep_aff_q$group)
+ed_pep_aff_q$group <- as.factor(ed_pep_aff_q$group)
+
+ed_pep_aff_q$affirmation <- ifelse(ed_pep_aff_q$group == 1, 0,
+                                 ifelse(ed_pep_aff_q$group == 2, 1,
+                                        ifelse(ed_pep_aff_q$group == 3, 0,
+                                               ifelse(ed_pep_aff_q$group == 4, 1, NA))))
+
+ed_pep_aff_q$affirmation <- factor(ed_pep_aff_q$affirmation)
+
+ed_pep_aff_q$depletion <- ifelse(ed_pep_aff_q$group == 1, 1,
+                               ifelse(ed_pep_aff_q$group == 2, 1,
+                                      ifelse(ed_pep_aff_q$group == 3, 0,
+                                             ifelse(ed_pep_aff_q$group == 4, 0, NA))))
+
+ed_pep_aff_q$depletion <- factor(ed_pep_aff_q$depletion)
+
+ed_pep_aff_q$group <- factor(ed_pep_aff_q$group, labels = (c("ed no.aff", "ed aff", "no.ed no.aff", "no.ed aff")))
+
+ed_pep_aff_q <- ed_pep_aff_q %>% select(-c(value_01, value_02, value_03, value_04, value_05, value_06, value_07, value_08, value_09, value_10, value_11))
+
+```
+
+## Descriptives sample: Age, Sex
+```{r}
+sum_age <- ed_pep_aff_q %>%
+  select(age) %>%
+  summarySE(measurevar = "age", na.rm = TRUE)
+
+sum_age %>%
+  kable(., digits = 2)
+
+
+ed_pep_aff_q$sex <- as.factor(ed_pep_aff_q$sex) 
+ed_pep_aff_q$sex <- factor(ed_pep_aff_q$sex, labels = c("W", "M"))
+
+sum_sex <- table(ed_pep_aff_q$sex)
+
+sum_sex %>%
+  kable(., digits = 2)
+```
+
+
+
+# Manipulation check 
+```{r}
+# rainclouds manipulation check
+
+sum_mca <- ed_pep_aff_q %>%
+  select(group, mca) %>%
+  summarySE(measurevar = "mca", groupvars = c("group"), na.rm = TRUE)
+
+sum_mca %>%
+  kable(., digits = 2)
+
+reliability(data = ed_pep_aff_q, vars = c("mca_1", "mca_2"), alphaItems = TRUE)
+
+sum_mca_dep <- ed_pep_aff_q %>%
+  select(depletion, mca) %>%
+  summarySE(measurevar = "mca", groupvars = c("depletion"), na.rm = TRUE)
+
+sum_mca_dep %>%
+  kable(., digits = 2)
+
+
+# plot manipulation check
+ed_pep_aff_q %>%
+  ggplot(aes(x = as.factor(depletion), y = mca, fill = as.factor(depletion), colour = as.factor(depletion))) +
+  geom_flat_violin(position = position_nudge(x = .45, y = 0), adjust = .8, alpha = 0.1, trim = TRUE) +
+  geom_point(position = position_jitter(width = .15), size = .25) +
+  
+  geom_bar(position = position_nudge(x = .30, y = 0), data = sum_mca_dep, stat = "identity", na.rm = TRUE, width = 0.2) +
+  geom_point(data = sum_mca_dep, aes(x = as.factor(depletion), y = mca), position = position_nudge(.30), colour = "BLACK") +
+  geom_errorbar(data = sum_mca_dep, aes(x = as.factor(depletion), ymin = mca-se, ymax = mca+se), 
+                position = position_nudge(.30), colour = "BLACK", width = 0.1, size = 0.8) +
+  ylab('MC Ratings') + xlab('Depletion condition') + guides(fill = FALSE, colour = FALSE) +
+  scale_colour_grey(start = 0.7, end = 0.2) +
+  scale_fill_grey(start = 0.7, end = 0.2) +
+  theme_minimal() +
+  ggtitle("Manipulation check after MD Manipulation (Counting task)") + 
+  scale_x_discrete(labels = c("Low MD", "High MD")) + 
+  theme(axis.title.x = element_text(face="bold", size = 12, vjust = -2), 
+        axis.title.y = element_text(face="bold", size = 12, vjust = 3), 
+        axis.text.x  = element_text(size=8, color = "black"), 
+        axis.text.y  = element_text(size=10), 
+        title = element_text(size = 12), plot.margin = unit(c(12, 12, 20, 12),"pt"))
+
+write.csv(ed_pep_aff_q, "ed_pep_aff_mca.csv")
+
+
+
+```
+
+## t-Test manipulation check ~ depletion
+#### As expected! 
+```{r}
+# t-test
+effect_mca_dep <- ed_pep_aff_q %>%
+  t.test(mca ~ depletion, data = ., alternative = "less")
+
+effect_mca_dep %>%
+  tidy() %>%
+  kable(., digits = 3)
+
+d_mca <- ed_pep_aff_q %>%
+  cohen.d(mca ~ depletion, data=., conf.level = 0.90) 
+
+d_mca <- data.frame("cohens.d" = d_mca[["estimate"]], "conf.int.lower" =  "-Inf", "conf.int.upper" =  d_mca[["conf.int"]][["upper"]])
+
+d_mca %>% kable(., digits = 3)
+
+```
+
+# Stroop performance
+
+## Exclusion criteria: 
+
+### Trial level:  
+#### Stroop trials with reaction time < 200ms
+#### Stroop trials with reaction time > |2.5 SD| from an individual’s overall reaction time
+
+### Task level: 
+#### Individuals whose total number of errors on congruent trails > 2.5 SD from the overall mean across all experimental conditions
+#### Stroop interference (% incongruent error trials minus % congruent error trials) > |2.5 SD| within each experimental condition
+#### For analysis of reaction times only: Individuals whose reaction time > |2.5 SD| from the overall mean within each experimental condition
+```{r include = TRUE}
+# select N = 80 / N = 100 / N = 120 / N = 140 / N = 160 / N = 180
+# ed_pep_aff <- subset(ed_pep_aff, subject < 81 | subject == 196)
+# ed_pep_aff <- subset(ed_pep_aff, subject < 101 | subject == 196)
+# ed_pep_aff <- subset(ed_pep_aff, subject < 121 | subject == 196)
+# ed_pep_aff <- subset(ed_pep_aff, subject < 141 | subject == 196)
+# ed_pep_aff <- subset(ed_pep_aff, subject < 161 | subject == 196)
+# ed_pep_aff <- subset(ed_pep_aff, subject < 181 | subject == 196)
+
+# select stroop blocks
+ed_pep_aff_stroop <- ed_pep_aff %>%
+  filter(., blockcode == "series1" | blockcode == "series2" | blockcode == "series3" | blockcode == "series4")
+ 
+
+# select stroop trials
+ed_pep_aff_stroop <- ed_pep_aff_stroop %>%
+  filter(., trialcode != "t2" & trialcode != "t24"  & trialcode != "instruc_1b" & trialcode != "instruc_2" & trialcode != "instruc_3" & trialcode != "instruc_4" & 
+                              trialcode != "instruc_5b" & trialcode != "trigger2" & trialcode != "trigger3" & trialcode != "trigger4")
+
+# new variable: num: == trial-by-trial number
+ed_pep_aff_stroop <- arrange(ed_pep_aff_stroop, subject, blockcode, trialnum)
+ed_pep_aff_stroop$num <- sequence(rle(ed_pep_aff_stroop$subject)$lengths)
+
+# before exclusion: 32220 observations
+# select trials (stroop) reaction time > 200ms
+ed_pep_aff_stroop <- ed_pep_aff_stroop %>% filter(latency > 199)
+
+# after exclusion: 32219 observations
+
+### z-transformation of latency 
+# chose only correct trials
+ed_pep_aff_stroop_correct <- ed_pep_aff_stroop %>% filter(., correct == 1)
+
+# calculate mean latency for each subject for correct trials
+ed_pep_aff_stroop_correct_mean <- aggregate(latency ~ subject, data = ed_pep_aff_stroop_correct , FUN = mean, na.rm = TRUE)
+
+# rename variable: "rt_mean"
+ed_pep_aff_stroop_correct_mean <- dplyr::rename(ed_pep_aff_stroop_correct_mean, rt_mean = `latency`)
+names(ed_pep_aff_stroop_correct_mean)
+
+# calculate sd latency for each subject for correct trials 
+ed_pep_aff_stroop_correct_sd <- aggregate(latency ~ subject, data = ed_pep_aff_stroop_correct, FUN = sd, na.rm = TRUE)
+
+# rename variable: "rt_sd"
+ed_pep_aff_stroop_correct_sd <- dplyr::rename(ed_pep_aff_stroop_correct_sd, rt_sd = latency)
+names(ed_pep_aff_stroop_correct_sd)
+
+# merge data files 
+ed_pep_aff_stroop <- merge(ed_pep_aff_stroop, ed_pep_aff_stroop_correct_mean, by = "subject")
+ed_pep_aff_stroop <- merge(ed_pep_aff_stroop, ed_pep_aff_stroop_correct_sd, by = "subject")
+head(ed_pep_aff_stroop)
+
+# calculate z_latency for each trial based on mean latency for correct trials 
+ed_pep_aff_stroop$z_latency <- ((ed_pep_aff_stroop$latency - ed_pep_aff_stroop$rt_mean) / ed_pep_aff_stroop$rt_sd)
+head(ed_pep_aff_stroop)
+
+# number of trials before: 32219 observations
+# select trials (stroop) reaction time > 2.5 sd from individual mean reaction time based on correct trials 
+ed_pep_aff_stroop <- ed_pep_aff_stroop %>% filter(., z_latency <= 2.5 & z_latency >= -2.5 | correct == 0)
+head(ed_pep_aff_stroop)
+# number of trials after: 31463 observations
+
+# compute error variable
+ed_pep_aff_stroop$error <- 100*(1-ed_pep_aff_stroop$correct)
+head(ed_pep_aff_stroop)
+
+# compute congruence variable 
+# font_word
+ed_pep_aff_stroop <- ed_pep_aff_stroop %>%
+  mutate(
+    cong = case_when(
+      trialcode == "gelb_gelb" ~ 1, 
+      trialcode == "rot_rot" ~ 1,
+      trialcode == "blau_blau" ~ 1, 
+      trialcode == "gelb_blau" ~ 2,
+      trialcode == "gelb_rot" ~ 2, 
+      trialcode == "blau_rot" ~ 2,
+      trialcode == "rot_blau" ~ 2,
+      trialcode == "rot_gelb" ~ 3,
+      trialcode == "blau_gelb" ~ 3
+    )
+  )
+head(ed_pep_aff_stroop)
+
+# new variable: stroop performance (errors incongruent - errors congruent)
+ed_pep_aff_stroop <- 
+  ed_pep_aff_stroop %>%
+    mutate(
+      err_con = case_when(
+        cong == 1 ~ error
+      ),
+      err_incon = case_when(
+        cong == 2 ~ error
+      )
+    ) 
+
+head(ed_pep_aff_stroop)
+
+ed_pep_aff_stroop_long <- ed_pep_aff_stroop
+  
+# aggregate data: subject, congruent errors & incongruent errors in %
+ed_pep_aff_stroop <- aggregate(ed_pep_aff_stroop, by = list(ed_pep_aff_stroop$subject), FUN = mean, na.rm = TRUE)
+head(ed_pep_aff_stroop)
+ed_pep_aff_stroop <- ed_pep_aff_stroop %>%
+                        select(subject, err_con, err_incon, rt_mean)
+
+ed_pep_aff_stroop$stroop_perf <- (ed_pep_aff_stroop$err_incon - ed_pep_aff_stroop$err_con)
+
+# group variable
+
+# experimental conditions: 
+## 1: ego depletion | no affirmation
+## 2: ego depletion | affirmation
+## 3: no depletion  | no affirmation
+## 4: no depletion  | affirmation 
+
+ed_pep_aff_stroop$group <- ed_pep_aff_stroop$subject%%4
+ed_pep_aff_stroop$group[ed_pep_aff_stroop$group == "0"] <- "4"
+ed_pep_aff_stroop$group <- as.numeric(ed_pep_aff_stroop$group)
+ed_pep_aff_stroop$group <- as.factor(ed_pep_aff_stroop$group)
+
+ed_pep_aff_stroop$affirmation <- ifelse(ed_pep_aff_stroop$group == 1, 0,
+                                 ifelse(ed_pep_aff_stroop$group == 2, 1,
+                                        ifelse(ed_pep_aff_stroop$group == 3, 0,
+                                               ifelse(ed_pep_aff_stroop$group == 4, 1, NA))))
+
+ed_pep_aff_stroop$affirmation <- factor(ed_pep_aff_stroop$affirmation)
+
+ed_pep_aff_stroop$depletion <- ifelse(ed_pep_aff_stroop$group == 1, 1,
+                               ifelse(ed_pep_aff_stroop$group == 2, 1,
+                                      ifelse(ed_pep_aff_stroop$group == 3, 0,
+                                             ifelse(ed_pep_aff_stroop$group == 4, 0, NA))))
+
+ed_pep_aff_stroop$depletion <- factor(ed_pep_aff_stroop$depletion)
+
+ed_pep_aff_stroop$group <- factor(ed_pep_aff_stroop$group, labels = (c("ed no.aff", "ed aff", "no.ed no.aff", "no.ed aff")))
+
+head(ed_pep_aff_stroop)
+
+# OUTLIER EXCLUSION
+
+# TRIAL LEVEL - SUBJECTS
+#	Stroop trials with reaction time < 200ms -> DONE (see above)!
+#	Stroop trials with reaction time > |2.5 SD| from an individual’s overall reaction time -> DONE (see above)!
+
+# MEAN LEVEL - CONDITIONS
+#	Individuals whose total number of errors on congruent trails > 2.5 SD from the overall mean across all experimental conditions -> DONE (see below)!
+#	Individuals whose reaction time > |2.5 SD| from the overall mean within each experimental condition -> DONE (see below)!
+#	Stroop interference (% incongruent error trials minus % congruent error trials) > |2.5 SD| within each experimental condition -> DONE (see below)!
+
+# Mental effort (systolic blood pressure / pre-ejection period) > |2.5 SD| within each experimental condition -> DONE! 
+
+
+#	exclude subjects with total number of errors on congruent trails > 2.5 SD from the overall mean across all experimental conditions
+# calculate total number, than mean and sd of total number of congruent trials
+ed_pep_aff_err_cong <- ed_pep_aff_stroop_long %>%
+  select(subject, err_con) %>%
+  group_by(subject) %>%
+  mutate(sum_err_con = sum(err_con, na.rm = TRUE) / 100) %>%
+  select(subject, sum_err_con) %>%
+  distinct()
+
+ed_pep_aff_stroop <- full_join(ed_pep_aff_stroop, ed_pep_aff_err_cong, by = "subject")
+
+ed_pep_aff_stroop$mean_congruent <- mean(ed_pep_aff_stroop$sum_err_con)
+
+# calculate sd of number of congruent trials
+ed_pep_aff_stroop$sd_congruent <- sd(ed_pep_aff_stroop$sum_err_con)
+
+# calculate z value of congruent errors: z_err_con
+ed_pep_aff_stroop$z_err_con = ((ed_pep_aff_stroop$sum_err_con - ed_pep_aff_stroop$mean_congruent) / ed_pep_aff_stroop$sd_congruent)
+
+## test
+ed_pep_aff_stroop$mean_congruent_percent <- mean(ed_pep_aff_stroop$err_con)
+
+# calculate sd of number of congruent trials
+ed_pep_aff_stroop$sd_congruent_percent <- sd(ed_pep_aff_stroop$err_con)
+
+# calculate z value of congruent errors: z_err_con
+ed_pep_aff_stroop$z_err_con_percent = ((ed_pep_aff_stroop$err_con - ed_pep_aff_stroop$mean_congruent_percent) / ed_pep_aff_stroop$sd_congruent_percent)
+
+## end_test
+
+# number of observations before: 179
+# congruence filter 
+ed_pep_aff_stroop <- ed_pep_aff_stroop %>% filter(., z_err_con <= 2.5)
+# number of observations after: 174
+
+#	exclude subjects with stroop latency > |2.5 SD| from groups' overall latency
+ed_pep_aff_stroop <- ed_pep_aff_stroop %>%
+  group_by(group) %>%
+  mutate(z_rt_mean = scale(rt_mean, center = TRUE, scale = TRUE)) %>%
+  ungroup()
+
+ed_pep_aff_stroop_rt <- ed_pep_aff_stroop %>%
+  filter(., z_rt_mean <= 2.5 & z_rt_mean >= -2.5)
+
+#	exclude subjects with stroop interference > |2.5 SD| from groups' overall interference
+ed_pep_aff_stroop <- ed_pep_aff_stroop %>%
+  group_by(group) %>%
+  mutate(z_stroop_perf = scale(stroop_perf, center = TRUE, scale = TRUE)) %>%
+  ungroup()
+
+# number of observations before: 174
+ed_pep_aff_stroop_err <- ed_pep_aff_stroop %>%
+  filter(., z_stroop_perf <= 2.5 & z_stroop_perf >= -2.5)
+# numer of observations after: 170
+
+rm(ed_pep_aff_stroop_correct, ed_pep_aff_stroop_correct_mean, ed_pep_aff_stroop_correct_sd)
+
+
+```
+
+## Stroop interference (% incongruent error trials minus % congruent error trials) > |2.5 SD| within each experimental condition. 
+```{r}
+
+ed_pep_aff_stroop_err$group_ordered <- factor(ed_pep_aff_stroop_err$group, levels = levels(ed_pep_aff_stroop_err$group)[c(3,1,4,2)])
+
+sum_stroop_perf<- ed_pep_aff_stroop_err %>%
+  select(group_ordered, stroop_perf) %>%
+  summarySE(measurevar = "stroop_perf", groupvars = c("group_ordered"), na.rm = TRUE)
+
+sum_stroop_perf %>%
+  kable(., digits = 2)
+
+ed_pep_aff_stroop_err %>%
+  ggplot(aes(x = as.factor(group_ordered), y = stroop_perf, fill = as.factor(group_ordered), colour = as.factor(group_ordered))) +
+  geom_flat_violin(position = position_nudge(x = .30, y = 0), adjust = .8, alpha = 0.1, trim = TRUE) +
+  geom_point(position = position_jitter(width = .08), size = .25) +
+  geom_bar(position = position_nudge(x = .30, y = 0), data = sum_stroop_perf, stat = "identity", na.rm = TRUE, width = 0.2) +
+  geom_point(data = sum_stroop_perf, aes(x = as.factor(group_ordered), y = stroop_perf), position = position_nudge(.30), colour = "BLACK") +
+  geom_errorbar(data = sum_stroop_perf, aes(x = as.factor(group_ordered), ymin = stroop_perf-se, ymax = stroop_perf+se), 
+                position = position_nudge(.30), colour = "BLACK", width = 0.1, size = 0.8) +
+  ylab('Stroop interference [%]') + xlab('Experimental conditions') + guides(fill = FALSE, colour = FALSE) +
+  scale_colour_manual(values = c("grey70", "grey20", "grey70", "grey20"), name = "Exp. condition") +
+  scale_fill_manual(values = c("grey80", "grey50", "grey80", "grey50"), name = "Exp. condition") +
+  scale_x_discrete(labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.", "Low MD / Self-Aff.",  "High MD / Self-Aff.")) + 
+  theme_minimal() +
+  ggtitle("Stroop task: Interference on errors 2.5 SD") + 
+  theme(axis.title.x = element_text(face="bold", size = 14, vjust = -2), 
+        axis.title.y = element_text(face="bold", size = 14, vjust = 3), 
+        axis.text.x  = element_text(size=12, color = "black"), 
+        axis.text.y  = element_text(size=12), 
+        title = element_text(size = 14), plot.margin = unit(c(12, 12, 20, 12),"pt"))
+
+# Standard depletion effect only
+sum_stroop_perf_standard <- ed_pep_aff_stroop_err %>%
+  select(affirmation, depletion, stroop_perf) %>%
+  filter(affirmation == 0) %>%
+  summarySE(measurevar = "stroop_perf", groupvars = c("depletion"), na.rm = TRUE)
+
+sum_stroop_perf_standard %>%
+  kable(., digits = 2)
+
+ed_pep_aff_stroop_err %>%
+  filter(affirmation == 0) %>%
+  ggplot(aes(x = as.factor(depletion), y = stroop_perf, fill = as.factor(depletion), colour = as.factor(depletion))) +
+  geom_flat_violin(position = position_nudge(x = .30, y = 0), adjust = .8, alpha = 0.1, trim = TRUE) +
+  geom_point(position = position_jitter(width = .08), size = .25) +
+  
+  geom_bar(position = position_nudge(x = .30, y = 0), data = sum_stroop_perf_standard, stat = "identity", na.rm = TRUE, width = 0.2) +
+  geom_point(data = sum_stroop_perf_standard, aes(x = as.factor(depletion), y = stroop_perf), position = position_nudge(.30), colour = "BLACK") +
+  geom_errorbar(data = sum_stroop_perf_standard, aes(x = as.factor(depletion), ymin = stroop_perf-se, ymax = stroop_perf+se), 
+                position = position_nudge(.30), colour = "BLACK", width = 0.1, size = 0.8) +
+  ylab('Stroop interference [%]') + xlab('Experimental conditions') + guides(fill = FALSE, colour = FALSE) +
+  scale_colour_grey(start = 0.7, end = 0.2) +
+  scale_fill_grey(start = 0.7, end = 0.2) +
+  theme_minimal() +
+  ggtitle("Stroop task: 2.5 SD") + 
+  scale_x_discrete(labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.")) + 
+  theme(axis.title.x = element_text(face="bold", size = 14, vjust = -2), 
+        axis.title.y = element_text(face="bold", size = 14, vjust = 3), 
+        axis.text.x  = element_text(size=12, color = "black"), 
+        axis.text.y  = element_text(size=12), 
+        title = element_text(size = 14), plot.margin = unit(c(12, 12, 20, 12),"pt"))
+
+
+```
+
+## ANOVA pre-registered contrast: "ed no.affirmation" versus rest 3.0 MAD
+```{r}
+one_vs_three <- c(3, -1, -1, -1)
+mat <- cbind(one_vs_three)
+
+contrasts(ed_pep_aff_stroop_err$group) <- mat
+
+# anova sbp_stroop_r ~ depletion + affirmation
+lm_stroop_contrast <- lm(stroop_perf ~ group, data = ed_pep_aff_stroop_err, contrasts = list(group = mat))
+anova_stats(lm_stroop_contrast) %>%
+  kable(., digits = 3)
+```
+
+# REPRODUCE THIS
+
+```{r}
+r05771_mod_original_1 <- lm(stroop_perf ~ group, data = ed_pep_aff_stroop_err, contrasts = list(group = mat))
+r05771_mod_original_1 %>% summary()
+```
+
+```{r}
+r05771_mod_z_1 <- lm(z(stroop_perf) ~ group, data = ed_pep_aff_stroop_err, contrasts = list(group = mat))
+r05771_mod_z_1 %>% summary()
+```
+
+```{r}
+key_effects = c("groupone_vs_three")
+export_ols(r05771_mod_z_1, key_effects)
+```
+
+
+
+## t-Test standard ego depletion effect 
+
+```{r}
+# t-test for standard ego depletion effect (no affirmation)
+std_ed_effect <- ed_pep_aff_stroop_err %>%
+  filter(., affirmation == 0) %>%
+  t.test(stroop_perf ~ depletion, data = ., alternative = "less")
+
+std_ed_effect %>%
+  tidy() %>%
+  kable(., digits = 3)
+
+d_std_ed_effect <- ed_pep_aff_stroop_err %>%
+  filter(., affirmation == 0) %>%
+  cohen.d(stroop_perf ~ depletion, data=., conf.level = .90) 
+
+d_std_ed_effect <- data.frame("cohens.d" = d_std_ed_effect[["estimate"]], "conf.int.lower" =  "-Inf", "conf.int.upper" = d_std_ed_effect[["conf.int"]][["upper"]])
+
+d_std_ed_effect %>% kable(., digits = 3)
+
+
+```
+
+# REPRODUCE THIS
+
+```{r}
+std_ed_effect_lm <- ed_pep_aff_stroop_err %>%
+  filter(., affirmation == 0) %>%
+  lm(stroop_perf ~ depletion, data = .,)
+
+std_ed_effect_lm %>% summary()
+```
+
+```{r}
+data_2 = ed_pep_aff_stroop_err %>%
+  filter(., affirmation == 0)
+
+r05771_mod_original_2 <- lm(stroop_perf ~ depletion, data = data_2)
+r05771_mod_original_2 %>% summary()
+```
+
+```{r}
+r05771_mod_z_2 <- lm(z(stroop_perf) ~ depletion, data = data_2)
+r05771_mod_z_2 %>% summary()
+```
+
+```{r}
+key_effects = c("depletion1")
+export_ols(r05771_mod_z_2, key_effects)
+```
+
+
+# ALTERNATIVE OUTLIER ANALYSIS: Median Absolute Deviations (MAD)
+### Stroop interference (% incongruent error trials minus % congruent error trials) > |2.5 MAD| within each experimental condition. 
+### Exluding based on total number of errors on congruent trials makes no sense, as everybody with unequal 0 trials would have to be excluded.
+
+# Stroop performance
+
+## Exclusion criteria: 
+
+### Trial level:  
+#### Stroop trials with reaction time < 200ms
+#### Stroop trials with reaction time > |3.0 MAD| from an individual’s overall reaction time
+
+### Task level: 
+#### Individuals whose reaction time > |3.0 MAD| from the overall mean within each experimental condition --> only for reaction time analysis
+#### Individuals whose total number of errors on congruent trails > 3.0 MAD from the overall mean across all experimental conditions --> not possible for MAD
+#### Stroop interference (% incongruent error trials minus % congruent error trials) > |3.0 MAD| within each experimental condition
+```{r include = TRUE}
+# select N = 80 / N = 100 / N = 120 / N = 140 / N = 160 / N = 180
+# ed_pep_aff <- subset(ed_pep_aff, subject < 81 | subject == 196)
+# ed_pep_aff <- subset(ed_pep_aff, subject < 101 | subject == 196)
+# ed_pep_aff <- subset(ed_pep_aff, subject < 121 | subject == 196)
+# ed_pep_aff <- subset(ed_pep_aff, subject < 141 | subject == 196)
+# ed_pep_aff <- subset(ed_pep_aff, subject < 161 | subject == 196)
+# ed_pep_aff <- subset(ed_pep_aff, subject < 181 | subject == 196)
+
+# select stroop blocks
+ed_pep_aff_stroop_mad <- ed_pep_aff %>%
+  filter(., blockcode == "series1" | blockcode == "series2" | blockcode == "series3" | blockcode == "series4")
+
+# select stroop trials
+ed_pep_aff_stroop_mad <- ed_pep_aff_stroop_mad %>%
+  filter(., trialcode != "t2" & trialcode != "t24"  & trialcode != "instruc_1b" & trialcode != "instruc_2" & trialcode != "instruc_3" & trialcode != "instruc_4" & 
+                              trialcode != "instruc_5b" & trialcode != "trigger2" & trialcode != "trigger3" & trialcode != "trigger4")
+
+# new variable: num: == trial-by-trial number
+ed_pep_aff_stroop_mad <- arrange(ed_pep_aff_stroop_mad, subject, blockcode, trialnum)
+ed_pep_aff_stroop_mad$num <- sequence(rle(ed_pep_aff_stroop_mad$subject)$lengths)
+
+# select trials (stroop) reaction time > 200ms
+ed_pep_aff_stroop_mad <- ed_pep_aff_stroop_mad %>%
+  filter(latency > 199)
+
+### z-transformation of latency 
+# chose only correct trials
+ed_pep_aff_stroop_mad_correct <- ed_pep_aff_stroop_mad %>%
+  filter(., correct == 1)
+
+# calculate median latency for each subject for correct trials
+ed_pep_aff_stroop_mad_correct_median <- aggregate(latency ~ subject, data = ed_pep_aff_stroop_mad_correct , FUN = median, na.rm = TRUE)
+
+# rename variable: "rt_median"
+ed_pep_aff_stroop_mad_correct_median <- dplyr::rename(ed_pep_aff_stroop_mad_correct_median, rt_median = `latency`)
+names(ed_pep_aff_stroop_mad_correct_median)
+
+# calculate mad latency for each subject for correct trials 
+ed_pep_aff_stroop_correct_mad <- aggregate(latency ~ subject, data = ed_pep_aff_stroop_mad_correct, FUN = mad, na.rm = TRUE)
+
+# rename variable: "rt_mad"
+ed_pep_aff_stroop_correct_mad <- dplyr::rename(ed_pep_aff_stroop_correct_mad, rt_mad = latency)
+names(ed_pep_aff_stroop_correct_mad)
+
+# merge data files 
+ed_pep_aff_stroop_mad <- merge(ed_pep_aff_stroop_mad, ed_pep_aff_stroop_mad_correct_median, by = "subject")
+ed_pep_aff_stroop_mad <- merge(ed_pep_aff_stroop_mad, ed_pep_aff_stroop_correct_mad, by = "subject")
+head(ed_pep_aff_stroop_mad)
+
+# calculate z_latency for each trial based on median latency for correct trials 
+ed_pep_aff_stroop_mad$z_latency <- ((ed_pep_aff_stroop_mad$latency - ed_pep_aff_stroop_mad$rt_median) / ed_pep_aff_stroop_mad$rt_mad)
+head(ed_pep_aff_stroop_mad)
+
+# select trials (stroop) reaction time > 3.0 mad from individual median reaction time based on correct trials 
+ed_pep_aff_stroop_mad <- ed_pep_aff_stroop_mad %>%
+  filter(., z_latency <= 3.0 & z_latency >= -3.0  | correct == 0)
+head(ed_pep_aff_stroop_mad)
+
+# compute error variable
+ed_pep_aff_stroop_mad$error <- 100*(1-ed_pep_aff_stroop_mad$correct)
+head(ed_pep_aff_stroop_mad)
+
+# compute congruence variable 
+# font_word
+ed_pep_aff_stroop_mad <- ed_pep_aff_stroop_mad %>%
+  mutate(
+    cong = case_when(
+      trialcode == "gelb_gelb" ~ 1, 
+      trialcode == "rot_rot" ~ 1,
+      trialcode == "blau_blau" ~ 1, 
+      trialcode == "gelb_blau" ~ 2,
+      trialcode == "gelb_rot" ~ 2, 
+      trialcode == "blau_rot" ~ 2,
+      trialcode == "rot_blau" ~ 2,
+      trialcode == "rot_gelb" ~ 3,
+      trialcode == "blau_gelb" ~ 3
+    )
+  )
+head(ed_pep_aff_stroop_mad)
+
+# new variable: stroop performance (errors incongruent - errors congruent)
+ed_pep_aff_stroop_mad <- 
+  ed_pep_aff_stroop_mad %>%
+    mutate(
+      err_con = case_when(
+        cong == 1 ~ error
+      ),
+      err_incon = case_when(
+        cong == 2 ~ error
+      )
+    ) 
+
+head(ed_pep_aff_stroop_mad)
+
+ed_pep_aff_stroop_mad_long <- ed_pep_aff_stroop_mad
+  
+# aggregate data: subject, congruent errors & incongruent errors in %
+ed_pep_aff_stroop_mad <- aggregate(ed_pep_aff_stroop_mad, by = list(ed_pep_aff_stroop_mad$subject), FUN = mean, na.rm = TRUE)
+head(ed_pep_aff_stroop_mad)
+ed_pep_aff_stroop_mad <- ed_pep_aff_stroop_mad %>%
+                        select(subject, err_con, err_incon, rt_median)
+
+ed_pep_aff_stroop_mad$stroop_perf <- (ed_pep_aff_stroop_mad$err_incon - ed_pep_aff_stroop_mad$err_con)
+
+# group variable
+
+# experimental conditions: 
+## 1: ego depletion | no affirmation
+## 2: ego depletion | affirmation
+## 3: no depletion  | no affirmation
+## 4: no depletion  | affirmation 
+
+ed_pep_aff_stroop_mad$group <- ed_pep_aff_stroop_mad$subject%%4
+ed_pep_aff_stroop_mad$group[ed_pep_aff_stroop_mad$group == "0"] <- "4"
+ed_pep_aff_stroop_mad$group <- as.numeric(ed_pep_aff_stroop_mad$group)
+ed_pep_aff_stroop_mad$group <- as.factor(ed_pep_aff_stroop_mad$group)
+
+ed_pep_aff_stroop_mad$affirmation <- ifelse(ed_pep_aff_stroop_mad$group == 1, 0,
+                                 ifelse(ed_pep_aff_stroop_mad$group == 2, 1,
+                                        ifelse(ed_pep_aff_stroop_mad$group == 3, 0,
+                                               ifelse(ed_pep_aff_stroop_mad$group == 4, 1, NA))))
+
+ed_pep_aff_stroop_mad$affirmation <- factor(ed_pep_aff_stroop_mad$affirmation)
+
+ed_pep_aff_stroop_mad$depletion <- ifelse(ed_pep_aff_stroop_mad$group == 1, 1,
+                               ifelse(ed_pep_aff_stroop_mad$group == 2, 1,
+                                      ifelse(ed_pep_aff_stroop_mad$group == 3, 0,
+                                             ifelse(ed_pep_aff_stroop_mad$group == 4, 0, NA))))
+
+ed_pep_aff_stroop_mad$depletion <- factor(ed_pep_aff_stroop_mad$depletion)
+
+ed_pep_aff_stroop_mad$group <- factor(ed_pep_aff_stroop_mad$group, labels = (c("ed no.aff", "ed aff", "no.ed no.aff", "no.ed aff")))
+
+head(ed_pep_aff_stroop_mad)
+
+# OUTLIER EXCLUSION
+
+# TRIAL LEVEL - SUBJECTS
+#	Stroop trials with reaction time < 200ms -> DONE (see above)!
+#	Stroop trials with reaction time > |3.0 MAD| from an individual’s median reaction time -> DONE (see above)!
+
+# MEAN LEVEL - CONDITIONS
+#	Individuals whose total number of errors on congruent trails > 3.0 MAD from the overall median across all experimental conditions -> DONE (see below)!
+#	Individuals whose reaction time > |3.0 MAD| from the overall median within each experimental condition -> DONE (see below)!
+#	Stroop interference (% incongruent error trials minus % congruent error trials) > |3.0 MAD| within each experimental condition -> DONE (see below)!
+
+# Mental effort (systolic blood pressure / pre-ejection period) > |3.0 MAD| within each experimental condition -> DONE! 
+
+#	exclude subjects with stroop interference > |3.0 mad| from groups' overall interference
+# compute median & compute mad using mad function groupwise for Stroop performance
+ed_pep_aff_stroop_mad <- ed_pep_aff_stroop_mad %>%
+  group_by(group) %>%
+  mutate(median_stroop = median(stroop_perf, na.rm = TRUE),
+         mad_stroop = mad(stroop_perf, na.rm = TRUE))  %>%
+  ungroup()
+
+# calculate z_stroop_perf based on median & MAD for Stroop performance
+ed_pep_aff_stroop_mad$z_stroop_perf <- ((ed_pep_aff_stroop_mad$stroop_perf - ed_pep_aff_stroop_mad$median_stroop) / ed_pep_aff_stroop_mad$mad_stroop)
+head(ed_pep_aff_stroop_mad)
+
+# select participants based on 3.0 MAD for Stroop performance 
+ed_pep_aff_stroop_mad <- ed_pep_aff_stroop_mad %>%
+  filter(., z_stroop_perf <= 3.0 & z_stroop_perf >= -3.0)
+head(ed_pep_aff_stroop_mad)
+```
+
+## MAD: t-Test standard ego depletion effect 3.0 MAD
+### (no affirmation groups: depletion versus no depletion)
+```{r}
+# t-test for standard ego depletion effect (no affirmation)
+std_ed_effect <- ed_pep_aff_stroop_mad %>%
+  filter(., affirmation == 0) %>%
+  t.test(stroop_perf ~ depletion, data = ., alternative = "less")
+
+std_ed_effect %>%
+  tidy() %>%
+  kable(., digits = 3)
+
+d_std_ed_effect <- ed_pep_aff_stroop_mad %>%
+  filter(., affirmation == 0) %>%
+  cohen.d(stroop_perf ~ depletion, data=., conf.level = .90) 
+
+d_std_ed_effect <- data.frame("cohens.d" = d_std_ed_effect[["estimate"]], "conf.int.lower" =  "- Inf", "conf.int.upper" = d_std_ed_effect[["conf.int"]][["upper"]])
+
+d_std_ed_effect %>% kable(., digits = 3)
+
+```
+
+## MAD: Stroop interference: Standard Depletion Effect 3.0 MAD
+```{r}
+
+# Standard depletion effect only
+sum_stroop_perf_mad_standard <- ed_pep_aff_stroop_mad %>%
+  select(affirmation, depletion, stroop_perf) %>%
+  filter(affirmation == 0) %>%
+  summarySE(measurevar = "stroop_perf", groupvars = c("depletion"), na.rm = TRUE)
+
+sum_stroop_perf_mad_standard %>%
+  kable(., digits = 2)
+
+
+ed_pep_aff_stroop_mad %>%
+  filter(affirmation == 0) %>%
+  ggplot(aes(x = as.factor(depletion), y = stroop_perf, fill = as.factor(depletion), colour = as.factor(depletion))) +
+  geom_flat_violin(position = position_nudge(x = .30, y = 0), adjust = .8, alpha = 0.1, trim = TRUE) +
+  geom_point(position = position_jitter(width = .08), size = .25) +
+  
+  geom_bar(position = position_nudge(x = .30, y = 0), data = sum_stroop_perf_mad_standard, stat = "identity", na.rm = TRUE, width = 0.2) +
+  geom_point(data = sum_stroop_perf_mad_standard, aes(x = as.factor(depletion), y = stroop_perf), position = position_nudge(.30), colour = "BLACK") +
+  geom_errorbar(data = sum_stroop_perf_mad_standard, aes(x = as.factor(depletion), ymin = stroop_perf-se, ymax = stroop_perf+se), 
+                position = position_nudge(.30), colour = "BLACK", width = 0.1, size = 0.8) +
+  ylab('Stroop interference [%]') + xlab('Experimental conditions') + guides(fill = FALSE, colour = FALSE) +
+  scale_colour_grey(start = 0.7, end = 0.2) +
+  scale_fill_grey(start = 0.7, end = 0.2) +
+  theme_minimal() +
+  ggtitle("Stroop task: 3.0 MAD") + 
+  scale_x_discrete(labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.")) + 
+  theme(axis.title.x = element_text(face="bold", size = 14, vjust = -2), 
+        axis.title.y = element_text(face="bold", size = 14, vjust = 3), 
+        axis.text.x  = element_text(size=12, color = "black"), 
+        axis.text.y  = element_text(size=12), 
+        title = element_text(size = 14), plot.margin = unit(c(12, 12, 20, 12),"pt"))
+
+```
+
+## Stroop interference 3.0 MAD
+```{r}
+# rainclouds stroop interference
+
+ed_pep_aff_stroop_mad$group_ordered <- factor(ed_pep_aff_stroop_mad$group, levels = levels(ed_pep_aff_stroop_mad$group)[c(3,1,4,2)])
+
+sum_stroop_perf_mad <- ed_pep_aff_stroop_mad %>%
+  select(group_ordered, stroop_perf) %>%
+  summarySE(measurevar = "stroop_perf", groupvars = c("group_ordered"), na.rm = TRUE)
+
+sum_stroop_perf_mad %>%
+  kable(., digits = 2)
+
+sum_stroop_perf_aff_mad <- ed_pep_aff_stroop_mad %>%
+  select(affirmation, stroop_perf) %>%
+  summarySE(measurevar = "stroop_perf", groupvars = c("affirmation"), na.rm = TRUE)
+
+sum_stroop_perf_aff_mad %>%
+  kable(., digits = 2)
+
+sum_stroop_perf_dep_mad <- ed_pep_aff_stroop_mad %>%
+  select(depletion, stroop_perf) %>%
+  summarySE(measurevar = "stroop_perf", groupvars = c("depletion"), na.rm = TRUE)
+
+sum_stroop_perf_dep_mad %>%
+  kable(., digits = 2)
+
+
+ed_pep_aff_stroop_mad %>%
+  ggplot(aes(x = as.factor(group_ordered), y = stroop_perf, fill = as.factor(group_ordered), colour = as.factor(group_ordered))) +
+  geom_flat_violin(position = position_nudge(x = .30, y = 0), adjust = .8, alpha = 0.1, trim = TRUE) +
+  geom_point(position = position_jitter(width = .08), size = .25) +
+  
+  geom_bar(position = position_nudge(x = .30, y = 0), data = sum_stroop_perf_mad, stat = "identity", na.rm = TRUE, width = 0.2) +
+  geom_point(data = sum_stroop_perf_mad, aes(x = as.factor(group_ordered), y = stroop_perf), position = position_nudge(.30), colour = "BLACK") +
+  geom_errorbar(data = sum_stroop_perf_mad, aes(x = as.factor(group_ordered), ymin = stroop_perf-se, ymax = stroop_perf+se), 
+                position = position_nudge(.30), colour = "BLACK", width = 0.1, size = 0.8) +
+  ylab('Stroop interference [%]') + xlab('Experimental conditions') + guides(fill = FALSE, colour = FALSE) +
+  theme_minimal() +
+  ggtitle("Stroop task: Interference on errors 3.0 MAD") + 
+  scale_colour_manual(values = c("grey70", "grey20", "grey70", "grey20"), name = "Exp. condition") +
+  scale_fill_manual(values = c("grey80", "grey50", "grey80", "grey50"), name = "Exp. condition") +
+  scale_x_discrete(labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.", "Low MD / Self-Aff.",  "High MD / Self-Aff.")) + 
+  theme(axis.title.x = element_text(face="bold", size = 14, vjust = -2), 
+        axis.title.y = element_text(face="bold", size = 14, vjust = 3), 
+        axis.text.x  = element_text(size=12, color = "black"), 
+        axis.text.y  = element_text(size=12), 
+        title = element_text(size = 14), plot.margin = unit(c(12, 12, 20, 12),"pt"))
+
+```
+
+## ANOVA pre-registered contrast: "ed no.affirmation" versus rest 3.0 MAD
+```{r}
+
+one_vs_three <- c(3, -1, -1, -1)
+mat <- cbind(one_vs_three)
+
+contrasts(ed_pep_aff_stroop_mad$group) <- mat
+
+# anova sbp_stroop_r ~ depletion + affirmation
+lm_stroop_contrast <- lm(stroop_perf ~ group, data = ed_pep_aff_stroop_mad, contrasts = list(group = mat))
+anova_stats(lm_stroop_contrast) %>%
+  kable(., digits = 3)
+
+# make a factor of variable group
+ed_pep_aff_stroop_mad$group_factor <- as.factor(ed_pep_aff_stroop_mad$group)
+# execute an analysis of variance using lm() which, due to the -1, returns
+# estimates of the means per group
+anov_stroop_perf_mad <- lm(stroop_perf~ group_factor-1, ed_pep_aff_stroop_mad)
+# take a look at the estimated means and their names
+coef(anov_stroop_perf_mad)
+# collect the estimates means in a vector
+estimate_stroop_perf_mad <- coef(anov_stroop_perf_mad)
+# give names to the estimates in anov_stroop_perf_mad
+names(estimate_stroop_perf_mad) <- c("ed_no.aff", "ed_aff", "no.ed_no.aff","no.ed_aff")
+# create a vector containing the sample sizes of each group
+ngroup_stroop_perf_mad <- table(ed_pep_aff_stroop_mad$group_factor)
+# compute for each group the covariance matrix of the parameters
+# of that group and collect these in a list
+# for the ANOVA this is simply a list containing for each group the variance
+# of the mean note that, the within group variance as estimated using lm is
+# used to compute the variance of each of the means! See, Hoijtink, Gu, and
+# Mulder (2018) for further elaborations.
+var_stroop_perf_mad <- summary(anov_stroop_perf_mad)$sigma**2
+cov1_stroop_perf_mad <- matrix(var_stroop_perf_mad / ngroup_stroop_perf_mad[1], nrow=1, ncol=1)
+cov2_stroop_perf_mad <- matrix(var_stroop_perf_mad / ngroup_stroop_perf_mad[2], nrow=1, ncol=1)
+cov3_stroop_perf_mad <- matrix(var_stroop_perf_mad / ngroup_stroop_perf_mad[3], nrow=1, ncol=1)
+cov4_stroop_perf_mad <- matrix(var_stroop_perf_mad / ngroup_stroop_perf_mad[4], nrow=1, ncol=1)
+covlist_stroop_perf_mad <- list(cov1_stroop_perf_mad, cov2_stroop_perf_mad, cov3_stroop_perf_mad, cov4_stroop_perf_mad)
+# set a seed value
+set.seed(100)
+# test hypotheses with bain. Note that are no joint parameters, therefore, joint_parameters=0.
+results_stroop_perf_mad <- bain(estimate_stroop_perf_mad, "ed_no.aff > ed_aff = no.ed_aff = no.ed_no.aff; ed_no.aff = ed_aff = no.ed_aff = no.ed_no.aff; ed_no.aff = ed_aff = no.ed_aff > no.ed_no.aff",
+                n = ngroup_stroop_perf_mad, Sigma = covlist_stroop_perf_mad, group_parameters = 1, joint_parameters = 0)
+# display the results
+print(results_stroop_perf_mad)
+# obtain the descriptives table
+summary(results_stroop_perf_mad, ci = 0.95)
+results_stroop_perf_mad$BFmatrix
+```
+
+# Blood pressure
+
+## Exclusion criteria: 
+#### groupwise: > |2.5 SD| from mean for baseline and for each task (reactivity)
+```{r include = TRUE}
+# mean values for blood pressure
+# baseline: remove first value
+
+ed_pep_aff_q <- ed_pep_aff_q %>% 
+  group_by(subject) %>%
+  mutate(sbp_base = mean(c(sbp_base_1, sbp_base_2, sbp_base_3, sbp_base_4, sbp_base_5, sbp_base_6), na.rm = TRUE), 
+                dbp_base = mean(c(dbp_base_1, dbp_base_2, dbp_base_3, dbp_base_4, dbp_base_5, dbp_base_6), na.rm = TRUE), 
+                hr_base = mean(c(hr_base_1, hr_base_2, hr_base_3, hr_base_4, hr_base_5, hr_base_6), na.rm = TRUE),
+                sbp_count = mean(c(sbp_count_1, sbp_count_2, sbp_count_3, sbp_count_4, sbp_count_5, sbp_count_6, 
+                                   sbp_count_7, sbp_count_8), na.rm = TRUE), 
+                dbp_count = mean(c(dbp_count_1, dbp_count_2, dbp_count_3, dbp_count_4, dbp_count_5, dbp_count_6,
+                                   dbp_count_7, dbp_count_8), na.rm = TRUE), 
+                hr_count = mean(c(hr_count_1, hr_count_2, hr_count_3, hr_count_4, hr_count_5, hr_count_6,
+                                  hr_count_7, hr_count_8), na.rm = TRUE),
+                sbp_stroop = mean(c(sbp_stroop_1, sbp_stroop_2, sbp_stroop_3, sbp_stroop_4, sbp_stroop_5, 
+                                    sbp_stroop_6, sbp_stroop_7, sbp_stroop_8), na.rm = TRUE), 
+                dbp_stroop = mean(c(dbp_stroop_1, dbp_stroop_2, dbp_stroop_3, dbp_stroop_4, dbp_stroop_5, 
+                                    dbp_stroop_6, dbp_stroop_7, dbp_stroop_8), na.rm = TRUE), 
+                hr_stroop = mean(c(hr_stroop_1, hr_stroop_2, hr_stroop_3, hr_stroop_4, hr_stroop_5, 
+                                   hr_stroop_6, hr_stroop_7, hr_stroop_8), na.rm = TRUE),
+                sbp_aff = mean(c(sbp_aff_1, sbp_aff_2, sbp_aff_3, sbp_aff_4, sbp_aff_5, 
+                                    sbp_aff_6), na.rm = TRUE), 
+                dbp_aff = mean(c(dbp_aff_1, dbp_aff_2, dbp_aff_3, dbp_aff_4, dbp_aff_5, 
+                                    dbp_aff_6), na.rm = TRUE), 
+                hr_aff = mean(c(hr_aff_1, hr_aff_2, hr_aff_3, hr_aff_4, hr_aff_5, 
+                                   hr_aff_6), na.rm = TRUE), 
+                sbp_count_r = sbp_count - sbp_base, 
+                sbp_aff_r = sbp_aff - sbp_base, 
+                sbp_stroop_r = sbp_stroop - sbp_base, 
+                dbp_count_r = dbp_count - dbp_base, 
+                dbp_aff_r = dbp_aff - dbp_base, 
+                dbp_stroop_r = dbp_stroop - dbp_base, 
+                hr_count_r = hr_count - hr_base, 
+                hr_aff_r = hr_aff - hr_base, 
+                hr_stroop_r = hr_stroop - hr_base,
+                sbp_stroop_r_aff = sbp_stroop - sbp_aff,
+                sbp_aff_r_count = sbp_aff - sbp_count) %>%
+  ungroup()
+
+#	exclude subjects with blood pressure > |2.5 SD| from respective group mean
+ed_pep_aff_q <- ed_pep_aff_q %>%
+  group_by(group) %>%
+  mutate(z_sbp_base = scale(sbp_base, center = TRUE, scale = TRUE), 
+         z_dbp_base = scale(dbp_base, center = TRUE, scale = TRUE), 
+         z_hr_base = scale(hr_base, center = TRUE, scale = TRUE), 
+         z_sbp_count = scale(sbp_count, center = TRUE, scale = TRUE), 
+         z_dbp_count = scale(dbp_count, center = TRUE, scale = TRUE), 
+         z_hr_count = scale(hr_count, center = TRUE, scale = TRUE), 
+         z_sbp_stroop = scale(sbp_stroop, center = TRUE, scale = TRUE), 
+         z_dbp_stroop = scale(dbp_stroop, center = TRUE, scale = TRUE), 
+         z_hr_stroop = scale(hr_stroop, center = TRUE, scale = TRUE), 
+         z_sbp_aff = scale(sbp_aff, center = TRUE, scale = TRUE), 
+         z_dbp_aff = scale(dbp_aff, center = TRUE, scale = TRUE), 
+         z_hr_aff = scale(hr_aff, center = TRUE, scale = TRUE), 
+         
+         z_sbp_count_r = scale(sbp_count_r, center = TRUE, scale = TRUE), 
+         z_dbp_count_r = scale(dbp_count_r, center = TRUE, scale = TRUE), 
+         z_hr_count_r = scale(hr_count_r, center = TRUE, scale = TRUE), 
+         z_sbp_stroop_r = scale(sbp_stroop_r, center = TRUE, scale = TRUE), 
+         z_dbp_stroop_r = scale(dbp_stroop_r, center = TRUE, scale = TRUE), 
+         z_hr_stroop_r = scale(hr_stroop_r, center = TRUE, scale = TRUE), 
+         z_sbp_aff_r = scale(sbp_aff_r, center = TRUE, scale = TRUE), 
+         z_dbp_aff_r = scale(dbp_aff_r, center = TRUE, scale = TRUE), 
+         z_hr_aff_r = scale(hr_aff_r, center = TRUE, scale = TRUE)) %>%
+  ungroup()
+
+which(names(ed_pep_aff_q)=="z_sbp_base")
+which(names(ed_pep_aff_q)=="z_hr_aff_r")
+
+ed_pep_aff_q[, 192:212][ed_pep_aff_q[, 192:212] > 2.5] <- NA
+ed_pep_aff_q[, 192:212][ed_pep_aff_q[, 192:212] < -2.5] <- NA
+
+# raw blood pressure values
+#ed_pep_aff_q$sbp_count[is.na(ed_pep_aff_q$z_sbp_count)] <- NA
+#ed_pep_aff_q$dbp_count[is.na(ed_pep_aff_q$z_dbp_count)] <- NA
+#ed_pep_aff_q$hr_count[is.na(ed_pep_aff_q$z_hr_count)] <- NA
+
+#ed_pep_aff_q$sbp_stroop[is.na(ed_pep_aff_q$z_sbp_stroop)] <- NA
+#ed_pep_aff_q$dbp_stroop[is.na(ed_pep_aff_q$z_dbp_stroop)] <- NA
+#ed_pep_aff_q$hr_stroop[is.na(ed_pep_aff_q$z_hr_stroop)] <- NA
+
+#ed_pep_aff_q$sbp_aff[is.na(ed_pep_aff_q$z_sbp_aff)] <- NA
+#ed_pep_aff_q$dbp_aff[is.na(ed_pep_aff_q$z_dbp_aff)] <- NA
+#ed_pep_aff_q$hr_aff[is.na(ed_pep_aff_q$z_hr_aff)] <- NA
+```
+
+#### Exclude & count outliers SBP
+```{r}
+# baseline
+sum(is.na(ed_pep_aff_q$sbp_base))
+ed_pep_aff_q$sbp_base[is.na(ed_pep_aff_q$z_sbp_base)] <- NA
+sum(is.na(ed_pep_aff_q$sbp_base))
+
+ed_pep_aff_q$dbp_base[is.na(ed_pep_aff_q$z_dbp_base)] <- NA
+ed_pep_aff_q$hr_base[is.na(ed_pep_aff_q$z_hr_base)] <- NA
+
+# blood pressure reactivity
+sum(is.na(ed_pep_aff_q$sbp_count_r))
+ed_pep_aff_q$sbp_count_r[is.na(ed_pep_aff_q$z_sbp_count_r)] <- NA
+sum(is.na(ed_pep_aff_q$sbp_count_r))
+
+ed_pep_aff_q$dbp_count_r[is.na(ed_pep_aff_q$z_dbp_count_r)] <- NA
+ed_pep_aff_q$hr_count_r[is.na(ed_pep_aff_q$z_hr_count_r)] <- NA
+
+sum(is.na(ed_pep_aff_q$sbp_stroop_r))
+ed_pep_aff_q$sbp_stroop_r[is.na(ed_pep_aff_q$z_sbp_stroop_r)] <- NA
+sum(is.na(ed_pep_aff_q$sbp_stroop_r))
+
+ed_pep_aff_q$dbp_stroop_r[is.na(ed_pep_aff_q$z_dbp_stroop_r)] <- NA
+ed_pep_aff_q$hr_stroop_r[is.na(ed_pep_aff_q$z_hr_stroop_r)] <- NA
+
+sum(is.na(ed_pep_aff_q$sbp_aff_r))
+ed_pep_aff_q$sbp_aff_r[is.na(ed_pep_aff_q$z_sbp_aff_r)] <- NA
+sum(is.na(ed_pep_aff_q$sbp_aff_r))
+
+ed_pep_aff_q$dbp_aff_r[is.na(ed_pep_aff_q$z_dbp_aff_r)] <- NA
+ed_pep_aff_q$hr_aff_r[is.na(ed_pep_aff_q$z_hr_aff_r)] <- NA
+
+#write_csv(ed_pep_aff_q, "ed_pep_aff_bp.csv")
+
+```
+
+## Systolic blood pressure: Baseline
+```{r}
+
+sum_sbp_base <- ed_pep_aff_q %>%
+  select(group, sbp_base) %>%
+  summarySE(measurevar = "sbp_base", groupvars = c("group"), na.rm = TRUE)
+
+sum_sbp_base %>%
+  kable(., digits = 2)
+
+sum_sbp_base_dep <- ed_pep_aff_q %>%
+  select(depletion, sbp_base) %>%
+  summarySE(measurevar = "sbp_base", groupvars = c("depletion"), na.rm = TRUE)
+
+sum_sbp_base_dep %>%
+  kable(., digits = 2)
+
+sum_sbp_base_aff <- ed_pep_aff_q %>%
+  select(affirmation, sbp_base) %>%
+  summarySE(measurevar = "sbp_base", groupvars = c("affirmation"), na.rm = TRUE)
+
+sum_sbp_base_aff %>%
+  kable(., digits = 2)
+
+ed_pep_aff_q %>%
+  ggplot(aes(x = as.factor(group), y = sbp_base, fill = as.factor(group), colour = as.factor(group))) +
+  geom_flat_violin(position = position_nudge(x = .45, y = 0), adjust = .8, alpha = 0.1, trim = TRUE) +
+  geom_point(position = position_jitter(width = .08), size = .25) +
+  
+  geom_bar(position = position_nudge(x = .30, y = 0), data = sum_sbp_base, stat = "identity", na.rm = TRUE, width = 0.2) +
+  geom_point(data = sum_sbp_base, aes(x = as.factor(group), y = sbp_base), position = position_nudge(.30), colour = "BLACK") +
+  geom_errorbar(data = sum_sbp_base, aes(x = as.factor(group), ymin = sbp_base-se, ymax = sbp_base+se), 
+                position = position_nudge(.30), colour = "BLACK", width = 0.1, size = 0.8) +
+  ylab('SBP [mmHg]') + xlab('Experimental conditions') + guides(fill = FALSE, colour = FALSE) +
+  scale_colour_grey(start = 0.2, end = 0.7) +
+  scale_fill_grey(start = 0.2, end = 0.7) +
+  theme_minimal() +
+  ggtitle("SBP: Baseline") + 
+  scale_x_discrete(labels = c("High MD / No Self-Aff.", "High MD / Self-Aff.", "Low MD / No Self-Aff.", "Low MD / Self-Aff.")) + 
+  theme(axis.title.x = element_text(face="bold", size = 12, vjust = -2), 
+        axis.title.y = element_text(face="bold", size = 12, vjust = 3), 
+        axis.text.x  = element_text(size=8, color = "black"), 
+        axis.text.y  = element_text(size=10), 
+        title = element_text(size = 12), plot.margin = unit(c(12, 12, 20, 12),"pt"))
+```
+
+### SBP Baseline: Bayesian model comparison
+```{r}
+
+# make a factor of variable group
+ed_pep_aff_q$group_factor <- as.factor(ed_pep_aff_q$group)
+# execute an analysis of variance using lm() which, due to the -1, returns
+# estimates of the means per group
+anov_sbp_base <- lm(sbp_base ~ group_factor - 1, ed_pep_aff_q)
+# take a look at the estimated means and their names
+coef(anov_sbp_base)
+# collect the estimates means in a vector
+estimate_sbp_base <- coef(anov_sbp_base)
+# give names to the estimates in anov
+names(estimate_sbp_base) <- c("ed_no.aff", "ed_aff", "no.ed_no.aff","no.ed_aff")
+# create a vector containing the sample sizes of each group
+ngroup_sbp_base <- table(ed_pep_aff_q$group_factor)
+# compute for each group the covariance matrix of the parameters
+# of that group and collect these in a list
+# for the ANOVA this is simply a list containing for each group the variance
+# of the mean note that, the within group variance as estimated using lm is
+# used to compute the variance of each of the means! See, Hoijtink, Gu, and
+# Mulder (2018) for further elaborations.
+var_sbp_base <- summary(anov_sbp_base)$sigma**2
+cov1_sbp_base <- matrix(var_sbp_base / ngroup_sbp_base[1], nrow=1, ncol=1)
+cov2_sbp_base <- matrix(var_sbp_base / ngroup_sbp_base[2], nrow=1, ncol=1)
+cov3_sbp_base <- matrix(var_sbp_base / ngroup_sbp_base[3], nrow=1, ncol=1)
+cov4_sbp_base <- matrix(var_sbp_base / ngroup_sbp_base[4], nrow=1, ncol=1)
+covlist_sbp_base <- list(cov1_sbp_base, cov2_sbp_base, cov3_sbp_base, cov4_sbp_base)
+# set a seed value
+set.seed(100)
+# test hypotheses with bain. Note that are no joint parameters, therefore, joint_parameters=0.
+results_sbp_base <- bain(estimate_sbp_base, 
+                          "ed_no.aff = ed_aff = no.ed_aff = no.ed_no.aff; 
+                          ed_no.aff = ed_aff > no.ed_aff = no.ed_no.aff; 
+                          ed_no.aff = ed_aff < no.ed_aff = no.ed_no.aff",
+                n = ngroup_sbp_base, Sigma = covlist_sbp_base, group_parameters = 1, joint_parameters = 0)
+# display the results
+print(results_sbp_base)
+# obtain the descriptives table
+summary(results_sbp_base, ci = 0.95)
+results_sbp_base$BFmatrix
+```
+
+## SBP: reactivity counting task for DEPLETION 
+```{r}
+# rainclouds sbp counting task
+
+sum_sbp_count_r_dep <- ed_pep_aff_q %>%
+  select(depletion, sbp_count_r) %>%
+  summarySE(measurevar = "sbp_count_r", groupvars = c("depletion"), na.rm = TRUE)
+
+sum_sbp_count_r_dep %>%
+  kable(., digits = 2)
+
+
+ed_pep_aff_q %>%
+  ggplot(aes(x = as.factor(depletion), y = sbp_count_r, fill = as.factor(depletion), colour = as.factor(depletion))) +
+  geom_flat_violin(position = position_nudge(x = .45, y = 0), adjust = .8, alpha = 0.2, trim = TRUE) +
+  geom_point(position = position_jitter(width = .08), size = .25) +
+  
+  geom_bar(position = position_nudge(x = .30, y = 0), data = sum_sbp_count_r_dep, stat = "identity", na.rm = TRUE, width = 0.2) +
+  geom_point(data = sum_sbp_count_r_dep, aes(x = as.factor(depletion), y = sbp_count_r), position = position_nudge(.30), colour = "BLACK") +
+  geom_errorbar(data = sum_sbp_count_r_dep, aes(x = as.factor(depletion), ymin = sbp_count_r-se, ymax = sbp_count_r+se), 
+                position = position_nudge(.30), colour = "BLACK", width = 0.1, size = 0.8) +
+  ylab('SBP reactivity [mmHg]') + xlab('MD condition') + guides(fill = FALSE, colour = FALSE) +
+  scale_colour_grey(start = 0.7, end = 0.2) +
+  scale_fill_grey(start = 0.7, end = 0.2) +
+  theme_minimal() +
+  ggtitle("SBP reactivity during manipulation of MD") + 
+  geom_hline(yintercept=0, linetype="dotted", color = "black") +
+    scale_x_discrete(labels = c("Low MD","High MD")) + 
+  theme(axis.title.x = element_text(face="bold", size = 14, vjust = -2), 
+        axis.title.y = element_text(face="bold", size = 14, vjust = 3), 
+        axis.text.x  = element_text(size=12, color = "black"), 
+        axis.text.y  = element_text(size=12), 
+        title = element_text(size = 14), plot.margin = unit(c(12, 12, 20, 12),"pt")) + 
+  coord_cartesian(ylim = c(0, 10))
+```
+
+### SBP reactivity counting task 
+```{r}
+# depletion versus no depletion 
+effect_sbp_count_r <- ed_pep_aff_q %>% 
+  t.test(sbp_count_r ~ depletion, data = ., alternative = "less")
+
+effect_sbp_count_r %>%
+  tidy() %>%
+  kable(., digits = 3)
+
+d_sbp_count_r <- ed_pep_aff_q %>%
+  cohen.d(sbp_count_r ~ depletion, data=., conf.level = .90) 
+
+d_sbp_count_r <- data.frame("cohens.d" = d_sbp_count_r[["estimate"]], "conf.int.lower" =  "-Inf", "conf.int.upper" = d_sbp_count_r[["conf.int"]][["upper"]])
+
+d_sbp_count_r %>% kable(., digits = 3)
+```
+
+
+## SBP: reactivity self-affirmation 
+```{r}
+# rainclouds sbp self-affirmation
+
+sum_sbp_aff_r <- ed_pep_aff_q %>%
+  select(group, sbp_aff_r) %>%
+  summarySE(measurevar = "sbp_aff_r", groupvars = c("group"), na.rm = TRUE)
+
+sum_sbp_aff_r %>%
+  kable(., digits = 2)
+
+sum_sbp_aff_r_dep <- ed_pep_aff_q %>%
+  select(depletion, sbp_aff_r) %>%
+  summarySE(measurevar = "sbp_aff_r", groupvars = c("depletion"), na.rm = TRUE)
+
+sum_sbp_aff_r_dep %>%
+  kable(., digits = 2)
+
+sum_sbp_aff_r_aff <- ed_pep_aff_q %>%
+  select(affirmation, sbp_aff_r) %>%
+  summarySE(measurevar = "sbp_aff_r", groupvars = c("affirmation"), na.rm = TRUE)
+
+sum_sbp_aff_r_aff %>%
+  kable(., digits = 2)
+
+ed_pep_aff_q %>%
+  ggplot(aes(x = as.factor(group), y = sbp_aff_r, fill = as.factor(group), colour = as.factor(group))) +
+  geom_flat_violin(position = position_nudge(x = .45, y = 0), adjust = .8, alpha = 0.2, trim = TRUE) +
+  geom_point(position = position_jitter(width = .08), size = .25) +
+  
+  geom_bar(position = position_nudge(x = .30, y = 0), data = sum_sbp_aff_r, stat = "identity", na.rm = TRUE, width = 0.2) +
+  geom_point(data = sum_sbp_aff_r, aes(x = as.factor(group), y = sbp_aff_r), position = position_nudge(.30), colour = "BLACK") +
+  geom_errorbar(data = sum_sbp_aff_r, aes(x = as.factor(group), ymin = sbp_aff_r-se, ymax = sbp_aff_r+se), 
+                position = position_nudge(.30), colour = "BLACK", width = 0.1, size = 0.8) +
+  ylab('SBP reactivity [mmHg]') + xlab('Experimental condition') + guides(fill = FALSE, colour = FALSE) +
+  scale_colour_grey(start = 0.7, end = 0.2) +
+  scale_fill_grey(start = 0.7, end = 0.2) +
+  theme_minimal() +
+  ggtitle("SBP reactivity during Self-affirmation manipulation") +
+  theme(axis.title.x = element_text(face="bold", size = 12, vjust = -2), 
+        axis.title.y = element_text(face="bold", size = 12, vjust = 3), 
+        axis.text.x  = element_text(size=8, color = "black"), 
+        axis.text.y  = element_text(size=10), 
+        title = element_text(size = 12), plot.margin = unit(c(12, 12, 20, 12),"pt")) + 
+    scale_x_discrete(labels = c("High MD / No SA","High MD / SA", "Low MD / No SA", "Low MD / SA"))
+```
+
+### ANOVA: SBP reactivity self-affirmation 
+```{r}
+# anova sbp_aff_r ~ depletion + affirmation
+aov_sbp_aff_r <- aov(sbp_aff_r ~ affirmation*depletion, data = ed_pep_aff_q)
+anova_stats(aov_sbp_aff_r) %>% kable(., digits = 3)
+
+# pairwise t.tests
+pairwise.t.test(ed_pep_aff_q$sbp_aff_r, ed_pep_aff_q$group, p.adjust.method = "holm")
+
+```
+
+
+## SBP: reactivity Stroop task 
+```{r}
+# rainclouds sbp stroop task
+
+ed_pep_aff_q$group_ordered <- factor(ed_pep_aff_q$group, levels = levels(ed_pep_aff_q$group)[c(3,1,4,2)])
+
+sum_sbp_stroop_r <- ed_pep_aff_q %>%
+  select(group_ordered, sbp_stroop_r) %>%
+  summarySE(measurevar = "sbp_stroop_r", groupvars = c("group_ordered"), na.rm = TRUE)
+
+sum_sbp_stroop_r %>%
+  kable(., digits = 2)
+
+sum_sbp_stroop_r_dep <- ed_pep_aff_q %>%
+  select(depletion, sbp_stroop_r) %>%
+  summarySE(measurevar = "sbp_stroop_r", groupvars = c("depletion"), na.rm = TRUE)
+
+sum_sbp_stroop_r_dep %>%
+  kable(., digits = 2)
+
+sum_sbp_stroop_r_aff <- ed_pep_aff_q %>%
+  select(affirmation, sbp_stroop_r) %>%
+  summarySE(measurevar = "sbp_stroop_r", groupvars = c("affirmation"), na.rm = TRUE)
+
+sum_sbp_stroop_r_aff %>%
+  kable(., digits = 2)
+
+ed_pep_aff_q %>%
+  ggplot(aes(x = as.factor(group_ordered), y = sbp_stroop_r, fill = as.factor(group_ordered), colour = as.factor(group_ordered))) +
+  geom_flat_violin(position = position_nudge(x = .25, y = 0), adjust = .8, alpha = 0.2, trim = TRUE) +
+  geom_point(position = position_jitter(width = .08), size = .25) +
+  geom_bar(position = position_nudge(x = .25, y = 0), data = sum_sbp_stroop_r, stat = "identity", na.rm = TRUE, width = 0.2) +
+  geom_point(data = sum_sbp_stroop_r, aes(x = as.factor(group_ordered), y = sbp_stroop_r), position = position_nudge(.25), colour = "BLACK") +
+  geom_errorbar(data = sum_sbp_stroop_r, aes(x = as.factor(group_ordered), ymin = sbp_stroop_r-se, ymax = sbp_stroop_r+se), 
+                position = position_nudge(.25), colour = "BLACK", width = 0.1, size = 0.8) +
+  ylab('SBP reactivity [mmHg]') + xlab('Experimental conditions') + guides(fill = FALSE, colour = FALSE) +
+  theme_minimal() +
+  ggtitle("SBP reactivity during stroop task") + 
+  scale_colour_manual(values = c("grey70", "grey20", "grey70", "grey20"), name = "Exp. condition") +
+  scale_fill_manual(values = c("grey80", "grey50", "grey80", "grey50"), name = "Exp. condition") +
+  scale_x_discrete(labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.", "Low MD / Self-Aff.",  "High MD / Self-Aff.")) + 
+  theme(axis.title.x = element_text(face="bold", size = 14, vjust = -2), 
+        axis.title.y = element_text(face="bold", size = 14, vjust = 3), 
+        axis.text.x  = element_text(size=12, color = "black"), 
+        axis.text.y  = element_text(size=12), 
+        title = element_text(size = 14), plot.margin = unit(c(12, 12, 20, 12),"pt"))
+
+```
+
+### ANOVA: SBP reactivity Stroop task 
+```{r}
+# anova sbp_stroop_r ~ depletion + affirmation
+aov_sbp_stroop_r <- aov(sbp_stroop_r ~ affirmation*depletion, data = ed_pep_aff_q)
+anova_stats(aov_sbp_stroop_r) %>% kable(., digits = 3)
+
+# pairwise t.tests
+pairwise.t.test(ed_pep_aff_q$sbp_stroop_r, ed_pep_aff_q$group, p.adjust.method = "holm")
+
+# stroop
+ed_pep_aff_q_no_affirmation <- ed_pep_aff_q %>%
+  filter(affirmation == 0)
+
+
+effect_sbp_no_aff_stroop <- ed_pep_aff_q_no_affirmation %>%
+  t.test(sbp_stroop_r ~ depletion, data = ., alternative = "two.sided", na.action = na.omit)
+
+effect_sbp_no_aff_stroop %>%
+  tidy() %>%
+  kable(., digits = 3)
+
+d_sbp_no_aff_stroop <- ed_pep_aff_q_no_affirmation %>%
+  cohen.d(sbp_stroop_r ~ depletion, data=., conf.level = .95) 
+
+d_sbp_no_aff_stroop <- data.frame("cohens.d" = d_sbp_no_aff_stroop[["estimate"]], "conf.int.lower" =  d_sbp_no_aff_stroop[["conf.int"]][["lower"]], "conf.int.upper" = d_sbp_no_aff_stroop[["conf.int"]][["upper"]])
+
+d_sbp_no_aff_stroop %>% kable(., digits = 2)
+```
+
+
+### ANOVA pre-registered contrast (process model)
+### SBP reactivity Stroop task 
+#### group1: [-3, 1, 1, 1] [ed no.aff, ed aff, no.ed no.aff, no.ed aff]
+```{r}
+contrasts(ed_pep_aff_q$group) <- c(-3, 1, 1, 1)
+
+# anova sbp_stroop_r ~ depletion + affirmation
+aov_sbp_stroop_r_process <- aov(sbp_stroop_r ~ group, data = ed_pep_aff_q)
+anova_stats(aov_sbp_stroop_r_process) %>% kable(., digits = 3)
+
+```
+
+# REPRODUCE THIS
+
+```{r}
+r05771_mod_original_7 <- lm(sbp_stroop_r ~ group, data = ed_pep_aff_q)
+r05771_mod_original_7 %>% summary()
+```
+
+```{r}
+r05771_mod_z_7 <- lm(z(sbp_stroop_r) ~ group, data = ed_pep_aff_q)
+r05771_mod_z_7 %>% summary()
+```
+
+```{r}
+key_effects = c("group1", "group2", "group3")
+export_ols(r05771_mod_z_7, key_effects)
+```
+
+
+### ANOVA pre-registered contrast (strength model)
+### SBP reactivity Stroop task 
+#### group1: [-1, 3, -1, -1] [ed no.aff, ed aff, no.ed no.aff, no.ed aff]
+```{r}
+contrasts(ed_pep_aff_q$group) <- c(-1, 3, -1, -1)
+
+# anova sbp_stroop_r ~ depletion + affirmation
+aov_sbp_stroop_r_strength <- aov(sbp_stroop_r ~ group, data = ed_pep_aff_q)
+anova_stats(aov_sbp_stroop_r_strength) %>% kable(., digits = 3)
+
+```
+
+# SBP reactivity Stroop: Bayesian Model Comparison
+
+### strength model: [-1, 3, -1, -1] [ed no.aff, ed aff, no.ed no.aff, no.ed aff]
+### process model: [-3, 1, 1, 1] [ed no.aff, ed aff, no.ed no.aff, no.ed aff]
+### contrary - onyl "Low MD & no aff" good performance --> higher SBP
+```{r}
+
+# execute an analysis of variance using lm() which, due to the -1, returns
+# estimates of the means per group
+anov_sbp_stroop <- lm(sbp_stroop_r ~ group_factor - 1, ed_pep_aff_q)
+# take a look at the estimated means and their names
+coef(anov_sbp_stroop)
+# collect the estimates means in a vector
+estimate_sbp_stroop <- coef(anov_sbp_stroop)
+# give names to the estimates in anov
+names(estimate_sbp_stroop) <- c("ed_no.aff", "ed_aff", "no.ed_no.aff","no.ed_aff")
+# create a vector containing the sample sizes of each group
+ngroup_sbp_stroop <- table(ed_pep_aff_q$group_factor)
+# compute for each group the covariance matrix of the parameters
+# of that group and collect these in a list
+# for the ANOVA this is simply a list containing for each group the variance
+# of the mean note that, the within group variance as estimated using lm is
+# used to compute the variance of each of the means! See, Hoijtink, Gu, and
+# Mulder (2018) for further elaborations.
+var_sbp_stroop <- summary(anov_sbp_stroop)$sigma**2
+cov1_sbp_stroop <- matrix(var_sbp_stroop / ngroup_sbp_stroop[1], nrow=1, ncol=1)
+cov2_sbp_stroop <- matrix(var_sbp_stroop / ngroup_sbp_stroop[2], nrow=1, ncol=1)
+cov3_sbp_stroop <- matrix(var_sbp_stroop / ngroup_sbp_stroop[3], nrow=1, ncol=1)
+cov4_sbp_stroop <- matrix(var_sbp_stroop / ngroup_sbp_stroop[4], nrow=1, ncol=1)
+covlist_sbp_stroop <- list(cov1_sbp_stroop, cov2_sbp_stroop, cov3_sbp_stroop, cov4_sbp_stroop)
+# set a seed value
+set.seed(100)
+# test hypotheses with bain. Note that are no joint parameters, therefore, joint_parameters=0.
+results_sbp_stroop <- bain(estimate_sbp_stroop, 
+                        "ed_aff > no.ed_aff = no.ed_no.aff = ed_no.aff;
+                        ed_no.aff < ed_aff = no.ed_aff = no.ed_no.aff; 
+                        no.ed_no.aff > ed_aff = ed_no.aff = no.ed_aff; 
+                        no.ed_no.aff = ed_aff = ed_no.aff = no.ed_aff",
+                n = ngroup_sbp_stroop, Sigma = covlist_sbp_stroop, group_parameters = 1, joint_parameters = 0)
+# display the results
+print(results_sbp_stroop)
+# obtain the descriptives table
+summary(results_sbp_stroop, ci = 0.95)
+results_sbp_stroop$BFmatrix
+```
+
+### No Affirmation groups: Depletion vs. no depletion
+```{r}
+
+# execute an analysis of variance using lm() which, due to the -1, returns
+# estimates of the means per group
+anov_sbp_stroop_no_aff <- lm(sbp_stroop_r ~ depletion - 1, ed_pep_aff_q_no_affirmation)
+# take a look at the estimated means and their names
+coef(anov_sbp_stroop_no_aff)
+# collect the estimates means in a vector
+estimate_sbp_stroop_no_aff <- coef(anov_sbp_stroop_no_aff)
+# give names to the estimates in anov
+names(estimate_sbp_stroop_no_aff) <- c("ed_no.aff", "no.ed_no.aff")
+# create a vector containing the sample sizes of each group
+ngroup_sbp_stroop_no_aff <- table(ed_pep_aff_q_no_affirmation$depletion)
+# compute for each group the covariance matrix of the parameters
+# of that group and collect these in a list
+# for the ANOVA this is simply a list containing for each group the variance
+# of the mean note that, the within group variance as estimated using lm is
+# used to compute the variance of each of the means! See, Hoijtink, Gu, and
+# Mulder (2018) for further elaborations.
+var_sbp_stroop_no_aff <- summary(anov_sbp_stroop_no_aff)$sigma**2
+cov1_sbp_stroop_no_aff <- matrix(var_sbp_stroop_no_aff / ngroup_sbp_stroop_no_aff[1], nrow=1, ncol=1)
+cov2_sbp_stroop_no_aff <- matrix(var_sbp_stroop_no_aff / ngroup_sbp_stroop_no_aff[2], nrow=1, ncol=1)
+covlist_sbp_stroop_no_aff <- list(cov1_sbp_stroop_no_aff, cov2_sbp_stroop_no_aff)
+# set a seed value
+set.seed(100)
+# test hypotheses with bain. Note that are no joint parameters, therefore, joint_parameters=0.
+results_sbp_stroop_no_aff <- bain(estimate_sbp_stroop_no_aff, 
+                        "no.ed_no.aff = ed_no.aff;
+                        no.ed_no.aff > ed_no.aff; 
+                        no.ed_no.aff < ed_no.aff",
+                n = ngroup_sbp_stroop_no_aff, Sigma = covlist_sbp_stroop_no_aff, group_parameters = 1, joint_parameters = 0)
+# display the results
+print(results_sbp_stroop_no_aff)
+# obtain the descriptives table
+summary(results_sbp_stroop_no_aff, ci = 0.95)
+results_sbp_stroop_no_aff$BFmatrix
+```
+
+
+### t-Test standard ego depletion effect on SBP
+### (no affirmation groups: depletion versus no depletion)
+```{r}
+# t-test for standard ego depletion effect (no affirmation)
+std_sbp_stroop_r <- ed_pep_aff_q %>%
+  filter(., affirmation == 0) %>%
+  t.test(sbp_stroop_r ~ depletion, data = ., alternative = "less")
+
+std_sbp_stroop_r %>%
+  tidy() %>%
+  kable(., digits = 3)
+
+d_sbp_stroop_r <- ed_pep_aff_q %>%
+  filter(., affirmation == 0) %>%
+  cohen.d(sbp_stroop_r ~ depletion, data=., conf.level = .95) 
+
+d_sbp_stroop_r <- data.frame("cohens.d" = d_sbp_stroop_r[["estimate"]], "conf.int.lower" =  d_sbp_stroop_r[["conf.int"]][["lower"]], "conf.int.upper" = d_sbp_stroop_r[["conf.int"]][["upper"]])
+
+d_sbp_stroop_r %>% kable(., digits = 2)
+```
+
+# Pre-ejection period
+
+## Exclusion criteria: 
+#### < 90% cycles with values
+#### groupwise: >= |2.5SD| from mean for each task 
+
+## PEP over time
+```{r}
+
+pep_wide <- read.csv(here::here("data/raw_data/r05771_giesler2017_pep_wide_3rd.csv"))
+
+pep_long_short <- pep_wide %>% 
+  select(subject, group, pep_baseline:pep_stroop) %>%
+  gather(., task, pep, pep_baseline:pep_stroop)
+  
+  
+# rainclouds over time: pep
+
+pep_long_short$group <- pep_long_short$subject%%4
+pep_long_short$group[pep_long_short$group == "0"] <- "4"
+pep_long_short$group <- as.numeric(pep_long_short$group)
+pep_long_short$group <- as.factor(pep_long_short$group)
+
+pep_long_short$affirmation <- ifelse(pep_long_short$group == 1, 0,
+                                 ifelse(pep_long_short$group == 2, 1,
+                                        ifelse(pep_long_short$group == 3, 0,
+                                               ifelse(pep_long_short$group == 4, 1, NA))))
+
+pep_long_short$depletion <- ifelse(pep_long_short$group == 1, 1,
+                               ifelse(pep_long_short$group == 2, 1,
+                                      ifelse(pep_long_short$group == 3, 0,
+                                             ifelse(pep_long_short$group == 4, 0, NA))))
+
+pep_long_short$group <- factor(pep_long_short$group, labels = (c("ed no.aff", "ed aff", "no.ed no.aff", "no.ed aff")))
+
+summary_pep <- pep_long_short %>%
+  summarySE(., measurevar = "pep", groupvars = c("group", "task"), na.rm = TRUE)
+
+summary_pep$task.nr <- ifelse(summary_pep$task == "pep_baseline", 1,
+                               ifelse(summary_pep$task == "pep_counting", 2,
+                                      ifelse(summary_pep$task == "pep_self_affirmation", 3,
+                                             ifelse(summary_pep$task == "pep_stroop", 4, NA))))
+
+pep_long_short$task.nr <- ifelse(pep_long_short$task == "pep_baseline", 1,
+                               ifelse(pep_long_short$task == "pep_counting", 2,
+                                      ifelse(pep_long_short$task == "pep_self_affirmation", 3,
+                                             ifelse(pep_long_short$task == "pep_stroop", 4, NA))))
+
+
+# "ed no.aff", "ed aff", "no.ed no.aff", "no.ed aff"
+
+summary_pep$group.nr <- ifelse(summary_pep$group == "ed no.aff", 1,
+                               ifelse(summary_pep$group == "ed aff", 2,
+                                      ifelse(summary_pep$group == "no.ed no.aff", 3,
+                                             ifelse(summary_pep$group == "no.ed aff", 4, NA))))
+
+summary_pep %>%
+  kable(., digits = 2)
+```
+
+
+## PEP: Baseline (at the beginning of the study)
+```{r}
+
+pep_wide$group <- pep_wide$subject%%4
+pep_wide$group[pep_wide$group == "0"] <- "4"
+pep_wide$group <- as.numeric(pep_wide$group)
+pep_wide$group <- as.factor(pep_wide$group)
+
+pep_wide$affirmation <- ifelse(pep_wide$group == 1, 0,
+                                 ifelse(pep_wide$group == 2, 1,
+                                        ifelse(pep_wide$group == 3, 0,
+                                               ifelse(pep_wide$group == 4, 1, NA))))
+
+pep_wide$depletion <- ifelse(pep_wide$group == 1, 1,
+                               ifelse(pep_wide$group == 2, 1,
+                                      ifelse(pep_wide$group == 3, 0,
+                                             ifelse(pep_wide$group == 4, 0, NA))))
+
+pep_wide$group <- factor(pep_wide$group, labels = (c("ed no.aff", "ed aff", "no.ed no.aff", "no.ed aff")))
+
+# rainclouds pep baseline
+
+sum_pep_base <- pep_wide %>%
+  select(group, pep_baseline) %>%
+  summarySE(measurevar = "pep_baseline", groupvars = c("group"), na.rm = TRUE)
+
+sum_pep_base %>%
+  kable(., digits = 2)
+
+sum_pep_base_dep <- pep_wide %>%
+  select(depletion, pep_baseline) %>%
+  summarySE(measurevar = "pep_baseline", groupvars = c("depletion"), na.rm = TRUE)
+
+sum_pep_base_dep %>%
+  kable(., digits = 2)
+
+sum_pep_base_aff <- pep_wide %>%
+  select(affirmation, pep_baseline) %>%
+  summarySE(measurevar = "pep_baseline", groupvars = c("affirmation"), na.rm = TRUE)
+
+sum_pep_base_aff %>%
+  kable(., digits = 2)
+
+pep_wide %>%
+  ggplot(aes(x = as.factor(group), y = pep_baseline, fill = as.factor(group), colour = as.factor(group))) +
+  geom_flat_violin(position = position_nudge(x = .40, y = 0), adjust = .8, alpha = 0.1, trim = TRUE) +
+  geom_point(position = position_jitter(width = .15), size = .25) +
+  geom_bar(position = position_nudge(x = .25, y = 0), data = sum_pep_base, stat = "identity", na.rm = TRUE, width = 0.2) +
+  geom_point(data = sum_pep_base, aes(x = as.factor(group), y = pep_baseline), position = position_nudge(.25), colour = "BLACK") +
+  geom_errorbar(data = sum_pep_base, aes(x = as.factor(group), ymin = pep_baseline-se, ymax = pep_baseline+se), 
+                position = position_nudge(.25), colour = "BLACK", width = 0.1, size = 0.8) +
+  ylab('Pre-ejection period [ms]') + xlab('Experimental condition') + guides(fill = FALSE, colour = FALSE) +
+  scale_colour_grey(start = 0.2, end = 0.7) +
+  scale_fill_grey(start = 0.2, end = 0.7) +
+  theme_minimal() +
+  ggtitle("Baseline: Pre-ejection period") + 
+  scale_x_discrete(labels = c("High MD / No Self-Aff.", "High MD / Self-Aff.", "Low MD / No Self-Aff.", "Low MD / Self-Aff.")) + 
+  geom_hline(yintercept=0, linetype="dotted", color = "black") + 
+  theme(axis.title.x = element_text(face="bold", size = 12, vjust = -2), 
+        axis.title.y = element_text(face="bold", size = 12, vjust = 3), 
+        axis.text.x  = element_text(size=8, color = "black"), 
+        axis.text.y  = element_text(size=10), 
+        title = element_text(size = 12), plot.margin = unit(c(12, 12, 20, 12),"pt"))
+```
+
+## Reactivity PEP: Counting task
+```{r}
+
+# rainclouds pep counting task
+
+sum_pep_counting <- pep_wide %>%
+  select(group, pep_counting_r) %>%
+  summarySE(measurevar = "pep_counting_r", groupvars = c("group"), na.rm = TRUE)
+
+sum_pep_counting %>%
+  kable(., digits = 2)
+
+sum_pep_counting_dep <- pep_wide %>%
+  select(depletion, pep_counting_r) %>%
+  summarySE(measurevar = "pep_counting_r", groupvars = c("depletion"), na.rm = TRUE)
+
+sum_pep_counting_dep %>%
+  kable(., digits = 2)
+
+sum_pep_counting_aff <- pep_wide %>%
+  select(affirmation, pep_counting_r) %>%
+  summarySE(measurevar = "pep_counting_r", groupvars = c("affirmation"), na.rm = TRUE)
+
+sum_pep_counting_aff %>%
+  kable(., digits = 2)
+
+pep_wide %>%
+  ggplot(aes(x = as.factor(depletion), y = pep_counting_r, fill = as.factor(depletion), colour = as.factor(depletion))) +
+  geom_flat_violin(position = position_nudge(x = .45, y = 0), adjust = .8, alpha = 0.1, trim = TRUE) +
+  geom_point(position = position_jitter(width = .08), size = .25) +
+  geom_bar(position = position_nudge(x = .28, y = 0), data = sum_pep_counting_dep, stat = "identity", na.rm = TRUE, width = 0.2) +
+  geom_point(data = sum_pep_counting_dep, aes(x = as.factor(depletion), y = pep_counting_r), position = position_nudge(.28), colour = "BLACK") +
+  geom_errorbar(data = sum_pep_counting_dep, aes(x = as.factor(depletion), ymin = pep_counting_r-se, ymax = pep_counting_r+se), 
+                position = position_nudge(.28), colour = "BLACK", width = 0.1, size = 0.8) +
+  ylab('PEP reactitivy [ms]') + xlab('MD condition') + guides(fill = FALSE, colour = FALSE) +
+  scale_colour_grey(start = 0.7, end = 0.2) +
+  scale_fill_grey(start = 0.7, end = 0.2) +
+  theme_minimal() +
+  ggtitle("Counting task: PEP reactivity") + 
+  scale_x_discrete(labels = c("Low MD", "High MD")) + 
+  geom_hline(yintercept=0, linetype="dotted", color = "black") + 
+  theme(axis.title.x = element_text(face="bold", size = 12, vjust = -2), 
+        axis.title.y = element_text(face="bold", size = 12, vjust = 3), 
+        axis.text.x  = element_text(size=8, color = "black"), 
+        axis.text.y  = element_text(size=10), 
+        title = element_text(size = 12), plot.margin = unit(c(12, 12, 20, 12),"pt"))
+```
+
+### t-Test pep_counting_r ~ depletion
+```{r}
+
+# depletion versus no depletion 
+effect_pep_counting_r <- pep_wide %>% 
+  t.test(pep_counting_r ~ depletion, data = ., alternative = "greater")
+
+effect_pep_counting_r %>%
+  tidy() %>%
+  kable(., digits = 3)
+
+d_pep_counting_r <- pep_wide %>%
+  cohen.d(pep_counting_r ~ depletion, data=.) 
+
+d_pep_counting_r <- data.frame("cohens.d" = d_pep_counting_r[["estimate"]], "conf.int.lower" =  d_pep_counting_r[["conf.int"]][["lower"]], "conf.int.upper" = d_pep_counting_r[["conf.int"]][["upper"]])
+
+d_pep_counting_r %>% kable(., digits = 3)
+
+```
+
+
+# REPRODUCE THIS
+
+```{r}
+effect_pep_counting_r <- pep_wide %>% 
+  lm(pep_counting_r ~ depletion, data = .,)
+effect_pep_counting_r %>% summary()
+```
+
+```{r}
+r05771_mod_original_8 <- lm(pep_counting_r ~ as.factor(depletion), data = pep_wide)
+r05771_mod_original_8 %>% summary()
+```
+
+```{r}
+r05771_mod_z_8 <- lm(z(pep_counting_r) ~ as.factor(depletion), data = pep_wide)
+r05771_mod_z_8 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(depletion)1")
+export_ols(r05771_mod_z_8, key_effects)
+```
+
+
+# SBP progression over the course of the study (exploratory)
+
+## SBP progression: Self-affirmation manipulation.
+```{r}
+aov_sbp_aff_r_count <- aov(sbp_aff_r_count ~ affirmation*depletion, data = ed_pep_aff_q)
+anova_stats(aov_sbp_aff_r_count) %>% kable(., digits = 3)
+
+sum_sbp_aff_r_count <- ed_pep_aff_q %>%
+  select(group, sbp_aff_r_count) %>%
+  summarySE(measurevar = "sbp_aff_r_count", groupvars = c("group"), na.rm = TRUE)
+
+sum_sbp_aff_r_count %>%
+  kable(., digits = 2)
+
+sum_sbp_aff_r_count_dep <- ed_pep_aff_q %>%
+  select(depletion, sbp_aff_r_count) %>%
+  summarySE(measurevar = "sbp_aff_r_count", groupvars = c("depletion"), na.rm = TRUE)
+
+sum_sbp_aff_r_count_dep %>%
+  kable(., digits = 2)
+
+sum_sbp_aff_r_count_aff <- ed_pep_aff_q %>%
+  select(affirmation, sbp_aff_r_count) %>%
+  summarySE(measurevar = "sbp_aff_r_count", groupvars = c("affirmation"), na.rm = TRUE)
+
+sum_sbp_aff_r_count_aff %>%
+  kable(., digits = 2)
+
+ed_pep_aff_q %>%
+  ggplot(aes(x = as.factor(group), y = sbp_aff_r_count, fill = as.factor(group), colour = as.factor(group))) +
+  geom_flat_violin(position = position_nudge(x = .45, y = 0), adjust = .8, alpha = 0.2, trim = TRUE) +
+  geom_point(position = position_jitter(width = .08), size = .25) +
+  geom_bar(position = position_nudge(x = .25, y = 0), data = sum_sbp_aff_r_count, stat = "identity", na.rm = TRUE, width = 0.2) +
+  geom_point(data = sum_sbp_aff_r_count, aes(x = as.factor(group), y = sbp_aff_r_count), position = position_nudge(.25), colour = "BLACK") +
+  geom_errorbar(data = sum_sbp_aff_r_count, aes(x = as.factor(group), ymin = sbp_aff_r_count-se, ymax = sbp_aff_r_count+se), 
+                position = position_nudge(.25), colour = "BLACK", width = 0.1, size = 0.8) +
+  ylab('SBP reactivity to Counting [mmHg]') + xlab('Experimental conditions') + guides(fill = FALSE, colour = FALSE) +
+  scale_colour_grey(start = 0.2, end = 0.7) +
+  scale_fill_grey(start = 0.2, end = 0.7) +
+  theme_minimal() +
+  geom_hline(yintercept=0, linetype="dotted", color = "black") +
+  ggtitle("SBP reactivity to Counting during Self-affirmation") + 
+  scale_x_discrete(labels = c("High MD / No Self-Aff.", "High MD / Self-Aff.", "Low MD / No Self-Aff.", "Low MD / Self-Aff.")) + 
+  theme(axis.title.x = element_text(face="bold", size = 14, vjust = -2), 
+        axis.title.y = element_text(face="bold", size = 14, vjust = 3), 
+        axis.text.x  = element_text(size=12, color = "black"), 
+        axis.text.y  = element_text(size=12), 
+        title = element_text(size = 14), plot.margin = unit(c(12, 12, 20, 12),"pt")) + 
+  coord_cartesian(ylim = c(-5, 5))
+
+```
+
+## SBP progression: Stroop task.
+```{r}
+
+# anova sbp_stroop_r_aff ~ depletion + affirmation
+aov_sbp_stroop_r_aff <- aov(sbp_stroop_r_aff ~ affirmation*depletion, data = ed_pep_aff_q)
+anova_stats(aov_sbp_stroop_r_aff) %>% kable(., digits = 3)
+
+# pairwise t.tests
+pairwise.t.test(ed_pep_aff_q$sbp_stroop_r_aff, ed_pep_aff_q$group, p.adjust.method = "holm")
+
+# stroop
+ed_pep_aff_q_no_affirmation <- ed_pep_aff_q %>%
+  filter(affirmation == 0)
+
+
+effect_sbp_no_aff_stroop <- ed_pep_aff_q_no_affirmation %>%
+  t.test(sbp_stroop_r_aff ~ depletion, data = ., alternative = "greater", na.action = na.omit)
+
+effect_sbp_no_aff_stroop %>%
+  tidy() %>%
+  kable(., digits = 3)
+
+d_sbp_no_aff_stroop <- ed_pep_aff_q_no_affirmation %>%
+  cohen.d(sbp_stroop_r_aff ~ depletion, data=., conf.level = .95) 
+
+d_sbp_no_aff_stroop <- data.frame("cohens.d" = d_sbp_no_aff_stroop[["estimate"]], "conf.int.lower" =  d_sbp_no_aff_stroop[["conf.int"]][["lower"]], "conf.int.upper" = d_sbp_no_aff_stroop[["conf.int"]][["upper"]])
+
+d_sbp_no_aff_stroop %>% kable(., digits = 2)
+# rainclouds sbp stroop task
+
+sum_sbp_stroop_r_aff <- ed_pep_aff_q %>%
+  select(group, sbp_stroop_r_aff) %>%
+  summarySE(measurevar = "sbp_stroop_r_aff", groupvars = c("group"), na.rm = TRUE)
+
+sum_sbp_stroop_r_aff %>%
+  kable(., digits = 2)
+
+sum_sbp_stroop_r_aff_dep <- ed_pep_aff_q %>%
+  select(depletion, sbp_stroop_r_aff) %>%
+  summarySE(measurevar = "sbp_stroop_r_aff", groupvars = c("depletion"), na.rm = TRUE)
+
+sum_sbp_stroop_r_aff_dep %>%
+  kable(., digits = 2)
+
+sum_sbp_stroop_r_aff_aff <- ed_pep_aff_q %>%
+  select(affirmation, sbp_stroop_r_aff) %>%
+  summarySE(measurevar = "sbp_stroop_r_aff", groupvars = c("affirmation"), na.rm = TRUE)
+
+sum_sbp_stroop_r_aff_aff %>%
+  kable(., digits = 2)
+
+ed_pep_aff_q %>%
+  ggplot(aes(x = as.factor(group), y = sbp_stroop_r_aff, fill = as.factor(group), colour = as.factor(group))) +
+  geom_flat_violin(position = position_nudge(x = .25, y = 0), adjust = .8, alpha = 0.2, trim = TRUE) +
+  geom_point(position = position_jitter(width = .08), size = .25) +
+  geom_bar(position = position_nudge(x = .25, y = 0), data = sum_sbp_stroop_r_aff, stat = "identity", na.rm = TRUE, width = 0.2) +
+  geom_point(data = sum_sbp_stroop_r_aff, aes(x = as.factor(group), y = sbp_stroop_r_aff), position = position_nudge(.25), colour = "BLACK") +
+  geom_errorbar(data = sum_sbp_stroop_r_aff, aes(x = as.factor(group), ymin = sbp_stroop_r_aff-se, ymax = sbp_stroop_r_aff+se), 
+                position = position_nudge(.25), colour = "BLACK", width = 0.1, size = 0.8) +
+  ylab('SBP reactivity Self-affirmation [mmHg]') + xlab('Experimental conditions') + guides(fill = FALSE, colour = FALSE) +
+  scale_colour_grey(start = 0.2, end = 0.7) +
+  scale_fill_grey(start = 0.2, end = 0.7) +
+  theme_minimal() +
+  geom_hline(yintercept=0, linetype="dotted", color = "black") +
+  ggtitle("SBP reactivity to Self-affirmation during Stroop") + 
+  scale_x_discrete(labels = c("High MD / No Self-Aff.", "High MD / Self-Aff.", "Low MD / No Self-Aff.", "Low MD / Self-Aff.")) + 
+  theme(axis.title.x = element_text(face="bold", size = 14, vjust = -2), 
+        axis.title.y = element_text(face="bold", size = 14, vjust = 3), 
+        axis.text.x  = element_text(size=12, color = "black"), 
+        axis.text.y  = element_text(size=12), 
+        title = element_text(size = 14), plot.margin = unit(c(12, 12, 20, 12),"pt")) + 
+  coord_cartesian(ylim = c(-5, 5))
+
+```
+
+## SBP progression relative to the previous task over the course of the experiment
+```{r}
+# rainclouds for repeated measures: systolic blood pressure
+relative_reactivity_wide <- ed_pep_aff_q %>%
+  select(., subject, group, depletion, affirmation, sbp_base, sbp_count_r, sbp_aff_r_count, sbp_stroop_r_aff)
+
+relative_reactivity <- ed_pep_aff_q %>%
+  select(., subject, group, depletion, affirmation, sbp_base, sbp_count_r, sbp_aff_r_count, sbp_stroop_r_aff) %>%
+  gather(., task, sbp, sbp_base:sbp_stroop_r_aff)
+
+
+summary_sbp_react_base <- relative_reactivity %>%
+  summarySE(., measurevar = "sbp", groupvars = c( "task"), na.rm = TRUE)
+
+summary_sbp_react <- relative_reactivity %>%
+  summarySE(., measurevar = "sbp", groupvars = c("group", "task"), na.rm = TRUE)
+
+summary_sbp_aff_react <- relative_reactivity %>%
+  summarySE(., measurevar = "sbp", groupvars = c("affirmation", "task"), na.rm = TRUE)
+
+summary_sbp_dep_react <- relative_reactivity %>%
+  summarySE(., measurevar = "sbp", groupvars = c("depletion", "task"), na.rm = TRUE)
+
+# baseline: mean of all groups
+summary_sbp_react$sbp[2] <- summary_sbp_react_base$sbp[2]
+summary_sbp_react$sbp[6] <- summary_sbp_react_base$sbp[2]
+summary_sbp_react$sbp[10] <- summary_sbp_react_base$sbp[2]
+summary_sbp_react$sbp[14] <- summary_sbp_react_base$sbp[2]
+
+summary_sbp_react$se[2] <- summary_sbp_react_base$se[2]
+summary_sbp_react$se[6] <- summary_sbp_react_base$se[2]
+summary_sbp_react$se[10] <- summary_sbp_react_base$se[2]
+summary_sbp_react$se[14] <- summary_sbp_react_base$se[2]
+
+# counting: mean of MD conditions
+summary_sbp_react$sbp[3] <- summary_sbp_dep_react$sbp[7]
+summary_sbp_react$sbp[7] <- summary_sbp_dep_react$sbp[7]
+summary_sbp_react$sbp[11] <- summary_sbp_dep_react$sbp[3]
+summary_sbp_react$sbp[15] <- summary_sbp_dep_react$sbp[3]
+
+summary_sbp_react$se[3] <- summary_sbp_dep_react$se[7]
+summary_sbp_react$se[7] <- summary_sbp_dep_react$se[7]
+summary_sbp_react$se[11] <- summary_sbp_dep_react$se[3]
+summary_sbp_react$se[15] <- summary_sbp_dep_react$se[3]
+
+summary_sbp_react$task.nr <- ifelse(summary_sbp_react$task == "sbp_base", 1, ifelse(summary_sbp_react$task == "sbp_count_r", 2, ifelse(summary_sbp_react$task == "sbp_aff_r_count", 3, ifelse(summary_sbp_react$task == "sbp_stroop_r_aff", 4, NA))))
+
+relative_reactivity$task.nr <- ifelse(relative_reactivity$task == "sbp_base", 1, ifelse(relative_reactivity$task == "sbp_count_r", 2, ifelse(relative_reactivity$task == "sbp_aff_r_count", 3, ifelse(relative_reactivity$task == "sbp_stroop_r_aff", 4, NA))))
+
+summary_sbp_react$group.nr <- ifelse(summary_sbp_react$group == "ed no.aff", 1,
+                               ifelse(summary_sbp_react$group == "ed aff", 2,
+                                      ifelse(summary_sbp_react$group == "no.ed no.aff", 3,
+                                             ifelse(summary_sbp_react$group == "no.ed aff", 4, NA))))
+
+relative_reactivity$group.nr <- ifelse(relative_reactivity$group == "ed no.aff", 1,
+                               ifelse(relative_reactivity$group == "ed aff", 2,
+                                      ifelse(relative_reactivity$group == "no.ed no.aff", 3,
+                                             ifelse(relative_reactivity$group == "no.ed aff", 4, NA))))
+
+
+
+summary_sbp_react <- summary_sbp_react %>% arrange(task.nr)
+
+summary_sbp_react_2 <- summary_sbp_react %>% select(task.nr, group.nr, sbp)
+summary_sbp_react_2 <- summary_sbp_react_2 %>% spread(task.nr, sbp)
+summary_sbp_react_2 <- summary_sbp_react_2 %>% mutate(count_r_2 = `1` + `2`, 
+                                                      aff_r_2 = `1` + `2` + `3`, 
+                                                      stroop_r_2 = `1`+ `2`+ `3`+ `4`)
+
+summary_sbp_react_2 <- gather(summary_sbp_react_2, task, sbp_2, `1`, count_r_2:stroop_r_2)
+summary_sbp_react_2 <- summary_sbp_react_2 %>% select(group.nr, task, sbp_2)
+summary_sbp_react_2$task.nr <- ifelse(summary_sbp_react_2$task == "count_r_2", 2,
+                                      ifelse(summary_sbp_react_2$task == "aff_r_2", 3,
+                                             ifelse(summary_sbp_react_2$task == "stroop_r_2", 4, 1)))
+
+summary_sbp_react_2 <- summary_sbp_react_2 %>% select(group.nr, task.nr, sbp_2)
+summary_sbp_react_plot <- left_join(summary_sbp_react, summary_sbp_react_2, by = c("group.nr", "task.nr"))
+view(summary_sbp_react_plot)
+
+summary_sbp_react_plot %>%
+  ggplot(aes(x = as.numeric(task.nr), y = sbp_2, fill = group)) +
+  geom_point(aes(group = group, colour = group),  shape = 18) +
+  geom_errorbar(aes(group = group, colour = group, ymin = sbp_2-se, ymax = sbp_2+se), width = .05, show.legend = FALSE) +
+  geom_line(aes(group = group, colour = group, linetype = group), size = 0.8) +
+  ggtitle("SBP progression over time") +
+  ylab('SBP [mmHg]') +
+  theme_minimal() +
+  scale_colour_manual(values = c("black", "black", "grey", "grey"), name = "Exp. condition", labels = c("High MD / No Self-Aff.", "High MD / Self-Aff.", "Low MD / No Self-Aff.", "Low MD / Self-Aff.")) +
+  scale_fill_manual(values = c("black", "black", "grey", "grey"), name = "Exp. condition", labels = c("High MD / No Self-Aff.", "High MD / Self-Aff.", "Low MD / No Self-Aff.", "Low MD / Self-Aff.")) +
+  scale_linetype_manual(values=c("solid", "dotted", "solid", "dotted"), name = "Exp. condition", labels = c("High MD / No Self-Aff.", "High MD / Self-Aff.", "Low MD / No Self-Aff.", "Low MD / Self-Aff.")) +
+  scale_x_continuous(breaks = 1:4, labels = c("Baseline", "MD manipulation", "Self-affirmation", "Stroop"), name = "Experimental phase") + 
+  theme(axis.title.x = element_text(face="bold", size = 14, vjust = -2), 
+        axis.title.y = element_text(face="bold", size = 14, vjust = 3), 
+        axis.text.x  = element_text(size=12, color = "black"), 
+        axis.text.y  = element_text(size=12), 
+        title = element_text(size = 14), plot.margin = unit(c(12, 12, 20, 12),"pt"), 
+        legend.text = element_text(size=12, color = "black")) + 
+  coord_cartesian(ylim = c(110, 120))
+
+```
+
+# Questions asked after the Stroop task 
+### 1. How motivated were you to work on the color task according to the instructions?
+### 2. How much effort did you put into working on the color task according to the instructions?
+### 3. How difficult was it for you to work on the color task according to the instructions?
+### 4. How much did you want to work on the color task according to the instructions?
+### 5. How exhausting did you find it to work on the color task according to the instructions?
+```{r}
+# reduce data file
+ed_pep_aff_complete <- full_join(ed_pep_aff_q, ed_pep_aff_stroop_err, by = c("subject", "affirmation", "depletion"))
+ed_pep_aff_complete_red <- ed_pep_aff_complete %>% select(subject, affirmation, depletion, group.x, fat1, fat2, mca, stroop_q_1, stroop_q_2, stroop_q_3, stroop_q_4, stroop_q_5, stroop_experience, daytime, sbp_base:sbp_aff_r_count, stroop_perf, morningness)
+
+ed_pep_aff_complete_red <- ed_pep_aff_complete_red %>% rename(group = group.x)
+
+ed_pep_aff_complete_red$group_ordered <- factor(ed_pep_aff_complete_red$group, levels = levels(ed_pep_aff_complete_red$group)[c(3,1,4,2)])
+
+ ed_pep_depletion <- ed_pep_aff_q %>% filter(depletion == 1)
+ write.csv(ed_pep_depletion, "ed_aff_depletion.csv")
+```
+
+
+
+## Correlations
+```{r}
+jmv::corrMatrix(data = ed_pep_aff_complete_red, vars = c("stroop_q_1", "stroop_q_2", "stroop_q_3", "stroop_q_4", "stroop_q_5", "stroop_perf", "mca", "fat1", "fat2"))
+jmv::corrMatrix(data = ed_pep_aff_complete_red, vars = c("stroop_q_1", "stroop_q_2", "stroop_q_3", "stroop_q_4", "stroop_q_5", "stroop_perf"))
+
+ed_aff_red_aff <- ed_pep_aff_complete_red %>% filter(affirmation == 1)
+jmv::corrMatrix(data = ed_aff_red_aff, vars = c("stroop_q_1", "stroop_q_2", "stroop_q_3", "stroop_q_4", "stroop_q_5", "stroop_perf"))
+
+ed_aff_red_no_aff <- ed_pep_aff_complete_red %>% filter(affirmation == 0)
+jmv::corrMatrix(data = ed_aff_red_no_aff, vars = c("stroop_q_1", "stroop_q_2", "stroop_q_3", "stroop_q_4", "stroop_q_5", "stroop_perf"))
+```
+
+## Stroop questions by group
+```{r}
+
+sum_stroop_1 <- ed_pep_aff_complete_red %>%
+  select(group_ordered, stroop_q_1) %>%
+  summarySE(measurevar = "stroop_q_1", groupvars = c("group_ordered"), na.rm = TRUE)
+
+sum_stroop_1 %>%
+  kable(., digits = 2)
+
+aov_stroop_1 <- aov(stroop_q_1 ~ affirmation*depletion, data = ed_pep_aff_complete_red)
+anova_stats(aov_stroop_1) %>% kable(., digits = 3)
+
+ed_pep_aff_complete_red %>%
+  ggplot(aes(x = as.factor(group_ordered), y = stroop_q_1, fill = as.factor(group_ordered), colour = as.factor(group_ordered))) +
+  geom_flat_violin(position = position_nudge(x = .45, y = 0), adjust = .8, alpha = 0.2, trim = TRUE) +
+  geom_point(position = position_jitter(width = .08), size = .25) + 
+  geom_bar(position = position_nudge(x = .25, y = 0), data = sum_stroop_1, stat = "identity", na.rm = TRUE, width = 0.2) +
+  geom_point(data = sum_stroop_1, aes(x = as.factor(group_ordered), y = stroop_q_1), position = position_nudge(.25), colour = "BLACK") +
+  geom_errorbar(data = sum_stroop_1, aes(x = as.factor(group_ordered), ymin = stroop_q_1-se, ymax = stroop_q_1+se),  
+                position = position_nudge(.25), colour = "BLACK", width = 0.1, size = 0.8) +
+  theme_minimal() + 
+  labs(title = "1. How motivated were you...?") + 
+  scale_colour_manual(values = c("grey70", "grey20", "grey70", "grey20"),labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.", "Low MD / Self-Aff.",  "High MD / Self-Aff.")) +
+  scale_fill_manual(values = c("grey80", "grey50", "grey80", "grey50"), labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.", "Low MD / Self-Aff.",  "High MD / Self-Aff.")) +
+  scale_x_discrete(labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.", "Low MD / Self-Aff.",  "High MD / Self-Aff.")) + 
+  theme(legend.position = "none") + 
+  xlab("Exp. condition")
+
+
+### 1. How motivated were you to work on the color task according to the instructions?
+### 2. How much effort did you put into working on the color task according to the instructions?
+### 3. How difficult was it for you to work on the color task according to the instructions?
+### 4. How much did you want to work on the color task according to the instructions?
+### 5. How exhausting did you find it to work on the color task according to the instructions?
+
+sum_stroop_2 <- ed_pep_aff_complete_red %>%
+  select(group_ordered, stroop_q_2) %>%
+  summarySE(measurevar = "stroop_q_2", groupvars = c("group_ordered"), na.rm = TRUE)
+
+sum_stroop_2 %>%
+  kable(., digits = 2)
+
+aov_stroop_2 <- aov(stroop_q_2 ~ affirmation*depletion, data = ed_pep_aff_complete_red)
+anova_stats(aov_stroop_2) %>% kable(., digits = 3)
+
+ed_pep_aff_complete_red %>%
+  ggplot(aes(x = as.factor(group_ordered), y = stroop_q_2, fill = as.factor(group_ordered), colour = as.factor(group_ordered))) +
+  geom_flat_violin(position = position_nudge(x = .45, y = 0), adjust = .8, alpha = 0.2, trim = TRUE) +
+  geom_point(position = position_jitter(width = .08), size = .25) + 
+  geom_bar(position = position_nudge(x = .25, y = 0), data = sum_stroop_2, stat = "identity", na.rm = TRUE, width = 0.2) +
+  geom_point(data = sum_stroop_2, aes(x = as.factor(group_ordered), y = stroop_q_2), position = position_nudge(.25), colour = "BLACK") +
+  geom_errorbar(data = sum_stroop_2, aes(x = as.factor(group_ordered), ymin = stroop_q_2-se, ymax = stroop_q_2+se),  
+                position = position_nudge(.25), colour = "BLACK", width = 0.1, size = 0.8) + 
+  theme_minimal() + 
+  labs(title = "2. How much effort did you put into...?") + 
+  scale_colour_manual(values = c("grey70", "grey20", "grey70", "grey20"),labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.", "Low MD / Self-Aff.",  "High MD / Self-Aff.")) +
+  scale_fill_manual(values = c("grey80", "grey50", "grey80", "grey50"), labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.", "Low MD / Self-Aff.",  "High MD / Self-Aff.")) +
+  scale_x_discrete(labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.", "Low MD / Self-Aff.",  "High MD / Self-Aff.")) + 
+  theme(legend.position = "none") + 
+  xlab("Exp. condition")
+
+sum_stroop_3 <- ed_pep_aff_complete_red %>%
+  select(group_ordered, stroop_q_3) %>%
+  summarySE(measurevar = "stroop_q_3", groupvars = c("group_ordered"), na.rm = TRUE)
+
+sum_stroop_3 %>%
+  kable(., digits = 2)
+
+aov_stroop_3 <- aov(stroop_q_3 ~ affirmation*depletion, data = ed_pep_aff_complete_red)
+anova_stats(aov_stroop_3) %>% kable(., digits = 3)
+
+ed_pep_aff_complete_red %>%
+  ggplot(aes(x = as.factor(group_ordered), y = stroop_q_3, fill = as.factor(group_ordered), colour = as.factor(group_ordered))) +
+  geom_flat_violin(position = position_nudge(x = .45, y = 0), adjust = .8, alpha = 0.2, trim = TRUE) +
+  geom_point(position = position_jitter(width = .08), size = .25) + 
+  geom_bar(position = position_nudge(x = .25, y = 0), data = sum_stroop_3, stat = "identity", na.rm = TRUE, width = 0.2) +
+  geom_point(data = sum_stroop_3, aes(x = as.factor(group_ordered), y = stroop_q_3), position = position_nudge(.25), colour = "BLACK") +
+  geom_errorbar(data = sum_stroop_3, aes(x = as.factor(group_ordered), ymin = stroop_q_3-se, ymax = stroop_q_3+se),  
+                position = position_nudge(.25), colour = "BLACK", width = 0.1, size = 0.8) + 
+  theme_minimal() + 
+  labs(title = "3. How difficult was it for you...?") + 
+  scale_colour_manual(values = c("grey70", "grey20", "grey70", "grey20"),labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.", "Low MD / Self-Aff.",  "High MD / Self-Aff.")) +
+  scale_fill_manual(values = c("grey80", "grey50", "grey80", "grey50"), labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.", "Low MD / Self-Aff.",  "High MD / Self-Aff.")) +
+  scale_x_discrete(labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.", "Low MD / Self-Aff.",  "High MD / Self-Aff.")) + 
+  theme(legend.position = "none") + 
+  xlab("Exp. condition")
+
+sum_stroop_4 <- ed_pep_aff_complete_red %>%
+  select(group_ordered, stroop_q_4) %>%
+  summarySE(measurevar = "stroop_q_4", groupvars = c("group_ordered"), na.rm = TRUE)
+
+sum_stroop_4 %>%
+  kable(., digits = 2)
+
+aov_stroop_4 <- aov(stroop_q_4 ~ affirmation*depletion, data = ed_pep_aff_complete_red)
+anova_stats(aov_stroop_4) %>% kable(., digits = 3)
+
+ed_pep_aff_complete_red %>%
+  ggplot(aes(x = as.factor(group_ordered), y = stroop_q_4, fill = as.factor(group_ordered), colour = as.factor(group_ordered))) +
+  geom_flat_violin(position = position_nudge(x = .45, y = 0), adjust = .8, alpha = 0.2, trim = TRUE) +
+  geom_point(position = position_jitter(width = .08), size = .25) + 
+  geom_bar(position = position_nudge(x = .25, y = 0), data = sum_stroop_4, stat = "identity", na.rm = TRUE, width = 0.2) +
+  geom_point(data = sum_stroop_4, aes(x = as.factor(group_ordered), y = stroop_q_4), position = position_nudge(.25), colour = "BLACK") +
+  geom_errorbar(data = sum_stroop_4, aes(x = as.factor(group_ordered), ymin = stroop_q_4-se, ymax = stroop_q_4+se),  
+                position = position_nudge(.25), colour = "BLACK", width = 0.1, size = 0.8) + 
+  theme_minimal() + 
+  labs(title = "4. How much did you want to work...?") + 
+  scale_colour_manual(values = c("grey70", "grey20", "grey70", "grey20"),labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.", "Low MD / Self-Aff.",  "High MD / Self-Aff.")) +
+  scale_fill_manual(values = c("grey80", "grey50", "grey80", "grey50"), labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.", "Low MD / Self-Aff.",  "High MD / Self-Aff.")) +
+  scale_x_discrete(labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.", "Low MD / Self-Aff.",  "High MD / Self-Aff.")) + 
+  theme(legend.position = "none") + 
+  xlab("Exp. condition")
+
+sum_stroop_5 <- ed_pep_aff_complete_red %>%
+  select(group_ordered, stroop_q_5) %>%
+  summarySE(measurevar = "stroop_q_5", groupvars = c("group_ordered"), na.rm = TRUE)
+
+sum_stroop_5 %>%
+  kable(., digits = 2)
+
+aov_stroop_5 <- aov(stroop_q_5 ~ affirmation*depletion, data = ed_pep_aff_complete_red)
+anova_stats(aov_stroop_5) %>% kable(., digits = 3)
+
+
+ed_pep_aff_complete_red %>%
+  ggplot(aes(x = as.factor(group_ordered), y = stroop_q_5, fill = as.factor(group_ordered), colour = as.factor(group_ordered))) +
+  geom_flat_violin(position = position_nudge(x = .45, y = 0), adjust = .8, alpha = 0.2, trim = TRUE) +
+  geom_point(position = position_jitter(width = .08), size = .25) + 
+  geom_bar(position = position_nudge(x = .25, y = 0), data = sum_stroop_5, stat = "identity", na.rm = TRUE, width = 0.2) +
+  geom_point(data = sum_stroop_5, aes(x = as.factor(group_ordered), y = stroop_q_5), position = position_nudge(.25), colour = "BLACK") +
+  geom_errorbar(data = sum_stroop_5, aes(x = as.factor(group_ordered), ymin = stroop_q_5-se, ymax = stroop_q_5+se),  
+                position = position_nudge(.25), colour = "BLACK", width = 0.1, size = 0.8) + 
+  theme_minimal() + 
+  labs(title = "5. How exhausting did you find it to work...?")  + 
+  scale_colour_manual(values = c("grey70", "grey20", "grey70", "grey20"),labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.", "Low MD / Self-Aff.",  "High MD / Self-Aff.")) +
+  scale_fill_manual(values = c("grey80", "grey50", "grey80", "grey50"), labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.", "Low MD / Self-Aff.",  "High MD / Self-Aff.")) +
+  scale_x_discrete(labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.", "Low MD / Self-Aff.",  "High MD / Self-Aff.")) + 
+  theme(legend.position = "none") + 
+  xlab("Exp. condition")
+
+```
+
+## Fatigue analysis 
+### Descriptives
+```{r}
+sum_fat1 <- ed_pep_aff_complete_red %>%
+  select(fat1, group_ordered) %>%
+  summarySE(measurevar = "fat1", groupvars = c("group_ordered"), na.rm = TRUE)
+
+sum_fat1 %>%
+  kable(., digits = 2)
+
+ed_pep_aff_complete_red_no_aff <- ed_pep_aff_complete_red %>% filter(affirmation == 0)
+```
+
+### Linear regressions including self-reported mental fatigue baseline as covariate
+```{r}
+
+jmv::linReg(data = ed_pep_aff_complete_red_no_aff, dep = stroop_perf, covs = fat1, factors = depletion, blocks = list(list("depletion", "fat1")), refLevels = list(list(var = "depletion", ref = "1")))
+
+jmv::linReg(data = ed_pep_aff_complete_red_no_aff, dep = sbp_stroop_r, covs = fat1, factors = depletion, blocks = list(list("depletion", "fat1")), refLevels = list(list(var = "depletion", ref = "1")))
+
+aov_fat_1 <- aov(fat1 ~ affirmation*depletion, data = ed_pep_aff_complete_red)
+anova_stats(aov_fat_1) %>% kable(., digits = 3)
+
+ed_pep_aff_complete_red %>%
+  ggplot(aes(x = as.factor(group_ordered), y = fat1, fill = as.factor(group_ordered), colour = as.factor(group_ordered))) +
+  geom_flat_violin(position = position_nudge(x = .30, y = 0), adjust = .8, alpha = 0.1, trim = TRUE) +
+  geom_point(position = position_jitter(width = .08), size = .25) +
+  geom_bar(position = position_nudge(x = .30, y = 0), data = sum_fat1, stat = "identity", na.rm = TRUE, width = 0.2) +
+  geom_point(data = sum_fat1, aes(x = as.factor(group_ordered), y = fat1), position = position_nudge(.30), colour = "BLACK") +
+  geom_errorbar(data = sum_fat1, aes(x = as.factor(group_ordered), ymin = fat1-se, ymax = fat1+se), 
+                position = position_nudge(.30), colour = "BLACK", width = 0.1, size = 0.8) +
+  ylab('Fatigue self-report [1 --- 7]') + xlab('Experimental conditions') + guides(fill = FALSE, colour = FALSE) +
+  scale_colour_manual(values = c("grey70", "grey20", "grey70", "grey20"), name = "Exp. condition") +
+  scale_fill_manual(values = c("grey80", "grey50", "grey80", "grey50"), name = "Exp. condition") +
+  scale_x_discrete(labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.", "Low MD / Self-Aff.",  "High MD / Self-Aff.")) + 
+  theme_minimal() +
+  ggtitle("Fatigue self-report: Beginning of study") + 
+  theme(axis.title.x = element_text(face="bold", size = 14, vjust = -2), 
+        axis.title.y = element_text(face="bold", size = 14, vjust = 3), 
+        axis.text.x  = element_text(size=12, color = "black"), 
+        axis.text.y  = element_text(size=12), 
+        title = element_text(size = 14), plot.margin = unit(c(12, 12, 20, 12),"pt")) + 
+  coord_cartesian(ylim = c(1, 7))
+
+
+
+sum_fat2 <- ed_pep_aff_complete_red %>%
+  select(fat2, group_ordered) %>%
+  summarySE(measurevar = "fat2", groupvars = c("group_ordered"), na.rm = TRUE)
+
+sum_fat2 %>%
+  kable(., digits = 2)
+
+sum_fat2_depletion <- ed_pep_aff_complete_red %>%
+  select(fat2, depletion) %>%
+  summarySE(measurevar = "fat2", groupvars = c("depletion"), na.rm = TRUE)
+
+sum_fat2_depletion %>%
+  kable(., digits = 2)
+
+aov_fat_2 <- aov(fat2 ~ affirmation*depletion, data = ed_pep_aff_complete_red)
+anova_stats(aov_fat_2) %>% kable(., digits = 3)
+
+
+ed_pep_aff_complete_red %>%
+  ggplot(aes(x = as.factor(group_ordered), y = fat2, fill = as.factor(group_ordered), colour = as.factor(group_ordered))) +
+  geom_flat_violin(position = position_nudge(x = .30, y = 0), adjust = .8, alpha = 0.1, trim = TRUE) +
+  geom_point(position = position_jitter(width = .08), size = .25) +
+  geom_bar(position = position_nudge(x = .30, y = 0), data = sum_fat2, stat = "identity", na.rm = TRUE, width = 0.2) +
+  geom_point(data = sum_fat2, aes(x = as.factor(group_ordered), y = fat2), position = position_nudge(.30), colour = "BLACK") +
+  geom_errorbar(data = sum_fat2, aes(x = as.factor(group_ordered), ymin = fat2-se, ymax = fat2+se), 
+                position = position_nudge(.30), colour = "BLACK", width = 0.1, size = 0.8) +
+  ylab('Fatigue self-report [1 --- 7]') + xlab('Experimental conditions') + guides(fill = FALSE, colour = FALSE) +
+  scale_colour_manual(values = c("grey70", "grey20", "grey70", "grey20"), name = "Exp. condition") +
+  scale_fill_manual(values = c("grey80", "grey50", "grey80", "grey50"), name = "Exp. condition") +
+  scale_x_discrete(labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.", "Low MD / Self-Aff.",  "High MD / Self-Aff.")) + 
+  theme_minimal() +
+  ggtitle("Fatigue self-report: After manipulation of Mental demands") + 
+  theme(axis.title.x = element_text(face="bold", size = 14, vjust = -2), 
+        axis.title.y = element_text(face="bold", size = 14, vjust = 3), 
+        axis.text.x  = element_text(size=12, color = "black"), 
+        axis.text.y  = element_text(size=12), 
+        title = element_text(size = 14), plot.margin = unit(c(12, 12, 20, 12),"pt")) + 
+  coord_cartesian(ylim = c(1, 7))
+
+effect_fat2 <- ed_pep_aff_complete_red %>%
+  t.test(fat2 ~ depletion, data = .)
+
+effect_fat2 %>%
+  tidy() %>%
+  kable(., digits = 3)
+
+d_fat2 <- ed_pep_aff_complete_red %>%
+  cohen.d(fat2 ~ depletion, data = .) 
+
+d_fat2 <- data.frame("cohens.d" = d_fat2[["estimate"]], "conf.int.lower" =  "-Inf", "conf.int.upper" =  d_fat2[["conf.int"]][["upper"]])
+
+d_fat2 %>% kable(., digits = 3)
+
+```
+
+
+## Does Fatigue relate to Stroop interference? 
+```{r}
+corrMatrix(ed_pep_aff_complete_red, c(fat1, stroop_perf))
+corrMatrix(ed_pep_aff_complete_red, c(fat2, stroop_perf))
+
+ed_pep_aff_complete_red %>%
+  ggplot(aes(x = fat1, y = stroop_perf, color = group_ordered, fill = group_ordered)) + 
+  geom_jitter(height = 0.2, width = 0.2) + 
+  theme_minimal() +
+  geom_smooth(method = "lm", alpha = 0.2) +
+  labs(y = "Stroop performance",
+       x = "Fatigue 1 (mean)", 
+       title = "Stroop performance & fatigue at the beginning",
+       subtitle = expression(paste("Correlation overall: ", italic('r'), " = .08, ", italic('p'), " = .332"))) + 
+  scale_fill_brewer(palette = "Set1", labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.", "Low MD / Self-Aff.",  "High MD / Self-Aff."), name = "Exp. condition") +
+  scale_color_brewer(palette = "Set1",labels = c(
+    expression(paste(italic('r'), " = -.14, ",italic('p'), " = .357")), 
+    expression(paste(italic('r'), " = .34, ",italic('p'), " = .029")), 
+    expression(paste(italic('r'), " = .07, ",italic('p'), " = .643")),  
+    expression(paste(italic('r'), " = .02, ",italic('p'), " = .888"))), 
+    name = "Correlations") +
+  guides(color = guide_legend(order = 0), fill = guide_legend(order = 1))
+
+ed_pep_aff_complete_red %>%
+  ggplot(aes(x = fat2, y = stroop_perf, color = group_ordered, fill = group_ordered)) + 
+  geom_jitter(height = 0.2, width = 0.2) + 
+  theme_minimal() +
+  geom_smooth(method = "lm", alpha = 0.2) +
+  labs(y = "Stroop performance",
+       x = "Fatigue 2 (mean)", 
+       title = "Stroop performance & fatigue after MD manipulation",
+       subtitle = expression(paste("Correlation overall: ", italic('r'), " = .06, ", italic('p'), " = .407"))) + 
+  scale_fill_brewer(palette = "Set1", labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.", "Low MD / Self-Aff.",  "High MD / Self-Aff."), name = "Exp. condition") +
+  scale_color_brewer(palette = "Set1",labels = c(
+    expression(paste(italic('r'), " = -.10, ",italic('p'), " = .514")), 
+    expression(paste(italic('r'), " = .22, ",italic('p'), " = .176")), 
+    expression(paste(italic('r'), " = .19, ",italic('p'), " = .241")),  
+    expression(paste(italic('r'), " = -.02, ",italic('p'), " = .914"))), 
+    name = "Correlations") +
+  guides(color = guide_legend(order = 0), fill = guide_legend(order = 1))
+```
+
+## Fatigue Baseline & Stroop performance
+### Overall
+```{r}
+corrMatrix(ed_pep_aff_complete_red, c(stroop_perf, fat1))
+```
+
+### Group "high MD + aff"
+```{r}
+ed_pep_aff_complete_red %>% filter(group_ordered == "ed aff") %>% corrMatrix(., c(stroop_perf, fat1))
+```
+
+### Group "high MD + no aff"
+```{r}
+ed_pep_aff_complete_red %>% filter(group_ordered == "ed no.aff") %>% corrMatrix(., c(stroop_perf, fat1))
+```
+
+### Group "low MD + aff"
+```{r}
+ed_pep_aff_complete_red %>% filter(group_ordered == "no.ed aff") %>% corrMatrix(., c(stroop_perf, fat1))
+```
+
+### Group "low MD + no aff"
+```{r}
+ed_pep_aff_complete_red %>% filter(group_ordered == "no.ed no.aff") %>% corrMatrix(., c(stroop_perf, fat1))
+```
+
+## Fatigue after MD manip. & Stroop performance
+### Overall
+```{r}
+corrMatrix(ed_pep_aff_complete_red, c(stroop_perf, fat2))
+```
+
+### Group "high MD + aff"
+```{r}
+ed_pep_aff_complete_red %>% filter(group_ordered == "ed aff") %>% corrMatrix(., c(stroop_perf, fat2))
+```
+
+### Group "high MD + no aff"
+```{r}
+ed_pep_aff_complete_red %>% filter(group_ordered == "ed no.aff") %>% corrMatrix(., c(stroop_perf, fat2))
+```
+
+### Group "low MD + aff"
+```{r}
+ed_pep_aff_complete_red %>% filter(group_ordered == "no.ed aff") %>% corrMatrix(., c(stroop_perf, fat2))
+```
+
+### Group "low MD + no aff"
+```{r}
+ed_pep_aff_complete_red %>% filter(group_ordered == "no.ed no.aff") %>% corrMatrix(., c(stroop_perf, fat2))
+```
+
+
+
+# Content Analysis Self-affirmation 
+
+```{r include = TRUE}
+
+# load data (questionnaires & blood pressure)
+ed_pep_aff_text <- read_excel("data_raw_anonymous.xlsx")
+
+# select relevant columns
+ed_pep_aff_text <- ed_pep_aff_text %>%
+                  select(date, time, subject, group, blocknum, blockcode, trialnum, trialcode, response)
+
+# as.numeric: subject, blocknum, trialnum, latency, correct
+ed_pep_aff_text <- mutate_at(ed_pep_aff_text, vars(c(subject, group, blocknum, trialnum)), funs(as.numeric))
+
+# sort cases by subject
+ed_pep_aff_text <- ed_pep_aff_text %>%
+  arrange(subject)
+
+# as date
+ed_pep_aff_text$date <- as.Date(ed_pep_aff_text$date)
+
+# subject number 6 was assigned twice - change one of them to 186
+ed_pep_aff_text <- within(ed_pep_aff_text, subject[subject == 6 & date == '2017-11-23'] <- 186)
+
+# subject number 49 entered id in 'group' instead of 'subject'
+ed_pep_aff_text <- within(ed_pep_aff_text, subject[subject == 1 & group == '49'] <- 49)
+
+# delete 'group' column
+ed_pep_aff_text$group <- NULL
+
+# delete subjects used for testing
+ed_pep_aff_text <- ed_pep_aff_text %>%
+  filter(., subject < 300)
+```
+
+```{r include = TRUE}
+# Text Self-Affirmation / Puncher description 
+# select blocks
+ed_pep_aff_text <- ed_pep_aff_text %>%
+  filter(., blockcode == "affirmation" | blockcode == "punch")
+
+# select relevant columns
+ed_pep_aff_text <- ed_pep_aff_text %>%
+  select(., subject, group = trialcode, response)
+
+tidy_text <- ed_pep_aff_text %>%
+  unnest_tokens(word, response)
+
+```
+
+## Wordcount by Group
+```{r}
+words_by_group_all <- tidy_text %>%
+  group_by(group, subject) %>%
+  count(word, sort = TRUE) %>%
+  summarise(n_words = sum(n))
+
+word_count <- tidy_text %>%
+  group_by(group) %>%
+  count(word, sort = TRUE) %>%
+  summarise(n_words = sum(n), 
+            n_words_per_participant = sum(n)/90)
+
+sum_word_count<- words_by_group_all %>%
+  select(group, n_words) %>%
+  summarySE(measurevar = "n_words", groupvars = c("group"), na.rm = TRUE)
+
+sum_word_count %>%
+  kable(., digits = 2)
+
+effect_wordcount <- words_by_group_all %>%
+  t.test(n_words ~ group, data = .)
+
+effect_wordcount %>%
+  tidy() %>%
+  kable(., digits = 3)
+
+d_wordcount <- words_by_group_all %>%
+  cohen.d(n_words ~ group, data = .) 
+
+d_wordcount <- data.frame("cohens.d" = d_wordcount[["estimate"]], "conf.int.lower" = d_wordcount[["conf.int"]][["lower"]], "conf.int.upper" =  d_wordcount[["conf.int"]][["upper"]])
+
+d_wordcount %>% kable(., digits = 3)
+
+words_by_group_all %>%
+  ggplot(aes(x = n_words, color = as.factor(group), fill = as.factor(group), stat(density))) + 
+  geom_density(alpha = 0.2) +
+  geom_vline(xintercept = 101.08, color = "black") +
+  geom_vline(xintercept = 90.15, color = "grey40") +
+  theme_minimal() + 
+  scale_color_grey(start = 0.2, end = 0.7,  name = "Self-affirmation condition", labels = c("Affirmation", "Puncher")) + 
+  scale_fill_grey(start = 0.2, end = 0.7, name = "Self-affirmation condition", labels = c("Affirmation", "Puncher")) + 
+  ggtitle("Number of words written by Self-affirmation condition") + 
+  xlab('Number of words') +
+  ylab('Density') +
+  geom_text(aes(x=95, label="mean = 101.08", y=0.005), colour="black", angle=90) +
+  geom_text(aes(x=85, label="mean = 90.15", y=0.005), colour="grey40", angle=90) + 
+  theme(legend.text=element_text(size=10))
+
+```
+
+
+```{r}
+library(lsa)
+library(tm)
+
+# Exclude German stopwords
+
+stopwords_1 <- tibble(word = stopwords("german"))
+stopwords_2 <- tibble(word = stopwords_de)
+
+tidy_text <- tidy_text %>%
+  anti_join(stopwords_1)
+
+tidy_text <- tidy_text %>%
+  anti_join(stopwords_2)
+
+
+write.csv(tidy_text, "tidy_text_affirmation.csv")
+
+words_by_group <- tidy_text %>%
+  group_by(group) %>%
+  count(word, sort = TRUE)
+
+write.csv(words_by_group, "words_by_group.csv")
+```
+
+## Abstractness ratings of 30 most frequent words per group (German stopwords excluded)
+```{r}
+concrete_words_by_group <- read_excel("concrete_words_by_group.xlsx")
+concrete_words_by_group_30 <- read_excel("concrete_words_by_group_30.xlsx")
+
+concrete_words_by_group_30$abstract_mean <- (6 - concrete_words_by_group_30$concrete_mean)
+
+# abstract
+sum_abstract_words <- concrete_words_by_group_30 %>%
+  select(group, abstract_mean) %>%
+  summarySE(measurevar = "abstract_mean", groupvars = c("group"), na.rm = TRUE)
+
+sum_abstract_words %>%
+  kable(., digits = 2)
+
+effect_abstract_aff <- concrete_words_by_group_30 %>%
+  t.test(abstract_mean ~ group, data = .)
+
+effect_abstract_aff %>%
+  tidy() %>%
+  kable(., digits = 3)
+
+d_abstract <- concrete_words_by_group_30 %>%
+  cohen.d(abstract_mean ~ group, data = .) 
+
+d_abstract <- data.frame("cohens.d" = d_abstract[["estimate"]], "conf.int.lower" =  d_abstract[["conf.int"]][["lower"]], "conf.int.upper" =  d_abstract[["conf.int"]][["upper"]])
+
+d_abstract %>% kable(., digits = 3)
+
+# abstract
+
+concrete_words_by_group_30 %>%
+  ggplot(aes(word, abstract_mean, fill = as.factor(group))) +
+  geom_col() +
+  xlab(NULL) +
+  facet_wrap(~group, ncol = 2, scales = "free_y") + 
+  theme_minimal() + 
+  coord_flip() + 
+  scale_fill_grey(start = 0.3, end = 0.7, name = "Self-affirmation condition", labels = c("Affirmation", "Puncher")) + 
+  labs(y = "Abstractness", caption = "(1 = concrete [experience based] --- 5 = abstract [language based])", title = "Abstractness of 30 most frequently used words by group", 
+  subtitle = "[Brysbaert et al., 2014]") +
+  geom_errorbar(aes(ymin = abstract_mean-concrete_sd, ymax = abstract_mean+concrete_sd), 
+                 colour = "BLACK", width = 0.1, size = 0.8)
+
+concrete_words_by_group_30 %>%
+  ggplot(aes(x = as.factor(group),y = abstract_mean, fill = as.factor(group), colour = as.factor(group))) + 
+  geom_flat_violin(position = position_nudge(x = .45, y = 0), adjust = .8, alpha = 0.2, trim = TRUE) +
+  geom_boxplot(aes(x = as.numeric(as.factor(group)) + 0.25, y = abstract_mean), outlier.shape = NA, alpha = 0.3, width = .1, colour = "BLACK") +
+  geom_point(position = position_jitter(width = .08), size = .25) + 
+  theme_minimal() +
+  scale_fill_grey(start = 0.2, end = 0.7, name = "Self-affirmation condition", labels = c("Affirmation", "Puncher")) +
+  scale_color_grey(start = 0.2, end = 0.7, name = "Self-affirmation condition", labels = c("Affirmation", "Puncher")) + 
+  labs(y = "Abstractness ",
+       title = "Abstractness of 30 most frequently used words by group", 
+       subtitle = "[Brysbaert et al., 2014]") +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+```
+
+## Abstractness ratings of 20 most frequent words per group (German stopwords excluded)
+### 21 words per group due to ties in frequency
+```{r}
+concrete_words_by_group_20 <- read_excel("concrete_words_by_group_20.xlsx")
+
+concrete_words_by_group_20$abstract_mean <- (6 - concrete_words_by_group_20$concrete_mean)
+
+# abstract
+sum_abstract_words_20 <- concrete_words_by_group_20 %>%
+  select(group, abstract_mean) %>%
+  summarySE(measurevar = "abstract_mean", groupvars = c("group"), na.rm = TRUE)
+
+sum_abstract_words_20 %>%
+  kable(., digits = 2)
+
+effect_abstract_aff_20 <- concrete_words_by_group_20 %>%
+  t.test(abstract_mean ~ group, data = .)
+
+effect_abstract_aff_20 %>%
+  tidy() %>%
+  kable(., digits = 3)
+
+d_abstract_20 <- concrete_words_by_group_20 %>%
+  cohen.d(abstract_mean ~ group, data = .) 
+
+d_abstract_20 <- data.frame("cohens.d" = d_abstract_20[["estimate"]], "conf.int.lower" =  d_abstract_20[["conf.int"]][["lower"]], "conf.int.upper" =  d_abstract_20[["conf.int"]][["upper"]])
+
+d_abstract_20 %>% kable(., digits = 3)
+
+# abstract
+
+concrete_words_by_group_20 %>%
+  ggplot(aes(word, abstract_mean, fill = as.factor(group))) +
+  geom_col() +
+  xlab(NULL) +
+  facet_wrap(~group, ncol = 2, scales = "free_y") + 
+  theme_minimal() + 
+  coord_flip() + 
+  scale_fill_grey(start = 0.3, end = 0.7, name = "Self-affirmation condition", labels = c("Affirmation", "Puncher")) + 
+  labs(y = "Abstractness", caption = "(1 = concrete [experience based] --- 5 = abstract [language based])", title = "Abstractness of 20 most frequently used words by group", 
+  subtitle = "[Brysbaert et al., 2014]") +
+  geom_errorbar(aes(ymin = abstract_mean-concrete_sd, ymax = abstract_mean+concrete_sd), 
+                 colour = "BLACK", width = 0.1, size = 0.8)
+
+concrete_words_by_group_20 %>%
+  ggplot(aes(x = as.factor(group),y = abstract_mean, fill = as.factor(group), colour = as.factor(group))) + 
+  geom_flat_violin(position = position_nudge(x = .45, y = 0), adjust = .8, alpha = 0.2, trim = TRUE) +
+  geom_boxplot(aes(x = as.numeric(as.factor(group)) + 0.25, y = abstract_mean), outlier.shape = NA, alpha = 0.3, width = .1, colour = "BLACK") +
+  geom_point(position = position_jitter(width = .08), size = .25) + 
+  theme_minimal() +
+  scale_fill_grey(start = 0.2, end = 0.7, name = "Self-affirmation condition", labels = c("Affirmation", "Puncher")) +
+  scale_color_grey(start = 0.2, end = 0.7, name = "Self-affirmation condition", labels = c("Affirmation", "Puncher")) + 
+  labs(y = "Abstractness ",
+       title = "Abstractness of 20 most frequently used words by group", 
+       subtitle = "[Brysbaert et al., 2014]") +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+
+```
+
+
+## Abstractness ratings of 10 most frequent words per group (German stopwords excluded)
+```{r}
+concrete_words_by_group_10 <- read_excel("concrete_words_by_group_10.xlsx")
+
+concrete_words_by_group_10$abstract_mean <- (6 - concrete_words_by_group_10$concrete_mean)
+
+# abstract
+sum_abstract_words_10 <- concrete_words_by_group_10 %>%
+  select(group, abstract_mean) %>%
+  summarySE(measurevar = "abstract_mean", groupvars = c("group"), na.rm = TRUE)
+
+sum_abstract_words_10 %>%
+  kable(., digits = 2)
+
+effect_abstract_aff_10 <- concrete_words_by_group_10 %>%
+  t.test(abstract_mean ~ group, data = .)
+
+effect_abstract_aff_10 %>%
+  tidy() %>%
+  kable(., digits = 3)
+
+d_abstract_10 <- concrete_words_by_group_10 %>%
+  cohen.d(abstract_mean ~ group, data = .) 
+
+d_abstract_10 <- data.frame("cohens.d" = d_abstract_10[["estimate"]], "conf.int.lower" =  d_abstract_10[["conf.int"]][["lower"]], "conf.int.upper" =  d_abstract_10[["conf.int"]][["upper"]])
+
+d_abstract_10 %>% kable(., digits = 3)
+
+# abstract
+
+concrete_words_by_group_10 %>%
+  ggplot(aes(word, abstract_mean, fill = as.factor(group))) +
+  geom_col() +
+  xlab(NULL) +
+  facet_wrap(~group, ncol = 2, scales = "free_y") + 
+  theme_minimal() + 
+  coord_flip() + 
+  scale_fill_grey(start = 0.3, end = 0.7, name = "Self-affirmation condition", labels = c("Affirmation", "Puncher")) + 
+  labs(y = "Abstractness", caption = "(1 = concrete [experience based] --- 5 = abstract [language based])", title = "Abstractness of 10 most frequently used words by group", 
+  subtitle = "[Brysbaert et al., 2014]") +
+  geom_errorbar(aes(ymin = abstract_mean-concrete_sd, ymax = abstract_mean+concrete_sd), 
+                 colour = "BLACK", width = 0.1, size = 0.8)
+
+concrete_words_by_group_10 %>%
+  ggplot(aes(x = as.factor(group),y = abstract_mean, fill = as.factor(group), colour = as.factor(group))) + 
+  geom_flat_violin(position = position_nudge(x = .45, y = 0), adjust = .8, alpha = 0.2, trim = TRUE) +
+  geom_boxplot(aes(x = as.numeric(as.factor(group)) + 0.25, y = abstract_mean), outlier.shape = NA, alpha = 0.3, width = .1, colour = "BLACK") +
+  geom_point(position = position_jitter(width = .08), size = .25) + 
+  theme_minimal() +
+  scale_fill_grey(start = 0.2, end = 0.7, name = "Self-affirmation condition", labels = c("Affirmation", "Puncher")) +
+  scale_color_grey(start = 0.2, end = 0.7, name = "Self-affirmation condition", labels = c("Affirmation", "Puncher")) + 
+  labs(y = "Abstractness ",
+       title = "Abstractness of 10 most frequently used words by group", 
+       subtitle = "[Brysbaert et al., 2014]") +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+```
+
+# Does controlling for number of written words relate to SBP during the Stroop task? 
+```{r}
+subject_n_words <- words_by_group_all %>% ungroup() %>% select(subject, n_words)
+
+ed_aff_q_text <- full_join(ed_pep_aff_complete_red, subject_n_words, by = c("subject"))
+
+ed_aff_q_text_inner <- ed_pep_aff_complete_red %>% 
+                          select(subject, group_ordered, depletion, affirmation, sbp_stroop_r, stroop_perf) %>% 
+                          filter(subject != 10) %>% 
+                          inner_join(., subject_n_words, by = c("subject"))
+
+corrMatrix(ed_aff_q_text_inner, c(stroop_perf, n_words, sbp_stroop_r))
+```
+
+# Morningness / Eveningness
+## Does Morningness / Eveningness relate to Stroop interference? 
+```{r}
+sum_morningness <- ed_pep_aff_complete_red %>%
+  select(group_ordered, morningness) %>%
+  summarySE(measurevar = "morningness", groupvars = c("group_ordered"), na.rm = TRUE)
+
+sum_morningness %>%
+  kable(., digits = 2)
+
+aov_morningness <- aov(morningness ~ affirmation*depletion, data = ed_pep_aff_complete_red)
+anova_stats(aov_morningness) %>% kable(., digits = 3)
+
+ed_pep_aff_complete_red %>%
+  ggplot(aes(x = morningness, y = stroop_perf, color = group_ordered, fill = group_ordered)) + 
+  geom_jitter(height = 0.2, width = 0.2) + 
+  theme_minimal() +
+  geom_smooth(method = "lm", alpha = 0.2) +
+  labs(y = "Stroop performance",
+       x = "Morningness --- Eveningness", 
+       title = "Stroop performance & Morningness/Eveningness",
+       subtitle = expression(paste("Correlation overall: ", italic('r'), " = -.02, ", italic('p'), " = .751"))) + 
+  scale_fill_brewer(palette = "Set1", labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.", "Low MD / Self-Aff.",  "High MD / Self-Aff."), name = "Exp. condition") +
+  scale_color_brewer(palette = "Set1",labels = c(
+    expression(paste(italic('r'), " = -.06, ",italic('p'), " = .683")), 
+    expression(paste(italic('r'), " = -.06, ",italic('p'), " = .702")), 
+    expression(paste(italic('r'), " = -.04, ",italic('p'), " = .792")),  
+    expression(paste(italic('r'), " = -.02, ",italic('p'), " = .909"))), 
+    name = "Correlations") +
+  guides(color = guide_legend(order = 0), fill = guide_legend(order = 1))
+```
+
+## Morningness & Stroop performance
+### Overall
+```{r}
+corrMatrix(ed_pep_aff_complete_red, c(stroop_perf, morningness))
+```
+
+### Group "low MD + no aff"
+```{r}
+ed_pep_aff_complete_red %>% filter(group_ordered == "no.ed no.aff") %>% corrMatrix(., c(stroop_perf, morningness))
+```
+
+### Group "high MD + no aff"
+```{r}
+ed_pep_aff_complete_red %>% filter(group_ordered == "ed no.aff") %>% corrMatrix(., c(stroop_perf, morningness))
+```
+
+### Group "low MD + aff"
+```{r}
+ed_pep_aff_complete_red %>% filter(group_ordered == "no.ed aff") %>% corrMatrix(., c(stroop_perf, morningness))
+```
+
+### Group "high MD + aff"
+```{r}
+ed_pep_aff_complete_red %>% filter(group_ordered == "ed aff") %>% corrMatrix(., c(stroop_perf, morningness))
+```
+
+
+## Does SBP reactivity relate to Stroop interference? 
+```{r}
+ed_pep_aff_complete_red %>%
+  ggplot(aes(x = sbp_stroop_r, y = stroop_perf, color = group_ordered, fill = group_ordered)) + 
+  geom_jitter(height = 0.2, width = 0.2) + 
+  theme_minimal() +
+  geom_smooth(method = "lm", alpha = 0.2) +
+  labs(y = "Stroop performance",
+       x = "SBP Stroop reactivity", 
+       title = "Stroop performance & SBP Stroop reactivity",
+       subtitle = expression(paste("Correlation overall: ", italic('r'), " = -.01, ", italic('p'), " = .930"))) + 
+  scale_fill_brewer(palette = "Set1", labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.", "Low MD / Self-Aff.",  "High MD / Self-Aff."), name = "Exp. condition") +
+  scale_color_brewer(palette = "Set1",labels = c(
+    expression(paste(italic('r'), " = .25, ",italic('p'), " = .105")), 
+    expression(paste(italic('r'), " = -.14, ",italic('p'), " = .376")), 
+    expression(paste(italic('r'), " = -.23, ",italic('p'), " = .151")),  
+    expression(paste(italic('r'), " = .00, ",italic('p'), " = .998"))), 
+    name = "Correlations") +
+  guides(color = guide_legend(order = 0), fill = guide_legend(order = 1))
+
+```
+
+## Morningness & Stroop performance
+### Overall
+```{r}
+corrMatrix(ed_pep_aff_complete_red, c(stroop_perf, sbp_stroop_r))
+```
+
+### Group "low MD + no aff"
+```{r}
+ed_pep_aff_complete_red %>% filter(group_ordered == "no.ed no.aff") %>% corrMatrix(., c(stroop_perf, sbp_stroop_r))
+```
+
+### Group "high MD + no aff"
+```{r}
+ed_pep_aff_complete_red %>% filter(group_ordered == "ed no.aff") %>% corrMatrix(., c(stroop_perf, sbp_stroop_r))
+```
+
+### Group "low MD + aff"
+```{r}
+ed_pep_aff_complete_red %>% filter(group_ordered == "no.ed aff") %>% corrMatrix(., c(stroop_perf, sbp_stroop_r))
+```
+
+### Group "high MD + aff"
+```{r}
+ed_pep_aff_complete_red %>% filter(group_ordered == "ed aff") %>% corrMatrix(., c(stroop_perf, sbp_stroop_r))
+```
+
+# Heart rate mean
+```{r}
+mean(mean(ed_pep_aff_complete_red$hr_base, na.rm = TRUE), mean(ed_pep_aff_complete_red$hr_count, na.rm = TRUE), mean(ed_pep_aff_complete_red$hr_aff, na.rm = TRUE), mean(ed_pep_aff_complete_red$hr_stroop, na.rm = TRUE))
+```
+
+```{r}
+ed_pep_aff_complete_red <- ed_pep_aff_complete_red %>% left_join(., words_by_group_all, by = "subject")
+```
+
+
+## Does Wordcount relate to SBP reactivity during Self-affirmation manipulation? 
+```{r}
+ed_pep_aff_complete_red %>%
+  ggplot(aes(x = sbp_aff_r, y = n_words, color = group_ordered, fill = group_ordered)) + 
+  geom_jitter(height = 0.2, width = 0.2) + 
+  theme_minimal() +
+  geom_smooth(method = "lm", alpha = 0.2) +
+  labs(y = "Number of words written",
+       x = "SBP self-affirmation reactivity", 
+       title = "Number of words written & SBP self-affirmation reactivity",
+       subtitle = expression(paste("Correlation overall: ", italic('r'), " = .04, ", italic('p'), " = .589"))) + 
+  scale_fill_brewer(palette = "Set1", labels = c("Low MD / No Self-Aff.", "High MD / No Self-Aff.", "Low MD / Self-Aff.",  "High MD / Self-Aff."), name = "Exp. condition") +
+  scale_color_brewer(palette = "Set1",labels = c(
+    expression(paste(italic('r'), " = -.05, ",italic('p'), " = .769")), 
+    expression(paste(italic('r'), " = -.11, ",italic('p'), " = .500")), 
+    expression(paste(italic('r'), " = .10, ",italic('p'), " = .544")),  
+    expression(paste(italic('r'), " = .28, ",italic('p'), " = .065"))), 
+    name = "Correlations") +
+  guides(color = guide_legend(order = 0), fill = guide_legend(order = 1))
+```
+
+### Overall
+```{r}
+corrMatrix(ed_pep_aff_complete_red, c(n_words, sbp_aff_r))
+```
+
+### Group "low MD + no aff"
+```{r}
+ed_pep_aff_complete_red %>% filter(group_ordered == "no.ed no.aff") %>% corrMatrix(., c(n_words, sbp_aff_r))
+```
+
+### Group "high MD + no aff"
+```{r}
+ed_pep_aff_complete_red %>% filter(group_ordered == "ed no.aff") %>% corrMatrix(., c(n_words, sbp_aff_r))
+```
+
+### Group "low MD + aff"
+```{r}
+ed_pep_aff_complete_red %>% filter(group_ordered == "no.ed aff") %>% corrMatrix(., c(n_words, sbp_aff_r))
+```
+
+### Group "high MD + aff"
+```{r}
+ed_pep_aff_complete_red %>% filter(group_ordered == "ed aff") %>% corrMatrix(., c(n_words, sbp_aff_r))
+```
+

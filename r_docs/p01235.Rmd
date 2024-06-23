@@ -1,0 +1,297 @@
+---
+title: ""
+output: html_document
+---
+
+Gateway Groups are characterized by a unique social categorization which enables them to be identified with two or more groups
+within the context of intergroup relations. Due to their strategic situation, Gateway Groups have been found to have the potential to improve
+the relations between their distinct social counterparts. In this paper we attempted to replicate the Gateway Group line of research in the
+Western Balkan context with two different kinds of Gateway Groups: Children of mixed Serb(s) and Bosniak families, and Bosniak citizens of
+Serbia. As in previous Gateway Group studies, we found that in both cases the exposure to a dually identified Gateway Group lead to a more
+complex perception of the Gateway Group itself, a higher belief in the potential of the Gateway Group to bridge the relations between the
+ingroup and the outgroup, and a greater sense of closeness between the ingroup and the outgroup.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+library(gtools)
+library(robustbase)
+library(magrittr) # unless you routinely load tidyverse, in which case leave this one out. You just need it for the pipe. 
+library(moments)
+
+
+variables <- c("paper", "outcome", "n", "skew", "kurt", "z_1.96", "z_2.58", "z_3.29", "mode_n", "var", "var_ratio")
+
+list.files("../data/raw_data/", pattern = "p01235")
+
+p01235_tib_1 <- haven::read_sav("../data/raw_data/p01235_levy2019_Study 1 GG Balkans - Raw data and Scales.sav") 
+p01235_tib_2 <- haven::read_sav("../data/raw_data/p01235_levy2019_Study 2 GG Balkans - Raw data and Scales.sav") 
+
+names(p01235_tib_1)
+```
+
+```{r}
+p01235_tib_1 %<>% 
+  dplyr::mutate(
+    SIC = rowMeans(.[c("SIC1", "SIC2", "SIC3", "SIC4", "SIC5", "SIC6")])
+  )
+
+p01235_tib_2 %<>% 
+  dplyr::mutate(
+    SIC = rowMeans(.[c("SIC1", "SIC2", "SIC3", "SIC4", "SIC5", "SIC6")])
+  )
+```
+
+
+# Study 1 
+
+```{r}
+p01235_mod_original_1 <- lm(DUAL_ID_SCL ~ as.factor(Condition), data = p01235_tib_1) 
+p01235_mod_original_1 %>% summary()
+```
+
+```{r}
+p01235_mod_z_1 <- lm(z(DUAL_ID_SCL) ~ as.factor(Condition), data = p01235_tib_1) 
+p01235_mod_z_1 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(Condition)1")
+export_ols(p01235_mod_z_1, key_effects)
+```
+
+
+
+
+
+
+```{r}
+p01235_mod_original_2 <- lm(BRIDGE ~ as.factor(Condition), data = p01235_tib_1)
+p01235_mod_original_2 %>% summary()
+```
+
+```{r}
+p01235_mod_z_2 <- lm(z(BRIDGE) ~ as.factor(Condition), data = p01235_tib_1) 
+p01235_mod_z_2 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(Condition)1")
+export_ols(p01235_mod_z_2, key_effects)
+```
+
+
+
+
+
+
+
+```{r}
+p01235_mod_original_3 <- lm(SIC ~ as.factor(Condition), data = p01235_tib_1) 
+p01235_mod_original_3 %>% summary()
+```
+
+```{r}
+p01235_mod_z_3 <- lm(z(SIC) ~ as.factor(Condition), data = p01235_tib_1) 
+p01235_mod_z_3 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(Condition)1")
+export_ols(p01235_mod_z_3, key_effects)
+```
+
+
+
+
+```{r}
+p01235_mod_original_4 <- lm(CLOSENESS ~ as.factor(Condition), data = p01235_tib_1) 
+p01235_mod_original_4 %>% summary()
+```
+
+```{r}
+p01235_mod_z_4 <- lm(z(CLOSENESS) ~ as.factor(Condition), data = p01235_tib_1) 
+p01235_mod_z_4 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(Condition)1")
+export_ols(p01235_mod_z_4, key_effects)
+```
+
+
+
+
+
+
+```{r}
+p01235_mod_original_5 <- lm(SD_SCL ~ as.factor(Condition), data = p01235_tib_1) 
+p01235_mod_original_5 %>% summary()
+```
+
+```{r}
+p01235_mod_z_5 <- lm(z(SD_SCL) ~ as.factor(Condition), data = p01235_tib_1) 
+p01235_mod_z_5 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(Condition)1")
+export_ols(p01235_mod_z_5, key_effects)
+```
+
+
+# Study 2
+
+```{r}
+names(p01235_tib_2)
+```
+
+
+```{r}
+p01235_mod_original_6 <- lm(DUAL_ID_SCL ~ as.factor(Condition), data = p01235_tib_2)
+p01235_mod_original_6 %>% summary()
+```
+
+```{r}
+p01235_mod_z_6 <- lm(z(DUAL_ID_SCL) ~ as.factor(Condition), data = p01235_tib_2) 
+p01235_mod_z_6 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(Condition)2")
+export_ols(p01235_mod_z_6, key_effects)
+```
+
+
+
+
+
+```{r}
+p01235_mod_original_7 <- lm(GG_Level ~ as.factor(Condition), data = p01235_tib_2)
+p01235_mod_original_7 %>% summary()
+```
+
+```{r}
+p01235_mod_z_7 <- lm(z(GG_Level) ~ as.factor(Condition), data = p01235_tib_2) 
+p01235_mod_z_7 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(Condition)2")
+export_ols(p01235_mod_z_7, key_effects)
+```
+
+
+
+```{r}
+p01235_mod_original_8 <- lm(BRIDGEGG_SCL ~ as.factor(Condition), data = p01235_tib_2) 
+p01235_mod_original_8 %>% summary()
+```
+
+```{r}
+p01235_mod_z_8 <- lm(z(BRIDGEGG_SCL) ~ as.factor(Condition), data = p01235_tib_2) 
+p01235_mod_z_8 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(Condition)2")
+export_ols(p01235_mod_z_8, key_effects)
+```
+
+
+
+
+
+
+```{r}
+p01235_mod_original_9 <- lm(BRIDGEGG1 ~ as.factor(Condition), data = p01235_tib_2) 
+p01235_mod_original_9 %>% summary()
+```
+
+```{r}
+p01235_mod_z_9 <- lm(z(BRIDGEGG1) ~ as.factor(Condition), data = p01235_tib_2) 
+p01235_mod_z_9 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(Condition)2")
+export_ols(p01235_mod_z_9, key_effects)
+```
+
+
+
+
+
+```{r}
+p01235_mod_original_10 <- lm(BRIDGEGG2 ~ as.factor(Condition), data = p01235_tib_2)
+p01235_mod_original_10 %>% summary()
+```
+
+```{r}
+p01235_mod_z_10 <- lm(z(BRIDGEGG2) ~ as.factor(Condition), data = p01235_tib_2) 
+p01235_mod_z_10 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(Condition)2")
+export_ols(p01235_mod_z_10, key_effects)
+```
+
+
+
+
+
+
+```{r}
+p01235_mod_original_11 <- lm(SIC ~ as.factor(Condition), data = p01235_tib_2) 
+p01235_mod_original_11 %>% summary()
+```
+
+```{r}
+p01235_mod_z_11 <- lm(z(SIC) ~ as.factor(Condition), data = p01235_tib_2) 
+p01235_mod_z_11 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(Condition)2")
+export_ols(p01235_mod_z_11, key_effects)
+```
+
+
+
+
+```{r}
+p01235_mod_original_12 <- lm(CLOSENESS ~ as.factor(Condition), data = p01235_tib_2)
+p01235_mod_original_12 %>% summary()
+```
+
+```{r}
+p01235_mod_z_12 <- lm(z(CLOSENESS) ~ as.factor(Condition), data = p01235_tib_2) 
+p01235_mod_z_12 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(Condition)2")
+export_ols(p01235_mod_z_12, key_effects)
+```
+
+
+
+
+
+```{r}
+p01235_mod_original_13 <- lm(SD_SCL ~ as.factor(Condition), data = p01235_tib_2) 
+p01235_mod_original_13 %>% summary()
+```
+
+```{r}
+p01235_mod_z_13 <- lm(z(SD_SCL) ~ as.factor(Condition), data = p01235_tib_2) 
+p01235_mod_z_13 %>% summary()
+```
+
+```{r}
+key_effects = c("as.factor(Condition)2")
+export_ols(p01235_mod_z_13, key_effects)
+```

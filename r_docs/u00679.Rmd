@@ -1,0 +1,210 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-06-05'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+```
+
+
+# rt 
+
+process data 
+
+```{r}
+dat <- readr::read_csv("../data/raw_data/u00679_RT.csv")
+
+n <- 24
+ver_con <- c(1:n)
+ver_incon <- c(1:n)
+hor_con <- c(1:n)
+hor_incon <- c(1:n)
+log_ver_con <- c(1:n)
+log_ver_incon <- c(1:n)
+log_hor_con <- c(1:n)
+log_hor_incon <- c(1:n)
+exc <- c(1:n)
+exc1 <- c(1:n)
+exc2 <- c(1:n)
+exc3 <- c(1:n)
+
+for (i in 1:n){
+  
+  df <- subset(dat, id == i)
+  df_cor1 <- subset(df, rt_detection >= 100 & rt_detection <= mean(df$rt_detection) + 3*sd(df$rt_detection))
+  df_exc1 <- subset(df, rt_detection < 100 | rt_detection > mean(df$rt_detection) + 3*sd(df$rt_detection))
+  exc1[i] <- length(df_exc1$id)
+  df_cor2 <- subset(df_cor1, target_correct == 0)
+  df_exc2 <- subset(df_cor1, target_correct == 1)
+  exc2[i] <- length(df_exc2$id)
+  df_cor <- subset(df_cor2, ej_correct == 0)
+  df_exc3 <- subset(df_cor2, ej_correct == 1)
+  exc3[i] <- length(df_exc3$id)
+  exc[i] <- exc1[i] + exc2[i] + exc3[i]
+  df_cor$rt_detection_log <-  log10(df_cor$rt_detection)
+  
+  #ver
+  df_cor_ver_con <- subset(df_cor, (imagecategory == 0 & location == 0) | (imagecategory == 1 & location == 1))
+  log_ver_con[i] <- mean(df_cor_ver_con$rt_detection_log)
+  ver_con[i] <- mean(df_cor_ver_con$rt_detection)
+  df_cor_ver_incon <- subset(df_cor, (imagecategory == 1 & location == 0) | (imagecategory == 0 & location == 1))
+  log_ver_incon[i] <- mean(df_cor_ver_incon$rt_detection_log)
+  ver_incon[i] <- mean(df_cor_ver_incon$rt_detection)
+  
+  #hor
+  df_cor_hor_con <- subset(df_cor, (imagecategory == 0 & location == 3) | (imagecategory == 1 & location == 2))
+  log_hor_con[i] <- mean(df_cor_hor_con$rt_detection_log)
+  hor_con[i] <- mean(df_cor_hor_con$rt_detection)
+  df_cor_hor_incon <- subset(df_cor, (imagecategory == 1 & location == 3) | (imagecategory == 0 & location == 2))
+  log_hor_incon[i] <- mean(df_cor_hor_incon$rt_detection_log)
+  hor_incon[i] <- mean(df_cor_hor_incon$rt_detection)
+  
+}
+
+```
+
+models 
+
+```{r}
+ver_ttest <- t.test(log_ver_incon, log_ver_con, paired=T)
+
+df_rt_1 <- data.frame(
+  id = rep(1:n, 2), 
+  cond = rep(c("incon", "con"), each = n),
+  rt = c(log_ver_incon, log_ver_con)
+) 
+
+u00679_mod_rm_z_1 <- df_rt_1 %>% 
+  afex::aov_4(z(rt) ~ cond + (cond|id), .)
+
+
+export_ols(u00679_mod_rm_z_1, 
+           key_effects = c("cond"))
+
+
+u00679_mod_lmer_z_1 <- df_rt_1 %>% 
+  lme4::lmer(z(rt) ~ cond + (1|id), .)
+
+
+export_ols(u00679_mod_lmer_z_1, 
+           key_effects = c("condincon"))
+```
+
+
+```{r}
+hor_ttest <- t.test(log_hor_incon, log_hor_con, paired=T)
+
+df_rt_2 <- data.frame(
+  id = rep(1:n, 2), 
+  cond = rep(c("incon", "con"), each = n),
+  rt = c(log_hor_incon, log_hor_con)
+) 
+
+u00679_mod_rm_z_2 <- df_rt_2 %>% 
+  afex::aov_4(z(rt) ~ cond + (cond|id), .)
+
+
+export_ols(u00679_mod_rm_z_2, 
+           key_effects = c("cond"))
+
+u00679_mod_lmer_z_2 <- df_rt_2 %>% 
+  lme4::lmer(z(rt) ~ cond + (1|id), .)
+
+
+export_ols(u00679_mod_lmer_z_2, 
+           key_effects = c("condincon"))
+```
+
+# non-rt 
+
+```{r}
+dat <- readr::read_csv("../data/raw_data/u00679_nonRT.csv")
+
+n <- 24
+ycor_pos <- c(1:n)
+ycor_neg <- c(1:n)
+xcor_pos <- c(1:n)
+xcor_neg <- c(1:n)
+exc <- c(1:n)
+
+for (i in 1:n){
+  
+  df <- subset(dat, id == i)
+  df_cor <- subset(df, pointy >= mean(df$pointy) - 3*sd(df$pointy) & pointy <= mean(df$pointy) + 3*sd(df$pointy))
+  df_exc <- subset(df, pointy < mean(df$pointy) - 3*sd(df$pointy) | pointy > mean(df$pointy) + 3*sd(df$pointy))
+  exc[i] <- length(df_exc$id)
+  
+  #positive
+  df_cor_pos <- subset(df_cor, imagecategory == 0)
+  ycor_pos[i] <- mean(df_cor_pos$pointy)
+  xcor_pos[i] <- mean(df_cor_pos$pointx)
+  
+  #negative
+  df_cor_neg <- subset(df_cor, imagecategory == 1)
+  ycor_neg[i] <- mean(df_cor_neg$pointy)
+  xcor_neg[i] <- mean(df_cor_neg$pointx)
+  
+}
+
+```
+
+models 
+
+```{r}
+ycor_ttest <- t.test(ycor_pos, ycor_neg, paired=T)
+
+df_rt_3 <- data.frame(
+  id = rep(1:n, 2), 
+  cond = rep(c("pos", "neg"), each = n),
+  rt = c(ycor_pos, ycor_neg)
+) 
+
+u00679_mod_rm_z_3 <- df_rt_3 %>% 
+  afex::aov_4(z(rt) ~ cond + (cond|id), .)
+
+
+export_ols(u00679_mod_rm_z_3, 
+           key_effects = c("cond"))
+
+
+u00679_mod_lmer_z_3 <- df_rt_3 %>% 
+  lme4::lmer(z(rt) ~ cond + (1|id), .)
+
+
+export_ols(u00679_mod_lmer_z_3, 
+           key_effects = c("condpos"))
+```
+
+
+```{r}
+xcor_ttest <- t.test(xcor_neg, xcor_pos, paired=T)
+
+
+df_rt_4 <- data.frame(
+  id = rep(1:n, 2), 
+  cond = rep(c("pos", "neg"), each = n),
+  rt = c(xcor_neg, xcor_pos)
+) 
+
+u00679_mod_rm_z_4 <- df_rt_4 %>% 
+  afex::aov_4(z(rt) ~ cond + (cond|id), .)
+
+
+export_ols(u00679_mod_rm_z_4, 
+           key_effects = c("cond"))
+
+
+u00679_mod_lmer_z_4 <- df_rt_4 %>% 
+  lme4::lmer(z(rt) ~ cond + (1|id), .)
+
+
+export_ols(u00679_mod_lmer_z_4, 
+           key_effects = c("condpos"))
+```
+

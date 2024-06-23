@@ -1,0 +1,218 @@
+---
+title: "u00575"
+author: "MS"
+date: '2022-05-26'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(afex)
+library(dplyr)
+library(magrittr)
+library(stringr)
+
+source("../scripts/helpers.R")
+
+u00575_tib_1 <- haven::read_sav("../data/raw_data/u00575_1_containerstudy1.sav")
+u00575_tib_2 <- haven::read_sav("../data/raw_data/u00575_2_containerstudy2.sav")
+u00575_tib_3 <- haven::read_sav("../data/raw_data/u00575_3_pouringstudy1_processed.sav")
+u00575_tib_5 <- haven::read_sav("../data/raw_data/u00575_5_matrixstudy2.sav")
+```
+
+# Study 1 
+
+```{r}
+u00575_tib_1_long <- u00575_tib_1 %>% 
+  dplyr::filter(!is.na(Geschlecht)) %>% 
+  dplyr::transmute(id = 1:nrow(.), Bunt = factor(Bunt), Schuessel, Schale, Glas, grSchuessel) %>% 
+  tidyr::pivot_longer(
+    cols = c(-id, -Bunt), 
+    names_to = "vessel", 
+    values_to = "value"
+  )
+
+#####
+
+u00575_mod_rm_z_1 <- u00575_tib_1_long %>% 
+  afex::aov_4(z(value) ~ vessel*Bunt + (vessel|id), 
+              anova_table = list(correction = "none"),
+              data = .)
+
+export_ols(u00575_mod_rm_z_1, 
+           key_effects = c("Bunt", "vessel", "Bunt:vessel"))
+
+
+#####
+
+u00575_mod_lmer_z_1 <- u00575_tib_1_long %>% 
+  lme4::lmer(z(value) ~ vessel*Bunt + (1|id), 
+              data = .)
+
+export_ols(u00575_mod_lmer_z_1, 
+           key_effects = c("Bunt1", "vesselgrSchuessel", "vesselSchale", "vesselSchuessel", 
+                           "vesselgrSchuessel:Bunt1", "vesselSchale:Bunt1", "vesselSchuessel:Bunt1"))
+
+```
+
+# Study 2
+
+reported model: 
+
+```{r}
+u00575_tib_2_long <- u00575_tib_2 %>% 
+  dplyr::transmute(id = 1:nrow(.), variety, xkleineSchuessel, xSchale, xhohesGlas, xgrosseSchuessel) %>% 
+  tidyr::pivot_longer(
+    cols = -c(id, variety)
+  ) |> 
+  dplyr::mutate(
+    variety = factor(variety)
+  )
+
+#####
+
+u00575_tib_2_long %<>%
+  dplyr::filter(!id %in% c(148, 198))
+
+u00575_mod_rm_z_2 <- u00575_tib_2_long %>% 
+  afex::aov_4(z(value) ~ variety*name + (name|id), 
+              anova_table = list(correction = "none"), 
+              data =.
+              )
+
+export_ols(u00575_mod_rm_z_2, 
+           key_effects = c("variety", "name", "variety:name"))
+
+#####
+
+u00575_mod_lmer_z_2 <- u00575_tib_2_long %>% 
+  lme4::lmer(z(value) ~ variety*name + (1|id), 
+              data =.
+              )
+
+
+export_ols(u00575_mod_lmer_z_2, 
+           key_effects = c("variety1", "variety2", "namexhohesGlas", "namexkleineSchuessel", "namexSchale", 
+                           "variety1:namexhohesGlas", "variety2:namexhohesGlas", 
+                           "variety1:namexkleineSchuessel",  "variety2:namexkleineSchuessel",
+                           "variety1:namexSchale",  "variety2:namexSchale"))
+```
+
+without outlier exclusion: 
+
+```{r}
+# u00575_tib_2_long_out <- u00575_tib_2 %>% 
+#   dplyr::transmute(id = 1:nrow(.), variety, kleineSchuessel, Schale, hohesGlas, grosseSchuessel) %>% 
+#   tidyr::pivot_longer(
+#     cols = -c(id, variety)
+#   )
+# 
+# u00575_tib_2_long_out %>% 
+#   afex::aov_4(value ~ variety*name + (name|id), 
+#               anova_table = list(correction = "none"), 
+#               data =.
+#               )
+```
+
+# Study 3 
+
+```{r}
+u00575_tib_3_long <- u00575_tib_3 %>% 
+  dplyr::select(Proband, Gruppe, n1:n4) %>% 
+  tidyr::pivot_longer(cols = c(-Proband, -Gruppe)) %>% 
+  dplyr::mutate(
+    quantity = case_when(
+      name %in% c("n1", "n3") ~ 1, 
+      name %in% c("n2", "n4") ~ 2
+    ) %>% factor(), 
+    variety = case_when(
+      name %in% c("n1", "n2") ~ 1, 
+      name %in% c("n3", "n4") ~ 2
+    ) %>% factor(), 
+    Gruppe = factor(Gruppe)
+  )
+
+u00575_tib_3_long %<>% dplyr::filter(!Proband %in% 136)
+
+u00575_mod_rm_z_3 <- u00575_tib_3_long %>% 
+  afex::aov_4(z(value) ~ Gruppe*quantity*variety + (quantity*variety|Proband), .)
+
+export_ols(u00575_mod_rm_z_3, 
+           key_effects = c("Gruppe:quantity", "Gruppe:variety", "quantity:variety"))
+
+
+
+
+u00575_mod_lmer_z_3 <- 
+  u00575_tib_3_long %>% 
+  dplyr::filter(!is.na(value)) %>% 
+  lme4::lmer(z(value) ~ Gruppe*quantity*variety + (1|Proband), .)
+
+export_ols(u00575_mod_lmer_z_3, 
+           key_effects = c("Gruppe2:quantity2", "Gruppe2:variety2", "quantity2:variety2"))
+```
+
+# Study 4
+
+- no models of interest 
+
+# Study 5 
+
+```{r}
+u00575_tib_5_long <- u00575_tib_5 %>% 
+  dplyr::mutate(id = 1:nrow(.)) %>% 
+  dplyr::select(id, contains("mean")) %>% 
+  tidyr::pivot_longer(-id) %>% 
+  dplyr::mutate(
+    faberform = case_when(
+      str_detect(name, "color") ~ 1, 
+      str_detect(name, "shape") ~ 2
+    ) %>% factor(), 
+    prozent = case_when(
+      str_detect(name, "30") ~ 1, 
+      str_detect(name, "40") ~ 2, 
+      str_detect(name, "50") ~ 3, 
+      str_detect(name, "60") ~ 4, 
+      str_detect(name, "70") ~ 5
+    ) %>% factor(), 
+    viefalt = case_when(
+      str_detect(name, "_1_") ~ 1, 
+      str_detect(name, "_2_") ~ 2, 
+      str_detect(name, "_3_") ~ 3, 
+      str_detect(name, "_4_") ~ 4, 
+      str_detect(name, "_5_") ~ 5
+    ) %>% factor()
+  )
+
+u00575_tib_5_long %<>%
+  dplyr::filter(!id %in% c(
+    1, 4, 7, 8, 15, 17, 19, 21, 22, 23, 25, 27, 30, 31, 32, 33, 37, 38, 41, 46, 53, 54, 55, 56, 57
+  ))
+
+u00575_mod_rm_z_5 <- u00575_tib_5_long %>% 
+  afex::aov_4(z(value) ~ faberform*prozent*viefalt + (faberform*prozent*viefalt|id), .)
+
+export_ols(u00575_mod_rm_z_5, 
+           key_effects = c("faberform:viefalt"))
+
+
+
+
+u00575_mod_lmer_z_5 <- 
+  u00575_tib_5_long %>% 
+  dplyr::filter(!is.na(value)) %>% 
+  lme4::lmer(z(value) ~ faberform*prozent*viefalt + (1|id), .)
+
+export_ols(u00575_mod_lmer_z_5, 
+           key_effects = c("faberform2:viefalt2", 
+                           "faberform2:viefalt3", 
+                           "faberform2:viefalt4", 
+                           "faberform2:viefalt5"))
+```
+
+
+# Study 6 
+
+no models  interest  
+

@@ -1,0 +1,89 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-22'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df_1 <- read.csv("../data/raw_data/p01386_exp_1.csv")
+df_2 <- read.csv("../data/raw_data/p01386_exp_2.csv")
+df_3 <- read.csv("../data/raw_data/p01386_exp_3.csv")
+```
+
+# exp 1 
+
+```{r}
+df_1_long <- df_1 %>% 
+  dplyr::select(id = subj, cond, disobey, obey) %>% 
+  tidyr::pivot_longer(-c(id, cond)) 
+
+p01386_mod_rm_z_1 <- df_1_long %>% 
+  afex::aov_4(z(value) ~ cond*name + (name|id), .)
+
+export_ols(
+  p01386_mod_rm_z_1, 
+  key_effects = c("cond:name")
+)
+
+p01386_mod_lmer_z_1 <- df_1_long %>% 
+  lme4::lmer(z(value) ~ cond*name + (1|id), .)
+
+export_ols(
+  p01386_mod_lmer_z_1, 
+  key_effects = c("condLeader:nameobey")
+)
+```
+
+# exp 2
+
+```{r}
+df_2_long <- df_2 %>% 
+  dplyr::select(id = subj, cond, disobey, obey) %>% 
+  tidyr::pivot_longer(-c(id, cond)) 
+
+p01386_mod_rm_z_2 <- df_2_long %>% 
+  afex::aov_4(z(value) ~ cond*name + (name|id), .)
+
+export_ols(
+  p01386_mod_rm_z_2, 
+  key_effects = c("cond:name")
+)
+
+p01386_mod_lmer_z_2 <- df_2_long %>% 
+  lme4::lmer(z(value) ~ cond*name + (1|id), .)
+
+export_ols(
+  p01386_mod_lmer_z_2, 
+  key_effects = c("condBareheaded-leader:nameobey")
+)
+```
+
+
+# exp 3
+
+```{r}
+df_3_long <- df_3 %>% 
+  dplyr::select(id = subj, cond, disobey, obey) %>% 
+  tidyr::pivot_longer(-c(id, cond)) 
+
+p01386_mod_rm_z_3 <- df_3_long %>% 
+  afex::aov_4(z(value) ~ cond*name + (name|id), .)
+
+export_ols(
+  p01386_mod_rm_z_3, 
+  key_effects = c("cond:name")
+)
+
+p01386_mod_lmer_z_3 <- df_3_long %>% 
+  lme4::lmer(z(value) ~ cond*name + (1|id), .)
+
+export_ols(
+  p01386_mod_lmer_z_3, 
+  key_effects = c("condPowerless-character:nameobey")
+)
+```

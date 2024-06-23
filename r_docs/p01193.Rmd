@@ -1,0 +1,232 @@
+---
+title: ""
+output: html_document
+---
+
+The capacity to find humorous perspectives in aversive situations may outline a helpful
+strategy in the context of cognitive reappraisal. Yet, research suggested that some people
+produce more adaptive humour than others. At the same time, not all forms of cognitive reinterpretation
+seem to be unequivocally beneficial. The present study aimed to investigate
+specific cognitive reappraisal strategies that individuals employ in humorous reappraisal of
+adverse events. In a sample of 95 participants, the use of cognitive reappraisal sub-strategies
+was assessed in a behavioural test in which participants were required to generate a
+series of humorous reappraisals of self-relevant, threatening events. These reappraisal
+sub-strategies (three positive reinterpretation strategies, three de-emphasising strategies)
+were then related to the habitual use of different kinds of humour as well as the broader
+DSM-5 personality trait domains and well-being in terms of depressive experiences,
+assessed by self-report questionnaires. While no robust relationships were found for reappraisal
+strategies based on de-emphasising, sub-strategies within the positive reinterpretation
+category showed specific and contrasting associations with the examined traits.
+Findings indicated that the ability to produce humour is only linked to a favourable pattern of
+reappraisal strategies when manifested in benign forms of humour. Specific relations also
+emerged for the broader personality traits. The study suggests that some characteristics
+that advance the use of benign humour also benefit adaptive emotion regulation. The opposite
+seems to be true for malicious, or "dark" humour. The introduced behavioural approach
+to the analysis of humorous cognitive reappraisal may prove useful also in future related
+research.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+library(gtools)
+library(robustbase)
+library(magrittr) # unless you routinely load tidyverse, in which case leave this one out. You just need it for the pipe. 
+library(moments)
+
+
+variables <- c("paper", "outcome", "n", "skew", "kurt", "z_1.96", "z_2.58", "z_3.29", "mode_n", "var", "var_ratio")
+
+list.files("../data/raw_data/", pattern = "p01193")
+
+p01193_tib <- readxl::read_excel("../data/raw_data/p01193_perchtold2019_pone.0211618.s002.xlsx")
+
+p01193_tib
+```
+
+# Malicious humour
+
+```{r}
+p01193_mod_original_1 <- lm(dh ~ pos3 + pos7 + pos8 + rel10 + rel11 + rel14, 
+   data = p01193_tib) 
+p01193_mod_original_1 %>% summary()
+```
+
+```{r}
+p01193_mod_z_1 <- lm(z(dh) ~ z(pos3) + z(pos7) + z(pos8) + z(rel10) + z(rel11) + z(rel14), 
+   data = p01193_tib) 
+
+p01193_mod_z_1 %>% summary()
+```
+
+```{r}
+key_effects = c("z(pos3)" , "z(pos7)" , "z(pos8)" , "z(rel10)" , "z(rel11)" , "z(rel14)")
+export_ols(p01193_mod_z_1, key_effects)
+```
+
+
+
+
+# Benign humour
+
+
+```{r}
+p01193_mod_original_2 <- lm(bh ~ pos3 + pos7 + pos8 + rel10 + rel11 + rel14, 
+   data = p01193_tib) 
+
+p01193_mod_original_2 %>% summary()
+```
+
+
+```{r}
+p01193_mod_z_2 <- lm(z(bh) ~ z(pos3) + z(pos7) + z(pos8) + z(rel10) + z(rel11) + z(rel14), 
+   data = p01193_tib) 
+
+p01193_mod_z_2 %>% summary()
+```
+
+```{r}
+export_ols(p01193_mod_z_2, key_effects)
+```
+
+
+
+# Depression
+
+```{r}
+p01193_mod_original_3 <- lm(ads ~ pos3 + pos7 + pos8 + rel10 + rel11 + rel14, 
+   data = p01193_tib) 
+p01193_mod_original_3 %>% summary()
+```
+
+```{r}
+p01193_mod_z_3 <- lm(z(ads) ~ z(pos3) + z(pos7) + z(pos8) + z(rel10) + z(rel11) + z(rel14), 
+   data = p01193_tib) 
+
+p01193_mod_z_3 %>% summary()
+```
+
+```{r}
+export_ols(p01193_mod_z_3, key_effects)
+```
+
+
+
+
+
+
+
+# Negative affectivity
+
+```{r}
+p01193_mod_original_4 <- lm(naff ~ pos3 + pos7 + pos8 + rel10 + rel11 + rel14, 
+   data = p01193_tib)
+p01193_mod_original_4 %>% summary()
+```
+
+```{r}
+p01193_mod_z_4 <- lm(z(naff) ~ z(pos3) + z(pos7) + z(pos8) + z(rel10) + z(rel11) + z(rel14), 
+   data = p01193_tib) 
+
+p01193_mod_z_4 %>% summary()
+```
+
+```{r}
+export_ols(p01193_mod_z_4, key_effects)
+```
+
+
+
+# Detachment
+
+```{r}
+p01193_mod_original_5 <- lm(deta ~ pos3 + pos7 + pos8 + rel10 + rel11 + rel14, 
+   data = p01193_tib) 
+p01193_mod_original_5 %>% summary()
+```
+
+```{r}
+p01193_mod_z_5 <- lm(z(deta) ~ z(pos3) + z(pos7) + z(pos8) + z(rel10) + z(rel11) + z(rel14), 
+   data = p01193_tib) 
+
+p01193_mod_z_5 %>% summary()
+```
+
+```{r}
+export_ols(p01193_mod_z_5, key_effects)
+```
+
+
+
+# Antagonism
+
+```{r}
+p01193_mod_original_6 <- lm(anta ~ pos3 + pos7 + pos8 + rel10 + rel11 + rel14, 
+   data = p01193_tib) 
+p01193_mod_original_6 %>% summary()
+```
+
+
+```{r}
+p01193_mod_z_6 <- lm(z(anta) ~ z(pos3) + z(pos7) + z(pos8) + z(rel10) + z(rel11) + z(rel14), 
+   data = p01193_tib) 
+
+p01193_mod_z_6 %>% summary()
+```
+
+```{r}
+export_ols(p01193_mod_z_6, key_effects)
+```
+
+
+
+
+
+
+
+
+# Disinhibition
+
+```{r}
+p01193_mod_original_7 <- lm(dis ~ pos3 + pos7 + pos8 + rel10 + rel11 + rel14, 
+   data = p01193_tib) 
+p01193_mod_original_7 %>% summary()
+```
+
+```{r}
+p01193_mod_z_7 <- lm(z(dis) ~ z(pos3) + z(pos7) + z(pos8) + z(rel10) + z(rel11) + z(rel14), 
+   data = p01193_tib) 
+
+p01193_mod_z_7 %>% summary()
+```
+
+```{r}
+export_ols(p01193_mod_z_7, key_effects)
+```
+
+
+
+
+
+
+# Psychoticism
+
+```{r}
+p01193_mod_original_8 <- lm(psyc ~ pos3 + pos7 + pos8 + rel10 + rel11 + rel14, 
+   data = p01193_tib) 
+p01193_mod_original_8 %>% summary()
+```
+
+```{r}
+p01193_mod_z_8 <- lm(z(psyc) ~ z(pos3) + z(pos7) + z(pos8) + z(rel10) + z(rel11) + z(rel14), 
+   data = p01193_tib) 
+
+p01193_mod_z_8 %>% summary()
+```
+
+```{r}
+export_ols(p01193_mod_z_8, key_effects)
+```
+
+

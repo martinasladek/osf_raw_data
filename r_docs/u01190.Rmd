@@ -1,0 +1,138 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-08-03'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df_1 <- readRDS("../data/raw_data/u01190_exp2_data.rds")
+df_2 <- readRDS("../data/raw_data/u01190_mydatatotal_exp3.rds")
+df_3 <- readRDS("../data/raw_data/u01190_mydata_exp4.rds")
+```
+
+Experiment 1 seems like it's a between subjects ANOVA (aov) fitted to within subject data with 500+ degrees of freedom so I'm not including this. 
+
+# Experiment 2 
+
+
+use df_1 
+
+Model 1
+
+
+```{r}
+u01190_mod_z_1 <- lm(z(logEstimate) ~ Condition + z(Disgust) + Condition*z(Disgust) +  # here (1)
+     factor(Gender) + z(Age) + z(Education), data = df_1)
+
+export_ols(u01190_mod_z_1, 
+           key_effects = mod_coeffs(u01190_mod_z_1)[c(1:4, 9:11)])
+```
+
+Model 2
+
+```{r}
+u01190_mod_z_2 <- lm(z(Interest) ~ Condition + z(Disgust) + Condition*z(Disgust) +  # here (1)
+     factor(Gender) + z(Age) + z(Education), data = df_1)
+
+export_ols(u01190_mod_z_2, 
+           key_effects = mod_coeffs(u01190_mod_z_2)[c(1:4, 9:11)])
+```
+
+Model 3
+
+```{r}
+u01190_mod_z_3 <- lm(z(Sharing) ~ Condition + z(Disgust) + Condition*z(Disgust) +  # here (1)
+     factor(Gender) + z(Age) + z(Education), data = df_1)
+
+export_ols(u01190_mod_z_3, 
+           key_effects = mod_coeffs(u01190_mod_z_3)[c(1:4, 9:11)])
+```
+
+Model 4
+
+```{r}
+u01190_mod_z_4 <- lm(z(Acc_precise) ~ Condition + z(Disgust) + Condition*z(Disgust) +  # here (1)
+     factor(Gender) + z(Age) + z(Education), data = df_1)
+
+export_ols(u01190_mod_z_4, 
+           key_effects = mod_coeffs(u01190_mod_z_4)[c(1:4, 9:11)])
+```
+
+Model 5
+
+```{r}
+u01190_mod_z_5 <- lm(z(logdev_PeopleArea) ~ Condition + z(Disgust) + Condition*z(Disgust) +  # here (1)
+     factor(Gender) + z(Age) + z(Education), data = df_1)
+
+export_ols(u01190_mod_z_5, 
+           key_effects = mod_coeffs(u01190_mod_z_5)[c(1:4, 9:11)])
+```
+
+
+# Experiment 3 
+
+use df_2
+
+model 6
+
+```{r}
+u01190_mod_z_6 <- lm(z(Sweater) ~ Condition + z(Disgust) + Condition*z(Disgust) + z(Opinion_nucl) +
+     factor(Gender) + z(Age) + z(Education), data = df_2) # here (1)
+
+
+export_ols(u01190_mod_z_6, 
+           key_effects = mod_coeffs(u01190_mod_z_6)[c(1:5, 9:11)])
+```
+
+# exp 4 
+
+use df_3
+
+model 7
+
+```{r}
+u01190_mod_z_7 <-lm(z(Opinion_nucl_pre) ~ z(Disgust) + 
+                      factor(Gender) + z(Age) + z(Education), data = df_3)
+
+export_ols(u01190_mod_z_7, 
+           key_effects = "z(Disgust)")
+```
+
+model 8 
+
+```{r}
+u01190_mod_z_8 <-lm(z(Nucl_radiation_pre) ~ z(Disgust) + 
+                      factor(Gender) + z(Age) + z(Education), data = df_3)
+
+export_ols(u01190_mod_z_8, 
+           key_effects = "z(Disgust)")
+```
+
+model 9 
+
+```{r}
+u01190_mod_z_9 <-lm(z(Nucl_economic_pre) ~ z(Disgust) + 
+                      factor(Gender) + z(Age) + z(Education), data = df_3)
+
+export_ols(u01190_mod_z_9, 
+           key_effects = "z(Disgust)")
+```
+
+model 10
+
+```{r}
+u01190_mod_z_10 <- lm(z(diff_opinion_nucl) ~ Condition + z(Disgust) + z(Disgust)*Condition + 
+                        factor(Gender) + z(Age) + z(Education), data = df_3)
+
+export_ols(
+  u01190_mod_z_10, 
+  key_effects = c("ConditionEconomic", "z(Disgust)", "ConditionEconomic:z(Disgust)")
+)
+```
+
+

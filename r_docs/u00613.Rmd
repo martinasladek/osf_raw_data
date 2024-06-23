@@ -1,0 +1,169 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-08-01'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df_1 <- readRDS("../data/raw_data/u00613_clean_mcs_personality.rds")
+df_2 <- readRDS("../data/raw_data/u00613_morbid_genres_z.rds")
+```
+
+(study 1 is FA)
+
+# study 2
+
+model 1 
+
+- estimates in the model seem unstandardised whereas these were standardised (even before I applied the z function)
+
+```{r}
+u00613_mod_z_1 <- lm(z(morbid_curiosity) ~ 
+                       z(FDC_overt_social)  + 
+                       z(honhum_score) +
+                       z(animal_reminder_disgust) +
+                       z(PPI_FEAR) + z(PPI_REBEL) + z(PPI_STRESS) +
+                       factor(sex) + z(age), 
+                     data = df_1)
+
+
+
+export_ols(u00613_mod_z_1, 
+           key_effects = mod_coeffs(u00613_mod_z_1)[1:6])
+```
+
+# Study 3 
+
+these are already in z scores 
+
+ MCS and TIPI
+ 
+ model 2
+ 
+```{r}
+u00613_mod_z_2 <- lm(morbid_curiosity ~ emotionality + conscientiousness + agreeableness + extraversion + openness,
+                     data = df_2)
+
+export_ols(u00613_mod_z_2, key_effects = mod_coeffs(u00613_mod_z_2))
+```
+
+genres
+
+model 3
+
+```{r}
+u00613_mod_z_3 <- lm(alien ~ morbid_curiosity + 
+                       factor(sex) + age + income + 
+                       emotionality + conscientiousness + agreeableness + extraversion + openness,
+          data = df_2)
+
+export_ols(u00613_mod_z_3, key_effects = "morbid_curiosity")
+```
+
+model 4
+
+```{r}
+u00613_mod_z_4 <- lm(apocalyptic ~ morbid_curiosity + 
+                       factor(sex) + age + income + 
+                       emotionality + conscientiousness + agreeableness + extraversion + openness,
+          data = df_2)
+
+export_ols(u00613_mod_z_4, key_effects = "morbid_curiosity")
+```
+
+model 5
+
+```{r}
+u00613_mod_z_5 <- lm(comedy ~ morbid_curiosity + 
+                       factor(sex) + age + income + 
+                       emotionality + conscientiousness + agreeableness + extraversion + openness,
+          data = df_2)
+
+export_ols(u00613_mod_z_5, key_effects = "morbid_curiosity")
+```
+
+model 6
+
+```{r}
+u00613_mod_z_6 <- lm(crime ~ morbid_curiosity + 
+                       factor(sex) + age + income + 
+                       emotionality + conscientiousness + agreeableness + extraversion + openness,
+          data = df_2)
+
+export_ols(u00613_mod_z_6, key_effects = "morbid_curiosity")
+```
+
+model 7
+
+```{r}
+u00613_mod_z_7 <- lm(horror ~ morbid_curiosity + 
+                       factor(sex) + age + income + 
+                       emotionality + conscientiousness + agreeableness + extraversion + openness,
+          data = df_2)
+
+export_ols(u00613_mod_z_7, key_effects = "morbid_curiosity")
+```
+
+model 8
+
+```{r}
+u00613_mod_z_8 <- lm(romance ~ morbid_curiosity + 
+                       factor(sex) + age + income + 
+                       emotionality + conscientiousness + agreeableness + extraversion + openness,
+          data = df_2)
+
+export_ols(u00613_mod_z_8, key_effects = "morbid_curiosity")
+```
+
+model 9
+
+```{r}
+u00613_mod_z_9 <- lm(scifi ~ morbid_curiosity + 
+                       factor(sex) + age + income + 
+                       emotionality + conscientiousness + agreeableness + extraversion + openness,
+          data = df_2)
+
+export_ols(u00613_mod_z_9, key_effects = "morbid_curiosity")
+```
+
+model 10
+
+```{r}
+u00613_mod_z_10 <- lm(supernatural ~ morbid_curiosity + 
+                       factor(sex) + age + income + 
+                       emotionality + conscientiousness + agreeableness + extraversion + openness,
+          data = df_2)
+
+export_ols(u00613_mod_z_10, key_effects = "morbid_curiosity")
+```
+
+model 11
+
+```{r}
+u00613_mod_z_11 <- lm(thriller ~ morbid_curiosity + 
+                       factor(sex) + age + income + 
+                       emotionality + conscientiousness + agreeableness + extraversion + openness,
+          data = df_2)
+
+export_ols(u00613_mod_z_11, key_effects = "morbid_curiosity")
+```
+
+model 12
+
+```{r}
+u00613_mod_z_12 <- lm(zombie ~ morbid_curiosity + 
+                       factor(sex) + age + income + 
+                       emotionality + conscientiousness + agreeableness + extraversion + openness,
+          data = df_2)
+
+export_ols(u00613_mod_z_12, key_effects = "morbid_curiosity")
+```
+
+# study 4
+
+I can't get study 4 to reproduce - something's not right in the processing script and the results don't match (the pattern on the ggplot is odd.)

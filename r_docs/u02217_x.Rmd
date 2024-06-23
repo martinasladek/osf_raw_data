@@ -1,0 +1,70 @@
+---
+title: "u02217"
+author: "MS"
+date: '2022-06-14'
+output: html_document
+---
+
+```{r setup, include=FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+names <- readxl::read_xlsx("../data/raw_data/u02217_dataset_covid19Japan.XLSX", sheet = 4) %>% 
+  dplyr::filter(better_name != "health_zip") %>% 
+  dplyr::mutate(
+    reverse_score = if_else(is.na(reverse_score), "", reverse_score),
+    better_name = paste0(better_name, reverse_score)
+  )
+
+df <- readxl::read_xlsx("../data/raw_data/u02217_dataset_covid19Japan.XLSX", sheet = 2, 
+                        col_types = "numeric") %>% 
+  magrittr::set_colnames(names$better_name)
+
+```
+
+
+```{r}
+df_1 <- df %>%
+  dplyr::filter(survey == 2) %>% 
+  dplyr::rowwise() %>% 
+  dplyr::mutate(
+  #  demo_sex = factor(demo_sex), 
+   # mask_wear_before = as.numeric(mask_wear_before),
+    
+    var_b5_e = mean(c(b5_1, reverse_score(b5_6_R, 7))), 
+    var_b5_a = mean(c(reverse_score(b5_2_R, 7), b5_7)), 
+    var_b5_c = mean(c(b5_3, reverse_score(b5_8_R, 7))), 
+    var_b5_n = mean(c(b5_4, reverse_score(b5_9_R, 7))), 
+    var_b5_o = mean(c(b5_5, reverse_score(b5_10_R, 7))), 
+    
+    var_prevent_oneself = mean(c(prevent_oneself_1:prevent_oneself_13)),
+    
+    var_risk_perception_self = mean(c(risk_perception_self_1:risk_perception_self_4)),
+    var_risk_perception_other = mean(c(risk_perception_other_1:risk_perception_other_4)),
+    
+    var_rejection_avoidance = mean(c(about_2, about_6, about_11, about_17, about_20)),
+    var_harmony_seeking = mean(c(about_1, about_7, about_8, about_15, about_18)),
+    
+    var_prevent_oneself = mean(c(prevent_oneself_1:prevent_oneself_13)),
+    var_prevent_other = mean(c(prevent_call_for_1:prevent_call_for_3)),
+  ) %>% dplyr::ungroup()
+```
+
+# 1 
+
+```{r}
+df_1 %>% 
+  lm(z(var_prevent_oneself) ~ z(demo_age) + z(demo_sex) + 
+       z(var_b5_e) + z(var_b5_a) + z(var_b5_c)  + z(var_b5_n) + z(var_b5_o) +
+       
+       var_risk_perception_self + var_risk_perception_other + 
+       
+       var_rejection_avoidance + var_harmony_seeking + 
+       
+       var_prevent_oneself + var_prevent_other + 
+       
+       reason_prevent_own_3 + reason_prevent_own_4 + reason_prevent_own_5,
+     .) %>% summary()
+```
+

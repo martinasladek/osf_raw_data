@@ -1,0 +1,284 @@
+---
+title: ""
+output: html_document
+---
+```{r}
+source("../scripts/helpers.R")
+
+library(gtools)
+library(robustbase)
+library(magrittr) # unless you routinely load tidyverse, in which case leave this one out. You just need it for the pipe. 
+library(moments)
+
+
+variables <- c("paper", "outcome", "n", "skew", "kurt", "z_1.96", "z_2.58", "z_3.29", "mode_n", "var", "var_ratio")
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(magrittr)
+
+#list.files("../data/raw_data/", pattern = "p00000")
+
+#p00000_tib <- readr::read_csv("../data/raw_data/REPLACE_THIS")
+
+### load Packages
+library(dplyr,psych)
+library(BayesFactor)
+library(GPArotation)
+
+
+## read data (hcp: using relative directory)
+
+
+total.data <- read.csv("../data/raw_data/u02398_yin2020_Registered_Study.csv",header = TRUE,sep = ',', 
+                      stringsAsFactors=FALSE, na.strings=c(""," ","NA")) %>%
+  mutate_if(is.character,as.numeric)  # change character to numeric
+```
+
+```{r}
+FADNames <- paste('FAD',1:27,sep="_")                      # name for FAD+
+justSenNames <- paste('justSens',1:8,sep="_")              # name for Justice sensitivity
+JstWrldBeliefNames <- paste('JstWrldBelief',1:13,sep="_")  # name for general belief in just world
+pre_emotion<- paste('pre_emotion',1:18,sep="_")  # name for emotion
+post_emotion<- paste('post_emotion',1:18,sep="_")
+```
+
+## exclude participants who pay insufficient attention to the test problem and the scenarios
+
+```{r}
+
+valid.data <- total.data %>%
+  dplyr::filter(Q34=="4" & Q2_Q2_28=="3")   %>%          # select the participants paid attention (i.e., Q34=4 and Q2_13=3)
+  dplyr::filter(((adolescent_brain == "1"|adolescent_brainimage == "1" | adolescent_behavior == "1") & Q25 == "0") |
+                  ((adult_brain == "1"| adult_brainimage == "1" | adult_behavior == "1") & Q25 == "1")) %>% # select the participant with correct memory of age
+  dplyr::filter(!is.na(Q27) & !is.na(Q28) & !is.na(Q30) & !is.na(Q31) & !is.na(Q32) & !is.na(Q33)) %>%                # select no-na data
+  dplyr::mutate(CrimeAge1 = ifelse(adolescent_brain == "1" |adolescent_brainimage =="1" | adolescent_behavior =="1", "age17", "age37"),
+                CrimeAge2 = ifelse(adult_brain == "1" |adult_brainimage=="1" | adult_behavior=="1", "age37", "age17"),
+                CrimeAge1 = ifelse(adolescent_brain == "1" |adolescent_brainimage =="1" | adolescent_behavior=="1", "age17", "age37"),
+                CrimeAge2 = ifelse(adult_brain == "1" |adult_brainimage =="1" | adult_behavior =="1", "age37", "age17")) %>%
+  dplyr::mutate(CrimeAge = coalesce(CrimeAge1, CrimeAge2)) %>%                       # coalesce two columns into one
+  dplyr::mutate(EvidenceType1 = ifelse(adolescent_behavior == "1" |adult_behavior =="1", "Behav"),
+                EvidenceType2 = ifelse(adolescent_brain == "1" |adult_brain =="1", "Neuro_No_img"),
+                EvidenceType3 = ifelse(adolescent_brainimage == "1" |adult_brainimage =="1", "Neuro_img")) %>%
+  dplyr::mutate(EvidenceType  = coalesce(EvidenceType1, EvidenceType2,EvidenceType3)) %>%    # coalesce three columns into one
+  dplyr::select(-c(CrimeAge1, CrimeAge2,EvidenceType1, EvidenceType2,EvidenceType3)) %>%     # delete intermediate columns
+  dplyr::select(-Q2_Q2_28) %>%                                                                  # remove the attention check item
+  dplyr::rename_at(vars(starts_with('Q2_Q2_')), ~ FADNames) %>%           # use renames_at of dplyr to rename all items of short version of FAD+
+  dplyr::rename_at(vars(starts_with('Q3_Q3_')), ~ justSenNames) %>%        # rename all justice sensitivity
+  dplyr::rename_at(vars(starts_with('Q8_')), ~ JstWrldBeliefNames) %>%  # rename all just world belief
+  dplyr::rename_at(vars(starts_with('Q54_Q54_')), ~ pre_emotion) %>%  # rename all pre_emotion
+  dplyr::rename_at(vars(starts_with('Q55_Q55_')), ~ post_emotion) %>%  # rename all post_emotion
+  dplyr::rename(now_SSS = Q5, past_SSS = Q6, future_SSS = Q7,           # hcp: subjective SES = SSS
+                gender = Q9, age = Q10, self_Edu = Q11,                 ## hcp: I said included all variable!!
+                father_edu = Q12, moth_edu = Q13, father_occup = Q14, moth_occup = Q15,
+                death =Q30, respnsb=Q31, curDanger=Q32,
+                retrn_Soc =Q33,  retribut =Q35_1, specfc_Deter=Q35_2, Genrl_Deter = Q35_3,
+                legalKnowledge =Q36, sciKnowledge =Q37, verisim = Q39, verisim_effect = Q40)  #rename others one-by-one
+
+```
+
+## rename the variables
+
+```{r}
+
+
+valid.data2<-valid.data%>%
+  dplyr::mutate(free_will_avg=rowMeans(data.frame(FAD_4,FAD_8,FAD_12,FAD_16,FAD_21,FAD_23,FAD_26),na.rm = T))%>%
+  dplyr::mutate(scientific_avg=rowMeans(data.frame(FAD_2,FAD_6,FAD_10,FAD_14,FAD_18),na.rm = T))%>%
+  dplyr::mutate(fatalistic_avg=rowMeans(data.frame(FAD_1,FAD_5,FAD_6,FAD_9,FAD_13,FAD_17,FAD_22,FAD_24),na.rm = T))%>%
+  dplyr::mutate(unpreditic_avg=rowMeans(data.frame(FAD_3,FAD_7,FAD_11,FAD_15,FAD_19,FAD_20,FAD_25,FAD_27),na.rm = T))%>%
+  dplyr::mutate(justSens_avg=rowMeans(data.frame(justSens_1,justSens_2,justSens_3,justSens_4,justSens_5,justSens_6,justSens_7,justSens_8),na.rm=T))%>%
+  dplyr::mutate(JstWrldBelief_avg=rowMeans(data.frame(JstWrldBelief_1,JstWrldBelief_2,JstWrldBelief_3,JstWrldBelief_4,JstWrldBelief_5,JstWrldBelief_6,JstWrldBelief_7,JstWrldBelief_8,JstWrldBelief_9,JstWrldBelief_10,JstWrldBelief_11,JstWrldBelief_12,JstWrldBelief_13),na.rm=T)) %>%
+  dplyr::mutate(pos_emotion_pre_avg=rowMeans(data.frame(pre_emotion_1,pre_emotion_2,pre_emotion_3,pre_emotion_4,pre_emotion_5,pre_emotion_6,pre_emotion_7,pre_emotion_8,pre_emotion_9),na.rm=T)) %>%
+  dplyr::mutate(neg_emotion_pre_avg=rowMeans(data.frame(pre_emotion_10,pre_emotion_11,pre_emotion_12,pre_emotion_13,pre_emotion_14,pre_emotion_15,pre_emotion_16,pre_emotion_17,pre_emotion_17,pre_emotion_18),na.rm=T)) %>%
+  dplyr::mutate(pos_emotion_post_avg=rowMeans(data.frame(post_emotion_1,post_emotion_2,post_emotion_3,post_emotion_4,post_emotion_5,post_emotion_6,post_emotion_7,post_emotion_8,post_emotion_9),na.rm=T)) %>%
+  dplyr::mutate(neg_emotion_post_avg=rowMeans(data.frame(post_emotion_10,post_emotion_11,post_emotion_12,post_emotion_13,post_emotion_14,post_emotion_15,post_emotion_16,post_emotion_17,post_emotion_18),na.rm=T))
+
+```
+
+# reliability 
+
+```{r}
+#free will
+
+free_will_total<- valid.data2 %>% select(FAD_4,FAD_8,FAD_12,FAD_16,FAD_21,FAD_23,FAD_26) # hcp: have you ever check the result of your functions?
+ap_free_will <- psych::alpha(free_will_total)
+ap_free_will <- round(ap_free_will$total[1],2)
+omega_free_will<- psych::omega(free_will_total)
+
+scientific_total <- valid.data2 %>% select(FAD_2,FAD_6,FAD_10,FAD_14,FAD_18)
+ap_scientific <- psych::alpha(scientific_total)
+ap_scientific <- round(ap_scientific$total[1],2)
+omega_scientific<- psych::omega(scientific_total)
+
+fatalistic_total <- valid.data2 %>% select(FAD_1,FAD_5,FAD_6,FAD_9,FAD_13,FAD_17,FAD_22,FAD_24)
+ap_fatalistic <- psych::alpha(fatalistic_total)
+ap_fatalistic <- round(ap_fatalistic$total[1],2)
+omega_fatalistic<- psych::omega(fatalistic_total)
+
+unpreditic_total<- valid.data2 %>% select(FAD_3,FAD_7,FAD_11,FAD_15,FAD_19,FAD_20,FAD_25,FAD_27)
+ap_unpreditic <- psych::alpha(unpreditic_total)
+ap_unpreditic <- round(ap_unpreditic$total[1],2)
+omega_unpreditic<- psych::omega(unpreditic_total)
+
+#just sense
+just_sense_total<- valid.data2 %>% select(justSens_1,justSens_2,justSens_3,justSens_4,justSens_5,justSens_6,justSens_7,justSens_8)
+ap_just_sense <- psych::alpha(just_sense_total)
+ap_just_sense <- round(ap_just_sense$total[1],2)
+omega_just_sense<- psych::omega(just_sense_total)
+
+#just world belief
+just_belief_total<- valid.data2 %>% select(JstWrldBelief_1,JstWrldBelief_2,JstWrldBelief_3,JstWrldBelief_4,JstWrldBelief_5,JstWrldBelief_6,JstWrldBelief_7,JstWrldBelief_8,JstWrldBelief_9,JstWrldBelief_10,JstWrldBelief_11,JstWrldBelief_12,JstWrldBelief_13)
+ap_just_belief <- psych::alpha(just_belief_total)
+ap_just_belief <- round(ap_just_belief$total[1],2)
+omega_just_belief<- psych::omega(just_belief_total)
+
+#emotion
+pos_emotion_pre<- valid.data2 %>% select(pre_emotion_1,pre_emotion_2,pre_emotion_3,pre_emotion_4,pre_emotion_5,pre_emotion_6,pre_emotion_7,pre_emotion_8,pre_emotion_9)
+
+neg_emotion_pre<-valid.data2 %>% select(pre_emotion_10,pre_emotion_11,pre_emotion_12,pre_emotion_13,pre_emotion_14,pre_emotion_15,pre_emotion_16,pre_emotion_17,pre_emotion_17,pre_emotion_18)
+
+pos_emotion_post<-valid.data2 %>% select(post_emotion_1,post_emotion_2,post_emotion_3,post_emotion_4,post_emotion_5,post_emotion_6,post_emotion_7,post_emotion_8,post_emotion_9)
+
+neg_emotion_post<-valid.data2 %>% select(post_emotion_10,post_emotion_11,post_emotion_12,post_emotion_13,post_emotion_14,post_emotion_15,post_emotion_16,post_emotion_17,post_emotion_18)
+
+
+```
+
+### end preparing ###
+
+### information of participants ###
+
+```{r}
+participant.age<-as.numeric(as.character(valid.data[,"age"])) #transform factor to numeric
+participant.gender<-  factor(valid.data$gender,
+                             levels = c(1, 2),
+                             labels = c("Male", "Femle"))
+age <- summary(participant.age)
+gender <- summary(participant.gender)
+```
+
+### analysis ###
+
+##   caculate the depentent varibles   ##
+
+# ANOVA for three different varibles # 
+
+```{r}
+str(valid.data2)
+
+valid.data2$CrimeAge<-as.factor(valid.data2$CrimeAge)
+valid.data2$EvidenceType<-as.factor(valid.data2$EvidenceType)
+
+
+death_penalty_anova <- summary(aov(valid.data2$death~valid.data2$CrimeAge*valid.data2$EvidenceType))
+
+death_penalty_BFanova<-BayesFactor::anovaBF(death~CrimeAge*EvidenceType,data=valid.data2)
+
+death_penalty_BFanova[4]/death_penalty_BFanova[3]
+
+percep_of_respon_anova <- summary(aov(valid.data2$respnsb~valid.data2$CrimeAge*valid.data2$EvidenceType))
+
+percep_of_danger_anova <- summary(aov(valid.data2$curDanger~valid.data2$CrimeAge*valid.data2$EvidenceType))
+
+percep_of_retrn_Soc_anova <- summary(aov(valid.data2$retrn_Soc~valid.data2$CrimeAge*valid.data2$EvidenceType))
+
+
+```
+
+# REPRODUCE THIS
+
+```{r}
+valid.data2$CrimeAge <- as.factor(valid.data2$CrimeAge)
+valid.data2$EvidenceType <- as.factor(valid.data2$EvidenceType)
+
+contrasts(valid.data2$CrimeAge) <- c(1/2, -1/2)
+behav_vs_neuro <- c(2/3, -1/3, -1/3)
+img_vs_no_image <- c(0, 1/2, -1/2)
+contrasts(valid.data2$EvidenceType) <- cbind(behav_vs_neuro, img_vs_no_image)
+```
+
+
+```{r}
+u02398_mod_original_1 <- lm(death~CrimeAge*EvidenceType, data = valid.data2)
+u02398_mod_original_1 %>% summary()
+```
+
+```{r}
+u02398_mod_z_1 <- lm(z(death)~CrimeAge*EvidenceType, data = valid.data2)
+u02398_mod_z_1 %>% summary()
+```
+
+```{r}
+key_effects = c("CrimeAge1:EvidenceTypebehav_vs_neuro", "CrimeAge1:EvidenceTypeimg_vs_no_image")
+export_ols(u02398_mod_z_1, key_effects)
+```
+
+
+
+
+
+
+
+
+```{r}
+u02398_mod_original_2 <- lm(respnsb~CrimeAge*EvidenceType, data = valid.data2)
+u02398_mod_original_2 %>% summary()
+```
+
+```{r}
+u02398_mod_z_2 <- lm(z(respnsb)~CrimeAge*EvidenceType, data = valid.data2)
+u02398_mod_z_2 %>% summary()
+```
+
+```{r}
+key_effects = c("CrimeAge1:EvidenceTypebehav_vs_neuro", "CrimeAge1:EvidenceTypeimg_vs_no_image")
+export_ols(u02398_mod_z_2, key_effects)
+```
+
+
+
+
+
+
+
+```{r}
+u02398_mod_original_3 <- lm(curDanger~CrimeAge*EvidenceType, data = valid.data2)
+u02398_mod_original_3 %>% summary()
+```
+
+```{r}
+u02398_mod_z_3 <- lm(z(curDanger)~CrimeAge*EvidenceType, data = valid.data2)
+u02398_mod_z_3 %>% summary()
+```
+
+```{r}
+key_effects = c("CrimeAge1:EvidenceTypebehav_vs_neuro", "CrimeAge1:EvidenceTypeimg_vs_no_image")
+export_ols(u02398_mod_z_3, key_effects)
+```
+
+
+
+
+
+
+
+
+```{r}
+u02398_mod_original_4 <- lm(retrn_Soc~CrimeAge*EvidenceType, data = valid.data2)
+u02398_mod_original_4 %>% summary()
+```
+
+```{r}
+u02398_mod_z_4 <- lm(z(retrn_Soc)~CrimeAge*EvidenceType, data = valid.data2)
+u02398_mod_z_4 %>% summary()
+```
+
+```{r}
+key_effects = c("CrimeAge1:EvidenceTypebehav_vs_neuro", "CrimeAge1:EvidenceTypeimg_vs_no_image")
+export_ols(u02398_mod_z_4, key_effects)
+```
+

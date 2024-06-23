@@ -1,0 +1,179 @@
+---
+title: "u00409"
+author: "MS"
+date: '2022-05-10'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(afex)
+library(dplyr)
+library(magrittr)
+
+source("../scripts/helpers.R")
+
+list.files("../data/raw_data/", pattern = "u00435*")
+
+u00435_tib_1 <- readxl::read_xlsx("../data/raw_data/u00435_All_DATA.xlsx", sheet = 1)
+u00435_tib_2 <- readxl::read_xlsx("../data/raw_data/u00435_All_DATA.xlsx", sheet = 2)
+u00435_tib_3 <- readxl::read_xlsx("../data/raw_data/u00435_All_DATA.xlsx", sheet = 3)
+u00435_tib_4 <- readxl::read_xlsx("../data/raw_data/u00435_All_DATA.xlsx", sheet = 4)
+u00435_tib_5 <- readxl::read_xlsx("../data/raw_data/u00435_All_DATA.xlsx", sheet = 5)
+```
+
+# Study 1 
+
+```{r}
+# not key
+u00435_tib_1_a <- u00435_tib_1 %>% 
+  dplyr::select(Subject, Overall_High_Energy, Overall_Low_Energy, Overall_Non_Food) %>% 
+  tidyr::pivot_longer(
+    cols = -Subject, 
+    names_to = "image_type", 
+    values_to = "correct_recall"
+  )
+
+u00435_tib_1_a %>% 
+  afex::aov_4(correct_recall ~ image_type + (image_type|Subject), 
+              data = ., 
+              anova_table = list(
+                correct = "none"
+              ))
+```
+
+
+```{r}
+u00435_tib_1_b <- u00435_tib_1 %>% 
+  dplyr::select(Subject, Correct_Rec_High_Energy, Correct_Rec_Low_Energy, Correct_Rec_Non_Food) %>% 
+  tidyr::pivot_longer(
+    cols = -Subject, 
+    names_to = "image_type", 
+    values_to = "correct_recall"
+  )
+
+u00435_tib_1_b %>% 
+  afex::aov_4(correct_recall ~ image_type + (image_type|Subject), 
+              data = ., 
+              anova_table = list(
+                correct = "none"
+              ))
+
+
+u00435_mod_rm_z_1 <- u00435_tib_1_b %>% 
+  afex::aov_4(z(correct_recall) ~ image_type + (image_type|Subject), 
+              data = ., 
+              anova_table = list(
+                correct = "none"
+              ))
+
+
+key_effects = c("image_type")
+export_ols(u00435_mod_rm_z_1, key_effects)
+
+
+
+
+
+u00435_mod_lmer_z_1 <- u00435_tib_1_b %>% 
+  lme4::lmer(z(correct_recall) ~ image_type + (1|Subject), 
+              data = .)
+
+
+key_effects = mod_coeffs(u00435_mod_lmer_z_1)
+export_ols(u00435_mod_lmer_z_1, key_effects)
+```
+
+
+```{r}
+u00435_tib_1_c <- u00435_tib_1 %>% 
+  dplyr::select(Subject, Correct_Novel_High_Energy, Correct_Novel_Low_Energy, Correct_Novel_Non_Food) %>% 
+  tidyr::pivot_longer(
+    cols = -Subject, 
+    names_to = "image_type", 
+    values_to = "correct_recall"
+  )
+
+u00435_tib_1_c %>% 
+  afex::aov_4(correct_recall ~ image_type + (image_type|Subject), 
+              data = ., 
+              anova_table = list(
+                correct = "none"
+              ))
+
+
+u00435_mod_rm_z_2 <- u00435_tib_1_c %>% 
+  afex::aov_4(z(correct_recall) ~ image_type + (image_type|Subject), 
+              data = ., 
+              anova_table = list(
+                correct = "none"
+              ))
+
+
+key_effects = c("image_type")
+export_ols(u00435_mod_rm_z_2, key_effects)
+
+
+
+
+u00435_mod_lmer_z_2 <- u00435_tib_1_c %>% 
+  lme4::lmer(z(correct_recall) ~ image_type + (1|Subject), 
+              data = .)
+
+
+key_effects = c("image_typeCorrect_Novel_Low_Energy", "image_typeCorrect_Novel_Non_Food")
+export_ols(u00435_mod_lmer_z_2, key_effects)
+```
+
+
+# Study 2
+
+
+
+```{r}
+u00435_tib_4_a <- u00435_tib_4 %>% 
+  dplyr::select(Subject, high_energy, low_energy, non_food, `Last Meal`, Sex) %>% 
+  tidyr::pivot_longer(
+    cols = -c(Subject, `Last Meal`, Sex), 
+    names_to = "image_type", 
+    values_to = "correct_recall"
+  ) %>% 
+  dplyr::mutate(Sex = factor(Sex))
+
+u00435_tib_4_a %>% 
+  afex::aov_4(correct_recall ~ image_type + `Last Meal` + Sex + (image_type|Subject), 
+              data = ., 
+              factorize = F,
+              anova_table = list(
+                correct = "none"
+              )
+  )
+
+u00435_tib_4
+
+
+u00435_mod_rm_z_3 <- u00435_tib_4_a %>% 
+  afex::aov_4(z(correct_recall) ~ image_type + z(`Last Meal`) + Sex + (image_type|Subject), 
+              data = ., 
+              factorize = F,
+              anova_table = list(
+                correct = "none"
+              )
+  )
+
+
+key_effects = c("image_type")
+export_ols(u00435_mod_rm_z_3, key_effects)
+
+
+
+u00435_mod_lmer_z_3 <- u00435_tib_4_a %>% 
+  lme4::lmer(z(correct_recall) ~ image_type + z(`Last Meal`) + Sex + (1|Subject), 
+              data = .
+  )
+
+
+key_effects = mod_coeffs(u00435_mod_lmer_z_3)
+export_ols(u00435_mod_lmer_z_3, key_effects)
+```

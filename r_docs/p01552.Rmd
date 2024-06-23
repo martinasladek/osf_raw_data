@@ -1,0 +1,87 @@
+---
+title: ""
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(magrittr)
+
+source("../scripts/helpers.R")
+
+list.files("../data/raw_data/", pattern = "p01552")
+
+df_1 <- readxl::read_excel("../data/raw_data/p01552_SuppressionReward_Exp1.xlsx")
+df_2 <- readxl::read_excel("../data/raw_data/p01552_SuppressionReward_Exp2.xlsx")
+```
+
+# Study 1 
+
+```{r}
+df_l_long <- df_1 %>% 
+  dplyr::select(id = subNum, contains("RT") & !contains("abs"), -startTime) %>% 
+  tidyr::pivot_longer(-id) %>% 
+  dplyr::mutate(
+    freq = if_else(str_detect(name, "freq"), "freq", "rare"),
+    high = if_else(str_detect(name, "high"), "high", "low")
+  )
+
+p01552_mod_rm_z_1 <- df_l_long %>% 
+  afex::aov_4(z(value) ~ freq*high + (freq*high|id), .)
+
+export_ols(
+  p01552_mod_rm_z_1,
+  key_effects = c("freq", "high", "freq:high")
+)
+
+p01552_mod_lmer_z_1 <- df_l_long %>% 
+  lme4::lmer(z(value) ~ freq*high + (1|id), .)
+
+export_ols(
+  p01552_mod_lmer_z_1,
+  key_effects = c("freqrare", "highlow", "freqrare:highlow")
+)
+
+```
+
+# Study 2 
+
+```{r}
+df_2_long <- df_2 %>% 
+  dplyr::filter(accBeforeExclusions > 0.6) %>% 
+  dplyr::select(id = subNum, 
+                RT_high_match, RT_high_mismatch, RT_high_rare,
+                RT_low_match, RT_low_mismatch, RT_low_rare) %>% 
+  tidyr::pivot_longer(-id) %>% 
+  dplyr::mutate(
+    high = if_else(str_detect(name, "high"), "high", "low"), 
+    match = case_when(
+      str_detect(name, "_match") ~ "_match", 
+      str_detect(name, "mismatch") ~ "mismatch", 
+      str_detect(name, "rare") ~ "rare", 
+    )
+  )
+```
+
+model 2 
+
+```{r}
+p01552_mod_rm_z_2 <- df_2_long %>% 
+  afex::aov_4(z(value) ~ high*match + (high*match|id), .)
+
+export_ols(
+  p01552_mod_rm_z_2, 
+  key_effects = c("high", "match", "high:match")
+)
+
+
+p01552_mod_lmer_z_2 <- df_2_long %>% 
+  lme4::lmer(z(value) ~ high*match + (1|id), .)
+
+export_ols(
+  p01552_mod_lmer_z_2, 
+  key_effects = mod_coeffs(p01552_mod_lmer_z_2)
+)
+```
+

@@ -1,0 +1,168 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-25'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+df_1 <- readxl::read_excel("../data/raw_data/p01693_1618-3169_a000414_esm1.xlsx", sheet = 1)
+df_2 <- readxl::read_excel("../data/raw_data/p01693_1618-3169_a000414_esm1.xlsx", sheet = 2)
+df_3 <- readxl::read_excel("../data/raw_data/p01693_1618-3169_a000414_esm1.xlsx", sheet = 3)
+```
+
+
+# Experiment 1
+
+model 1 
+
+```{r}
+df_1 %>% 
+  t.test(score_2 ~ condition_2, data = ., paired = T)
+
+p01693_mod_rm_z_1 <- df_1 %>% 
+  afex::aov_4(z(score_2) ~ condition_2 + (condition_2|subject_nr_1), .)
+
+export_ols(
+  p01693_mod_rm_z_1, 
+  key_effects = c("condition_2")
+)
+
+
+p01693_mod_lmer_z_1 <- df_1 %>% 
+  lme4::lmer(z(score_2) ~ condition_2 + (1|subject_nr_1), .)
+
+export_ols(
+  p01693_mod_lmer_z_1, 
+  key_effects = c("condition_2mask")
+)
+```
+
+
+model 2 
+
+```{r}
+df_1 %>% 
+  t.test(score_3 ~ sound_3, data = ., paired = T)
+
+p01693_mod_rm_z_2 <- df_1 %>% 
+  afex::aov_4(z(score_3) ~ sound_3 + (sound_3|subject_nr_2), .)
+
+export_ols(
+  p01693_mod_rm_z_2, 
+  key_effects = c("sound_3")
+)
+
+p01693_mod_lmer_z_2 <- df_1 %>% 
+  lme4::lmer(z(score_3) ~ sound_3 + (1|subject_nr_2), .)
+
+export_ols(
+  p01693_mod_lmer_z_2, 
+  key_effects = c("sound_3low_pitched")
+)
+```
+
+# experiment 2 
+
+model 3
+
+```{r}
+df_2 %>% 
+  t.test(score_2 ~ condition_2, data = ., paired = T)
+
+p01693_mod_rm_z_3 <- df_2 %>% 
+  afex::aov_4(z(score_2) ~ condition_2 + (condition_2|subject_nr_1), .)
+
+export_ols(
+  p01693_mod_rm_z_3, 
+  key_effects = c("condition_2")
+)
+
+
+p01693_mod_lmer_z_3 <- df_2 %>% 
+  lme4::lmer(z(score_2) ~ condition_2 + (1|subject_nr_1), .)
+
+export_ols(
+  p01693_mod_lmer_z_3, 
+  key_effects = c("condition_2mask")
+)
+```
+
+model 4
+
+- incorrectly reported t, p-value matches
+
+```{r}
+df_2 %>% 
+  t.test(score_3 ~ sound_3, data = ., paired = T)
+
+p01693_mod_rm_z_4 <- df_2 %>% 
+  afex::aov_4(z(score_3) ~ sound_3 + (sound_3|subject_nr_2), .)
+
+export_ols(
+  p01693_mod_rm_z_4, 
+  key_effects = c("sound_3")
+)
+
+p01693_mod_lmer_z_4 <- df_2 %>% 
+  lme4::lmer(z(score_3) ~ sound_3 + (1|subject_nr_2), .)
+
+export_ols(
+  p01693_mod_lmer_z_4, 
+  key_effects = c("sound_3low_pitched")
+)
+```
+
+# experiment 3 
+
+model 5 
+
+```{r}
+df_3 %>% 
+  t.test(score_3 ~ sound_3, data = ., paired = T)
+
+p01693_mod_rm_z_5 <- df_3 %>% 
+  afex::aov_4(z(score_3) ~ sound_3 + (sound_3|subject_nr_2), .)
+
+export_ols(
+  p01693_mod_rm_z_5, 
+  key_effects = c("sound_3")
+)
+
+p01693_mod_lmer_z_5 <- df_3 %>% 
+  lme4::lmer(z(score_3) ~ sound_3 + (1|subject_nr_2), .)
+
+export_ols(
+  p01693_mod_lmer_z_5, 
+  key_effects = c("sound_3low_pitched")
+)
+```
+
+model 6 
+
+```{r}
+df_3 %>% 
+  t.test(score_2 ~ condition_2, data = ., paired = T)
+
+p01693_mod_rm_z_6 <- df_3 %>% 
+  afex::aov_4(z(score_2) ~ condition_2 + (condition_2|subject_nr_1), .)
+
+export_ols(
+  p01693_mod_rm_z_6, 
+  key_effects = c("condition_2")
+)
+
+
+p01693_mod_lmer_z_6 <- df_3 %>% 
+  lme4::lmer(z(score_2) ~ condition_2 + (1|subject_nr_1), .)
+
+export_ols(
+  p01693_mod_lmer_z_6, 
+  key_effects = c("condition_2mask")
+)
+```
+
+
+

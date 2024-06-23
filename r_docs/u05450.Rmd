@@ -1,0 +1,41 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-12'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+data <- readRDS("../data/raw_data/u05450_processed_data.rds")
+```
+
+model 1
+
+```{r}
+u05450_mod_z_1 <- lm(z(depression) ~ z(satisficing) + z(maximizing_strategy) + z(maximizing_goal) + 
+     z(Age) + Gender + z(neuroticism) + z(extraversion) + z(self_rumination), 
+   data = data) 
+
+export_ols(
+  u05450_mod_z_1, 
+  key_effects = c("z(satisficing)", "z(maximizing_strategy)", "z(maximizing_goal)")
+)
+
+```
+
+model 2 
+
+```{r}
+u05450_mod_z_2 <- lm(z(happiness) ~ z(satisficing) + z(maximizing_strategy) + z(maximizing_goal) + 
+     z(Age) + Gender + z(neuroticism) + z(extraversion) + z(self_rumination), 
+   data = data) 
+
+export_ols(
+  u05450_mod_z_2, 
+  key_effects = c("z(satisficing)", "z(maximizing_strategy)", "z(maximizing_goal)")
+)
+
+```
+

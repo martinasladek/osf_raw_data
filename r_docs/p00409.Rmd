@@ -1,0 +1,74 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-05-11'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(afex)
+library(dplyr)
+library(magrittr)
+
+p00409_tib_1 <- readxl::read_excel("../data/raw_data/p00409_Processed.xlsx")
+p00409_tib_1
+```
+
+```{r}
+p00409_tib_1 %>% 
+  lm(`Bias X` ~ as.factor(Condition), 
+     data = .) %>% summary()
+
+p00409_mod_z_1 <- p00409_tib_1 %>% 
+  lm(z(`Bias X`) ~ as.factor(Condition), 
+     data = .)
+     
+key_effects = c("as.factor(Condition)2", "as.factor(Condition)3", "as.factor(Condition)4")    
+export_ols(p00409_mod_z_1, key_effects)
+```
+
+
+```{r}
+p00409_tib_1 %>% 
+  lm(`Bias Y` ~ as.factor(Condition), 
+     data = .) %>% summary()
+
+p00409_mod_z_2 <- p00409_tib_1 %>% 
+  lm(z(`Bias Y`) ~ as.factor(Condition), 
+     data = .)
+     
+key_effects = c("as.factor(Condition)2", "as.factor(Condition)3", "as.factor(Condition)4")    
+export_ols(p00409_mod_z_2, key_effects)
+```
+
+
+```{r}
+p00409_tib_1 %>% 
+  lm(`Bias Weight` ~ as.factor(Condition), 
+     data = .) %>% summary()
+
+
+p00409_mod_z_3 <- p00409_tib_1 %>% 
+  lm(z(`Bias Weight`) ~ as.factor(Condition), 
+     data = .)
+     
+key_effects = c("as.factor(Condition)2", "as.factor(Condition)3", "as.factor(Condition)4")    
+export_ols(p00409_mod_z_3, key_effects)
+```
+
+
+```{r}
+p00409_tib_1 %>% 
+  lm(`Residual Error` ~ as.factor(Condition), 
+     data = .) %>% summary()
+
+
+p00409_mod_z_4 <- p00409_tib_1 %>% 
+  lm(z(`Residual Error`) ~ as.factor(Condition), 
+     data = .)
+     
+key_effects = c("as.factor(Condition)2", "as.factor(Condition)3", "as.factor(Condition)4")    
+export_ols(p00409_mod_z_4, key_effects)
+```

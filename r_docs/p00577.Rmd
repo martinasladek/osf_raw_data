@@ -1,0 +1,193 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-05-30'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(afex)
+library(dplyr)
+library(magrittr)
+library(stringr)
+library(plyr)
+
+source("../scripts/helpers.R")
+
+p00577_tib_1 <- read.csv("../data/raw_data/p00577.csv")
+```
+
+process data 
+
+```{r}
+all_data <- p00577_tib_1
+reversals_only <- subset(all_data,Reversal==1)
+mean_reversals_subj <- ddply(reversals_only, .(Subj.ID,age_group,gender,label), summarize, stim_threshold=mean(Preview.Duration), sd = sd(Preview.Duration))
+mean_reversals_group <- ddply(reversals_only, .(age_group,label), summarize, stim_threshold=mean(Preview.Duration), group.sem = sd(Preview.Duration)/sqrt(length(Preview.Duration)))
+mean_reversals_group_gender <- ddply(reversals_only, .(age_group,label,gender), summarize, stim_threshold=mean(Preview.Duration), group.sem = sd(Preview.Duration)/sqrt(length(Preview.Duration)))
+
+# running a quickie ANOVA
+print("ANOVA ON REVERSALS:")
+anova.output.rev <- aov_ez("Subj.ID", "stim_threshold", mean_reversals_subj, within = c("label"), between = c("age_group", "gender"),
+                           anova_table = list(es="pes", correction = "GG"))
+print(anova.output.rev$anova_table)
+#emmeans(anova.output, "label", contr = "pairwise")
+print("")
+
+# fit individual subjects' data, and get thresholds that way (code adapted from 2015z, the first blur/noise typeface experiment)
+
+# AK fitting psychometric functions
+resp4Fit<- ddply(all_data,.(Subj.ID, age_group, label, gender), summarize, level=Preview.Duration, corr = as.numeric(correct),index=1:length(correct))
+
+fitFunc <- function(df) {
+  x <- df$level
+  y <- df$corr
+  ## 2-parameter fit
+  nll <- function(p) { 
+    FittedCurve <-(1/nAFC + (1/nAFC) * pnorm(x, p[1], p[2]))
+    -sum(y*log(FittedCurve)+(1-y)*log(1-FittedCurve));#maximum likelihood
+    # sum((FittedCurve-y)^2) #least squares
+  }
+  # print(c(mean(x),sd(x)))
+  para <- optim(par = startParams, fn=nll)
+}
+# analysis and plotting parameters
+xEval <- seq(-.5,1.5,length.out=1000)
+nBins <- 7
+threshLevel <- .8
+nAFC <- 2
+nIter <- 100 #for bootstrapping
+startParams<-c(.3,.3) #for fitting
+threshLimits<-c(0,1.5)
+
+fitOutput <- dlply(resp4Fit, .(Subj.ID, age_group, label, gender), .fun=fitFunc,.inform=TRUE)
+
+# getting slope and inflection from the initial fits
+coeffsOut <- ldply(fitOutput,function(x){data.frame(alpha=x$par[1],beta=x$par[2])}) # output of coefficients
+
+threshOut<-ddply(coeffsOut,.(Subj.ID, age_group, label, gender), function(d) {data.frame(thresh=qnorm((threshLevel-(1/nAFC))/(1/nAFC),d$alpha,d$beta))})
+fit.summary<-merge(coeffsOut,threshOut)
+
+exclObs <- fit.summary$thresh<threshLimits[1] | fit.summary$thresh>threshLimits[2]
+exclSubj <- unique(fit.summary[exclObs,]$Subj.ID)
+print("Excluding the following subjects: ")
+print(exclSubj)
+fit.summary<-fit.summary[!is.element(fit.summary$Subj.ID,exclSubj),]
+checkList<-1:max(fit.summary$Subj.ID)
+notInSet<-checkList[!is.element(checkList,sort(unique(fit.summary$Subj.ID)))]
+print("Full set of subject IDs not included:")
+print(notInSet)
+subjectCount<-ddply(subset(fit.summary,label=="Choose"),.(age_group,gender),summarize,nInGroup = length(thresh))
+print("Subject count:")
+print(subjectCount)
+
+# look at RT, because even though this ain't an RT experiment, people gonna want it
+
+RT_subset <- subset(all_data,RT..minus.mask.dur.<5)
+RT_subset <- RT_subset[!is.element(RT_subset$Subj.ID,exclSubj),]
+
+median_RT_subj <- ddply(RT_subset,.(Subj.ID,age_group,Trial.Type,gender,Lock.Type), summarize, meanRT=median(RT..minus.mask.dur.+Preview.Duration+Mask.Duration, na.rm=TRUE), SEM = sd(RT..minus.mask.dur.)/sqrt(length(RT..minus.mask.dur.)))
+mean_of_median_RT <- ddply(median_RT_subj,. (age_group,Trial.Type,Lock.Type), summarize, meanRT=mean(meanRT), group.sem = mean(SEM))
+mean_RT_group <- ddply(RT_subset,.(age_group,Trial.Type), summarize, meanRT=mean(RT..minus.mask.dur.+Preview.Duration, na.rm=TRUE), group.sem = sd(RT..minus.mask.dur.)/sqrt(length(RT..minus.mask.dur.)))
+
+mean_of_median_RT_coll <- ddply(median_RT_subj,. (age_group,Trial.Type), summarize, meanRT=mean(meanRT), group.sem = mean(SEM))
+
+
+```
+
+
+```{r}
+# subsetting the data by task
+
+median_RT_subj_detect <- subset(median_RT_subj,Trial.Type=="Detect")
+median_RT_subj_choose <- subset(median_RT_subj,Trial.Type=="Choose")
+
+# running a quickie ANOVA on RT, split by task
+```
+
+
+```{r}
+print("ANOVA ON REACTION TIME - DETECT:")
+
+anova.output.RT <- aov_ez("Subj.ID", "meanRT", median_RT_subj_detect,  between = c("age_group","gender"), anova_table = list(es="pes"))
+print(anova.output.RT$anova_table)
+#emmeans(anova.output, "label", contr = "pairwise")
+print("")
+```
+
+
+```{r}
+median_RT_subj_detect <- median_RT_subj_detect |>
+  dplyr::group_by(age_group, gender, Subj.ID) |>
+  dplyr::summarise(meanRT = mean(meanRT))
+
+p00577_mod_z_1 <- median_RT_subj_detect %>% 
+  lm(z(meanRT) ~ age_group*gender, data = .)
+
+anova(p00577_mod_z_1)
+
+export_ols(p00577_mod_z_1, 
+           key_effects = c("age_group55-70"))
+
+
+```
+
+
+```{r}
+print("ANOVA ON REACTION TIME - CHOOSE:")
+#anova.output.RT <- aov_ez("Subj.ID", "meanRT", median_RT_subj, within = c("Trial.Type"), between = c("age_group","gender"),anova_table = list(es="pes"))
+anova.output.RT <- aov_ez("Subj.ID", "meanRT", median_RT_subj_choose,  between = c("age_group","gender"), anova_table = list(es="pes"))
+print(anova.output.RT$anova_table)
+#emmeans(anova.output, "label", contr = "pairwise")
+print("")
+```
+
+```{r}
+anova.output.RT$lm$model |> 
+  lm(dv ~ age_group*gender, data = _) |> 
+  anova()
+```
+
+
+```{r}
+median_RT_subj_choose <- median_RT_subj_choose |>
+  dplyr::group_by(age_group, gender, Subj.ID) |>
+  dplyr::summarise(meanRT = mean(meanRT))
+
+p00577_mod_z_2 <- median_RT_subj_choose %>% 
+  lm(z(meanRT) ~ age_group*gender, data = .)
+
+export_ols(p00577_mod_z_2, 
+           key_effects = c("age_group55-70"))
+```
+
+
+
+
+```{r}
+print("")
+print("ANOVA ON FITTED THRESHOLDS")
+fit.summary[c("Subj.ID","label","age_group","gender")]<-lapply(fit.summary[c("Subj.ID","label","age_group","gender")],factor)
+anova.output <- aov_ez("Subj.ID", "thresh", fit.summary, within = c("label"), between = c("age_group", "gender"),anova_table = list(es="pes"))
+print(anova.output$anova_table)
+
+
+p00577_mod_rm_z_3 <- fit.summary %>% 
+  afex::aov_4(z(thresh) ~ label*age_group*gender + (label|Subj.ID), .)
+
+export_ols(p00577_mod_rm_z_3, 
+           key_effects = c("age_group", "label", "age_group:label"))
+
+
+
+
+p00577_mod_lmer_z_3 <- fit.summary %>% 
+  lme4::lmer(z(thresh) ~ label*age_group*gender + (1|Subj.ID), .)
+
+export_ols(p00577_mod_lmer_z_3, 
+           key_effects = c("age_group55-70", "labelResponse-Locked", "labelChoose", 
+                           "labelResponse-Locked:age_group55-70", "labelChoose:age_group55-70"))
+```
+

@@ -1,0 +1,92 @@
+---
+title: "p00097 re-analysis and data extraction notes"
+output: 
+   html_document:
+      theme: cosmo
+      highlight: tango
+---
+
+Despite a lack of research linking school shootings to video games, video games are frequently associated
+with school shootings carried out by White perpetrators. Because there is a stereotypical association
+between racial minorities and violent crime, it is possible that people often look toward video games as
+a cause for school shootings committed by White perpetrators who do not fit this stereotype. Consistent
+with this notion, Study 1 (n   169) found that participants who read a mock news story about a school
+shooting were more likely to blame video games when the shooter was White than when the shooter was
+Black. Study 2 examined 204,796 news stories of 204 mass shootings committed in the United States and
+found that, when a shooting occurred at a school, video games were 8.35 times more likely to be
+discussed when the shooter was White than when the shooter was Black.
+
+```{r setup, include=TRUE, message = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(magrittr)
+source("../scripts/helpers.R")
+
+# for alternative analyses 
+library(robustbase)
+library(moments)
+
+list.files("../data/raw_data/", pattern = "p00097")
+
+p00097_tib <- readr::read_csv("../data/raw_data/p00097_makrey2019_Datastudy1.csv")
+
+```
+
+Study 1
+
+compute weekly video game use 
+
+```{r}
+p00097_tib %<>% dplyr::mutate(
+  hours_pw = `Hours a day playing video games`*7
+)
+
+```
+
+They fit anova with and without covariates, I'm only reproducing the one with as it's a more complex model
+
+```{r}
+lm(`BlameGamesDV(MeanOf11dAnd11h)` ~ `IV condition (Black or White Mug)` 
+   + `11b. Social environment Wilson lived in a factor in this crime`
+   + hours_pw, 
+   data = p00097_tib) %>% car::Anova(type = 3)
+```
+
+Model to refit: 
+
+```{r}
+p00097_mod <- lm(`BlameGamesDV(MeanOf11dAnd11h)` ~ `IV condition (Black or White Mug)` 
+   + `11b. Social environment Wilson lived in a factor in this crime`
+   + hours_pw, 
+   data = p00097_tib)
+
+p00097_mod %>% summary()
+```
+
+
+```{r}
+p00097_tib <- p00097_tib %>% 
+   dplyr::mutate(
+      z_blame = z(`BlameGamesDV(MeanOf11dAnd11h)`),
+      z_social_env = z(`11b. Social environment Wilson lived in a factor in this crime`), 
+      z_hours_pw = z(hours_pw)
+   )
+
+```
+
+```{r}
+p00097_mod_z_1 <- lm(z_blame ~ `IV condition (Black or White Mug)` 
+   + z_social_env
+   + z_hours_pw, 
+   data = p00097_tib)
+
+summary(p00097_mod_z_1)
+```
+
+```{r}
+key_effects = c("`IV condition (Black or White Mug)`White Mugshot")
+export_ols(p00097_mod_z_1, key_effects)
+```
+
+
+

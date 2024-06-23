@@ -1,0 +1,183 @@
+---
+title: ""
+output: html_document
+---
+
+Conflict control is a critical capability for humans to detect and resolve conflicts. Unbalanced development of cognitive control may be associated with mental disorders and cause a heavy social burden. Despite the substantial amount of research on this topic, inconsistent conclusions were obtained from developmental trajectories of stimulus-response (S-R) conflict processing and stimulus-stimulus (S-S) conflict processing. This may be due to different tasks or relatively small population-based samples. Therefore, we designed a Simon-spatial-Stroop task and recruited 644 children, adolescents, and young adults from ages 7 to 23 to **investigate consecutively developmental trajectories of different types of conflict processing.** Our results demonstrated that **all age groups showed robust stimulus-response compatibility (SRC) effects, and the task performance improved with faster response speed and enhanced accuracy with advancing age.** It is noteworthy that the size of both S-R and S-S SRC effects declined from ages 7 to 15, which suggested that the crucial developmental period is from early childhood to adolescence. Furthermore, both S-R and S-S conflicts processing followed a U-shaped function across ages and showed a distinct developmental pattern from age 7. The peak performance of S-S conflict processing (18.61 years) occurred earlier than S-R conflict processing (19.66 years), suggesting S-S conflict processing may mature earlier than S-R conflict processing. The current study provides a robust measurement of conflict control across a wide age range and advances our understanding of the developmental specificity of S-R and S-S conflict processing.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+library(gtools)
+library(robustbase)
+library(magrittr) # unless you routinely load tidyverse, in which case leave this one out. You just need it for the pipe. 
+library(moments)
+
+list.files("../data/raw_data/", pattern = "u01144")
+
+#u01144_tib_1 <- haven::read_sav("../data/raw_data/u01144_fu2020_SRC_RT_644.sav")
+#u01144_tib_2 <- haven::read_sav("../data/raw_data/u01144_fu2020_SRC_ER_644.sav")
+u01144_tib_3 <- haven::read_sav("../data/raw_data/u01144_fu2020_SRC_IES_644.sav")
+u01144_tib_4 <- haven::read_sav("../data/raw_data/u01144_fu2020_SRC_IES_regression.sav")
+
+```
+
+```{r}
+names(u01144_tib_3)
+
+u01144_tib_3 %<>% 
+  dplyr::mutate(id = 1:nrow(.))
+```
+
+
+
+# ANOVAs reported in the paper.
+
+I'm specifying custom contrasts here because otherwise this would inflate the sample and result in 10 t-tests for each lm.
+
+```{r}
+u01144_tib_3 %<>%
+  dplyr::mutate(
+    Group1 = as.factor(Group1)
+  )
+```
+
+```{r}
+c1 = c(4/5, -1/5, -1/5, -1/5, -1/5)
+c2 = c(0.0, +3/4, -1/4, -1/4, -1/4)
+c3 = c(0.0, -0.0, +2/3, -1/3, -1/3)
+c4 = c(0.0, -0.0, -0.0, +1/2, -1/2)
+
+contrasts(u01144_tib_3$Group1) <- cbind(c1,c2,c3,c4)
+```
+
+
+
+```{r}
+u01144_mod_original_1 <- lm(SR.mean.IES ~ Group1, data = u01144_tib_3)
+u01144_mod_original_1 %>% car::Anova(type = 3)
+u01144_mod_original_1 %>% summary()
+```
+
+```{r}
+u01144_mod_z_1 <- lm(z(SR.mean.IES) ~ Group1, data = u01144_tib_3)
+u01144_mod_z_1 %>% car::Anova(type = 3)
+u01144_mod_z_1 %>% summary()
+```
+
+```{r}
+key_effects <- c("Group1c1", "Group1c2", "Group1c3", "Group1c4")
+export_ols(u01144_mod_z_1, key_effects)
+```
+
+
+
+
+
+
+
+```{r}
+u01144_mod_original_2 <- lm(SR.IES ~ Group1, data = u01144_tib_3) 
+u01144_mod_original_2 %>% summary()
+```
+
+```{r}
+u01144_mod_z_2 <- lm(z(SR.IES) ~ Group1, data = u01144_tib_3)
+u01144_mod_z_2 %>% summary()
+```
+
+```{r}
+key_effects <- c("Group1c1", "Group1c2", "Group1c3", "Group1c4")
+export_ols(u01144_mod_z_2, key_effects)
+```
+
+
+
+
+
+
+```{r}
+u01144_mod_original_3 <- lm(SS.mean.IES ~ Group1, data = u01144_tib_3)
+u01144_mod_original_3 %>% summary()
+```
+
+```{r}
+u01144_mod_z_3 <- lm(z(SS.mean.IES) ~ Group1, data = u01144_tib_3)
+u01144_mod_z_3 %>% summary()
+```
+
+```{r}
+key_effects <- c("Group1c1", "Group1c2", "Group1c3", "Group1c4")
+export_ols(u01144_mod_z_3, key_effects)
+```
+
+
+
+
+
+```{r}
+u01144_mod_original_4 <- lm(SS.IES ~ Group1, data = u01144_tib_3)
+u01144_mod_original_4 %>% summary()
+```
+
+```{r}
+u01144_mod_z_4 <- lm(z(SS.IES) ~ Group1, data = u01144_tib_3)
+u01144_mod_z_4 %>% summary()
+```
+
+```{r}
+key_effects <- c("Group1c1", "Group1c2", "Group1c3", "Group1c4")
+export_ols(u01144_mod_z_4, key_effects)
+```
+
+
+
+
+
+# regressions reported in the paper
+
+unstandardised
+
+```{r}
+names(u01144_tib_4)
+u01144_tib_4 %<>% dplyr::mutate(
+  Age2 = Age^2
+) 
+```
+
+```{r}
+u01144_mod_original_5 <- lm(SR.IES.normalized ~ Age + Age2, data = u01144_tib_4) 
+u01144_mod_original_5 %>% summary()
+```
+
+```{r}
+u01144_mod_z_5 <- lm(z(SR.IES.normalized) ~ z(Age) + z(Age2), data = u01144_tib_4) 
+u01144_mod_z_5 %>% summary()
+```
+
+```{r}
+key_effects = c("z(Age)", "z(Age2)")
+export_ols(u01144_mod_z_5, key_effects)
+```
+
+
+
+
+```{r}
+u01144_mod_original_6 <- lm((SS.IES.normalized) ~ (Age) + (Age2), data = u01144_tib_4)
+u01144_mod_original_6 %>% summary()
+```
+
+```{r}
+u01144_mod_z_6 <- lm(z(SS.IES.normalized) ~ z(Age) + z(Age2), data = u01144_tib_4)
+u01144_mod_z_6 %>% summary()
+```
+
+```{r}
+key_effects = c("z(Age)", "z(Age2)")
+export_ols(u01144_mod_z_6, key_effects)
+```
+
+

@@ -1,0 +1,1846 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-07'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+library(psych)
+library(dplyr)
+library(lm.beta)
+library(yarrr)
+library(ggplot2)
+library(Hmisc)
+library(multicon)
+library(effsize)
+library(lsr)
+
+
+source("../scripts/helpers.R")
+
+data = read.csv("../data/raw_data/p01192_GMCS_data_z2g999174621so2.csv", header = T)
+
+```
+
+```{r}
+Profile.r2 = function (x.set, y.set, nomiss = 1, distinct = FALSE, alt = "greater") 
+{
+  if (distinct == F) {
+    valids <- apply(cbind(x.set, y.set), 1, function(x) valid.pairs(x[1:ncol(x.set)], 
+                                                                    x[-1:-ncol(y.set)])$Pct)
+    out <- diag(cor(t(x.set), t(y.set), use = "pair"))
+    out <- ifelse(valids >= nomiss, out, NA)
+  }
+  if (distinct == T) {
+    valids <- apply(cbind(x.set, y.set), 1, function(x) valid.pairs(x[1:ncol(x.set)], 
+                                                                    x[-1:-ncol(y.set)])$Pct)
+    mat <- cor(t(x.set), t(y.set), use = "pair") 
+    overall.r <- diag(mat)
+    overall.r <- ifelse(valids >= nomiss, overall.r, NA)
+    mat[mat == 1 | mat == -1] = NA  # remove perfect correlations form the matrix to avoid infinite z-Values
+    baseline <- mean(c(fisherz(mat[upper.tri(mat)]), 
+                     fisherz(mat[lower.tri(mat)])), na.rm = TRUE) # this modification considers all random pairs when computing the baseline normative correlation
+    x.Norm <- colMeans(x.set, na.rm = T)
+    y.Norm <- colMeans(y.set, na.rm = T)
+    norm.r <- cor(x.Norm, y.Norm)
+    x.dist <- temp.resid(x.Norm, x.set, nomiss = nomiss)
+    y.dist <- temp.resid(y.Norm, y.set, nomiss = nomiss)
+    dist.r <- diag(cor(t(x.dist), t(y.dist), use = "pair"))
+    dist.r <- ifelse(valids >= nomiss, dist.r, NA)
+    overall.test <- t.test(fisherz(overall.r), mu = baseline, 
+                           alternative = alt)
+    overall.d <- cohensD(fisherz(overall.r), mu = baseline)
+    dist.test <- t.test(fisherz(dist.r), alternative = alt)
+    dist.d <- cohensD(fisherz(dist.r))
+    overall.T <- rbind(length(overall.r) - sum(is.na(overall.r)), 
+                       fisherz2r(mean(fisherz(overall.r), na.rm = T)), fisherz2r(baseline), 
+                       overall.test$statistic, overall.test$p.value, overall.d)
+    dist.T <- rbind(length(dist.r) - sum(is.na(dist.r)), 
+                    fisherz2r(mean(fisherz(dist.r), na.rm = T)), 0, dist.test$statistic, 
+                    dist.test$p.value, dist.d)
+    tests <- data.frame(overall.T, dist.T, row.names = c("N", 
+                                                         "Mean", "baseline", "t", "p-value", "Cohen's d"))
+    colnames(tests) <- c("Overall", "Distinctive")
+    agrees <- data.frame(Overall = overall.r, Distinctive = dist.r, 
+                         row.names = rownames(x.set))
+    out <- list(xNorm = x.Norm, yNorm = y.Norm, Norm.r = norm.r, 
+                Agreement = agrees, Tests = tests)
+  }
+  return(out)
+}
+
+```
+
+
+```{r}
+fa_T1 = fa(data %>% dplyr::select(matches('T1_pref'))  , nfactors = 4, rotate = 'oblimin')
+
+print.psych(fa_T1, digits = 2, cut = .30) # print factor loadings greater than .30
+
+# 19 of the 20 items load highest on the intended factor
+# the exception is the status/resources item SR_2 which has no loadings greater than .30
+# therefore, this items is removed from the SR scale
+
+
+table1 = data.frame(item = c('unterstanding', 'supportive', 'reliable', 'trustworthy', 'kind',
+                             'sexy', 'attractive', 'nice body', 'appealing', 'athletic', 
+                             'industrious', 'educated', 'successful', 'good occupational prospects', 'respected',
+                             'confident', 'humorous', 'resourceful', 'interesting', 'assertive'),
+                    intended = c(rep('WT', 5), rep('VA', 5), rep('SR', 5), rep('CH', 5)),
+                    M = round(c(mean(data$T1_pref_WT_1), mean(data$T1_pref_WT_2), mean(data$T1_pref_WT_3),
+                                mean(data$T1_pref_WT_4), mean(data$T1_pref_WT_5),
+                                mean(data$T1_pref_VA_1), mean(data$T1_pref_VA_2), mean(data$T1_pref_VA_3),
+                                mean(data$T1_pref_VA_4), mean(data$T1_pref_VA_5),
+                                mean(data$T1_pref_SR_1), mean(data$T1_pref_SR_2), mean(data$T1_pref_SR_3),
+                                mean(data$T1_pref_SR_4), mean(data$T1_pref_SR_5),
+                                mean(data$T1_pref_CH_1), mean(data$T1_pref_CH_2), mean(data$T1_pref_CH_3),
+                                mean(data$T1_pref_CH_4), mean(data$T1_pref_CH_5)),2),
+                    SD = round(c(sd(data$T1_pref_WT_1), sd(data$T1_pref_WT_2), sd(data$T1_pref_WT_3),
+                                 sd(data$T1_pref_WT_4), sd(data$T1_pref_WT_5),
+                                 sd(data$T1_pref_VA_1), sd(data$T1_pref_VA_2), sd(data$T1_pref_VA_3),
+                                 sd(data$T1_pref_VA_4), sd(data$T1_pref_VA_5),
+                                 sd(data$T1_pref_SR_1), sd(data$T1_pref_SR_2), sd(data$T1_pref_SR_3),
+                                 sd(data$T1_pref_SR_4), sd(data$T1_pref_SR_5),
+                                 sd(data$T1_pref_CH_1), sd(data$T1_pref_CH_2), sd(data$T1_pref_CH_3),
+                                 sd(data$T1_pref_CH_4), sd(data$T1_pref_CH_5)),2))
+
+table1$WT = fa_T1$loadings[1:20, 1]
+table1$VA = fa_T1$loadings[1:20, 2]
+table1$SR = fa_T1$loadings[1:20, 3]
+table1$CH = fa_T1$loadings[1:20, 4]
+table1$h2 = round(fa_T1$communality,2) # communalities
+
+table1[,5:8][table1[,5:8] < .30] = NA   # suppress factor loadings smaller than .30 in the table
+table1[,5:8] = round(table1[,5:8],2)   # round factor loadings to two decimals
+table1[,5:8][is.na(table1[,5:8])] = '' # remove the NAs; if the decond decimal is a zero, R eats it
+
+table1$WT[4] = '0.60' # manually correct the value fom 0.6 to 0.60
+table1$SR[15] = '0.50' # manually correct the value fom 0.5 to 0.50
+table1$h2[11] = '0.40' # manually correct the value fom 0.4 to 0.40
+
+table1[,1] = as.character(table1[,1])
+table1[,2] = as.character(table1[,2])
+
+table1 = rbind(table1, rep('', 9),  
+               c('variance explained', '', '', '', '.12', '.12', '.11', '.08', ''))
+
+table1 # display table 1
+
+# write.csv2(table1, file = 'table1.csv', row.names = F) # uncomment this line if you want to save the table as a separate file
+```
+
+
+```{r}
+# 1.2. initial (T1) preferences -------------------------------------------
+
+# 1.2.1. warmth - trustworthiness -----------------------------------------
+
+T1_pref_WT_items = data %>% dplyr::select(matches('T1_pref_WT'))
+psych::alpha(T1_pref_WT_items) # alpha = .77
+data$T1_pref_WT = rowMeans(T1_pref_WT_items, na.rm = T)
+
+
+# 1.2.2. vitality - attractiveness ----------------------------------------
+
+T1_pref_VA_items = data %>% dplyr::select(matches('T1_pref_VA'))
+psych::alpha(T1_pref_VA_items) # alpha = .78
+data$T1_pref_VA = rowMeans(T1_pref_VA_items, na.rm = T)
+
+
+# 1.2.3. status - resources -----------------------------------------------
+
+T1_pref_SR_items = data %>% dplyr::select(matches('T1_pref_SR')) %>% dplyr::select(-matches('SR_2'))
+psych::alpha(T1_pref_SR_items) # alpha = .78
+data$T1_pref_SR = rowMeans(T1_pref_SR_items, na.rm = T)
+
+
+# 1.2.4. confidence - humor ----------------------------------------
+
+T1_pref_CH_items = data %>% dplyr::select(matches('T1_pref_CH'))
+psych::alpha(T1_pref_CH_items) # alpha = .67
+data$T1_pref_CH = rowMeans(T1_pref_CH_items, na.rm = T)
+
+
+# 1.3. T2 preferences -----------------------------------------------------
+
+# 1.3.1. warmth - trustworthiness -----------------------------------------
+
+T2_pref_WT_items = data %>% dplyr::select(matches('T2_pref_WT'))
+psych::alpha(T2_pref_WT_items) # alpha = .78
+data$T2_pref_WT = rowMeans(T2_pref_WT_items, na.rm = T)
+
+
+# 1.3.2. vitality - attractiveness ----------------------------------------
+
+T2_pref_VA_items = data %>% dplyr::select(matches('T2_pref_VA'))
+psych::alpha(T2_pref_VA_items) # alpha = .77
+data$T2_pref_VA = rowMeans(T2_pref_VA_items, na.rm = T)
+
+
+# 1.3.3. status - resources -----------------------------------------------
+
+T2_pref_SR_items = data %>% dplyr::select(matches('T2_pref_SR')) %>% dplyr::select(-matches('SR_2'))
+psych::alpha(T2_pref_SR_items) # alpha = .80
+data$T2_pref_SR = rowMeans(T2_pref_SR_items, na.rm = T)
+
+
+# 1.3.4. confidence - humor ----------------------------------------
+
+T2_pref_CH_items = data %>% dplyr::select(matches('T2_pref_CH'))
+psych::alpha(T2_pref_CH_items) # alpha = .70
+data$T2_pref_CH = rowMeans(T2_pref_CH_items, na.rm = T)
+
+
+# 1.4. T2 partner characteristics ----------------------------------------------
+
+# 1.4.1. warmth - trustworthiness -----------------------------------------
+
+T2_partner_WT_items = data %>% dplyr::select(matches('T2_partner_WT'))
+psych::alpha(T2_partner_WT_items) # alpha = .86
+data$T2_partner_WT = rowMeans(T2_partner_WT_items, na.rm = T)
+
+
+# 1.4.2. vitality - attractiveness ----------------------------------------
+
+T2_partner_VA_items = data %>% dplyr::select(matches('T2_partner_VA'))
+psych::alpha(T2_partner_VA_items) # alpha = .83
+data$T2_partner_VA = rowMeans(T2_partner_VA_items, na.rm = T)
+
+
+# 1.4.3. status - resources -----------------------------------------------
+
+T2_partner_SR_items = data %>% dplyr::select(matches('T2_partner_SR')) %>% dplyr::select(-matches('SR_2'))
+psych::alpha(T2_partner_SR_items) # alpha = .75
+data$T2_partner_SR = rowMeans(T2_partner_SR_items, na.rm = T)
+
+
+# 1.4.4. confidence - humor ----------------------------------------
+
+T2_partner_CH_items = data %>% dplyr::select(matches('T2_partner_CH'))
+psych::alpha(T2_partner_CH_items) # alpha = .75
+data$T2_partner_CH = rowMeans(T2_partner_CH_items, na.rm = T)
+
+
+# 1.5 self-perceived mate value -------------------------------------------
+
+T1_MV_items = data %>% dplyr::select(matches('MV'))
+psych::alpha(T1_MV_items) # alpha = .87
+data$T1_MV = rowMeans(T1_MV_items, na.rm = T)
+
+
+# 2. descriptive data -----------------------------------------------------
+
+# 2.1. demographic data ---------------------------------------------------
+
+# 2.1.1 participants' age and gender --------------------------------------
+
+# not reproducible due to removing T1_age in order to ensure the anonymity of our participants
+# round(mean(data$T1_age), 2) # mean age
+# round(sd(data$T1_age), 2) # age sd
+
+table(data$T1_sex) # participant sex - absolute numbers
+round(table(data$T1_sex)/sum(table(data$T1_sex)),2)*100 # participant sex - percent values
+
+
+# 2.1.2 education and occupation stated at T1 ------------------------------------
+
+# Number and proportion of participants with at a least high school degree
+table(data$T1_education) # 689 participants with high school degree, 74 without
+
+round(table(data$T1_education)/
+  sum(table(data$T1_education))*100) # 90% percent with at least high school diploma
+
+# Number and percentage of university students
+table(data$T1_occupation) # 555 university students, 208 non-students
+
+round(table(data$T1_occupation)/
+  sum(table(data$T1_occupation))*100) # 73% of participants are university students
+
+
+# 2.1.3 relationship status at T2 -----------------------------------------
+
+table(data$T2_relationship_status) # relationship status - absolute numbers
+round(table(data$T2_relationship_status)/
+        sum(table(data$T2_relationship_status)),2)*100 # relationship status - percent values
+
+
+# 2.1.4 age and sex of relationship subsample -----------------------------
+
+round(mean(data$T1_age[data$T2_relationship_status == 'relationship']), 2) # mean age in relationship sample
+round(sd(data$T1_age[data$T2_relationship_status == 'relationship']), 2) # age sd
+
+table(data$T1_sex[data$T2_relationship_status == 'relationship']) # participant sex - absolute numbers
+round(table(data$T1_sex[data$T2_relationship_status == 'relationship'])/
+        sum(table(data$T1_sex[data$T2_relationship_status == 'relationship'])),2)*100 # participant sex - percent values
+
+
+# 2.1.5 education and occupation of relationship subsample -----------------
+
+# Number and propiortion of participants with at a least high school degree
+with(subset(data, T2_relationship_status == 'relationship'), 
+     table(T1_education == 'high school degree')) # 232 participants
+
+with(subset(data, T2_relationship_status == 'relationship'), 
+     round(table(T1_education == 'high school degree')/
+        sum(table(T1_education))*100)) # 90% percent with at least high school diploma
+
+# Number and percentage of university students
+with(subset(data, T2_relationship_status == 'relationship'),
+     table(T1_occupation == 'university student')) # 172 university students
+
+with(subset(data, T2_relationship_status == 'relationship'),
+          round(table(T1_occupation == 'university student')/
+        sum(table(T1_occupation))*100)) # 67% of participants are university students
+
+
+# 2.1.6 Comparison of relationship and single subsamples - ----------------
+
+# 2.1.6.1 age -------------------------------------------------------------
+
+# not reproducible due to removing T1_age in order to ensure the anonymity of our participants
+# with(data, t.test(T1_age ~ T2_relationship_status)) # relationship subsample is about 1 year older, on average
+# with(data, cohen.d(T1_age, T2_relationship_status)) # d = .19
+
+# 2.1.6.2 participant sex -------------------------------------------------
+
+chisq.test(rbind(table(subset(data, T2_relationship_status == 'single')$T1_sex), 
+                 table(subset(data, T2_relationship_status == 'relationship')$T1_sex)))
+# significant difference in the proportion of females
+
+round(table(subset(data, T2_relationship_status == 'single')$T1_sex) /
+  sum(table(subset(data, T2_relationship_status == 'single')$T1_sex)),2) # proportion of females in single sample
+
+
+# 2.1.6.3 education (high school degree or higher) -------------------------
+
+chisq.test(rbind(with(subset(data, T2_relationship_status == 'single'), 
+                      table(T1_education == 'high school degree')),
+      with(subset(data, T2_relationship_status == 'relationship'), 
+           table(T1_education == 'high school degree'))))
+# no difference in proportion of participants with at least high school degree
+      
+
+# 2.1.6.4 occupation (university student status) -----------------------------
+
+chisq.test(rbind(with(subset(data, T2_relationship_status == 'single'),
+                            table(T1_occupation == 'university student')),
+                 with(subset(data, T2_relationship_status == 'relationship'),
+                      table(T1_occupation == 'university student'))))
+# slightly lower proportion of university students in the relationship subsample
+# which is in line with the relationship subsample being, on average, one year older
+
+round(with(subset(data, T2_relationship_status == 'single'),
+     table(T1_occupation == 'university student'))/
+  sum(with(subset(data, T2_relationship_status == 'single'),
+           table(T1_occupation == 'university student')))*100)
+# proportion of T2 singles who were university students at T1
+
+
+# 2.2 Means, SDs, and zero order correlations -----------------------------
+
+# correlation matrix of T1 preferences and T2 partner attributes
+cor_matrix = rcorr(as.matrix(data %>% 
+                               dplyr::select(T1_pref_WT, T1_pref_VA, T1_pref_SR, T1_pref_CH, 
+                                             T2_pref_WT, T2_pref_VA, T2_pref_SR, T2_pref_CH, 
+                                             T2_partner_WT, T2_partner_VA, T2_partner_SR, T2_partner_CH)))
+
+# correlations rounded to 2 decimals
+round(cor_matrix[[1]],2)
+
+# number of observations
+cor_matrix[[2]]
+
+# p-values rounded to 4 decimals
+round(cor_matrix[[3]],4)
+
+# comparison of T1 and T2 preferences
+t.test(data$T1_pref_WT, data$T2_pref_WT, paired = T)
+round(cohensD(data$T1_pref_WT, data$T2_pref_WT, method = 'paired'),2)
+
+t.test(data$T1_pref_VA, data$T2_pref_VA, paired = T)
+round(cohensD(data$T1_pref_VA, data$T2_pref_VA, method = 'paired'),2)
+
+t.test(data$T1_pref_SR, data$T2_pref_SR, paired = T)
+round(cohensD(data$T1_pref_SR, data$T2_pref_SR, method = 'paired'),2)
+
+t.test(data$T1_pref_CH, data$T2_pref_CH, paired = T)
+round(cohensD(data$T1_pref_CH, data$T2_pref_CH, method = 'paired'),2)
+
+# add means and standard deviations to the correlation table 
+
+table3 = cbind(data.frame(M = round(colMeans(data %>% dplyr::select(T1_pref_WT, T1_pref_VA, 
+                                                                    T1_pref_SR, T1_pref_CH, 
+                                                                    T2_pref_WT, T2_pref_VA, 
+                                                                    T2_pref_SR, T2_pref_CH, 
+                                                                    T2_partner_WT, T2_partner_VA, 
+                                                                    T2_partner_SR, T2_partner_CH), na.rm = T),2),
+                    SD = round(apply(data %>% dplyr::select(T1_pref_WT, T1_pref_VA, 
+                                                            T1_pref_SR, T1_pref_CH, 
+                                                            T2_pref_WT, T2_pref_VA, 
+                                                            T2_pref_SR, T2_pref_CH, 
+                                                            T2_partner_WT, T2_partner_VA, 
+                                                            T2_partner_SR, T2_partner_CH), 2, sd, na.rm = T),2),
+                    d = c(rep('',4), c(round(cohensD(data$T1_pref_WT, data$T2_pref_WT, method = 'paired'),2),
+                                       round(cohensD(data$T1_pref_VA, data$T2_pref_VA, method = 'paired'),2),
+                                       round(cohensD(data$T1_pref_SR, data$T2_pref_SR, method = 'paired'),2),
+                                       round(cohensD(data$T1_pref_CH, data$T2_pref_CH, method = 'paired'),2)),
+                          rep('',4)),
+                    round(cor_matrix[[1]],2)))
+
+# replace correlations with self (1.00) with internal consistencies (cronbach's alpha)
+table3[1,4] = round(psych::alpha(T1_pref_WT_items)[[1]][1],2)
+table3[2,5] = round(psych::alpha(T1_pref_VA_items)[[1]][1],2)
+table3[3,6] = round(psych::alpha(T1_pref_SR_items)[[1]][1],2)
+table3[4,7] = round(psych::alpha(T1_pref_CH_items)[[1]][1],2)
+table3[5,8] = round(psych::alpha(T2_pref_WT_items)[[1]][1],2)
+table3[6,9] = round(psych::alpha(T2_pref_VA_items)[[1]][1],2)
+table3[7,10] = round(psych::alpha(T2_pref_SR_items)[[1]][1],2)
+table3[8,11] = round(psych::alpha(T2_pref_CH_items)[[1]][1],2)
+table3[9,12] = round(psych::alpha(T2_partner_WT_items)[[1]][1],2)
+table3[10,13] = round(psych::alpha(T2_partner_VA_items)[[1]][1],2)
+table3[11,14] = round(psych::alpha(T2_partner_SR_items)[[1]][1],2)
+table3[12,15] = round(psych::alpha(T2_partner_CH_items)[[1]][1],2)
+
+# remove redundant coefficients (above the diagonale) from the correlation matrix
+table3[,4:15][upper.tri(table3[,4:15])] = ''
+
+table3 # display table 3
+
+# write.csv2(table3, file = 'table3.csv', row.names = F) # uncomment this line if you want to save the table as a separate file
+
+
+# 2.3 differences between correlations of T1 preferences and T2 partner charactersitrics --------
+
+# create a character vector containnig the dimension names for use in the following loop
+dimensions = c('WT', 'VA', 'SR', 'CH')
+
+# create empty matrices later to contain the t and p values for the tests of differences between
+# the dependent correlation coefficients
+t_matrix_T1_pref_T2_partner = matrix(NA, 4, 4)
+p_matrix_T1_pref_T2_partner = matrix(NA, 4, 4)
+
+# this loop fills the matrix with the t and p values of the tests of differences between the correlations
+for(i in 1:4){
+  for(j in 1:4){
+    if(i != j){
+      
+    tmp = eval(parse(text = paste('paired.r(cor(data$T1_pref_', dimensions[i], 
+                    ', data$T2_partner_', dimensions[i], ', use = "pairwise.complete.obs"), cor(data$T1_pref_', 
+                    dimensions[i], ', data$T2_partner_', dimensions[j], 
+                    ', use = "pairwise.complete.obs"), cor(data$T2_partner_', dimensions[i], 
+                    ', data$T2_partner_', dimensions[j], ', use = "pairwise.complete.obs"), n = 257, twotailed=F)', sep = '')))
+    print(tmp)
+    t_matrix_T1_pref_T2_partner[j,i] = round(tmp[[2]],2)
+    p_matrix_T1_pref_T2_partner[j,i] = round(tmp[[3]],4)}
+  }
+}
+
+colnames(t_matrix_T1_pref_T2_partner) = c('matching_cor_WT', 'matching_cor_VA',
+                                           'matching_cor_SR', 'matching_cor_CH')
+rownames(t_matrix_T1_pref_T2_partner) = c('mismatching_cor_with_WT', 'mismatching_cor_with_VA',
+                                          'mismatching_cor_with_SR', 'mismatching_cor_with_CH')
+
+colnames(p_matrix_T1_pref_T2_partner) = c('matching_cor_WT', 'matching_cor_VA',
+                                          'matching_cor_SR', 'matching_cor_CH')
+rownames(p_matrix_T1_pref_T2_partner) = c('mismatching_cor_with_WT', 'mismatching_cor_with_VA',
+                                          'mismatching_cor_with_SR', 'mismatching_cor_with_CH')
+
+# t-values for the difference tests
+t_matrix_T1_pref_T2_partner
+
+# p-values for the difference tests
+p_matrix_T1_pref_T2_partner
+```
+
+
+```{r}
+# 3. analyses -------------------------------------------------------------
+
+# 3.1. research question 1: predictive validity of T1 preferences ---------
+
+# 3.1.1. regression analyses ----------------------------------------------
+
+# 3.1.1.1 warmth - trustworthiness ----------------------------------------
+
+# base model for predictive validity, scale-function z-standardizes the variables
+model_WT_1 = lm(z(T2_partner_WT) ~ T1_sex * z(T1_pref_WT), data = data)
+
+# output with standardized regression weights
+summary((model_WT_1))
+
+# not reproducible due to removing T1_age in order to ensure the anonymity of our participants
+# # test for the robustness of the effects when controlling for age
+# model_WT_2 = update(model_WT_1, .~. + scale(T1_age))
+# 
+# # adding participant age does not change the pattern of results for the other three predictors
+# summary(lm.beta(model_WT_2))
+
+
+# 3.1.1.2  vitality - attractiveness ----------------------------------------
+
+# base model for predictive validity, scale-function z-standardizes the variables
+model_VA_1 = lm(scale(T2_partner_VA) ~ T1_sex * scale(T1_pref_VA), data = data)
+
+# output with standardized regression weights
+summary((model_VA_1))
+
+# # not reproducible due to removing T1_age in order to ensure the anonymity of our participants
+# # test for the robustness of the effects when controlling for age
+# model_VA_2 = update(model_VA_1, .~. + scale(T1_age))
+# 
+# # adding participant age does not change the pattern of results for the other three predictors
+# summary(lm.beta(model_VA_2))
+
+# disentangling the interaction effect via simple slopes by participant sex
+# model_VA_1_male = lm(scale(T2_partner_VA) ~ scale(T1_pref_VA), data = subset(data, T1_sex == 'male'))
+# model_VA_1_female = lm(scale(T2_partner_VA) ~ scale(T1_pref_VA), data = subset(data, T1_sex == 'female'))
+# 
+# summary(lm.beta(model_VA_1_male))   # strong effect in male subset
+# summary(lm.beta(model_VA_1_female)) # weaker but still significant effect in female subset
+
+# 3.1.1.3  status - resources --------------------------------------------
+
+# base model for predictive validity, scale-function z-standardizes the variables
+model_SR_1 = lm(scale(T2_partner_SR) ~ T1_sex * scale(T1_pref_SR), data = data)
+
+# output with standardized regression weights
+summary(lm.beta(model_SR_1))
+
+# # not reproducible due to removing T1_age in order to ensure the anonymity of our participants
+# # test for the robustness of the effects when controlling for age
+# model_SR_2 = update(model_SR_1, .~. + scale(T1_age))
+# 
+# # adding participant age does not change the pattern of results for the other three predictors
+# summary(lm.beta(model_SR_2))
+
+
+# 3.1.1.4  confidence - humor ---------------------------------------
+
+# base model for predictive validity, scale-function z-standardizes the variables
+model_CH_1 = lm(scale(T2_partner_CH) ~ T1_sex * scale(T1_pref_CH), data = data)
+
+# output with standardized regression weights
+summary(lm.beta(model_CH_1))
+
+# # not reproducible due to removing T1_age in order to ensure the anonymity of our participants
+# # test for the robustness of the effects when controlling for age
+# model_CH_2 = update(model_CH_1, .~. + scale(T1_age))
+# 
+# # adding participant age does not change the pattern of results for the other three predictors
+# summary(lm.beta(model_CH_2))
+```
+
+# HERE
+
+It seems like the values reported in the paper used gender as numeric, so there is slight mismatch for those parameter estimates, but the R squared and p-values match for all models. 
+
+```{r}
+# 3.1.2 the moderating effect of self-perceived mate value ------------------
+
+# 3.1.2.1 analysis of all participants  ------------------------------
+
+# moderation analysis including interactions of mate value with the T1 preferences, 
+# participants' sex, and the three-way interaction
+```
+
+
+model 1
+
+```{r}
+# WT - no main effect of mate value, no interactions
+p01192_mod_z_1 <- ((lm(z(T2_partner_WT) ~ z(T1_pref_WT) * z(T1_MV) * T1_sex, data = data)))
+
+export_ols(
+  p01192_mod_z_1, 
+  key_effects = c("z(T1_pref_WT)", "z(T1_MV)", "T1_sexmale", 
+                  "z(T1_pref_WT):z(T1_MV)", "z(T1_pref_WT):T1_sexmale",
+                  "z(T1_MV):T1_sexmale", "z(T1_pref_WT):z(T1_MV):T1_sexmale")
+)
+```
+
+
+```{r}
+# VA - no main effect of mate value, no interactions
+p01192_mod_z_2 <- ((lm(z(T2_partner_VA) ~ z(T1_pref_VA) * z(T1_MV) * T1_sex, data = data)))
+
+export_ols(
+  p01192_mod_z_2, 
+  key_effects = mod_coeffs(p01192_mod_z_2)
+)
+```
+
+
+```{r}
+# SR - no main effect of mate value, no interactions
+p01192_mod_z_3 <- ((lm(z(T2_partner_SR) ~ z(T1_pref_SR) * z(T1_MV) * (T1_sex), data = data)))
+
+export_ols(
+  p01192_mod_z_3, 
+  key_effects = mod_coeffs(p01192_mod_z_3)
+)
+```
+
+
+```{r}
+# CH - no main effect of mate value, no interactions
+p01192_mod_z_4 <- ((lm(z(T2_partner_CH) ~ z(T1_pref_CH) * z(T1_MV) * T1_sex, data = data)))
+
+export_ols(
+  p01192_mod_z_4, 
+  key_effects = mod_coeffs(p01192_mod_z_4)
+)
+```
+
+
+```{r}
+# 3.1.2.2 Analysis of female participants only ------------------------------
+
+# At the time of the preregistration, the study was designed to focus on female participants only. 
+# Therefore, testing the original preregistered hypothesis means to test the moderating effect of 
+# self-perceived mate value on the predictive validity of T1 partner preferences in women only. 
+# Results are consistent with the analysis of the full sample: there are no effects of mate value.
+```
+
+
+```{r}
+# WT - no main effect of mate value, no moderation
+summary(lm.beta(lm(scale(T2_partner_WT) ~ scale(T1_pref_WT) * scale(T1_MV), 
+                   data = subset(data, T1_sex == 'female'))))
+
+# VA - no main effect of mate value, no moderation
+summary(lm.beta(lm(scale(T2_partner_VA) ~ scale(T1_pref_VA) * scale(T1_MV), 
+                   data = subset(data, T1_sex == 'female'))))
+
+# SR - no main effect of mate value, no moderation
+summary(lm.beta(lm(scale(T2_partner_SR) ~ scale(T1_pref_SR) * scale(T1_MV), 
+                   data = subset(data, T1_sex == 'female'))))
+
+# CH - no main effect of mate value, no moderation
+summary(lm.beta(lm(scale(T2_partner_CH) ~ scale(T1_pref_CH) * scale(T1_MV), 
+                   data = subset(data, T1_sex == 'female'))))
+```
+
+
+```{r}
+# 3.1.3 profile correlations ----------------------------------------------
+
+# 3.1.3.1 profile correlation on the basis of the four dimensions ---------
+
+# extract the four T1 preference dimensions of participants who were in a relationship at T2
+# and who reported their partner's charactesitics (N = 257)
+T1_scales = subset(data, T2_relationship_status == 'relationship' & !is.na(T2_partner_WT)) %>%
+  dplyr::select(T1_pref_WT, T1_pref_VA, T1_pref_SR, T1_pref_CH)
+
+# extract the ratings of the four T2 partner characteristics of participants who were in a relationship at T2
+T2_scales = subset(data, T2_relationship_status == 'relationship' & !is.na(T2_partner_WT)) %>%
+  dplyr::select(T2_partner_WT, T2_partner_VA, T2_partner_SR, T2_partner_CH)
+
+# compute profile correlations on the basis of the 4 preference dimensions
+# here, we use the modified Profile.r function because the corelation matrix contains perfect correlations
+round(suppressWarnings(Profile.r2(T1_scales, T2_scales, distinct = T))$Tests, 4)
+
+# check the number of perfect correlations in the correlation matrix
+suppressWarnings(sum(abs((cor(t(T1_scales), t(T2_scales)) == 1)), na.rm = T))
+# 6 entries in the 256 x 256 correlation matrix equal 1 or -1 and are, thus, removed from the data
+
+
+# 3.1.3.2 profile correlations on the item level --------------------------
+
+# extract all 19 T1 preference items of participants who were in a relationship at T2
+T1_preferences = subset(data, T2_relationship_status == 'relationship') %>%
+  dplyr::select(matches('T1_pref')) %>% dplyr::select(-matches('T1_pref_SR_2')) %>%
+  dplyr::select(-c(T1_pref_WT, T1_pref_VA, T1_pref_SR, T1_pref_CH)) # this line removes the 4 scale values
+
+# extract all 19 T2 partner ratings of participants who were in a relationship at T2
+T2_partner = subset(data, T2_relationship_status == 'relationship') %>%
+  dplyr::select(matches('T2_partner')) %>% dplyr::select(-matches('T2_partner_SR_2')) %>%
+  dplyr::select(-c(T2_partner_WT, T2_partner_VA, T2_partner_SR, T2_partner_CH)) # this line removes the 4 scale values
+
+# compute mean overall profile correlation and distinctive profile correlation
+# distinctive correlations are tested against zero using a two-tailed one-sample t-test
+round(suppressWarnings(Profile.r2(T1_preferences, T2_partner, distinct = T))$Tests,4)
+
+
+# 3.1.3.3 Analysis of dimension-level profile correlation by participants' sex ------
+
+# extract the four T1 preference dimensions of female participants (N = 187)
+T1_scales_f = subset(data, T2_relationship_status == 'relationship' & !is.na(T2_partner_WT) &
+                       T1_sex == 'female') %>% dplyr::select(T1_pref_WT, T1_pref_VA, T1_pref_SR, T1_pref_CH)
+
+# extract the ratings of the four T2 partner characteristics of female participants 
+T2_scales_f = subset(data, T2_relationship_status == 'relationship' & !is.na(T2_partner_WT) & 
+                       T1_sex == 'female') %>% dplyr::select(T2_partner_WT, T2_partner_VA, T2_partner_SR, T2_partner_CH)
+
+# extract the four T1 preference dimensions of male participants (N = 70)
+T1_scales_m = subset(data, T2_relationship_status == 'relationship' & !is.na(T2_partner_WT) &
+                       T1_sex == 'male') %>% dplyr::select(T1_pref_WT, T1_pref_VA, T1_pref_SR, T1_pref_CH)
+
+# extract the ratings of the four T2 partner characteristics of male participants
+T2_scales_m = subset(data, T2_relationship_status == 'relationship' & !is.na(T2_partner_WT) & 
+                       T1_sex == 'male') %>% dplyr::select(T2_partner_WT, T2_partner_VA, T2_partner_SR, T2_partner_CH)
+
+# compute profile correlation for female participants
+pCorr_scales_f = round(suppressWarnings(Profile.r2(T1_scales_f, T2_scales_f, distinct = T))$Tests, 4)
+
+# compute profile correlation for male participants
+pCorr_scales_m = round(suppressWarnings(Profile.r2(T1_scales_m, T2_scales_m, distinct = T))$Tests, 4)
+
+# compare average profile correlation
+r.test(n = 187, n2 = 70, r12 = pCorr_scales_f[2,1], 
+       r34 = pCorr_scales_m[2,1], twotailed = T)
+(1-pnorm(0.77, mean = 0, sd = 1))*2 # p = .441
+
+# compare average distinct correlation
+r.test(n = 187, n2 = 70, r12 = pCorr_scales_f[2,2], 
+       r34 = pCorr_scales_m[2,2], twotailed = T)
+(1-pnorm(0.52, mean = 0, sd = 1))*2 # p = .603
+
+
+# 3.1.3.4 Analysis of item-level profile correlation by participants' sex ------
+
+# extract all 19 T1 preference items of female participants who were in a relationship at T2
+T1_preferences_f = subset(data, T2_relationship_status == 'relationship' & T1_sex == 'female') %>%
+  dplyr::select(matches('T1_pref')) %>% dplyr::select(-matches('T1_pref_SR_2')) %>%
+  dplyr::select(-c(T1_pref_WT, T1_pref_VA, T1_pref_SR, T1_pref_CH)) # this line removes the 4 scale values
+
+# extract all 19 T2 partner ratings of female participants who were in a relationship at T2
+T2_partner_f = subset(data, T2_relationship_status == 'relationship' & T1_sex == 'female') %>%
+  dplyr::select(matches('T2_partner')) %>% dplyr::select(-matches('T2_partner_SR_2')) %>%
+  dplyr::select(-c(T2_partner_WT, T2_partner_VA, T2_partner_SR, T2_partner_CH))
+
+# extract all 19 T1 preference items of male participants who were in a relationship at T2
+T1_preferences_m = subset(data, T2_relationship_status == 'relationship' & T1_sex == 'male') %>%
+  dplyr::select(matches('T1_pref')) %>% dplyr::select(-matches('T1_pref_SR_2')) %>%
+  dplyr::select(-c(T1_pref_WT, T1_pref_VA, T1_pref_SR, T1_pref_CH)) 
+
+# extract all 19 T2 partner ratings of male participants who were in a relationshipt at T2
+T2_partner_m = subset(data, T2_relationship_status == 'relationship' & T1_sex == 'male') %>%
+  dplyr::select(matches('T2_partner')) %>% dplyr::select(-matches('T2_partner_SR_2')) %>%
+  dplyr::select(-c(T2_partner_WT, T2_partner_VA, T2_partner_SR, T2_partner_CH))
+
+# compute profile correlation for female participants
+pCorr_items_f = round(suppressWarnings(Profile.r2(T1_preferences_f, T2_partner_f, distinct = T))$Tests, 4)
+
+# compute profile correlation for male participants
+pCorr_items_m = round(suppressWarnings(Profile.r2(T1_preferences_m, T2_partner_m, distinct = T))$Tests, 4)
+
+# compare average profile correlation
+r.test(n = 187, n2 = 70, r12 = pCorr_items_f[2,1], 
+       r34 = pCorr_items_m[2,1], twotailed = T)
+(1-pnorm(0.37, mean = 0, sd = 1))*2 # p = .711
+
+# compare average distinct correlation
+r.test(n = 187, n2 = 70, r12 = pCorr_items_f[2,2], 
+       r34 = pCorr_items_m[2,2], twotailed = T)
+(1-pnorm(0.07, mean = 0, sd = 1))*2 # p = .944
+
+
+# 3.2 research question 2: stability of preferences -----------------------
+
+# 3.2.1 analysis of all participants --------------------------------------
+
+# retest correlations of T1 and T2 preferences for all 4 dimensions
+cor.test(data$T1_pref_WT, data$T2_pref_WT) # r = .56, 95% CI [.51; .61]
+cor.test(data$T1_pref_VA, data$T2_pref_VA) # r = .69, 95% CI [.65; .72]
+cor.test(data$T1_pref_SR, data$T2_pref_SR) # r = .73, 95% CI [.70; .76]
+cor.test(data$T1_pref_CH, data$T2_pref_CH) # r = .59, 95% CI [.54; .64]
+
+# mean stability of preferences (averaged across all 4 dimensions)
+fisherz2r(mean(c(fisherz(cor(data$T1_pref_WT, data$T2_pref_WT)),
+                 fisherz(cor(data$T1_pref_VA, data$T2_pref_VA)),
+                 fisherz(cor(data$T1_pref_SR, data$T2_pref_SR)),
+                 fisherz(cor(data$T1_pref_CH, data$T2_pref_CH)))))
+# mean r = .65
+     
+
+# 3.2.1.2 analysis by participant sex -------------------------------------
+
+# retest correlations of T1 and T2 preferences for all 4 dimensions among female participants
+with(subset(data, T1_sex == 'female'), cor.test(T1_pref_WT, T2_pref_WT)) # r = .52, 95% CI [.45; .58]
+with(subset(data, T1_sex == 'female'), cor.test(T1_pref_VA, T2_pref_VA)) # r = .67, 95% CI [.62; .71]
+with(subset(data, T1_sex == 'female'), cor.test(T1_pref_SR, T2_pref_SR)) # r = .70, 95% CI [.65; .74]
+with(subset(data, T1_sex == 'female'), cor.test(T1_pref_CH, T2_pref_CH)) # r = .47, 95% CI [.40; .53]
+
+# mean stability of preferences (averaged across all 4 dimensions) among female participants
+with(subset(data, T1_sex == 'female'), fisherz2r(mean(c(fisherz(cor(T1_pref_WT, T2_pref_WT)),
+                 fisherz(cor(T1_pref_VA, T2_pref_VA)),
+                 fisherz(cor(T1_pref_SR, T2_pref_SR)),
+                 fisherz(cor(T1_pref_CH, T2_pref_CH))))))
+# mean r = .60
+
+# retest correlations of T1 and T2 preferences for all 4 dimensions among male participants
+with(subset(data, T1_sex == 'male'), cor.test(T1_pref_WT, T2_pref_WT)) # r = .66, 95% CI [.58; .72]
+with(subset(data, T1_sex == 'male'), cor.test(T1_pref_VA, T2_pref_VA)) # r = .74, 95% CI [.67; .79]
+with(subset(data, T1_sex == 'male'), cor.test(T1_pref_SR, T2_pref_SR)) # r = .75, 95% CI [.69; .80]
+with(subset(data, T1_sex == 'male'), cor.test(T1_pref_CH, T2_pref_CH)) # r = .77, 95% CI [.71; .82]
+
+# mean stability of preferences (averaged across all 4 dimensions) among male participants
+with(subset(data, T1_sex == 'male'), fisherz2r(mean(c(fisherz(cor(T1_pref_WT, T2_pref_WT)),
+                                                        fisherz(cor(T1_pref_VA, T2_pref_VA)),
+                                                        fisherz(cor(T1_pref_SR, T2_pref_SR)),
+                                                        fisherz(cor(T1_pref_CH, T2_pref_CH))))))
+# mean r = .73
+
+
+# 3.2.2 comparison of participants by T2 relationship status --------------
+
+# 3.2.2.1 warmth - trustworthiness ----------------------------------------
+
+# retest correlation for participants who remain single at T2
+r_WT_single = with(subset(data, T2_relationship_status == 'single'), 
+     cor.test(T1_pref_WT, T2_pref_WT))
+# r = .60, 95% CI [.54; .65]
+
+# retest correlation for participants who transitioned into a relationship
+r_WT_relationship = with(subset(data, T2_relationship_status == 'relationship'), 
+     cor.test(T1_pref_WT, T2_pref_WT))
+# r = .50, 95% CI [.40; .59]
+
+# differences between the correlation coefficients using one-sided tests
+# (hypothesized result is greater stability in those who remain singles)
+r.test(n = 505, n2 = 258, r12 = as.numeric(r_WT_single[4]), 
+       r34 = as.numeric(r_WT_relationship[4]), twotailed = F)
+
+# exact p-value for the one-tailed test
+1-pnorm(1.81, mean = 0, sd = 1) # p = .035
+
+
+# 3.2.2.1.2 analysis by participant sex -----------------------------------
+
+# retest correlation for female participants who remain single at T2
+r_WT_single_f = with(subset(data, T2_relationship_status == 'single' & T1_sex == 'female'), 
+                   cor.test(T1_pref_WT, T2_pref_WT))
+# r = .59, 95% CI [.51; .65]
+
+# retest correlation for female participants who transitioned into a relationship
+r_WT_relationship_f = with(subset(data, T2_relationship_status == 'relationship' & T1_sex == 'female'), 
+                         cor.test(T1_pref_WT, T2_pref_WT))
+# r = .42, 95% CI [.30; .54]
+
+# differences between the correlation coefficients using one-sided tests
+# (hypothesized result is greater stability in females who remain singles)
+r.test(n = 331, n2 = 188, r12 = as.numeric(r_WT_single_f[4]), 
+       r34 = as.numeric(r_WT_relationship_f[4]), twotailed = F)
+
+# exact p-value for the one-tailed test
+1-pnorm(2.38, mean = 0, sd = 1) # p = .009
+
+
+# retest correlation for male participants who remain single at T2
+r_WT_single_m = with(subset(data, T2_relationship_status == 'single' & T1_sex == 'male'), 
+                     cor.test(T1_pref_WT, T2_pref_WT))
+# r = .63, 95% CI [.54; .72]
+
+# retest correlation for male participants who transitioned into a relationship
+r_WT_relationship_m = with(subset(data, T2_relationship_status == 'relationship' & T1_sex == 'male'), 
+                           cor.test(T1_pref_WT, T2_pref_WT))
+# r = .73, 95% CI [.60; .82]
+
+# differences between the correlation coefficients using one-sided tests
+# (hypothesized result is greater stability in males who remain singles)
+r.test(n = 174, n2 = 70, r12 = as.numeric(r_WT_single_m[4]), 
+       r34 = as.numeric(r_WT_relationship_m[4]), twotailed = F)
+
+# exact p-value for the one-tailed test
+1-pnorm(-1.21, mean = 0, sd = 1) # p = .887 because effect is in the opposite direction (p-value for two-sided test, p = .23)
+
+
+# 3.2.2.2 vitality - attractiveness ---------------------------------------
+
+# retest correlation for participants who remain single at T2
+r_VA_single = with(subset(data, T2_relationship_status == 'single'), 
+                   cor.test(T1_pref_VA, T2_pref_VA))
+# r = .72, 95% CI [.68; .76]
+
+# retest correlation for participants who transitioned into a relationship
+r_VA_relationship = with(subset(data, T2_relationship_status == 'relationship'), 
+                         cor.test(T1_pref_VA, T2_pref_VA))
+# r = .60, 95% CI [.52; .67]
+
+# differences between the correlation coefficients using one-sided tests
+# (hypothesized result is greater stability in those who remain singles)
+r.test(n = 505, n2 = 258, r12 = as.numeric(r_VA_single[4]), 
+       r34 = as.numeric(r_VA_relationship[4]), twotailed = F)
+
+# exact p-value for the one-tailed test
+1-pnorm(2.84, mean = 0, sd = 1) # p = .002
+
+
+# 3.2.2.2.2 analysis by participant sex ----------------------------------
+
+# retest correlation coefficient for female participants who remain single at T2
+r_VA_single_f = with(subset(data, T2_relationship_status == 'single' & T1_sex == 'female'), 
+                     cor.test(T1_pref_VA, T2_pref_VA))
+# r = .71, 95% CI [.65; .76]
+
+# retest correlation coefficient for female participants who transitioned into a relationship
+r_VA_relationship_f = with(subset(data, T2_relationship_status == 'relationship' & T1_sex == 'female'), 
+                           cor.test(T1_pref_VA, T2_pref_VA))
+# r = .56, 95% CI [.46; .66]
+
+# differences between the correlation coefficients using one-sided tests
+# (hypothesized result is greater stability in females who remain singles)
+r.test(n = 331, n2 = 188, r12 = as.numeric(r_VA_single_f[4]), 
+       r34 = as.numeric(r_VA_relationship_f[4]), twotailed = F)
+
+# exact p-value for the one-tailed test
+1-pnorm(2.58, mean = 0, sd = 1) # p = .005
+
+# retest correlation for male participants who remain single at T2
+r_VA_single_m = with(subset(data, T2_relationship_status == 'single' & T1_sex == 'male'), 
+                     cor.test(T1_pref_VA, T2_pref_VA))
+# r = .74, 95% CI [.67; .80]
+
+# retest correlation for male participants who transitioned into a relationship
+r_VA_relationship_m = with(subset(data, T2_relationship_status == 'relationship' & T1_sex == 'male'), 
+                           cor.test(T1_pref_VA, T2_pref_VA))
+# r = .70, 95% CI [.56; .81]
+
+# differences between the correlation coefficients using one-sided tests
+# (hypothesized result is greater stability in males who remain singles)
+r.test(n = 174, n2 = 70, r12 = as.numeric(r_VA_single_m[4]), 
+       r34 = as.numeric(r_VA_relationship_m[4]), twotailed = F)
+
+# exact p-value for the one-tailed test
+1-pnorm(-0.55, mean = 0, sd = 1) # p = .709
+
+
+# 3.2.2.3 status - resources --------------------------------------------
+
+# retest correlation for participants who remain single at T2
+r_SR_single = with(subset(data, T2_relationship_status == 'single'), 
+                   cor.test(T1_pref_SR, T2_pref_SR))
+# r = .76, 95% CI [.72; .80]
+
+# retest correlation for participants who transitioned into a relationship
+r_SR_relationship = with(subset(data, T2_relationship_status == 'relationship'), 
+                         cor.test(T1_pref_SR, T2_pref_SR))
+# r = .67, 95% CI [.60; .73]
+
+# differences between the correlation coefficients using one-sided tests
+# (hypothesized result is greater stability in those who remain singles)
+r.test(n = 505, n2 = 258, r12 = as.numeric(r_SR_single[4]), 
+       r34 = as.numeric(r_SR_relationship[4]), twotailed = F)
+
+# exact p-value for the one-tailed test
+1-pnorm(2.41, mean = 0, sd = 1) # p = .008
+
+
+# 3.2.2.3.2. analysis by participant sex -------------------------------
+
+# retest correlation for female participants who remain single at T2
+r_SR_single_f = with(subset(data, T2_relationship_status == 'single' & T1_sex == 'female'), 
+                     cor.test(T1_pref_SR, T2_pref_SR))
+# r = .73, 95% CI [.68; .78]
+
+# retest correlation for female participants who transitioned into a relationship
+r_SR_relationship_f = with(subset(data, T2_relationship_status == 'relationship' & T1_sex == 'female'), 
+                           cor.test(T1_pref_SR, T2_pref_SR))
+# r = .66, 95% CI [.56; .73]
+
+# differences between the correlation coefficients using one-sided tests
+# (hypothesized result is greater stability in females who remain singles)
+r.test(n = 331, n2 = 188, r12 = as.numeric(r_SR_single_f[4]), 
+       r34 = as.numeric(r_SR_relationship_f[4]), twotailed = F)
+
+# exact p-value for the one-tailed test
+1-pnorm(1.61, mean = 0, sd = 1) # p = .054
+
+# retest correlation for male participants who remain single at T2
+r_SR_single_m = with(subset(data, T2_relationship_status == 'single' & T1_sex == 'male'), 
+                     cor.test(T1_pref_SR, T2_pref_SR))
+# r = .78, 95% CI [.71; .83]
+
+# retest correlation for male participants who transitioned into a relationship
+r_SR_relationship_m = with(subset(data, T2_relationship_status == 'relationship' & T1_sex == 'male'), 
+                           cor.test(T1_pref_SR, T2_pref_SR))
+# r = .68, 95% CI [.53; .79]
+
+# differences between the correlation coefficients using one-sided tests
+# (hypothesized result is greater stability in males who remain singles)
+r.test(n = 174, n2 = 70, r12 = as.numeric(r_SR_single_m[4]), 
+       r34 = as.numeric(r_SR_relationship_m[4]), twotailed = F)
+
+# exact p-value for the one-tailed test
+1-pnorm(1.47, mean = 0, sd = 1) # p = .071
+
+
+# 3.2.2.4 confidence - humor ---------------------------------------
+
+# retest correlation for participants who remain single at T2
+r_CH_single = with(subset(data, T2_relationship_status == 'single'), 
+                   cor.test(T1_pref_CH, T2_pref_CH))
+# r = .64, 95% CI [.59; .69]
+
+# retest correlation for participants who transitioned into a relationship
+r_CH_relationship = with(subset(data, T2_relationship_status == 'relationship'), 
+                         cor.test(T1_pref_CH, T2_pref_CH))
+# r = .48, 95% CI [.38; .57]
+
+# differences between the correlation coefficients using one-sided tests
+# (hypothesized result is greater stability in those who remain singles)
+r.test(n = 505, n2 = 258, r12 = as.numeric(r_CH_single[4]), 
+       r34 = as.numeric(r_CH_relationship[4]), twotailed = F)
+
+# exact p-value for the one-tailed test
+1-pnorm(3.15, mean = 0, sd = 1) # p < .001
+
+
+# 3.2.2.4.2 analysis by participant sex -----------------------------------------
+
+# retest correlation for female participants who remain single at T2
+r_CH_single_f = with(subset(data, T2_relationship_status == 'single' & T1_sex == 'female'), 
+                     cor.test(T1_pref_CH, T2_pref_CH))
+# r = .51, 95% CI [.43; .59]
+
+# retest correlation for participants who transitioned into a relationship
+r_CH_relationship_f = with(subset(data, T2_relationship_status == 'relationship' & T1_sex == 'female'), 
+                           cor.test(T1_pref_CH, T2_pref_CH))
+# r = .40, 95% CI [.27; .51]
+
+# differences between the correlation coefficients using one-sided tests
+# (hypothesized result is greater stability in females who remain singles)
+r.test(n = 331, n2 = 188, r12 = as.numeric(r_CH_single_f[4]), 
+       r34 = as.numeric(r_CH_relationship_f[4]), twotailed = F)
+
+# exact p-value for the one-tailed test
+1-pnorm(1.57, mean = 0, sd = 1) # p = .058
+
+# retest correlation for male participants who remain single at T2
+r_CH_single_m = with(subset(data, T2_relationship_status == 'single' & T1_sex == 'male'), 
+                     cor.test(T1_pref_CH, T2_pref_CH))
+# r = .80, 95% CI [.73; .84]
+
+# retest correlation for male participants who transitioned into a relationship
+r_CH_relationship_m = with(subset(data, T2_relationship_status == 'relationship' & T1_sex == 'male'), 
+                           cor.test(T1_pref_CH, T2_pref_CH))
+# r = .67, 95% CI [.52; .78]
+
+# differences between the correlation coefficients using one-sided tests
+# (hypothesized result is greater stability in males who remain singles)
+r.test(n = 174, n2 = 70, r12 = as.numeric(r_CH_single_m[4]), 
+       r34 = as.numeric(r_CH_relationship_m[4]), twotailed = F)
+
+# exact p-value for the one-tailed test
+1-pnorm(1.90, mean = 0, sd = 1) # p = .029
+
+
+# 3.2.2.5 compare mean stabilities (across all 4 dimensions) ----------------
+
+# mean stability of preferences (averaged across all 4 dimensions)
+# for participants who remain single at T2
+mean_r_single = with(subset(data, T2_relationship_status == 'single'),
+                     fisherz2r(mean(c(fisherz(cor(T1_pref_WT, T2_pref_WT)),
+                                      fisherz(cor(T1_pref_VA, T2_pref_VA)),
+                                      fisherz(cor(T1_pref_SR, T2_pref_SR)),
+                                      fisherz(cor(T1_pref_CH, T2_pref_CH))))))
+# average correlation for T2 singles: r = .69
+
+# mean stability of preferences (averaged across all 4 dimensions)
+# for participants who transitioned into a relationship
+mean_r_relationship = with(subset(data, T2_relationship_status == 'relationship'),
+                           fisherz2r(mean(c(fisherz(cor(T1_pref_WT, T2_pref_WT)),
+                                            fisherz(cor(T1_pref_VA, T2_pref_VA)),
+                                            fisherz(cor(T1_pref_SR, T2_pref_SR)),
+                                            fisherz(cor(T1_pref_CH, T2_pref_CH))))))
+# average correlation for participants with relationships at T2: r = .57
+
+# differences between the average correlation coefficients using one-sided tests
+# (hypothesized result is greater stability in those who remain singles)
+r.test(n = 505, n2 = 258, r12 = mean_r_single, 
+       r34 = mean_r_relationship, twotailed = F)
+
+# exact p-value for the one-tailed test
+1-pnorm(2.55, mean = 0, sd = 1) # p = .005
+
+
+# 3.3 research question 3: adjustment of preferences ----------------------
+
+# create data subset containing only those who are in a relationship at T2
+# this data set excludes one person who reported being in a relationship at T2
+# but did not provide ratings of partner attributes at T2
+data_rel = subset(data, T2_relationship_status == 'relationship' &
+                    !is.nan(T2_partner_WT))
+
+
+# 3.3.1 compute relative measure of adjustment (PAI) ------------------
+
+# the adjustment measure represents the percent adjustment of T1 
+# preferences towards partners' T2 characteristics
+# it is, thus, directional and relative
+# Formula: adjust = (T2_pref - T1_pref) / (T2_partner - T1_pref)
+
+data_rel$rel_adjust_WT = (data_rel$T2_pref_WT - data_rel$T1_pref_WT) /
+  (data_rel$T2_partner_WT - data_rel$T1_pref_WT)
+
+data_rel$rel_adjust_VA = (data_rel$T2_pref_VA - data_rel$T1_pref_VA) /
+  (data_rel$T2_partner_VA - data_rel$T1_pref_VA)
+
+data_rel$rel_adjust_SR = (data_rel$T2_pref_SR - data_rel$T1_pref_SR) /
+  (data_rel$T2_partner_SR - data_rel$T1_pref_SR)
+
+data_rel$rel_adjust_CH = (data_rel$T2_pref_CH - data_rel$T1_pref_CH) /
+  (data_rel$T2_partner_CH - data_rel$T1_pref_CH)
+
+# the PAI is not defined if T2 partner attributes perfectly
+# match T1 preferences (division by zero)
+# since R defines division by zero als +/- infinity, values are manually
+# set to NA in the respective cases 
+data_rel$rel_adjust_WT[abs(data_rel$rel_adjust_WT) == Inf] = NA
+data_rel$rel_adjust_VA[abs(data_rel$rel_adjust_VA) == Inf] = NA
+data_rel$rel_adjust_SR[abs(data_rel$rel_adjust_SR) == Inf] = NA
+data_rel$rel_adjust_CH[abs(data_rel$rel_adjust_CH) == Inf] = NA
+
+# this sets one case in which the participant did not rate the partner to NA
+data_rel$rel_adjust_WT[is.nan(data_rel$rel_adjust_WT)] = NA
+data_rel$rel_adjust_VA[is.nan(data_rel$rel_adjust_VA)] = NA
+data_rel$rel_adjust_SR[is.nan(data_rel$rel_adjust_SR)] = NA
+data_rel$rel_adjust_CH[is.nan(data_rel$rel_adjust_CH)] = NA
+
+
+# 3.3.2 frequency of undefined PAI values ------------------------
+
+sum(is.na(data_rel$rel_adjust_WT)) # 29 cases with an undefined PAI
+sum(is.na(data_rel$rel_adjust_SR)) # 17 cases with an undefined PAI
+sum(is.na(data_rel$rel_adjust_VA)) # 22 cases with an undefined PAI
+sum(is.na(data_rel$rel_adjust_CH)) # 23 cases with an undefined PAI
+
+
+# 3.3.3 create indicator of partner falling short of preferences --------
+
+data_rel$partner_match_WT = 
+  factor(sign(data_rel$T2_partner_WT - data_rel$T1_pref_WT),
+         levels = c(-1, 1), labels = c('falls short', 'exceeds'))
+data_rel$partner_match_VA = 
+  factor(sign(data_rel$T2_partner_VA - data_rel$T1_pref_VA),
+         levels = c(-1, 1), labels = c('falls short', 'exceeds'))
+data_rel$partner_match_SR = 
+  factor(sign(data_rel$T2_partner_SR - data_rel$T1_pref_SR),
+         levels = c(-1, 1), labels = c('falls short', 'exceeds'))
+data_rel$partner_match_CH = 
+  factor(sign(data_rel$T2_partner_CH - data_rel$T1_pref_CH),
+         levels = c(-1, 1), labels = c('falls short', 'exceeds'))
+
+
+# 3.3.4 comparison of adjustment by partners' matching of T1 preferences ----
+
+# comparison using all data
+with(data_rel, list(t.test(rel_adjust_WT ~ partner_match_WT),
+                    cohen.d(rel_adjust_WT ~ partner_match_WT)))
+with(data_rel, list(t.test(rel_adjust_VA ~ partner_match_VA),
+                    cohen.d(rel_adjust_VA ~ partner_match_VA)))
+with(data_rel, list(t.test(rel_adjust_SR ~ partner_match_SR),
+                    cohen.d(rel_adjust_SR ~ partner_match_SR)))
+with(data_rel, list(t.test(rel_adjust_CH ~ partner_match_CH),
+                    cohen.d(rel_adjust_CH ~ partner_match_CH)))
+
+
+# 3.3.5 robustness analysis of PAI differences --------------------------
+
+# The PAI index can take extreme values when the discrepancy between
+# T1 preference and T2 partner attribute is small. The resulting outliers
+# could have a strong impact on the results. Therefore, the analysis is
+# repeated while excluding the 10% most extreme values (5% on each end) to
+# test the robustness of the observed differences between participants
+# whose partners exceeded the T1 preferences and those whose partner fell short.
+
+t.test_WT_trimmed = with(subset(data_rel, rel_adjust_WT > 
+              quantile(rel_adjust_WT, prob = .05, na.rm = T) &
+              rel_adjust_WT < 
+              quantile(rel_adjust_WT, prob = .95, na.rm = T)),
+              list(t.test(rel_adjust_WT ~ partner_match_WT),
+                   cohen.d(rel_adjust_WT ~ partner_match_WT)))
+# t(135.32) = -0.12, p = .904, d = -0.02 
+
+t.test_VA_trimmed = with(subset(data_rel, rel_adjust_VA > 
+              quantile(rel_adjust_VA, prob = .05, na.rm = T) &
+              rel_adjust_VA < 
+              quantile(rel_adjust_VA, prob = .95, na.rm = T)),
+              list(t.test(rel_adjust_VA ~ partner_match_VA),
+                   cohen.d(rel_adjust_VA ~ partner_match_VA)))
+# t(197.37) = 6.38, p < .001, d = 0.89
+
+t.test_SR_trimmed = with(subset(data_rel, rel_adjust_SR > 
+              quantile(rel_adjust_SR, prob = .05, na.rm = T) &
+              rel_adjust_SR <
+              quantile(rel_adjust_SR, prob = .95, na.rm = T)),
+              list(t.test(rel_adjust_SR ~ partner_match_SR),
+                   cohen.d(rel_adjust_SR ~ partner_match_SR)))
+# t(62.52) = 3.60, p < .001, d = 0.67
+
+t.test_CH_trimmed = with(subset(data_rel, rel_adjust_CH > 
+              quantile(rel_adjust_CH, prob = .05, na.rm = T) &
+              rel_adjust_CH < 
+              quantile(rel_adjust_CH, prob = .95, na.rm = T)),
+              list(t.test(rel_adjust_CH ~ partner_match_CH),
+                   cohen.d(rel_adjust_CH ~ partner_match_CH)))
+# t(171.96) = 3.66, p < .001, d = 0.53
+
+# averaging the means of the trimmed PAI scores across the four preference dimensions
+mean_rel_adjust = colMeans(rbind(t.test_WT_trimmed[[1]][[5]], t.test_VA_trimmed[[1]][[5]],
+                                 t.test_SR_trimmed[[1]][[5]], t.test_CH_trimmed[[1]][[5]]))
+round(mean_rel_adjust, 2)
+
+
+# 3.3.6 analysis of sex effects on PAI score and differences --------------------------
+
+# 2(sex: female vs. male) x 2(partner falls short of preference: yes vs. no) ANOVAs using all data
+with(data_rel, summary(aov(rel_adjust_WT ~ partner_match_WT * T1_sex)))
+with(data_rel, summary(aov(rel_adjust_VA ~ partner_match_VA * T1_sex)))
+with(data_rel, summary(aov(rel_adjust_SR ~ partner_match_SR * T1_sex)))
+with(data_rel, summary(aov(rel_adjust_CH ~ partner_match_CH * T1_sex)))
+
+# no sex effects and no interactions of sex and preference-partner match for
+# any of the four dimensions, all p > .234
+
+
+# 2x2 ANOVAs using trimmed data (exluding extreme PAI scores)
+with(subset(data_rel, rel_adjust_WT > 
+              quantile(rel_adjust_WT, prob = .05, na.rm = T) &
+              rel_adjust_WT < 
+              quantile(rel_adjust_WT, prob = .95, na.rm = T)),
+     summary(aov(rel_adjust_WT ~ partner_match_WT * T1_sex)))
+
+with(subset(data_rel, rel_adjust_VA > 
+              quantile(rel_adjust_VA, prob = .05, na.rm = T) &
+              rel_adjust_VA < 
+              quantile(rel_adjust_VA, prob = .95, na.rm = T)),
+     summary(aov(rel_adjust_VA ~ partner_match_VA * T1_sex)))
+
+with(subset(data_rel, rel_adjust_SR > 
+              quantile(rel_adjust_SR, prob = .05, na.rm = T) &
+              rel_adjust_SR < 
+              quantile(rel_adjust_SR, prob = .95, na.rm = T)),
+     summary(aov(rel_adjust_SR ~ partner_match_SR * T1_sex)))
+
+with(subset(data_rel, rel_adjust_CH > 
+              quantile(rel_adjust_CH, prob = .05, na.rm = T) &
+              rel_adjust_CH < 
+              quantile(rel_adjust_CH, prob = .95, na.rm = T)),
+     summary(aov(rel_adjust_SR ~ partner_match_SR * T1_sex)))
+
+# no sex effects and no interactions of sex and preference-partner match for
+# any of the four dimensions, all p > .123
+
+
+# 3.3.7.1 create a temporary data set containing the variabels relevant for the plots ----
+data_reduced = data %>% 
+  dplyr::select(T1_sex, T2_relationship_status, T1_pref_WT, T1_pref_VA, T1_pref_SR, T1_pref_CH, 
+                T2_pref_WT, T2_pref_VA, T2_pref_SR, T2_pref_CH,
+                T2_partner_WT, T2_partner_VA, T2_partner_SR, T2_partner_CH)
+
+data_reduced$ID = 1:nrow(data_reduced) # create ID variable
+
+data_reduced$partner_match_WT = 
+  factor(sign(data_reduced$T2_partner_WT - data_reduced$T1_pref_WT),
+         levels = c(-1, 1), labels = c('falls short', 'exceeds'))
+data_reduced$partner_match_VA = 
+  factor(sign(data_reduced$T2_partner_VA - data_reduced$T1_pref_VA),
+         levels = c(-1, 1), labels = c('falls short', 'exceeds'))
+data_reduced$partner_match_SR = 
+  factor(sign(data_reduced$T2_partner_SR - data_reduced$T1_pref_SR),
+         levels = c(-1, 1), labels = c('falls short', 'exceeds'))
+data_reduced$partner_match_CH = 
+  factor(sign(data_reduced$T2_partner_CH - data_reduced$T1_pref_CH),
+         levels = c(-1, 1), labels = c('falls short', 'exceeds'))
+
+
+data_reduced_long = reshape(data_reduced, direction = 'long', idvar = 'ID', timevar = 'attribute',
+                            varying = list(names(data_reduced)[3:6], names(data_reduced)[7:10],
+                                           names(data_reduced)[11:14], names(data_reduced)[16:19]),
+                            times = 1:4, v.names = c('T1_pref', 'T2_pref', 'T2_partner', 'partner_match'))
+
+# labeling the preference attribute variable in a meaningful way
+data_reduced_long$attribute = factor(data_reduced_long$attribute, levels = 1:4, 
+                                     labels = c('warmth-trustworthiness', 'vitality-attractiveness', 
+                                                'status-resources', 'confidence-humor'))
+
+# remove the temporary dataset from the workspace
+rm(data_reduced)
+
+# compute simple change of preferences (T2 preference - T1 preference)
+data_reduced_long$pref_change = data_reduced_long$T2_pref - data_reduced_long$T1_pref
+
+# compute variable to distinguish between singles, participants with partners exceeeding the T1 preference
+# and participants with partners falling short of the T1 preference (note that partners may exceed some, but
+# fall short of other preferences)
+data_reduced_long$status = NA
+data_reduced_long$status[data_reduced_long$T2_relationship_status == 'single'] = '3 - single'
+data_reduced_long$status[data_reduced_long$partner_match == 'exceeds'] = '2 - p. exceeds'
+data_reduced_long$status[data_reduced_long$partner_match == 'falls short'] = '1 - p. falls short'
+
+
+# 3.3.7.2 compare change by relationship type for each preference dimension  --------
+
+# 3.3.7.2.1 warmth-trustworthiness ------------------
+
+# ANOVA
+summary(aov(pref_change ~ status, data = subset(data_reduced_long, attribute == 'warmth-trustworthiness')))
+
+# pairwise comparisons and effect sizes via t-tests
+with(subset(data_reduced_long, attribute == 'warmth-trustworthiness'),
+     t.test(pref_change[status == '1 - p. falls short'],
+            pref_change[status == '2 - p. exceeds']))
+with(subset(data_reduced_long, attribute == 'warmth-trustworthiness'),
+     round(cohensD(pref_change[status == '1 - p. falls short'],
+                   pref_change[status == '2 - p. exceeds']),2))
+
+with(subset(data_reduced_long, attribute == 'warmth-trustworthiness'),
+     t.test(pref_change[status == '1 - p. falls short'],
+            pref_change[status == '3 - single']))
+with(subset(data_reduced_long, attribute == 'warmth-trustworthiness'),
+     round(cohensD(pref_change[status == '1 - p. falls short'],
+                   pref_change[status == '3 - single']),2))
+
+with(subset(data_reduced_long, attribute == 'warmth-trustworthiness'),
+     t.test(pref_change[status == '2 - p. exceeds'],
+            pref_change[status == '3 - single']))
+with(subset(data_reduced_long, attribute == 'warmth-trustworthiness'),
+     round(cohensD(pref_change[status == '2 - p. exceeds'],
+                   pref_change[status == '3 - single']),2))
+
+# 3.3.7.2.2 vitality-attractiveness ------------------
+
+# ANOVA
+summary(aov(pref_change ~ status, data = subset(data_reduced_long, attribute == 'vitality-attractiveness')))
+
+# pairwise comparisons and effect sizes via t-tests
+with(subset(data_reduced_long, attribute == 'vitality-attractiveness'),
+     t.test(pref_change[status == '1 - p. falls short'],
+            pref_change[status == '2 - p. exceeds']))
+with(subset(data_reduced_long, attribute == 'vitality-attractiveness'),
+     round(cohensD(pref_change[status == '1 - p. falls short'],
+                   pref_change[status == '2 - p. exceeds']),2))
+
+with(subset(data_reduced_long, attribute == 'vitality-attractiveness'),
+     t.test(pref_change[status == '1 - p. falls short'],
+            pref_change[status == '3 - single']))
+with(subset(data_reduced_long, attribute == 'vitality-attractiveness'),
+     round(cohensD(pref_change[status == '1 - p. falls short'],
+                   pref_change[status == '3 - single']),2))
+
+with(subset(data_reduced_long, attribute == 'vitality-attractiveness'),
+     t.test(pref_change[status == '2 - p. exceeds'],
+            pref_change[status == '3 - single']))
+with(subset(data_reduced_long, attribute == 'vitality-attractiveness'),
+     round(cohensD(pref_change[status == '2 - p. exceeds'],
+                   pref_change[status == '3 - single']),2))
+
+
+# 3.3.7.2.3 status-resources ------------------
+
+# ANOVA
+summary(aov(pref_change ~ status, data = subset(data_reduced_long, attribute == 'status-resources')))
+
+# pairwise comparisons and effect sizes via t-tests
+with(subset(data_reduced_long, attribute == 'status-resources'),
+     t.test(pref_change[status == '1 - p. falls short'],
+            pref_change[status == '2 - p. exceeds']))
+with(subset(data_reduced_long, attribute == 'status-resources'),
+     round(cohensD(pref_change[status == '1 - p. falls short'],
+                   pref_change[status == '2 - p. exceeds']),2))
+
+with(subset(data_reduced_long, attribute == 'status-resources'),
+     t.test(pref_change[status == '1 - p. falls short'],
+            pref_change[status == '3 - single']))
+with(subset(data_reduced_long, attribute == 'status-resources'),
+     round(cohensD(pref_change[status == '1 - p. falls short'],
+                   pref_change[status == '3 - single']),2))
+
+with(subset(data_reduced_long, attribute == 'status-resources'),
+     t.test(pref_change[status == '2 - p. exceeds'],
+            pref_change[status == '3 - single']))
+with(subset(data_reduced_long, attribute == 'status-resources'),
+     round(cohensD(pref_change[status == '2 - p. exceeds'],
+                   pref_change[status == '3 - single']),2))
+
+
+# 3.3.7.2.4 confidence-humor ------------------
+
+# ANOVA
+summary(aov(pref_change ~ status, data = subset(data_reduced_long, attribute == 'confidence-humor')))
+
+# pairwise comparisons and effect sizes via t-tests
+with(subset(data_reduced_long, attribute == 'confidence-humor'),
+     t.test(pref_change[status == '1 - p. falls short'],
+            pref_change[status == '2 - p. exceeds']))
+with(subset(data_reduced_long, attribute == 'confidence-humor'),
+     round(cohensD(pref_change[status == '1 - p. falls short'],
+                   pref_change[status == '2 - p. exceeds']),2))
+
+with(subset(data_reduced_long, attribute == 'confidence-humor'),
+     t.test(pref_change[status == '1 - p. falls short'],
+            pref_change[status == '3 - single']))
+with(subset(data_reduced_long, attribute == 'confidence-humor'),
+     round(cohensD(pref_change[status == '1 - p. falls short'],
+                   pref_change[status == '3 - single']),2))
+
+with(subset(data_reduced_long, attribute == 'confidence-humor'),
+     t.test(pref_change[status == '2 - p. exceeds'],
+            pref_change[status == '3 - single']))
+with(subset(data_reduced_long, attribute == 'confidence-humor'),
+     round(cohensD(pref_change[status == '2 - p. exceeds'],
+                   pref_change[status == '3 - single']),2))
+
+
+# 4. plots ----- 
+
+# 4.1. create long format of data for plotting ----------------------------
+
+# create a temporary data set containing the variabels relevant for the plots
+data_rel_reduced = data_rel %>% 
+  dplyr::select(T1_sex, T1_pref_WT, T1_pref_VA, T1_pref_SR, T1_pref_CH, 
+                T2_pref_WT, T2_pref_VA, T2_pref_SR, T2_pref_CH,
+                T2_partner_WT, T2_partner_VA, T2_partner_SR, T2_partner_CH,
+                rel_adjust_WT, rel_adjust_VA, rel_adjust_SR, rel_adjust_CH,
+                partner_match_WT, partner_match_VA, partner_match_SR, partner_match_CH)
+
+data_rel_reduced$ID = 1:length(data_rel_reduced$T1_sex) # create ID variable
+
+# exclude 10% most extreme values for relative adjustments by preference dimension
+# data are excluded if they fall below the 5th or exceed the 95th percentile
+data_rel_reduced$trim_adjust_WT = data_rel_reduced$rel_adjust_WT
+data_rel_reduced$trim_adjust_WT[data_rel_reduced$rel_adjust_WT < 
+                                  quantile(data_rel_reduced$rel_adjust_WT, prob = .05, na.rm = T) |
+                                  data_rel_reduced$rel_adjust_WT > 
+                                  quantile(data_rel_reduced$rel_adjust_WT, prob = .95, na.rm = T)] = NA
+
+data_rel_reduced$trim_adjust_VA = data_rel_reduced$rel_adjust_VA
+data_rel_reduced$trim_adjust_VA[data_rel_reduced$rel_adjust_VA < 
+                                  quantile(data_rel_reduced$rel_adjust_VA, prob = .05, na.rm = T) |
+                                  data_rel_reduced$rel_adjust_VA > 
+                                  quantile(data_rel_reduced$rel_adjust_VA, prob = .95, na.rm = T)] = NA
+
+data_rel_reduced$trim_adjust_SR = data_rel_reduced$rel_adjust_SR
+data_rel_reduced$trim_adjust_SR[data_rel_reduced$rel_adjust_SR < 
+                                  quantile(data_rel_reduced$rel_adjust_SR, prob = .05, na.rm = T) |
+                                  data_rel_reduced$rel_adjust_SR > 
+                                  quantile(data_rel_reduced$rel_adjust_SR, prob = .95, na.rm = T)] = NA
+
+data_rel_reduced$trim_adjust_CH = data_rel_reduced$rel_adjust_CH
+data_rel_reduced$trim_adjust_CH[data_rel_reduced$rel_adjust_CH < 
+                                  quantile(data_rel_reduced$rel_adjust_CH, prob = .05, na.rm = T) |
+                                  data_rel_reduced$rel_adjust_CH > 
+                                  quantile(data_rel_reduced$rel_adjust_CH, prob = .95, na.rm = T)] = NA
+
+# transformation of the temporary data set to long format
+data_rel_long = reshape(data_rel_reduced, direction = 'long', idvar = 'ID', timevar = 'attribute',
+                        varying = list(names(data_rel_reduced)[2:5], names(data_rel_reduced)[6:9],
+                                       names(data_rel_reduced)[10:13], names(data_rel_reduced)[14:17], 
+                                       names(data_rel_reduced)[18:21], names(data_rel_reduced)[23:26]),
+                        times = 1:4, v.names = c('T1_pref', 'T2_pref', 'T2_partner', 'rel_adjust', 
+                                                 'partner_match', 'trim_adjust'))
+
+# labeling the preference attribute variable in a meaningful way
+data_rel_long$attribute = factor(data_rel_long$attribute, levels = 1:4, 
+                                 labels = c('warmth-trustworthiness', 'vitality-attractiveness', 
+                                            'status-resources', 'confidence-humor'))
+
+# remove the temporary dataset from the workspace
+rm(data_rel_reduced)
+
+data_rel_long$T1_sex = recode(data_rel_long$T1_sex, female = 'Female', male = 'Male')
+
+
+
+# 4.2. Regression plots for partner preferences ---------------------------
+
+# 4.2.1 grey -------------------------------------------------------
+
+posn.j <- position_jitter(width = 0.1)
+posn.jd <- position_jitterdodge(jitter.width = 0.1, dodge.width = 0.2)
+
+PredVal <- ggplot(data_rel_long, aes(x = T1_pref, y = T2_partner, col = T1_sex, fill = T1_sex)) +
+  geom_point(aes(shape = factor(T1_sex)), size = 1, colour = '#000000', alpha = 0.4, position = posn.j) +
+  geom_point(data = subset(data_rel_long, T1_sex =="Female"), aes(x=T1_pref, y=0.8),
+             shape="|", size = 1, position = position_jitter(width = 0.1, height=0), alpha = 0.2) +
+  geom_point(data = subset(data_rel_long, T1_sex =="Male"), aes(x=T1_pref, y=0.95),
+             shape="|", size = 1, position = position_jitter(width = 0.1, height=0), alpha = 0.2) +
+  geom_point(data = subset(data_rel_long, T1_sex =="Female"), aes(y=T2_partner, x=0.8),
+             shape="-", size = 4, position = position_jitter(width = 0, height=0.1), alpha = 0.2) +
+  geom_point(data = subset(data_rel_long, T1_sex =="Male"), aes(y=T2_partner, x=0.95),
+             shape="-", size = 4, position = position_jitter(width = 0, height=0.1), alpha = 0.2) +
+  scale_y_continuous(expand = c(0,0.4), limits = c(0.8,7), breaks = seq(1,7,1)) +
+  scale_x_continuous(expand = c(0,0.4), limits = c(0.8,7), breaks = seq(1,7,1)) + 
+  stat_smooth(method="lm") +
+  facet_wrap(~ attribute, ncol = 2) +
+  coord_equal() +
+  labs(x = "Preference at T1", 
+       y = "Partner Rating at T2",
+       fill = "Sex",
+       col = "Sex") + 
+  theme_classic() +
+  theme(strip.background = element_blank(),legend.position="bottom", legend.title = element_blank() )+
+  scale_colour_manual(values=c("#000000", "#666666")) +
+  scale_fill_manual(values=c("#000000", "#666666")) + 
+  theme(legend.position = "bottom", legend.box = "horizontal")
+
+PredVal
+ggsave("PredVal_grey.png", width = 6, height = 6, units ="in")
+
+
+# 4.2.2 colors -------------------------------------------------------
+
+posn.j <- position_jitter(width = 0.1)
+posn.jd <- position_jitterdodge(jitter.width = 0.1, dodge.width = 0.2)
+fem_col = 'deeppink4'
+male_col = 'seagreen'
+
+PredVal_color <- ggplot(data_rel_long, aes(x = T1_pref, y = T2_partner, col = T1_sex, fill = T1_sex)) +
+  geom_point(data = subset(data_rel_long, T1_sex =="Female"), shape = 16, 
+             size = 1, colour = fem_col, alpha = 0.6, position = posn.j) +
+  geom_point(data = subset(data_rel_long, T1_sex =="Male"), shape = 17, 
+             size = 1, colour = male_col, alpha = 0.6, position = posn.j) +
+  geom_point(data = subset(data_rel_long, T1_sex =="Female"), aes(x=T1_pref, y=0.8),
+             shape="l", size = 1.3, position = position_jitter(width = 0.1, height=0), alpha = 0.2) +
+  geom_point(data = subset(data_rel_long, T1_sex =="Male"), aes(x=T1_pref, y=0.95),
+             shape="l", size = 1.3, position = position_jitter(width = 0.1, height=0), alpha = 0.2) +
+  geom_point(data = subset(data_rel_long, T1_sex =="Female"), aes(y=T2_partner, x=0.8),
+             shape="-", size = 3.8, position = position_jitter(width = 0, height=0.1), alpha = 0.2) +
+  geom_point(data = subset(data_rel_long, T1_sex =="Male"), aes(y=T2_partner, x=0.95),
+             shape="-", size = 3.8, position = position_jitter(width = 0, height=0.1), alpha = 0.2) +
+  scale_y_continuous(expand = c(0,0.4), limits = c(0.8,7), breaks = seq(1,7,1)) +
+  scale_x_continuous(expand = c(0,0.4), limits = c(0.8,7), breaks = seq(1,7,1)) + 
+  stat_smooth(method="lm") +
+  facet_wrap(~ attribute, ncol = 2) +
+  coord_equal() +
+  labs(x = "Preference at T1", 
+       y = "Partner Rating at T2",
+       fill = "Sex",
+       col = "Sex") + 
+  theme_classic(base_size=12) +
+  theme(strip.background = element_blank(),legend.position="bottom", 
+        legend.title = element_blank(), strip.text = element_text(size=12)) +
+  scale_colour_manual(values=c(fem_col, male_col)) +
+  scale_fill_manual(values=c(fem_col, male_col)) + 
+  theme(legend.position = "bottom", legend.box = "horizontal", 
+        legend.text=element_text(size=12))
+
+PredVal_color
+ggsave("PredVal_color.png", width = 6, height = 6, units ="in")
+
+
+# 4.3 Pirateplots of relative preference adjustments (trimmed) ------------------
+
+# 4.3.1 grey --------------------------------------------------------------
+
+png('pirateplot_adjustments.png', width = 6, height = 3, units = 'in', res = 300)
+par(mar = c(2.2,2.2,.5,.5))
+pirateplot(trim_adjust*100 ~ partner_match * attribute, data = data_rel_long, gl.col = 'white', 
+           pal = c('#111111', '#777777'), ylim = c(-4.5, 3)*100,
+           point.col = c('#111111', '#999999'), bar.f.col = c('#111111', '#999999') ,
+           bean.b.col = c('#111111', '#111111'), bean.f.col = c('#111111', '#999999'),
+           ylab = '', bean.lwd = 1.5, xaxt = 'n', yaxt = 'n', bty = 'n', inf = 'ci',
+           point.cex = .4, avg.line.lwd = 2, cut.min = -300, cut.max = 300)
+axis(1, tck = -.015, at = c(1.5, 4.5, 7.5, 10.5), labels  = NA)
+axis(2, tck = -.015, at = seq(-300,300,100), labels  = NA)
+axis(1, lwd = 0, at = c(1.5, 4.5, 7.5, 10.5), labels = c('WT', 'VA', 'SR', 'CH'), cex.axis = .7, line = -.8)
+axis(2, lwd = 0, at = seq(-300,300,100), cex.axis = .6, line = -.8)   
+mtext(side = 1, 'preference dimension', line = 1.1, cex = .85)
+mtext(side = 2, 'adjustment in %', line = 1.1, cex = .85)        
+box()
+legend('bottomleft', legend = c('Partner falls short of T1 preference',
+                                    'Partner exceeds T1 preference'), 
+       bty = 'n', fill = c('#111111DD', '#999999DD'), ncol = 2, cex = .85)
+abline(0,0, lwd = .25)
+dev.off()
+
+
+# 4.3.1 color --------------------------------------------------------------
+
+png('pirateplot_adjustments_color.png', width = 6, height = 3, units = 'in', res = 300)
+par(mar = c(2.2,2.2,.5,.5))
+pirateplot(trim_adjust*100 ~ partner_match * attribute, data = data_rel_long, gl.col = 'white', 
+           pal = c('#fc8d62', '#66c2a5'), ylim = c(-4.5, 3)*100,
+           point.col = c('#fc8d62', '#66c2a5'), bar.f.col = c('#fc8d62', '#66c2a5') ,
+           bean.b.col = c('#fc8d62', '#66c2a5'), bean.f.col = c('#fc8d62', '#66c2a5'),
+           ylab = '', bean.lwd = 1.5, xaxt = 'n', yaxt = 'n', bty = 'n', inf = 'ci',
+           point.cex = .4, avg.line.lwd = 2, cut.min = -300, cut.max = 300)
+axis(1, tck = -.015, at = c(1.5, 4.5, 7.5, 10.5), labels  = NA)
+axis(2, tck = -.015, at = seq(-300,300,100), labels  = NA)
+axis(1, lwd = 0, at = c(1.5, 4.5, 7.5, 10.5), labels = c('WT', 'VA', 'SR', 'CH'), cex.axis = .7, line = -.8)
+axis(2, lwd = 0, at = seq(-300,300,100), cex.axis = .6, line = -.8)   
+mtext(side = 1, 'preference dimension', line = 1.1, cex = .85)
+mtext(side = 2, 'adjustment in %', line = 1.1, cex = .85)        
+box()
+legend('bottomleft', legend = c('Partner falls short of T1 preference',
+                                'Partner exceeds T1 preference'), 
+       bty = 'n', fill = c('#fc8d62DD', '#66c2a5DD'), ncol = 2, cex = .85)
+abline(0,0, lwd = .25)
+dev.off()
+
+
+# 4.4 pirate plots of absolute preference change by relationship type ------
+
+png('pirateplot_pref_change_color.png', width = 6, height = 3, units = 'in', res = 300)
+par(mar = c(2.2,2.2,.5,.5))
+pirateplot(pref_change ~ status * attribute, data = data_reduced_long, gl.col = 'white', 
+           pal = c('#fc8d62', '#66c2a5', '#8598fc'), ylim = c(-4, 3),
+           point.col = c('#fc8d62', '#66c2a5', '#8598fc'), bar.f.col = c('#fc8d62', '#66c2a5', '#8598fc') ,
+           bean.b.col = c('#fc8d62', '#66c2a5', '#8598fc'), bean.f.col = c('#fc8d62', '#66c2a5', '#8598fc'),
+           ylab = '', bean.lwd = 1.5, xaxt = 'n', yaxt = 'n', bty = 'n', inf = 'ci',
+           point.cex = .4, avg.line.lwd = 2, cut.min = -2, cut.max = 2)
+axis(1, tck = -.015, at = c(2, 6, 10, 14), labels  = NA)
+axis(2, tck = -.015, at = seq(-3,3,.50), labels  = NA)
+axis(1, lwd = 0, at = c(2, 6, 10, 14), labels = c('WT', 'VA', 'SR', 'CH'), cex.axis = .7, line = -.8)
+axis(2, lwd = 0, at = seq(-3,3,.50), cex.axis = .6, line = -.8)   
+mtext(side = 1, 'preference dimension', line = 1.1, cex = .85)
+mtext(side = 2, 'preference change (T2 - T1)', line = 1.1, cex = .85)        
+box()
+legend('bottomleft', legend = c('Partner falls short of T1 preference',
+                                'Partner exceeds T1 preference', 'Single'), 
+       bty = 'n', fill = c('#fc8d62DD', '#66c2a5DD', '#8598fc'), ncol = 3, cex = .75)
+abline(0,0, lwd = .25)
+# significances for pairwise comparisons - WT
+lines(x = c(1,2), y = c(2.2, 2.2), lwd = .5, col = '#4D4D4D')
+lines(x = c(1,1), y = c(2.2, 2.1), lwd = .5, col = '#4D4D4D')
+lines(x = c(2,2), y = c(2.2, 2.1), lwd = .5, col = '#4D4D4D')
+text(x = 1.5, y = 2.3, '***', cex = .8, col = '#4D4D4D')
+lines(x = c(2,3), y = c(2.45, 2.45), lwd = .5, col = '#4D4D4D')
+lines(x = c(2,2), y = c(2.45, 2.35), lwd = .5, col = '#4D4D4D')
+lines(x = c(3,3), y = c(2.45, 2.35), lwd = .5, col = '#4D4D4D')
+text(x = 2.5, y = 2.55, '**', cex = .8, col = '#4D4D4D')
+lines(x = c(1,3), y = c(2.7, 2.7), lwd = .5, col = '#4D4D4D')
+lines(x = c(1,1), y = c(2.7, 2.6), lwd = .5, col = '#4D4D4D')
+lines(x = c(3,3), y = c(2.7, 2.6), lwd = .5, col = '#4D4D4D')
+text(x = 2, y = 2.8, '***', cex = .8, col = '#4D4D4D')
+# significances for pairwise comparisons - VA
+lines(x = c(1,2)+4, y = c(2.2, 2.2), lwd = .5, col = '#4D4D4D')
+lines(x = c(1,1)+4, y = c(2.2, 2.1), lwd = .5, col = '#4D4D4D')
+lines(x = c(2,2)+4, y = c(2.2, 2.1), lwd = .5, col = '#4D4D4D')
+text(x = 1.5+4, y = 2.3, '***', cex = .8, col = '#4D4D4D')
+lines(x = c(2,3)+4, y = c(2.45, 2.45), lwd = .5, col = '#4D4D4D')
+lines(x = c(2,2)+4, y = c(2.45, 2.35), lwd = .5, col = '#4D4D4D')
+lines(x = c(3,3)+4, y = c(2.45, 2.35), lwd = .5, col = '#4D4D4D')
+text(x = 2.5+4, y = 2.55, 'ns', cex = .6, col = '#4D4D4D')
+lines(x = c(1,3)+4, y = c(2.7, 2.7), lwd = .5, col = '#4D4D4D')
+lines(x = c(1,1)+4, y = c(2.7, 2.6), lwd = .5, col = '#4D4D4D')
+lines(x = c(3,3)+4, y = c(2.7, 2.6), lwd = .5, col = '#4D4D4D')
+text(x = 2+4, y = 2.8, '**', cex = .8, col = '#4D4D4D')
+# significances for pairwise comparisons - SR
+lines(x = c(1,2)+8, y = c(2.2, 2.2), lwd = .5, col = '#4D4D4D')
+lines(x = c(1,1)+8, y = c(2.2, 2.1), lwd = .5, col = '#4D4D4D')
+lines(x = c(2,2)+8, y = c(2.2, 2.1), lwd = .5, col = '#4D4D4D')
+text(x = 1.5+8, y = 2.3, '***', cex = .8, col = '#4D4D4D')
+lines(x = c(2,3)+8, y = c(2.45, 2.45), lwd = .5, col = '#4D4D4D')
+lines(x = c(2,2)+8, y = c(2.45, 2.35), lwd = .5, col = '#4D4D4D')
+lines(x = c(3,3)+8, y = c(2.45, 2.35), lwd = .5, col = '#4D4D4D')
+text(x = 2.5+8, y = 2.55, 'ns', cex = .6, col = '#4D4D4D')
+lines(x = c(1,3)+8, y = c(2.7, 2.7), lwd = .5, col = '#4D4D4D')
+lines(x = c(1,1)+8, y = c(2.7, 2.6), lwd = .5, col = '#4D4D4D')
+lines(x = c(3,3)+8, y = c(2.7, 2.6), lwd = .5, col = '#4D4D4D')
+text(x = 2+8, y = 2.8, '***', cex = .8, col = '#4D4D4D')
+# significances for pairwise comparisons - CH
+lines(x = c(1,2)+12, y = c(2.2, 2.2), lwd = .5, col = '#4D4D4D')
+lines(x = c(1,1)+12, y = c(2.2, 2.1), lwd = .5, col = '#4D4D4D')
+lines(x = c(2,2)+12, y = c(2.2, 2.1), lwd = .5, col = '#4D4D4D')
+text(x = 1.5+12, y = 2.3, '***', cex = .8, col = '#4D4D4D')
+lines(x = c(2,3)+12, y = c(2.45, 2.45), lwd = .5, col = '#4D4D4D')
+lines(x = c(2,2)+12, y = c(2.45, 2.35), lwd = .5, col = '#4D4D4D')
+lines(x = c(3,3)+12, y = c(2.45, 2.35), lwd = .5, col = '#4D4D4D')
+text(x = 2.5+12, y = 2.55, '**', cex = .8, col = '#4D4D4D')
+lines(x = c(1,3)+12, y = c(2.7, 2.7), lwd = .5, col = '#4D4D4D')
+lines(x = c(1,1)+12, y = c(2.7, 2.6), lwd = .5, col = '#4D4D4D')
+lines(x = c(3,3)+12, y = c(2.7, 2.6), lwd = .5, col = '#4D4D4D')
+text(x = 2+12, y = 2.8, '***', cex = .8, col = '#4D4D4D')
+dev.off()
+
+
+# 5. supplementary analyses -----------------------------------------------
+
+# 5.1 predictive validities among participants with committed relationships only ----------------
+
+# 5.1.1 warmth-trustworthiness --------------------------------------------
+model_WT_committed = lm(scale(T2_partner_WT) ~ T1_sex * scale(T1_pref_WT), 
+                data = subset(data, T2_relationship_type == 'committed'))
+
+summary(lm.beta(model_WT_committed))
+
+# 5.1.2 vitality - attractiveness  ----------------------------------------
+model_VA_committed = lm(scale(T2_partner_VA) ~ T1_sex * scale(T1_pref_VA), 
+                        data = subset(data, T2_relationship_type == 'committed'))
+
+summary(lm.beta(model_VA_committed))
+
+# 5.1.3  status - resources --------------------------------------------
+
+model_SR_committed = lm(scale(T2_partner_SR) ~ T1_sex * scale(T1_pref_SR), 
+                        data = subset(data, T2_relationship_type == 'committed'))
+
+summary(lm.beta(model_SR_committed))
+
+# 5.1.4  confidence - humor ---------------------------------------
+
+model_CH_committed = lm(scale(T2_partner_CH) ~ T1_sex * scale(T1_pref_CH), 
+                        data = subset(data, T2_relationship_type == 'committed'))
+
+summary(lm.beta(model_CH_committed))
+
+
+# 5.2 testing the moderating effect of mate value in the committed subsample --------
+
+# 5.2.1 warmth-trustworthiness --------------------------------------------
+model_WT_committed_2 = lm(scale(T2_partner_WT) ~ T1_sex * scale(T1_pref_WT) * scale(T1_MV), 
+                        data = subset(data, T2_relationship_type == 'committed'))
+
+summary(lm.beta(model_WT_committed_2)) 
+
+# 5.2.2 vitality-attractiveness --------------------------------------------
+model_VA_committed_2 = lm(scale(T2_partner_VA) ~ T1_sex * scale(T1_pref_VA) * scale(T1_MV), 
+                          data = subset(data, T2_relationship_type == 'committed'))
+
+summary(lm.beta(model_VA_committed_2)) 
+
+# 5.2.3 status-resources --------------------------------------------
+model_SR_committed_2 = lm(scale(T2_partner_SR) ~ T1_sex * scale(T1_pref_SR) * scale(T1_MV), 
+                          data = subset(data, T2_relationship_type == 'committed'))
+
+summary(lm.beta(model_SR_committed_2)) 
+
+# 5.2.4 confidence - humor --------------------------------------------
+model_CH_committed_2 = lm(scale(T2_partner_CH) ~ T1_sex * scale(T1_pref_CH) * scale(T1_MV), 
+                          data = subset(data, T2_relationship_type == 'committed'))
+
+summary(lm.beta(model_CH_committed_2)) 
+
+
+# 5.3 stability of ideal partner preferences by relationship type ---------
+
+# 5.3.1 warmth - trustworthiness ------------------------------------------
+
+# retest correlation for participants who entered a committed relationship
+r_WT_committed = with(subset(data, T2_relationship_type == 'committed'), 
+                      cor.test(T1_pref_WT, T2_pref_WT))
+# r = .58, 95% CI [.46; .68]
+
+# retest correlation for participants who entered an affair with further options 
+r_WT_affair_more = with(subset(data, T2_relationship_type == 'affair with option'), 
+                        cor.test(T1_pref_WT, T2_pref_WT))
+# r = .71, 95% CI [.57; .80]
+
+# retest correlation for participants who entered an affair without further options
+r_WT_affair = with(subset(data, T2_relationship_type == 'affair'), 
+                   cor.test(T1_pref_WT, T2_pref_WT))
+# r = .08, 95% CI [-.23; .38]
+
+
+# 5.3.2 vitality - attractiveness ------------------------------------------
+
+# retest correlation for participants who entered a committed relationship
+r_VA_committed = with(subset(data, T2_relationship_type == 'committed'), 
+                      cor.test(T1_pref_VA, T2_pref_VA))
+# r = .58, 95% CI [.46; .68]
+
+# retest correlation for participants who entered an affair with further options 
+r_VA_affair_more = with(subset(data, T2_relationship_type == 'affair with option'), 
+                        cor.test(T1_pref_VA, T2_pref_VA))
+# r = .60, 95% CI [.44; .73]
+
+# retest correlation for participants who entered an affair without further options 
+r_VA_affair = with(subset(data, T2_relationship_type == 'affair'), 
+                   cor.test(T1_pref_VA, T2_pref_VA))
+# r = .66, 95% CI [.44; .81]
+
+
+# 5.3.3 status - resources  --------------------------------------------
+
+# retest correlation for participants who entered a committed relationship
+r_SR_committed = with(subset(data, T2_relationship_type == 'committed'), 
+                      cor.test(T1_pref_SR, T2_pref_SR))
+# r = .68, 95% CI [.59; .77]
+
+# retest correlation for participants who entered an affair with further options 
+r_SR_affair_more = with(subset(data, T2_relationship_type == 'affair with option'), 
+                        cor.test(T1_pref_SR, T2_pref_SR))
+# r = .73, 95% CI [.61; .82]
+
+# retest correlation for participants who entered an affair without further options 
+r_SR_affair = with(subset(data, T2_relationship_type == 'affair'), 
+                   cor.test(T1_pref_SR, T2_pref_SR))
+# r = .53, 95% CI [.27; .72]
+
+
+# 5.3.4 confidence - humor  --------------------------------------------
+
+# retest correlation for participants who entered a committed relationship
+r_CH_committed = with(subset(data, T2_relationship_type == 'committed'), 
+                      cor.test(T1_pref_CH, T2_pref_CH))
+# r = .45, 95% CI [.31; .57]
+
+# retest correlation for participants who entered an affair with further options 
+r_CH_affair_more = with(subset(data, T2_relationship_type == 'affair with option'), 
+                      cor.test(T1_pref_CH, T2_pref_CH))
+# r = .62, 95% CI [.46; .74]
+
+# retest correlation for participants who entered an affair without further options 
+r_CH_affair = with(subset(data, T2_relationship_type == 'affair'), 
+                   cor.test(T1_pref_CH, T2_pref_CH))
+# r = .44, 95% CI [.16; .66]
+
+
+# 5.3.5 Table S3 ----------------------------------------------------------
+
+tableS3 = data.frame(dimension = c('WT', 'VA', 'SR', 'CH'), 
+                     committedR = round(c(r_WT_committed$estimate, r_VA_committed$estimate,
+                                          r_SR_committed$estimate, r_CH_committed$estimate),2),
+                     committedCI = c(paste('[', round(r_WT_committed$conf.int[1],2), '; ', round(r_WT_committed$conf.int[2],2), ']', sep = ''),
+                                     paste('[', round(r_VA_committed$conf.int[1],2), '; ', round(r_VA_committed$conf.int[2],2), ']', sep = ''),
+                                     paste('[', round(r_SR_committed$conf.int[1],2), '; ', round(r_SR_committed$conf.int[2],2), ']', sep = ''),
+                                     paste('[', round(r_CH_committed$conf.int[1],2), '; ', round(r_CH_committed$conf.int[2],2), ']', sep = '')),
+                     awoR = round(c(r_WT_affair_more$estimate, r_VA_affair_more$estimate,
+                                    r_SR_affair_more$estimate, r_CH_affair_more$estimate),2),
+                     awoCI = c(paste('[', round(r_WT_affair_more$conf.int[1],2), '; ', round(r_WT_affair_more$conf.int[2],2), ']', sep = ''),
+                               paste('[', round(r_VA_affair_more$conf.int[1],2), '; ', round(r_VA_affair_more$conf.int[2],2), ']', sep = ''),
+                               paste('[', round(r_SR_affair_more$conf.int[1],2), '; ', round(r_SR_affair_more$conf.int[2],2), ']', sep = ''),
+                               paste('[', round(r_CH_affair_more$conf.int[1],2), '; ', round(r_CH_affair_more$conf.int[2],2), ']', sep = '')),
+                     affairR = round(c(r_WT_affair$estimate, r_VA_affair$estimate,
+                                       r_SR_affair$estimate, r_CH_affair$estimate),2),
+                     affairCI = c(paste('[', round(r_WT_affair$conf.int[1],2), '; ', round(r_WT_affair$conf.int[2],2), ']', sep = ''),
+                                  paste('[', round(r_VA_affair$conf.int[1],2), '; ', round(r_VA_affair$conf.int[2],2), ']', sep = ''),
+                                  paste('[', round(r_SR_affair$conf.int[1],2), '; ', round(r_SR_affair$conf.int[2],2), ']', sep = ''),
+                                  paste('[', round(r_CH_affair$conf.int[1],2), '; ', round(r_CH_affair$conf.int[2],2), ']', sep = '')))
+
+# write.csv2(tableS3, file = 'tableS3.csv', row.names = F) # uncomment this line if you want to save the table as a separate file
+
+
+# 5.4 Testing the moderating role of relationship type --------------------
+
+# relationship type is dummy coded so that committed relationships are the reference level
+
+
+# 5.4.1 warmth-trustworthiness --------------------------------------------
+model_WT_by_rel_type = lm(scale(T2_partner_WT) ~ scale(T1_pref_WT) * 
+                            C(T2_relationship_type, contr.treatment(3, base = 3)), 
+                          data = subset(data_rel))
+
+summary(lm.beta(model_WT_by_rel_type)) 
+
+# 5.4.2 vitality-attractiveness --------------------------------------------
+model_VA_by_rel_type = lm(scale(T2_partner_VA) ~ scale(T1_pref_VA) * 
+                            C(T2_relationship_type, contr.treatment(3, base = 3)), 
+                          data = subset(data_rel))
+
+summary(lm.beta(model_VA_by_rel_type)) 
+
+# 5.4.3 status-resources --------------------------------------------
+model_SR_by_rel_type = lm(scale(T2_partner_SR) ~ scale(T1_pref_SR) * 
+                            C(T2_relationship_type, contr.treatment(3, base = 3)), 
+                          data = subset(data_rel))
+
+summary(lm.beta(model_SR_by_rel_type)) 
+
+# 5.4.4 confidence - humor --------------------------------------------
+model_CH_by_rel_type = lm(scale(T2_partner_CH) ~ scale(T1_pref_CH) * 
+                            C(T2_relationship_type, contr.treatment(3, base = 3)), 
+                          data = subset(data_rel))
+
+summary(lm.beta(model_CH_by_rel_type)) 
+
+
+
+```
+

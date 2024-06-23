@@ -1,0 +1,144 @@
+---
+title: ""
+output: html_document
+---
+
+In Study 1 (N = 310), the intention to get vaccinated against COVID-19 was correlated
+with knowledge about and belief in herd immunity (r = .58, p < .001), as well as with empathy
+for those most vulnerable to the virus (r = .26, p < .001). In Study 2 (N = 2,005), information
+about herd immunity (Cohen’s d = 0.13, p = .003) and empathy (Cohen’s d = 0.22, p < .001)
+independently promoted vaccination intention.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+library(gtools)
+library(robustbase)
+library(magrittr) # unless you routinely load tidyverse, in which case leave this one out. You just need it for the pipe. 
+library(moments)
+
+
+
+list.files("../data/raw_data/", pattern = "r01288")
+
+r01288_tib_1 <- haven::read_sav("../data/raw_data/r01288_pfattheicher2020_Study1.sav")
+r01288_tib_2 <- haven::read_sav("../data/raw_data/r01288_pfattheicher2020_Study2.sav")
+
+
+```
+
+# Study 1 
+
+```{r}
+r01288_mod_original_1 <- lm(vac ~ HH + E + X + A + C + O + vacBK + empa
+  , data = r01288_tib_1) 
+
+r01288_mod_original_1 %>% summary()
+```
+
+```{r}
+r01288_mod_z_1 <- lm(z(vac) ~ z(HH) + z(E) + z(X) + z(A) + z(C) + z(O) + z(vacBK) + z(empa)
+  , data = r01288_tib_1) 
+r01288_mod_z_1 %>% summary()
+```
+
+```{r}
+key_effects = c("z(vacBK)", "z(empa)")
+export_ols(r01288_mod_z_1, key_effects)
+```
+
+
+
+
+
+
+# Study 2
+
+```{r}
+r01288_tib_2 %<>% 
+  dplyr::mutate(
+    cH = as.factor(cH), 
+    cE = as.factor(cE)
+  )
+```
+
+
+```{r}
+contrasts(r01288_tib_2$cE) = c(0.5, -0.5)
+contrasts(r01288_tib_2$cH) = c(0.5, -0.5)
+```
+
+Not a key finding, leaving out: 
+
+
+<!-- ```{r} -->
+<!-- r01288_mod_original_2 <- lm(empa ~ cH * cE, data = r01288_tib_2) -->
+<!-- r01288_mod_original_2 %>% car::Anova(type =3) -->
+<!-- r01288_mod_original_2 %>% summary() -->
+<!-- ``` -->
+
+
+
+
+
+
+
+
+```{r}
+r01288_mod_original_3 <- lm(vac ~ cH * cE, data = r01288_tib_2)
+r01288_mod_original_3 %>% car::Anova(type = 3)
+r01288_mod_original_3 %>% summary()
+```
+
+```{r}
+r01288_mod_z_3 <- lm(z(vac) ~ cH * cE, data = r01288_tib_2)
+r01288_mod_z_3 %>% summary()
+```
+
+```{r}
+key_effects = c("cH1", "cE1", "cH1:cE1")
+export_ols(r01288_mod_z_3, key_effects)
+```
+
+
+
+
+```{r}
+r01288_mod_original_4 <- lm(Q89_1 ~ cH * cE, data = r01288_tib_2)
+r01288_mod_original_4 %>% Anova(type = 3)
+r01288_mod_original_4 %>% summary()
+```
+
+```{r}
+r01288_mod_z_4 <- lm(z(Q89_1) ~ cH * cE, data = r01288_tib_2)
+r01288_mod_z_4 %>% Anova(type = 3)
+r01288_mod_z_4 %>% summary()
+```
+
+```{r}
+key_effects = c("cH1", "cE1", "cH1:cE1")
+export_ols(r01288_mod_z_4, key_effects)
+```
+
+
+
+
+
+```{r}
+r01288_mod_original_5 <- lm(Q89_2 ~ cH * cE, data = r01288_tib_2)
+r01288_mod_original_5 %>% car::Anova(type = 3)
+r01288_mod_original_5 %>% summary()
+```
+
+```{r}
+r01288_mod_z_5 <- lm(z(Q89_2) ~ cH * cE, data = r01288_tib_2)
+r01288_mod_z_5 %>% car::Anova(type = 3)
+r01288_mod_z_5 %>% summary()
+```
+
+```{r}
+key_effects = c("cH1", "cE1", "cH1:cE1")
+export_ols(r01288_mod_z_5, key_effects)
+```

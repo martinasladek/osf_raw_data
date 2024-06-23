@@ -1,0 +1,57 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-08-04'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df <- haven::read_sav("../data/raw_data/u01344_anxCOVID_data_7.31.20.sav") %>% 
+  dplyr::filter(duration_in_minutes > 10)
+
+names(df)
+```
+
+
+perceived negative cost == COVID_conseq_total
+more severe symptoms == COVID_19_1_4
+probability of infection == COVID_19_1_1
+
+model 1 
+
+```{r}
+u01344_mod_z_1 <- df %>% 
+  lm(z(PSWQ_total) ~ z(COVID_19_1_1) + z(COVID_19_1_4) + z(COVID_conseq_total), .) 
+
+export_ols(u01344_mod_z_1, key_effects = mod_coeffs(u01344_mod_z_1))
+```
+
+model 2
+
+```{r}
+u01344_mod_z_2 <- df %>% 
+  lm(z(Health_Behavior_score) ~ z(COVID_19_1_1) + z(COVID_19_1_4) + z(COVID_conseq_total), .)
+
+export_ols(u01344_mod_z_2, key_effects = mod_coeffs(u01344_mod_z_2))
+```
+
+
+model 3 
+
+This is the last model according to the description, even though the preprint incorrectly copied and pasted results from the previous model and reported as results for this model. 
+
+```{r}
+u01344_mod_z_3 <- df %>% 
+  lm((Health_Behavior_score) ~ z(COVID_conseq_total)*z(PSWQ_total), .) 
+
+export_ols(u01344_mod_z_3, key_effects = mod_coeffs(u01344_mod_z_3))
+```
+
+```{r}
+progress()
+```
+

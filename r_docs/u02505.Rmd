@@ -1,0 +1,178 @@
+---
+title: "u02505"
+author: "MS"
+date: '2022-06-25'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df <- read.csv("../data/raw_data/u02505_mindTheRobot_edited.csv") %>% 
+  dplyr::filter(row_number() > 2) %>% 
+  dplyr::mutate(id = 1:nrow(.))
+
+```
+
+manipulation checks
+
+```{r}
+df_check_1 <- df %>% 
+  dplyr::select(id, contains("agency")) %>% 
+  tidyr::pivot_longer(-id) %>% 
+  dplyr::mutate(value = as.numeric(value))
+
+df_check_1 %>% 
+  afex::aov_4(value ~ name + (name|id), .)
+
+df_check_2 <- df %>% 
+  dplyr::select(id, contains("experience")) %>% 
+  tidyr::pivot_longer(-id) %>% 
+  dplyr::mutate(value = as.numeric(value))
+
+df_check_2 %>% 
+  afex::aov_4(value ~ name + (name|id), .)
+```
+
+process remaining variables 
+
+
+```{r}
+df %<>% 
+  dplyr::mutate(
+    age = as.numeric(age), 
+    age_split = if_else(age <= 38, "younger", "older")
+  )
+```
+
+agency
+
+```{r}
+df_agency <- df %>% 
+  dplyr::select(id, gender, age_split, contains("agency")) %>% 
+  tidyr::pivot_longer(cols = -c(id, gender, age_split)) %>% 
+  dplyr::mutate(name = str_remove_all(name, "_agency")) %>% 
+  tidyr::separate(., col = "name", into = c("q", "name"), sep = "_1_") %>% 
+  tidyr::separate(., col = "name", into = c("individual", "category"), sep = "_") %>% 
+  dplyr::mutate(
+    robot_cat = case_when(
+      individual %in% c("walle", "r2d2", "fcr") & category == "robot" ~ "fictional",
+      !individual %in% c("walle", "r2d2", "fcr") & category == "robot" ~ "real",
+      TRUE ~ "not_robot"
+      ), 
+    value = as.numeric(value)
+    )
+
+df_exp <- df %>% 
+  dplyr::select(id, gender, age_split, contains("experience")) %>% 
+  tidyr::pivot_longer(cols = -c(id, gender, age_split)) %>% 
+  dplyr::mutate(name = str_remove_all(name, "_experience")) %>% 
+  tidyr::separate(., col = "name", into = c("q", "name"), sep = "_2_") %>% 
+  tidyr::separate(., col = "name", into = c("individual", "category"), sep = "_") %>% 
+  dplyr::mutate(
+    robot_cat = case_when(
+      individual %in% c("walle", "r2d2", "fcr") & category == "robot" ~ "fictional",
+      !individual %in% c("walle", "r2d2", "fcr") & category == "robot" ~ "real",
+      TRUE ~ "not_robot"
+      ), 
+    value = as.numeric(value)
+    )
+```
+
+model 1 
+
+```{r}
+df_agency_long_1 <- df_agency %>% 
+  dplyr::filter(category == "robot") %>% 
+  dplyr::group_by(id, gender, age_split, individual) %>% 
+  dplyr::summarise(agency = mean(value)) 
+
+u02505_mod_rm_z_1 <- df_agency_long_1 %>% 
+  afex::aov_4(z(agency) ~ gender*age_split*individual + (individual|id), .)
+
+export_ols(u02505_mod_rm_z_1, 
+           key_effects = c("age_split", "individual"))
+
+u02505_mod_lmer_z_1 <- df_agency_long_1 %>% 
+  lme4::lmer(z(agency) ~ gender*age_split*individual + (1|id), .) 
+
+export_ols(u02505_mod_lmer_z_1, 
+           key_effects = c("age_splityounger", 
+                           "individualatlast", "individualbeam", "individualfcr", "individualmaslo", 
+                           "individualr2d2", "individualroomba", "individualsiri", "individualsophia", 
+                           "individualsphero", "individualwalle"))
+```
+
+model 2
+
+```{r}
+df_exp_long_2 <- df_exp %>% 
+  dplyr::filter(category == "robot") %>% 
+  dplyr::group_by(id, gender, age_split, individual) %>% 
+  dplyr::summarise(exp = mean(value)) 
+
+u02505_mod_rm_z_2 <- df_exp_long_2 %>% 
+  afex::aov_4(exp ~ gender*age_split*individual + (individual|id), .)
+
+
+export_ols(u02505_mod_rm_z_2, 
+           key_effects = c("age_split", "individual"))
+
+u02505_mod_lmer_z_2 <- df_exp_long_2 %>% 
+  lme4::lmer(z(exp) ~ gender*age_split*individual + (1|id), .) 
+
+export_ols(u02505_mod_lmer_z_2, 
+           key_effects = c("age_splityounger", 
+                           "individualatlast", "individualbeam", "individualfcr", "individualmaslo", 
+                           "individualr2d2", "individualroomba", "individualsiri", "individualsophia", 
+                           "individualsphero", "individualwalle"))
+```
+
+model 3 
+
+```{r}
+df_agency_long_3 <- df_agency %>% 
+  dplyr::filter(category == "robot", robot_cat == "real") %>% 
+  dplyr::group_by(id, gender, age_split, individual) %>% 
+  dplyr::summarise(agency = mean(value)) 
+
+u02505_mod_rm_z_3 <- df_agency_long_3 %>% 
+  afex::aov_4(z(agency) ~ gender*age_split*individual + (individual|id), .)
+
+export_ols(u02505_mod_rm_z_3, 
+           key_effects = c("age_split", "individual"))
+
+u02505_mod_lmer_z_3 <- df_agency_long_3 %>% 
+  lme4::lmer(z(agency) ~ gender*age_split*individual + (1|id), .)
+
+export_ols(u02505_mod_lmer_z_3, 
+           key_effects = mod_coeffs(u02505_mod_lmer_z_3)[2:9])
+```
+
+
+model 4 
+
+```{r}
+df_exp_long_4 <- df_exp %>% 
+  dplyr::filter(category == "robot", robot_cat == "real") %>% 
+  dplyr::group_by(id, gender, age_split, individual) %>% 
+  dplyr::summarise(exp = mean(value)) 
+
+u02505_mod_rm_z_4 <- df_exp_long_4 %>% 
+  afex::aov_4(z(exp) ~ gender*age_split*individual + (individual|id), .)
+
+export_ols(u02505_mod_rm_z_4, 
+           key_effects = c("age_split", "individual"))
+
+u02505_mod_lmer_z_4 <- df_exp_long_4 %>% 
+  lme4::lmer(z(exp) ~ gender*age_split*individual + (1|id), .)
+
+export_ols(u02505_mod_lmer_z_4, 
+           key_effects = mod_coeffs(u02505_mod_lmer_z_4)[2:9]
+           )
+```
+
+
+

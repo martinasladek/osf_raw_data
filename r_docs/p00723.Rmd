@@ -1,0 +1,52 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-06-05'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df <- readr::read_delim("../data/raw_data/p00723_1015-5759_a000543_esm1.txt") %>% 
+  dplyr::mutate(id = 1:nrow(.))
+```
+
+```{r}
+df_long <- df %>% 
+  dplyr::select(id, sb1_RT, snb1_RT, tb1_RT, tnb1_RT, rb1_RT, rnb1_RT) %>% 
+  tidyr::pivot_longer(-id) %>% 
+  dplyr::mutate(
+    value = str_replace_all(value, ",", ".") %>% as.numeric(), 
+    arrangement = case_when(
+      str_detect(name, "s") ~ "1", 
+      str_detect(name, "t") ~ "2", 
+      str_detect(name, "r") ~ "3"
+    ), 
+    pace = case_when(
+      str_detect(name, "nb") ~ "2", 
+      str_detect(name, "b") ~ "1"
+    )
+  )
+
+
+id_missing = c(1,16,17,22,43, 79)
+
+p00723_mod_rm_z_1 <- df_long %>% 
+  afex::aov_4(z(value) ~ arrangement*pace + (arrangement*pace|id), .)
+
+export_ols(p00723_mod_rm_z_1, 
+           key_effects = c("arrangement", "pace", "arrangement:pace"))
+
+
+p00723_mod_lmer_z_1 <- df_long %>% 
+  dplyr::filter(!id %in% id_missing) %>% 
+  lme4::lmer(z(value) ~ arrangement*pace + (1|id), .)
+
+export_ols(p00723_mod_lmer_z_1, 
+           key_effects = c("arrangement2", "arrangement3", "pace2", 
+                           "arrangement2:pace2", "arrangement3:pace2"))
+```
+

@@ -1,0 +1,217 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-08-04'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df_1a <- read.csv("../data/raw_data/u01250_Experiment-1a.csv")
+df_1b <- read.csv("../data/raw_data/u01250_Experiment-1b.csv")
+
+df_2a <- read.csv("../data/raw_data/u01250_Experiment-2a.csv")
+df_2b <- readRDS("../data/raw_data/u01250_exp2b_data_df.rds")
+
+df_3 <- read.csv("../data/raw_data/u01250_Experiment-3.csv")
+
+df_5 <- readRDS("../data/raw_data/u01250_exp5_data_df.rds")
+
+
+```
+
+# exp 1 
+
+
+model 1 
+
+```{r}
+u01250_mod_rm_z_1 <- df_1a %>% 
+  afex::aov_4(z(Accuracy) ~ trialType*numInSequence + (trialType*numInSequence|subjID), ., 
+              anova_table = list(correct = "none"))
+
+
+export_ols(
+  u01250_mod_rm_z_1, 
+  key_effects = c("trialType", "numInSequence", "trialType:numInSequence")
+)
+
+u01250_mod_lmer_z_1 <- u01250_mod_rm_z_1$data$long %>% 
+  lme4::lmer(z.Accuracy ~ trialType*numInSequence + (1|subjID), .)
+
+export_ols(
+  u01250_mod_lmer_z_1, 
+  key_effects = mod_coeffs(u01250_mod_lmer_z_1)
+)
+
+```
+
+model 2 
+
+```{r}
+df_1b %>% 
+  afex::aov_4(Accuracy ~ trialType*numInSequence + (trialType*numInSequence|subjID), ., 
+              anova_table = list(correct = "none"))
+
+
+u01250_mod_rm_z_2 <- df_1b %>% 
+  afex::aov_4(z(Accuracy) ~ trialType*numInSequence + (trialType*numInSequence|subjID), ., 
+              anova_table = list(correct = "none"))
+
+export_ols(
+  u01250_mod_rm_z_2, 
+  key_effects = c("trialType", "numInSequence", "trialType:numInSequence")
+)
+
+u01250_mod_lmer_z_2 <- u01250_mod_rm_z_2$data$long %>% 
+  lme4::lmer(z.Accuracy ~ trialType*numInSequence + (1|subjID), .)
+
+export_ols(
+  u01250_mod_lmer_z_2, 
+  key_effects = mod_coeffs(u01250_mod_lmer_z_2)
+)
+```
+
+# exp 2 
+
+model 3 
+
+```{r}
+df_2a %>% 
+  afex::aov_4(Accuracy ~ trialType*numInSequence + (trialType*numInSequence|subjID), ., 
+              anova_table = list(correct = "none"))
+
+u01250_mod_rm_z_3 <- df_2a %>% 
+  afex::aov_4(z(Accuracy) ~ trialType*numInSequence + (trialType*numInSequence|subjID), ., 
+              anova_table = list(correct = "none"))
+
+export_ols(
+  u01250_mod_rm_z_3, 
+  key_effects = c("trialType", "numInSequence", "trialType:numInSequence")
+)
+
+u01250_mod_lmer_z_3 <- u01250_mod_rm_z_3$data$long %>% 
+  lme4::lmer(z.Accuracy ~ trialType*numInSequence + (1|subjID), .)
+
+export_ols(
+  u01250_mod_lmer_z_3, 
+  key_effects = mod_coeffs(u01250_mod_lmer_z_3)
+)
+```
+
+model 4 
+
+```{r}
+u01250_mod_rm_z_4 <- df_2b %>% 
+  afex::aov_4(z(propCorrect) ~ blockType*numShapes + (blockType*numShapes|workerID), ., 
+              anova_table = list(correct = "none"))
+
+export_ols(u01250_mod_rm_z_4, 
+           key_effects = c("blockType", "numShapes", "blockType:numShapes"))
+
+u01250_mod_lmer_z_4 <- u01250_mod_rm_z_4$data$long %>% 
+  lme4::lmer(z.propCorrect ~ blockType*numShapes + (1|workerID), .)
+
+export_ols(u01250_mod_lmer_z_4, 
+           key_effects = mod_coeffs(u01250_mod_lmer_z_4))
+```
+
+model 5
+
+```{r}
+groupedData = df_2b |> dplyr::group_by(workerID) %>% dplyr::summarise(meanAcc = mean(propCorrect))
+aboveSubjs = groupedData$workerID[groupedData$meanAcc>.5]
+filtData = filter(df_2b,workerID %in% aboveSubjs)
+
+
+filtData %>% 
+  afex::aov_4(propCorrect ~ blockType*numShapes + (blockType*numShapes|workerID), ., 
+              anova_table = list(correct = "none"))
+
+u01250_mod_rm_z_5 <- filtData %>% 
+  afex::aov_4(z(propCorrect) ~ blockType*numShapes + (blockType*numShapes|workerID), ., 
+              anova_table = list(correct = "none"))
+
+export_ols(u01250_mod_rm_z_5, 
+           key_effects = c("blockType", "numShapes", "blockType:numShapes"))
+
+u01250_mod_lmer_z_5 <- u01250_mod_rm_z_5$data$long %>% 
+  lme4::lmer(z.propCorrect ~ blockType*numShapes + (1|workerID), .)
+
+export_ols(u01250_mod_lmer_z_5, 
+           key_effects = mod_coeffs(u01250_mod_lmer_z_5))
+
+```
+
+# exp 3 
+
+model 6 
+
+```{r}
+u01250_mod_rm_z_6 <- df_3 %>% 
+  afex::aov_4(z(Accuracy) ~ trialType*numInSequence + (trialType*numInSequence|subjID), ., 
+              anova_table = list(correct = "none"))
+
+export_ols(u01250_mod_rm_z_6, 
+           key_effects = c("trialType", "numInSequence", "trialType:numInSequence"))
+
+u01250_mod_lmer_z_6 <- u01250_mod_rm_z_6$data$long %>% 
+  lme4::lmer(z.Accuracy ~ trialType*numInSequence + (1|subjID), .)
+
+export_ols(u01250_mod_lmer_z_6, 
+           key_effects = mod_coeffs(u01250_mod_lmer_z_6))
+```
+
+# exp 4 
+
+Missing data for exp 4 
+
+# exp 5 
+
+model 7 
+
+```{r}
+u01250_mod_rm_z_7 <- df_5 %>% 
+  afex::aov_4(z(propCorrect) ~ blockType*numShapes + (blockType*numShapes|workerID), ., 
+              anova_table = list(correct = "none"))
+
+export_ols(u01250_mod_rm_z_7, 
+           key_effects = c("blockType", "numShapes", "blockType:numShapes"))
+
+u01250_mod_lmer_z_7 <- u01250_mod_rm_z_7$data$long %>% 
+  lme4::lmer(z.propCorrect ~ blockType*numShapes + (1|workerID), .)
+
+export_ols(u01250_mod_lmer_z_7, 
+           key_effects = mod_coeffs(u01250_mod_lmer_z_7))
+```
+
+model 8 
+
+```{r}
+groupedData = dplyr::group_by(df_5,workerID) %>% dplyr::summarise(meanAcc = mean(propCorrect))
+aboveSubjs = groupedData$workerID[groupedData$meanAcc>.5]
+filtData = filter(df_5,workerID %in% aboveSubjs)
+
+filtData %>% 
+  afex::aov_4(propCorrect ~ blockType*numShapes + (blockType*numShapes|workerID), ., 
+              anova_table = list(correct = "none"))
+
+
+
+u01250_mod_rm_z_8 <- filtData %>% 
+  afex::aov_4(z(propCorrect) ~ blockType*numShapes + (blockType*numShapes|workerID), ., 
+              anova_table = list(correct = "none"))
+
+export_ols(u01250_mod_rm_z_8, 
+           key_effects = c("blockType", "numShapes", "blockType:numShapes"))
+
+u01250_mod_lmer_z_8 <- u01250_mod_rm_z_8$data$long %>% 
+  lme4::lmer(z.propCorrect ~ blockType*numShapes + (1|workerID), .)
+
+export_ols(u01250_mod_lmer_z_8, 
+           key_effects = mod_coeffs(u01250_mod_lmer_z_8))
+```
+

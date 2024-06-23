@@ -1,0 +1,52 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-23'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+df <- readxl::read_excel("../data/raw_data/p01701_1618-3169_a000410_esm8.xlsx", sheet = 2)
+
+df
+```
+```{r}
+df_proc <- df %>% 
+  dplyr::group_by(subject, eccentricity, incidence_angle, response) %>% 
+  dplyr::summarise(n = n()) %>% 
+  tidyr::pivot_wider(id_cols = c(subject, eccentricity, incidence_angle), 
+                     names_from = response, values_from = n,
+                     values_fill = 0) %>% 
+  dplyr::mutate(
+    prop = `1` / (`0` + `1`), 
+    eccentricity = factor(eccentricity, levels = c("zero", "near", "far")), 
+    incidence_angle = factor(incidence_angle)
+  ) %>%
+  dplyr::ungroup() %>% 
+  dplyr::filter(!is.na(incidence_angle))
+```
+
+
+```{r}
+p01701_mod_rm_z_1 <- df_proc %>% 
+  afex::aov_4(z(prop) ~ eccentricity*incidence_angle + (eccentricity*incidence_angle|subject), .)
+
+export_ols(
+  p01701_mod_rm_z_1, 
+  key_effects = c("eccentricity:incidence_angle")
+)
+
+
+p01701_mod_lmer_z_1 <- df_proc %>% 
+  lme4::lmer(z(prop) ~ eccentricity*incidence_angle + (1|subject), .)
+
+export_ols(
+  p01701_mod_lmer_z_1, 
+  key_effects = rownames(summary(p01701_mod_lmer_z_1)$coefficients)[8:15]
+)
+
+rownames(summary(p01701_mod_lmer_z_1)$coefficients)[8:15]
+```
+

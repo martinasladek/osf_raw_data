@@ -1,0 +1,93 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-05-30'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(dplyr)
+library(magrittr)
+library(stringr)
+
+source("../scripts/helpers.R")
+
+p00576_tib_1 <- read.csv("../data/raw_data/p00576_Table-Extraction_PNE-2019-0125_Valenti_1.csv")
+p00576_tib_2 <- read.csv("../data/raw_data/p00576_Table-Extraction_PNE-2019-0125_Valenti_2.csv")
+```
+
+# Experiment 1 
+
+```{r}
+p00576_tib_1_long <- p00576_tib_1 %>% 
+  dplyr::mutate(id = 1:nrow(.)) %>% 
+  tidyr::pivot_longer(cols = -c(id, condition)) %>% 
+  dplyr::mutate(
+    inout = case_when(
+      str_detect(name, "inside") ~ "inside", 
+      str_detect(name, "outside") ~ "outside"
+    ) %>% factor(), 
+    infneu = case_when(
+      str_detect(name, "inf") ~ "inf", 
+      str_detect(name, "neu") ~ "neu"
+    ) %>% factor(), 
+    dvn = case_when(
+      str_detect(name, "dvn") ~ "dvn", 
+      str_detect(name, "control") ~ "control"
+    ) %>% factor(), 
+    value = if_else(value == -473, -0.473, value)
+  ) 
+
+p00576_mod_rm_z_1 <- p00576_tib_1_long %>% 
+  afex::aov_4(z(value) ~ condition*dvn*inout*infneu + (dvn*inout*infneu|id), .)
+
+export_ols(p00576_mod_rm_z_1, 
+           key_effects = c("dvn", " condition:dvn", "dvn:inout", "dvn:infneu"))
+
+
+
+
+p00576_mod_lmer_z_1 <- p00576_tib_1_long %>% 
+  lme4::lmer(z(value) ~ condition*dvn*inout*infneu + (1|id), .)
+
+export_ols(p00576_mod_lmer_z_1, 
+           key_effects = c("dvndvn", "conditionMemory:dvndvn", "dvndvn:inoutoutside", "dvndvn:infneuneu"))
+```
+
+# Experiment 2
+
+```{r}
+p00576_tib_2_long <- p00576_tib_2 %>% 
+  dplyr::mutate(id = 1:nrow(.)) %>% 
+  tidyr::pivot_longer(cols = -c(id)) %>% 
+  dplyr::mutate(
+    infneu = case_when(
+      str_detect(name, "inf") ~ "inf", 
+      str_detect(name, "neu") ~ "neu"
+    ) %>% factor(), 
+    dvn = case_when(
+      str_detect(name, "dvn") ~ "dvn", 
+      str_detect(name, "control") ~ "control"
+    ) %>% factor(), 
+  )
+
+p00576_mod_rm_z_2 <- p00576_tib_2_long %>% 
+  afex::aov_4(z(value) ~ infneu*dvn + (infneu*dvn|id), .)
+
+export_ols(p00576_mod_rm_z_2, 
+           key_effects = c("infneu", "dvn", "infneu:dvn"))
+
+
+
+
+p00576_mod_lmer_z_2 <- p00576_tib_2_long %>% 
+  lme4::lmer(z(value) ~ infneu*dvn + (1|id), .)
+
+export_ols(p00576_mod_lmer_z_2, 
+           key_effects = c("infneuneu", "dvndvn", "infneuneu:dvndvn"))
+
+```
+
+

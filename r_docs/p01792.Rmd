@@ -1,0 +1,110 @@
+---
+title: "p01792"
+author: "MS"
+date: '2022-07-23'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df_1 <- readxl::read_excel("../data/raw_data/p01792_S1 Dataset.xlsx")
+df_2 <- readxl::read_excel("../data/raw_data/p01792_S1 Dataset.xlsx")
+```
+
+S1 control 
+S2 stroke
+
+```{r}
+df_1  %<>% 
+  dplyr::mutate(
+    target = case_when(
+      str_detect(`...1`, "TARGET1") ~ "t1", 
+      str_detect(`...1`, "TARGET2") ~ "t2", 
+      str_detect(`...1`, "TARGET3") ~ "t3"
+    )
+  ) %>% 
+  dplyr::group_by(target) %>% 
+  dplyr::summarise(
+    across(`SUBJ 1`: `SUBJ 9`, mean)
+  ) %>% 
+  t() %>% 
+  as.data.frame()
+
+names(df_1) <- df_1[1, ] %>% c()
+
+df_1 <- df_1[-1, ]
+
+df_1 %<>% 
+  tibble::rownames_to_column() %>% 
+  dplyr::mutate(
+    id = paste0(rowname, " control"), 
+    group = "control"
+  )
+
+df_1
+```
+
+
+```{r}
+df_2  %<>% 
+  dplyr::mutate(
+    target = case_when(
+      str_detect(`...1`, "TARGET1") ~ "t1", 
+      str_detect(`...1`, "TARGET2") ~ "t2", 
+      str_detect(`...1`, "TARGET3") ~ "t3"
+    )
+  ) %>% 
+  dplyr::group_by(target) %>% 
+  dplyr::summarise(
+    across(`SUBJ 1`: `SUBJ 9`, mean)
+  ) %>% 
+  t() %>% 
+  as.data.frame()
+
+names(df_2) <- df_2[1, ] %>% c()
+
+df_2 <- df_2[-1, ]
+
+df_2 %<>% 
+  tibble::rownames_to_column() %>% 
+  dplyr::mutate(
+    id = paste0(rowname, " stroke"), 
+    group = "stroke"
+  )
+```
+
+
+```{r}
+df <- rbind(df_1, df_2)
+```
+
+
+```{r}
+df_long <- df %>% 
+  dplyr::select(id, group, t1:t3) %>% 
+  tidyr::pivot_longer(-c(id, group)) %>% 
+  dplyr::mutate(value = as.numeric(value)) 
+
+p01792_mod_rm_z_1 <- df_long %>% 
+  afex::aov_4(z(value) ~ group*name + (name|id), .)
+
+export_ols(
+  p01792_mod_rm_z_1, 
+  key_effects = c("group:name")
+)
+
+
+p01792_mod_lmer_z_1 <- df_long %>% 
+  lme4::lmer(z(value) ~ group*name + (1|id), .)
+
+export_ols(
+  p01792_mod_lmer_z_1, 
+  key_effects = c("groupstroke:namet2", "groupstroke:namet3")
+)
+```
+
+
+

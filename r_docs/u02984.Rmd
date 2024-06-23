@@ -1,0 +1,874 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-03'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+```
+
+# Experiment 1a-d
+
+```{r}
+mydata <- read.csv("../data/raw_data/u02984_Experiments 1a-d data.csv", stringsAsFactors = FALSE)
+
+mydata$expWin <- mydata$expWin - 1
+mydata$expWin <- 1- mydata$expWin
+
+# summary(lm(effort ~ round1, data=mydata))
+
+cond.negmom = subset(mydata, round1 == "Easy")
+cond.posmom = subset(mydata, round1 == "Hard")
+
+mydata$result[mydata$scoreComp > mydata$scoreAverage] <- 1
+mydata$result[mydata$scoreComp <= mydata$scoreAverage] <- 0
+
+# chisq.test(mydata$result, mydata$round1, correct=FALSE)
+# table(mydata$round1, mydata$result)
+# 
+# summary(lm(momentum ~ round1 + factor(exp), data=mydata))
+# 
+# t.test(perfChange2 ~ round1, data=mydata)
+
+easy <- with(mydata, tapply(mydata$scoreEasy, mydata$round1, mean))
+medium <- with(mydata, tapply(mydata$scoreMedium, mydata$round1, mean))
+hard <- with(mydata, tapply(mydata$scoreHard, mydata$round1, mean))
+avg <- with(mydata, tapply(mydata$scoreAverage, mydata$round1, mean))
+comp <- with(mydata, tapply(mydata$scoreComp, mydata$round1, mean))
+
+scores <- matrix(c(easy, medium, hard, avg, comp), ncol = 2, byrow=TRUE)
+colnames(scores) <- c("negMom", "posMom")
+rownames(scores) <- c("easy", "medium", "hard", "avg", "comp")
+scores <- as.table(scores)
+scores
+
+# t.test(scoreHard ~ round1, data=mydata, var.equal=TRUE)
+# t.test(scoreEasy ~ round1, data=mydata, var.equal=TRUE)
+# t.test(scoreMedium ~ round1, data=mydata, var.equal=TRUE)
+# 
+# t.test(scoreAverage ~ round1, data=mydata, var.equal=TRUE)
+# t.test(scoreComp ~ round1, data=mydata, var.equal=TRUE)
+# 
+# ##For Table 1 
+# summary(lm(likelyWin ~ round1 + scoreAverage + factor(exp), data=mydata))
+```
+
+model 1
+
+```{r}
+u02984_mod_z_1 <- lm(z(likelyWin) ~ (round1) + z(scoreAverage) + z(age) + z(gender) + 
+      z(familiar) + z(education) + factor(exp), data=mydata)
+
+export_ols(u02984_mod_z_1, 
+           key_effects = c("round1Hard"))
+```
+
+
+```{r}
+# summary(lm(likelyWin ~ scoreAverage + effPre + effPreComp + momentum + factor(exp), data=mydata))
+# summary(lm(likelyWin ~ scoreAverage + effPre + effPreComp + momentum + age + gender + familiar + education + factor(exp), data=mydata))
+# 
+# summary(glm(expWin ~ round1 + scoreAverage + effPre + factor(exp), family="binomial", data=mydata))
+# summary(glm(expWin ~ round1 + scoreAverage + effPre + age + gender + familiar + education + factor(exp), family="binomial", data=mydata))
+# summary(glm(expWin ~ scoreAverage + effPre + effPreComp + momentum + factor(exp), family="binomial", data=mydata))
+# summary(glm(expWin ~ scoreAverage + effPre + effPreComp + momentum + age + gender + familiar + education + factor(exp), family="binomial", data=mydata))
+
+#For Table 2
+# summary(lm(scoreComp ~ round1 + scoreAverage + factor(exp), data=mydata))
+# summary(lm(scoreComp ~ round1 + scoreAverage + age + gender + familiar + education + factor(exp), data=mydata))
+# summary(lm(scoreComp ~ scoreAverage + effPre + effPreComp + momentum + factor(exp), data=mydata))
+# summary(lm(scoreComp ~ scoreAverage + effPre + effPreComp + momentum + age + gender + familiar + education + factor(exp), data=mydata))
+```
+
+
+model 2
+
+```{r}
+t.test(likelyWin ~ round1, data=mydata, var.equal=TRUE)
+# ci(cond.posmom$likelyWin)
+# ci(cond.negmom$likelyWin)
+u02984_mod_z_2 <- lm(z(likelyWin) ~ round1, data=mydata)
+
+export_ols(u02984_mod_z_2, 
+           key_effects = c("round1Hard"))
+```
+
+## exp 1a
+
+```{r}
+mydata <- read.csv("../data/raw_data/u02984_Experiment 1a data.csv", stringsAsFactors = FALSE)
+
+library(psych)
+
+##clean data, removing participants with average or competition scores more than 1 SD below average
+avgCompScore <- mean(mydata$scoreComp)
+sdCompScore <- sd(mydata$scoreComp)
+
+avgScoreMinusOneSD <- avgCompScore - sdCompScore
+
+cleandata <- subset(mydata, mydata$scoreComp > avgScoreMinusOneSD)
+
+avgPracticeScore <- mean(mydata$scoreAverage)
+sdPracticeScore <- sd(mydata$scoreAverage)
+
+avgPracticeScoreMinusOneSD <- avgPracticeScore - sdPracticeScore
+
+cleandata <- subset(cleandata, cleandata$scoreAverage > avgPracticeScoreMinusOneSD)
+
+library(gmodels)
+
+# ci(mydata$age)
+# table(mydata$gender)
+
+##main analyses##
+cond.posmom = subset(cleandata, condition == "posMom")
+cond.negmom = subset(cleandata, condition == "negMom")
+```
+
+model 3 
+
+```{r}
+t.test(cleandata$scoreComp ~ cleandata$condition, var.equal=TRUE)
+
+u02984_mod_z_3 <- lm(z(scoreComp) ~ condition, cleandata) 
+
+export_ols(u02984_mod_z_3, 
+           key_effects = c("conditionposMom"))
+```
+
+
+# exp 1b
+
+```{r}
+mydata <- read.csv("../data/raw_data/u02984_Experiment 1b data.csv", stringsAsFactors = FALSE)
+
+##clean data, removing participants with average or competition scores more than 1 SD below average
+avgCompScore <- mean(mydata$ScoreComp)
+sdCompScore <- sd(mydata$ScoreComp)
+
+avgScoreMinusOneSD <- avgCompScore - sdCompScore
+
+cleandata <- subset(mydata, mydata$ScoreComp > avgScoreMinusOneSD)
+
+avgPracticeScore <- mean(mydata$ScoreAverage)
+sdPracticeScore <- sd(mydata$ScoreAverage)
+
+avgPracticeScoreMinusOneSD <- avgPracticeScore - sdPracticeScore
+
+cleandata <- subset(cleandata, cleandata$ScoreAverage > avgPracticeScoreMinusOneSD)
+#######
+
+##all variables were the same pre and post interruption, telling us that the interruption had no effect##
+t.test(cleandata$momPreComp[cleandata$Condition == "HardYes"], cleandata$momPostInt[cleandata$Condition == "HardYes"])
+t.test(cleandata$momPreComp[cleandata$Condition == "EasyYes"], cleandata$momPostInt[cleandata$Condition == "EasyYes"])
+
+t.test(cleandata$effPreComp[cleandata$Condition == "HardYes"], cleandata$effPostInt[cleandata$Condition == "HardYes"])
+t.test(cleandata$effPreComp[cleandata$Condition == "EasyYes"], cleandata$effPostInt[cleandata$Condition == "EasyYes"])
+
+t.test(cleandata$likelyWin[cleandata$Condition == "HardYes"], cleandata$likelyWinPostInt[cleandata$Condition == "HardYes"])
+t.test(cleandata$likelyWin[cleandata$Condition == "EasyYes"], cleandata$likelyWinPostInt[cleandata$Condition == "EasyYes"])
+###
+
+library(gmodels)
+
+ci(mydata$age)
+table(mydata$gender)
+####
+
+cleandata$won = 0
+cleandata$won[cleandata$ScoreComp > cleandata$ScoreAverage] = 1
+
+cleandata$expWin = cleandata$expWin - 1
+cleandata$expWin = 1 - cleandata$expWin
+
+##main analyses conducted on all data split only by pos/neg momentum condition using pre-interruption measures##
+cond.posmom = subset(cleandata, cleandata$Round1 == "Hard")
+cond.negmom = subset(cleandata, cleandata$Round1 == "Easy")
+```
+
+model 4 
+
+```{r}
+t.test(ScoreComp ~ Round1, data=cleandata, var.equal = TRUE)
+
+u02984_mod_z_4 <- lm(z(ScoreComp) ~ Round1, data=cleandata)
+
+export_ols(u02984_mod_z_4, 
+           key_effects = c("Round1Hard"))
+```
+
+# exp 1c 
+
+```{r}
+mydata <- read.csv("../data/raw_data/u02984_Experiment 1c data.csv", stringsAsFactors = FALSE)
+
+##clean data, removing participants with average or competition scores more than 1 SD below average
+avgCompScore <- mean(mydata$ScoreComp)
+sdCompScore <- sd(mydata$ScoreComp)
+
+avgScoreMinusOneSD <- avgCompScore - sdCompScore
+
+cleandata <- subset(mydata, mydata$ScoreComp > avgScoreMinusOneSD)
+
+avgPracticeScore <- mean(mydata$ScoreAverage)
+sdPracticeScore <- sd(mydata$ScoreAverage)
+
+avgPracticeScoreMinusOneSD <- avgPracticeScore - sdPracticeScore
+
+cleandata <- subset(cleandata, cleandata$ScoreAverage > avgPracticeScoreMinusOneSD)
+
+###demographic information###
+library(gmodels)
+
+ci(mydata$age)
+table(mydata$gender)
+###
+
+cleandata$won = 0
+cleandata$won[cleandata$ScoreComp > cleandata$ScoreAverage] = 1
+
+#######
+
+easy <- with(cleandata, tapply(cleandata$ScoreEasy, cleandata$Condition, mean))
+medium <- with(cleandata, tapply(cleandata$ScoreMedium, cleandata$Condition, mean))
+hard <- with(cleandata, tapply(cleandata$ScoreHard, cleandata$Condition, mean))
+avg <- with(cleandata, tapply(cleandata$ScoreAverage, cleandata$Condition, mean))
+comp <- with(cleandata, tapply(cleandata$ScoreComp, cleandata$Condition, mean))
+
+scores <- matrix(c(easy, medium, hard, avg, comp), ncol = 2, byrow=TRUE)
+colnames(scores) <- c("negMom", "posMom")
+rownames(scores) <- c("easy", "medium", "hard", "avg", "comp")
+scores <- as.table(scores)
+scores
+
+##main analyses##
+cleandata$expWin = cleandata$expWin - 1
+cleandata$expWin = 1 - cleandata$expWin
+
+cond.negmom = subset(cleandata, Condition == "negMom")
+cond.posmom = subset(cleandata, Condition == "posMom")
+```
+
+model 5
+
+```{r}
+t.test(ScoreComp ~ Condition, data=cleandata, var.equal = TRUE)
+
+u02984_mod_z_5 <- lm(ScoreComp ~ Condition, data=cleandata)
+
+export_ols(u02984_mod_z_5, 
+           key_effects = c("ConditionposMom"))
+```
+
+# exp 1d
+
+```{r}
+mydata <- read.csv("../data/raw_data/u02984_Experiment 1d data.csv", stringsAsFactors = FALSE)
+
+#make sure we only want to use those who are playing again
+negmom = subset(mydata, condition == "negMom")
+posmom = subset(mydata, condition == "posMom")
+
+#no difference in entering the competition
+t.test(posmom$playAgain, negmom$playAgain, var.equal=TRUE)
+
+mydata$playAgain <- mydata$playAgain - 1
+mydata$playAgain <- 1 - mydata$playAgain
+mean(mydata$playAgain) #71.5% of participants choose to enter the competition
+
+
+##only want to do the main analyses with people who chose to compete
+competed <- subset(mydata, mydata$playAgain == 1)
+
+##clean data, removing participants with average or competition scores more than 1 SD below average
+avgCompScore <- mean(competed$scoreComp)
+sdCompScore <- sd(competed$scoreComp)
+
+avgScoreMinusOneSD <- avgCompScore - sdCompScore
+cleandata <- subset(competed, competed$scoreComp > avgScoreMinusOneSD)
+
+avgPracticeScore <- mean(competed$scoreAverage)
+sdPracticeScore <- sd(competed$scoreAverage)
+
+avgPracticeScoreMinusOneSD <- avgPracticeScore - sdPracticeScore
+
+cleandata <- subset(cleandata, cleandata$scoreAverage > avgPracticeScoreMinusOneSD)
+
+cleandata$won = 0
+cleandata$won[cleandata$scoreComp > cleandata$scoreAverage] = 1
+
+##demographics
+ci(mydata$age)
+table(mydata$gender)
+#######
+
+easy <- with(cleandata, tapply(cleandata$scoreEasy, cleandata$condition, mean))
+medium <- with(cleandata, tapply(cleandata$scoreMedium, cleandata$condition, mean))
+hard <- with(cleandata, tapply(cleandata$scoreHard, cleandata$condition, mean))
+avg <- with(cleandata, tapply(cleandata$scoreAverage, cleandata$condition, mean))
+comp <- with(cleandata, tapply(cleandata$scoreComp, cleandata$condition, mean))
+
+scores <- matrix(c(easy, medium, hard, avg, comp), ncol = 2, byrow=TRUE)
+colnames(scores) <- c("negMom", "posMom")
+rownames(scores) <- c("easy", "medium", "hard", "avg", "comp")
+scores <- as.table(scores)
+scores
+
+
+##main analyses
+cond.negmom = subset(cleandata, condition == "negMom")
+cond.posmom = subset(cleandata, condition == "posMom")
+
+t.test(scoreAverage ~ condition, data=cleandata)
+```
+
+model 6 
+
+```{r}
+t.test(scoreComp ~ condition, data=cleandata, var.equal=TRUE)
+
+u02984_mod_z_6 <- lm(z(scoreComp) ~ condition, data=cleandata)
+
+export_ols(u02984_mod_z_6, 
+           key_effects = c("conditionposMom"))
+```
+
+# Experiment 2 
+
+```{r}
+mydata <- read.csv("../data/raw_data/u02984_Experiment 2 data.csv", stringsAsFactors = FALSE)
+
+avgCompScore <- mean(mydata$ScoreComp)
+sdCompScore <- sd(mydata$ScoreComp)
+
+avgScoreMinusOneSD <- avgCompScore - sdCompScore
+
+cleandata <- subset(mydata, mydata$ScoreComp > avgScoreMinusOneSD)
+
+avgPracticeScore <- mean(mydata$ScoreAverage)
+sdPracticeScore <- sd(mydata$ScoreAverage)
+
+avgPracticeScoreMinusOneSD <- avgPracticeScore - sdPracticeScore
+
+cleandata <- subset(cleandata, cleandata$ScoreAverage > avgPracticeScoreMinusOneSD)
+
+ci(mydata$age)
+table(mydata$gender)
+
+cond.posmom <- subset(cleandata, Round1=="Hard")
+cond.negmom <- subset(cleandata, Round1=="Easy")
+
+#######
+#analysis with ALL data##
+
+mydata$condition
+cond.negmom.all <- subset(mydata, mydata$condition=="posMom")
+cond.posmom.all <- subset(mydata, mydata$condition=="negMom")
+
+t.test(momPreComp ~ condition, data=mydata, var.equal=TRUE)
+ci(cond.posmom.all$momPreComp)
+ci(cond.negmom.all$momPreComp)
+t.test(likelyWin ~ condition, data=mydata, var.equal=TRUE)
+ci(cond.posmom.all$likelyWin)
+ci(cond.negmom.all$likelyWin)
+t.test(ScoreComp ~ condition, data=mydata, var.equal=TRUE)
+ci(cond.posmom.all$ScoreComp)
+ci(cond.negmom.all$ScoreComp)
+
+#######
+
+easy <- with(cleandata, tapply(cleandata$ScoreEasy, cleandata$condition, mean))
+medium <- with(cleandata, tapply(cleandata$ScoreMedium, cleandata$condition, mean))
+hard <- with(cleandata, tapply(cleandata$ScoreHard, cleandata$condition, mean))
+avg <- with(cleandata, tapply(cleandata$ScoreAverage, cleandata$condition, mean))
+comp <- with(cleandata, tapply(cleandata$ScoreComp, cleandata$condition, mean))
+
+scores <- matrix(c(easy, medium, hard, avg, comp), ncol = 2, byrow=TRUE)
+colnames(scores) <- c("negMom", "posMom")
+rownames(scores) <- c("easy", "medium", "hard", "avg", "comp")
+scores <- as.table(scores)
+scores
+
+t.test(ScoreAverage ~ condition, data=cleandata, var.equal=TRUE) #same
+ci(cond.posmom$ScoreAverage)
+ci(cond.negmom$ScoreAverage)
+t.test(ScoreEasy ~ condition, data=cleandata) #p=0.056
+t.test(ScoreMedium ~ condition, data=cleandata) #same
+t.test(ScoreHard ~ condition, data=cleandata) #p=0.012 - practice effect
+
+
+t.test(ScoreComp ~ condition, data=cleandata, var.equal = TRUE) #same comp score by condition
+ci(cond.posmom$ScoreComp)
+ci(cond.negmom$ScoreComp)
+summary(lm(ScoreComp ~ condition + familiar + mood + fun + education + gender + age, data=cleandata))
+```
+
+model 7 
+
+```{r}
+t.test(likelyWin ~ condition, data=cleandata, var.equal = TRUE)
+
+u02984_mod_z_7 <- lm(z(likelyWin) ~ condition, data=cleandata)
+
+export_ols(u02984_mod_z_7, 
+           key_effects = c("conditionposMom"))
+```
+
+
+```{r}
+ci(cond.posmom$likelyWin)
+ci(cond.negmom$likelyWin)
+summary(lm(likelyWin ~ condition + familiar + mood + fun + education + gender + age, data=cleandata))
+```
+
+model 8
+
+```{r}
+t.test(predict ~ condition, data=cleandata, var.equal = TRUE)
+
+u02984_mod_z_8 <- lm(z(predict) ~ condition, data=cleandata)
+
+export_ols(u02984_mod_z_8, 
+           key_effects = c("conditionposMom"))
+```
+
+
+```{r}
+ci(cond.posmom$predict)
+ci(cond.negmom$predict)
+
+cleandata$expWin = cleandata$expWin - 1
+cleandata$expWin = 1 - cleandata$expWin
+
+t.test(expWin ~ condition, data=cleandata, var.equal = TRUE)
+ci(cond.posmom$expWin)
+ci(cond.negmom$expWin)
+```
+
+model 9
+
+```{r}
+t.test(win ~ condition, data=cleandata, var.equal=TRUE)
+
+u02984_mod_z_9 <- lm(z(win) ~ condition, data=cleandata)
+
+export_ols(u02984_mod_z_9, 
+           key_effects = c("conditionposMom"))
+```
+
+
+```{r}
+ci(cond.posmom$win)
+ci(cond.negmom$win)
+
+t.test(effortComp ~ condition, data=cleandata, var.equal=TRUE)
+
+t.test(perfComp ~ condition, data=cleandata, var.equal=TRUE)
+
+#for table 
+summary(lm(likelyWin ~ Round1 + ScoreAverage, data=cleandata)) 
+summary(lm(likelyWin ~ Round1 + ScoreAverage + age + gender + familiar + education, data=cleandata))
+summary(lm(likelyWin ~ ScoreAverage + effPre + effPreComp + momPreComp, data=cleandata))
+summary(lm(likelyWin ~ ScoreAverage + effPre + effPreComp + momPreComp + age + gender + familiar + education, data=cleandata))
+summary(lm(likelyWin ~ ScoreAverage + momPreComp, data=cleandata))
+
+summary(lm(ScoreComp ~ Round1 + ScoreAverage, data=cleandata))
+summary(lm(ScoreComp ~ Round1 + ScoreAverage + age + gender + familiar + education, data=cleandata))
+summary(lm(ScoreComp ~ ScoreAverage + effPre + effPreComp + momPreComp, data=cleandata))
+summary(lm(ScoreComp ~ ScoreAverage + effPre + effPreComp + momPreComp + age + gender + familiar + education, data=cleandata))
+summary(lm(ScoreComp ~ ScoreAverage + momPreComp, data=cleandata))
+
+
+cleandata$predictDiff <- cleandata$predict - cleandata$ScoreComp
+ci(cond.posmom$predictDiff)
+ci(cond.negmom$predictDiff)
+t.test(predictDiff ~ condition, data=cleandata) #same, p=0.100
+
+cleandata$predictOverAvg <- cleandata$predict - cleandata$ScoreAverage
+t.test(predictOverAvg ~ condition, data=cleandata, var.equal=TRUE) #dif, p=0.024
+ci(cond.posmom$predictOverAvg)
+ci(cond.negmom$predictOverAvg)
+summary(lm(predictOverAvg ~ condition + ScoreAverage + age + gender + education + familiar + fun, data=cleandata))
+
+
+###testing to make sure cleaning the data didn't have an effect
+t.test(predict~condition, data=mydata, var.equal=TRUE)
+t.test(ScoreAverage~condition, data=mydata, var.equal=TRUE)
+t.test(ScoreComp~condition, data=mydata, var.equal=TRUE)
+mydata$predictOverAvg <- mydata$predict - mydata$ScoreAverage
+t.test(predictOverAvg ~ condition, data=mydata, var.equal=TRUE)
+mydata$compAvgDiff <- mydata$ScoreComp - mydata$ScoreAverage
+mydata$predictActualDiff <- mydata$predictOverAvg - mydata$compAvgDiff
+t.test(predictActualDiff ~ condition, data=mydata, var.equal=TRUE)
+
+cleandata$compAvgDiff <- cleandata$ScoreComp - cleandata$ScoreAverage
+ci(cond.posmom$compAvgDiff)
+ci(cond.negmom$compAvgDiff)
+t.test(compAvgDiff ~ condition, data=cleandata) #identical
+
+#after manipulating it earlier in this code, expectation to win is coded as 1 = expWin, 0=expLose
+##in case i need to run it here:
+#cleandata$expWin = cleandata$expWin - 1
+#cleandata$expWin = 1 - cleandata$expWin
+
+cleandata$winByExp[cleandata$win==1 & cleandata$expWin==1] = 'hitWin'
+cleandata$winByExp[cleandata$win==1 & cleandata$expWin==0] = 'expLoseWin'
+cleandata$winByExp[cleandata$win==0 & cleandata$expWin==1] = 'expWinLose'
+cleandata$winByExp[cleandata$win==0 & cleandata$expWin==0] = 'hitLose'
+
+cleandata$hit1miss0[cleandata$win==1 & cleandata$expWin==0] = 1
+cleandata$hit1miss0[cleandata$win==1 & cleandata$expWin==1] = 0
+cleandata$hit1miss0[cleandata$win==0 & cleandata$expWin==0] = 0
+cleandata$hit1miss0[cleandata$win==0 & cleandata$expWin==1] = 1
+
+t.test(hit1miss0 ~ condition, data=cleandata, var.equal=TRUE)
+
+cleandata$expLoseWin = 0
+cleandata$expLoseWin[cleandata$win==1 & cleandata$expWin==0] = 1
+
+t.test(expLoseWin ~ condition, data=cleandata, var.equal=TRUE)
+ci(cleandata$expLoseWin[cleandata$Round1=="Hard"])
+ci(cleandata$expLoseWin[cleandata$Round1=="Easy"])
+
+cleandata$expWinLose = 0
+cleandata$expWinLose[cleandata$win==0 & cleandata$expWin==1] = 1
+
+t.test(expWinLose ~ condition, data=cleandata, var.equal=TRUE)
+ci(cleandata$expWinLose[cleandata$Round1=="Hard"])
+ci(cleandata$expWinLose[cleandata$Round1=="Easy"])
+
+cleandata$expWinWin = 0
+cleandata$expWinWin[cleandata$win==1 & cleandata$expWin==1] = 1
+
+t.test(expWinWin ~ condition, data=cleandata, var.equal=TRUE)
+ci(cleandata$expWinWin[cleandata$Round1=="Hard"])
+ci(cleandata$expWinWin[cleandata$Round1=="Easy"])
+
+cleandata$expLoseLose = 0
+cleandata$expLoseLose[cleandata$win==0 & cleandata$expWin==0] = 1
+
+t.test(expLoseLose ~ condition, data=cleandata, var.equal=TRUE)
+ci(cleandata$expLoseLose[cleandata$Round1=="Hard"])
+ci(cleandata$expLoseLose[cleandata$Round1=="Easy"])
+
+#manipulation checks
+
+cond.negmom = subset(cleandata, Round1 == "Easy")
+cond.posmom = subset(cleandata, Round1 == "Hard")
+
+cond.posmom$scoreFirst <- cond.posmom$ScoreHard
+cond.negmom$scoreFirst <- cond.negmom$ScoreEasy
+
+cond.posmom$scoreLast <- cond.posmom$ScoreEasy
+cond.negmom$scoreLast <- cond.negmom$ScoreHard
+
+cleandata <- rbind(cond.posmom, cond.negmom)
+
+t.test(momPreComp ~ condition, data=cleandata, var.equal = TRUE)
+ci(cond.posmom$momPreComp)
+ci(cond.negmom$momPreComp)
+
+t.test(effPreComp ~ condition, data=cleandata, var.equal = TRUE)
+ci(cond.posmom$effPreComp)
+ci(cond.negmom$effPreComp)
+
+t.test(effPre ~ condition, data=cleandata, var.equal = TRUE)
+ci(cond.posmom$effPre)
+ci(cond.negmom$effPre)
+
+t.test(effPost1 ~ condition, data=cleandata, var.equal = TRUE)
+ci(cond.posmom$effPost1)
+ci(cond.negmom$effPost1)
+
+
+#correlation plots
+variable.matrix <- matrix(c(cleandata$expWin, cleandata$effPre, cleandata$momPreComp), 
+                          nrow=nrow(cleandata), ncol=3)
+colnames(variable.matrix) <- c("win", "self.eff", "momentum")
+
+cor.matrix <- cor(variable.matrix)
+corrplot.mixed(cor.matrix, lower="number", upper="circle")
+
+
+##correlation plots by condition
+
+cond.negmom = subset(cleandata, condition == "negMom")
+cond.posmom = subset(cleandata, condition == "posMom")
+
+#negative momentum
+neg.mom.matrix <- matrix(c(cond.negmom$expWin, cond.negmom$ScoreComp, cond.negmom$effPre, cond.negmom$momPreComp), 
+                         nrow=nrow(cond.negmom), ncol=4)
+colnames(neg.mom.matrix) <- c("win","score", "self.eff", "momentum")
+
+cor.matrix <- cor(neg.mom.matrix)
+corrplot.mixed(cor.matrix, lower="number", upper="circle")
+
+#positive momentum
+pos.mom.matrix <- matrix(c(cond.posmom$expWin, cond.posmom$ScoreComp, cond.posmom$effPre, cond.posmom$momPreComp), 
+                         nrow=nrow(cond.posmom), ncol=4)
+colnames(pos.mom.matrix) <- c("win","score", "self.eff", "momentum")
+
+cor.matrix <- cor(pos.mom.matrix)
+corrplot.mixed(cor.matrix, lower="number", upper="circle")
+```
+
+# Experiment 3 
+
+```{r}
+library(car)
+```
+
+
+```{r}
+mydata <- read.csv("../data/raw_data/u02984_Experiment 3 data.csv", stringsAsFactors = FALSE)
+
+avgCompScore <- mean(mydata$scoreComp)
+sdCompScore <- sd(mydata$scoreComp)
+
+avgPracticeScore <- mean(mydata$scoreAverage)
+sdPracticeScore <- sd(mydata$scoreAverage)
+
+avgPracticeScoreMinusOneSD <- avgPracticeScore - sdPracticeScore
+
+cleandata <- subset(mydata, mydata$scoreAverage > avgPracticeScoreMinusOneSD)
+
+cleandata$playAgain = cleandata$playAgain - 1
+cleandata$playAgain = 1 - cleandata$playAgain
+
+ci(mydata$age)
+table(mydata$gender)
+
+###########
+#analysis with ALL data##
+cond.negmomfav.all = subset(mydata, condition == "negMomFav")
+cond.negmomunder.all = subset(mydata, condition == "negMomUnder")
+cond.posmomfav.all = subset(mydata, condition == "posMomFav")
+cond.posmomunder.all = subset(mydata, condition == "posMomUnder")
+
+
+mydata$Round1
+cond.negmom.all <- subset(mydata, mydata$Round1=="Easy")
+cond.posmom.all <- subset(mydata, mydata$Round1=="Hard")
+cond.under.all <- subset(mydata, mydata$status=="Underdog")
+cond.fav.all <- subset(mydata, mydata$status=="Favorite")
+
+t.test(momentum2 ~ Round1, data=mydata, var.equal=TRUE)
+ci(cond.posmom.all$momentum2)
+ci(cond.negmom.all$momentum2)
+
+
+ci(cond.posmom.all$likelyWin)
+ci(cond.negmom.all$likelyWin)
+
+
+m1.all <- lm(scoreComp ~ Round1*status + scoreAverage, data=mydata)
+summary(m1.all)
+car::Anova(m1.all)
+ci(cond.negmomfav.all$scoreComp)
+ci(cond.negmomunder.all$scoreComp)
+ci(cond.posmomfav.all$scoreComp)
+ci(cond.posmomunder.all$scoreComp)
+etaSquared(m1.all)
+
+m2.all <- lm(likelyWin ~ Round1*status, data=mydata)
+Anova(m2.all, type="II")
+etaSquared(m2.all)
+ci(cond.posmom.all$likelyWin)
+ci(cond.negmom.all$likelyWin)
+ci(cond.fav.all$likelyWin)
+ci(cond.under.all$likelyWin)
+
+mydata$playAgain = mydata$playAgain - 1
+mydata$playAgain = 1 - mydata$playAgain
+
+m3.all <- lm(playAgain ~ Round1*status, data=mydata)
+Anova(m3.all, type="II")
+etaSquared(m3.all)
+ci(cond.posmom.all$playAgain)
+ci(cond.negmom.all$playAgain)
+ci(cond.fav.all$playAgain)
+ci(cond.under.all$playAgain)
+
+#######
+
+
+t.test(cleandata$playAgain ~ cleandata$Round1)
+
+easy <- with(cleandata, tapply(cleandata$scoreEasy, cleandata$Round1, mean))
+medium <- with(cleandata, tapply(cleandata$scoreMedium, cleandata$Round1, mean))
+hard <- with(cleandata, tapply(cleandata$scoreHard, cleandata$Round1, mean))
+avg <- with(cleandata, tapply(cleandata$scoreAverage, cleandata$Round1, mean))
+comp <- with(cleandata, tapply(cleandata$scoreComp, cleandata$Round1, mean))
+
+scores <- matrix(c(easy, medium, hard, avg, comp), ncol = 2, byrow=TRUE)
+colnames(scores) <- c("negMom", "posMom")
+rownames(scores) <- c("easy", "medium", "hard", "avg", "comp")
+scores <- as.table(scores)
+scores
+
+#subset out data into each condition
+cond.negmomfav = subset(cleandata, condition == "negMomFav")
+cond.negmomunder = subset(cleandata, condition == "negMomUnder")
+cond.posmomfav = subset(cleandata, condition == "posMomFav")
+cond.posmomunder = subset(cleandata, condition == "posMomUnder")
+
+cond.negmom = subset(cleandata, Round1 == "Easy")
+cond.posmom = subset(cleandata, Round1 == "Hard")
+cond.under = subset(cleandata, cleandata$status=="Underdog")
+cond.fav = subset(cleandata, cleandata$status=="Favorite")
+
+t.test(scoreEasy~Round1, data=cleandata, var.equal=TRUE)
+ci(cond.posmom$scoreEasy)
+ci(cond.negmom$scoreEasy)
+
+t.test(scoreMedium~Round1, data=cleandata, var.equal=TRUE)
+tapply(cleandata$scoreMedium, cleandata$Round1, sd)
+
+t.test(scoreHard ~ Round1, data=cleandata, var.equal=TRUE)
+
+t.test(scoreAverage~Round1, data=cleandata, var.equal=TRUE)
+ci(cond.posmom$scoreAverage)
+ci(cond.negmom$scoreAverage)
+
+t.test(scoreComp~Round1, data=cleandata, var.equal=TRUE)
+ci(cond.posmom$scoreComp)
+ci(cond.negmom$scoreComp)
+```
+
+model 10
+
+```{r}
+u02984_mod_z_10 <- lm(z(scoreComp) ~ Round1*status + z(scoreAverage), data=cleandata)
+
+export_ols(u02984_mod_z_10, 
+           key_effects = c("Round1Hard", "statusUnderdog", "Round1Hard:statusUnderdog"))
+
+```
+
+
+```{r}
+t.test(scoreComp~status, data=cleandata)
+
+
+summary(lm(likelyWin ~ Round1 + scoreAverage, data=cleandata))
+summary(lm(likelyWin ~ Round1 + scoreAverage + age + gender + familiarTask + education, data=cleandata))
+summary(lm(likelyWin ~ scoreAverage + momentum2, data=cleandata))
+summary(lm(likelyWin ~ scoreAverage + momentum2 + age + gender + familiarTask + education, data=cleandata))
+
+summary(lm(scoreComp ~ Round1 + scoreAverage, data=cleandata))
+summary(lm(scoreComp ~ Round1 + scoreAverage + age + gender + familiarTask + education, data=cleandata))
+summary(lm(scoreComp ~ scoreAverage + momentum2, data=cleandata))
+summary(lm(scoreComp ~ scoreAverage + momentum2 + age + gender + familiarTask + education, data=cleandata))
+```
+
+model 11
+
+```{r}
+u02984_mod_z_11 <- lm(z(likelyWin) ~ Round1*status*z(dweckAvg) + z(scoreAverage), data=cleandata)
+summary(u02984_mod_z_11)
+
+export_ols(u02984_mod_z_11, 
+           key_effects = c("Round1Hard", "statusUnderdog", "z(dweckAvg)", 
+                           "Round1Hard:statusUnderdog:z(dweckAvg)"))
+
+```
+
+
+```{r}
+ci(model1)
+
+model2 <- lm(likelyWin ~ Round1 + status + dweckAvg + scoreAverage, data=cleandata)
+summary(model2)
+ci(model2)
+```
+
+model 12
+
+```{r}
+u02984_mod_z_12 <- lm(z(scoreComp) ~ Round1*status*z(dweckAvg) + z(scoreAverage), data=cleandata)
+summary(u02984_mod_z_12)
+
+export_ols(u02984_mod_z_12, 
+           key_effects = c("Round1Hard", "statusUnderdog", "z(dweckAvg)", 
+                           "Round1Hard:statusUnderdog:z(dweckAvg)"))
+```
+
+
+```{r}
+ci(model3)
+
+model4 <- lm(scoreComp ~ Round1 + status + dweckAvg + scoreAverage, data=cleandata)
+summary(model4)
+ci(model4)
+
+
+library(car)
+model <- lm(likelyWin ~ Round1*status, data=cleandata)
+Anova(model, type="II")
+etaSquared(model)
+ci(cond.posmom$likelyWin)
+ci(cond.negmom$likelyWin)
+ci(cond.fav$likelyWin)
+ci(cond.under$likelyWin)
+```
+
+model 13
+
+```{r}
+model2 <- lm(playAgain ~ Round1*status, data=cleandata)
+Anova(model2, type="II")
+
+u02984_mod_z_13 <- lm(z(playAgain) ~ Round1*status, data=cleandata)
+
+export_ols(u02984_mod_z_13, 
+           key_effects = c("Round1Hard", "statusUnderdog", "Round1Hard:statusUnderdog"))
+
+```
+
+
+
+
+
+```{r}
+etaSquared(model2)
+ci(cond.posmom$playAgain)
+ci(cond.negmom$playAgain)
+ci(cond.fav$playAgain)
+ci(cond.under$playAgain)
+
+model.score <- lm(scoreComp ~ Round1*status, data=cleandata)
+Anova(model.score, type="II")
+etaSquared(model.score)
+ci(cond.negmomfav$scoreComp)
+ci(cond.negmomunder$scoreComp)
+ci(cond.posmomfav$scoreComp)
+ci(cond.posmomunder$scoreComp)
+
+cleandata$compStats = cleandata$compStats - 1 
+cleandata$compStats = 1 - cleandata$compStats
+mean(cleandata$compStats, na.rm=TRUE)
+aov.comp <- aov(compStats ~ Round1*status + scoreAverage, data=cleandata)
+summary(aov.comp)
+etaSquared(aov.comp)
+
+t.test(likelyWin ~ Round1, data=cleandata)
+ci(cond.posmom$likelyWin)
+ci(cond.negmom$likelyWin)
+
+
+t.test(likelyWin ~ status, data=cleandata) 
+ci(cond.under$likelyWin)
+ci(cond.fav$likelyWin)
+
+
+#manipulation checks
+summary(lm(momentum2 ~ condition, data=cleandata))
+
+
+```
+

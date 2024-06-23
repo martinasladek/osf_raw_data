@@ -1,0 +1,103 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-06-24'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+#source("../scripts/process.R")
+
+df <- haven::read_sav("../data/raw_data/u02472_covid_data.sav")
+names(df)
+```
+
+
+# Model 1 
+
+
+
+```{r}
+process(data = df, 
+        y = "Zsd21",
+        x = "Zstate21", 
+        m = "Zdep21", 
+        w = "ZBHt1",  
+        cov = c("Zage", "gender"),
+        model = 8
+)
+```
+
+
+
+```{r}
+u02472_mod_z_1 <- df %>% 
+  lm(Zdep21 ~ Zstate21*ZBHt1 + Zage + factor(gender), data = .)
+
+export_ols(
+  mod_z = u02472_mod_z_1, 
+  key_effects = c("Zstate21", "ZBHt1", "Zstate21:ZBHt1")
+)
+```
+
+```{r}
+u02472_mod_z_2 <- df %>% 
+  lm(Zsd21 ~ Zdep21 + Zstate21*ZBHt1 + Zage + factor(gender), data = .) 
+
+export_ols(
+  mod_z = u02472_mod_z_2, 
+  key_effects = c("Zstate21", "ZBHt1", "Zstate21:ZBHt1", "Zdep21")
+)
+```
+
+model 2
+
+```{r}
+process(data = df, 
+        y = "ZrDiff21",
+        x = "Zstate21", 
+        m = "Zdep21", 
+        w = "ZBHt1",  
+        cov = c("Zage", "gender"),
+        model = 8
+)
+
+```
+
+```{r}
+u02472_mod_z_3 <- df %>% 
+  lm(ZrDiff21 ~ Zdep21 + Zstate21*ZBHt1 + Zage + factor(gender), data = .)
+
+export_ols(
+  mod_z = u02472_mod_z_3, 
+  key_effects = c("Zstate21", "ZBHt1", "Zstate21:ZBHt1", "Zdep21")
+)
+```
+
+model 3 
+
+```{r}
+process(data = df, 
+        y = "ZrIN21",
+        x = "Zstate21", 
+        m = "Zdep21", 
+        w = "ZBHt1",  
+        cov = c("Zage", "gender"),
+        model = 8
+)
+
+names(df)
+```
+
+```{r}
+u02472_mod_z_4 <- df %>% 
+  lm(ZrIN21 ~ Zdep21 + Zstate21*ZBHt1 + Zage + factor(gender), data = .)
+
+export_ols(
+  mod_z = u02472_mod_z_4, 
+  key_effects = c("Zstate21", "ZBHt1", "Zstate21:ZBHt1", "Zdep21")
+)
+```

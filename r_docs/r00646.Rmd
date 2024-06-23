@@ -1,0 +1,170 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-06-01'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+library(papaja)
+
+rt_long <- readRDS("../data/raw_data/r00646_1.rds")
+
+```
+
+
+# Experiment 1 
+
+```{r}
+rt_mean <- rt_long %>%
+  group_by(subj, outcome, amount_level, stage) %>%
+  summarize(rt = mean(rt)) 
+
+rt_mean
+```
+
+```{r}
+stages <- c("startRT", "rt_key1", "rt_key2", "rt_key3", "outcomeRT", "next_startRT", "next_rt_key1", "next_rt_key2")
+
+# create an empty tibble to save the results of all ANOVAs
+anova_table <- tibble()
+
+# create an empty tibble to save the mean rts calculated for each stage
+rt_means <- tibble()
+
+# loop through the three stages one by one, and conduct a rm-ANOVA for RT in each stage
+for (one_stage in stages){
+  
+  # data preparation
+  if (one_stage == "rt_key3") {
+    rt_one_stage <- rt_long %>%
+      filter(stage == one_stage) %>% # select the rt for turning card3
+      mutate(outcome = str_sub(outcome, end = 2)) %>% # delete the last card as it yet needs to be turned
+      group_by(subj, outcome, amount_level) %>% # mean rt per amount level and outcome (AA vs. AB)
+      summarize(rt = mean(rt)) %>%
+      ungroup() %>%
+      mutate_at(c("subj", "outcome", "amount_level"), as.factor) %>% # turn these variables into factors
+      mutate(stage = one_stage) # add stage information
+  } else {
+    rt_one_stage <- rt_long %>%
+      filter(stage == one_stage) %>% # select the rt of the selected stage
+      group_by(subj, outcome, amount_level) %>% # mean rt per amount level and outcome
+      summarize(rt = mean(rt)) %>%
+      ungroup() %>%
+      mutate_at(c("subj", "outcome", "amount_level"), as.factor) %>% # turn these variables into factors
+      mutate(stage = one_stage) # add stage information
+  }
+  
+  # add the prepared data to the overall tibble created above
+  rt_means <- rbind(rt_means, rt_one_stage)
+
+  # conduct repeated-measures ANOVA
+  anova_one_stage <- aov_ez(id = "subj"
+                            , dv = "rt"
+                            , data = rt_one_stage
+                            , within = c("outcome", "amount_level"))
+  
+  # use apa_print to turn results into an APA table
+  anova_one_stage <- apa_print(anova_one_stage)$table
+  
+  # add the results of one ANOVA to the overall table
+  anova_table <- rbind(anova_table, anova_one_stage)
+  
+  
+}
+
+anova_table
+```
+
+1
+
+```{r}
+rt_one_stage_card3 <- rt_long %>%
+  filter(stage == "rt_key3") %>% # select the rt for turning card3
+  mutate(outcome = str_sub(outcome, end = 2)) %>% # delete the last card as it yet needs to be turned
+  group_by(subj, outcome, amount_level) %>% # mean rt per amount level and outcome (AA vs. AB)
+  summarize(rt = mean(rt)) %>%
+  ungroup() %>%
+  mutate_at(c("subj", "outcome", "amount_level"), as.factor) %>% # turn these variables into factors
+  mutate(stage = "rt_key3") 
+
+###
+
+r00646_mod_rm_z_1 <- rt_one_stage_card3 %>% 
+  afex::aov_4(z(rt) ~ outcome*amount_level + (outcome*amount_level|subj), ., 
+              anova_table = list(correction = "none"))
+
+export_ols(r00646_mod_rm_z_1, 
+           key_effects = c("outcome", "amount_level", "outcome:amount_level"))
+
+
+###
+
+r00646_mod_lmer_z_1 <- rt_one_stage_card3 %>% 
+  lme4::lmer(z(rt) ~ outcome*amount_level + (1|subj), .,)
+
+export_ols(r00646_mod_lmer_z_1, 
+           key_effects = c("outcomeAB", "amount_levellow", "outcomeAB:amount_levellow"))
+
+```
+
+2
+
+```{r}
+one_stage = "outcomeRT"
+rt_one_stage <- rt_long %>%
+      filter(stage == one_stage) %>% # select the rt of the selected stage
+      group_by(subj, outcome, amount_level) %>% # mean rt per amount level and outcome
+      dplyr::summarize(rt = mean(rt)) %>%
+      ungroup() %>%
+      mutate_at(c("subj", "outcome", "amount_level"), as.factor) %>% # turn these variables into factors
+      mutate(stage = one_stage)
+
+r00646_mod_rm_z_2 <- rt_one_stage %>% 
+  afex::aov_4(z(rt) ~ outcome*amount_level + (outcome*amount_level|subj), ., 
+              anova_table = list(correction = "GG"))
+
+export_ols(r00646_mod_rm_z_2, 
+           key_effects = c("outcome", "amount_level", "outcome:amount_level"))
+
+
+
+r00646_mod_lmer_z_2 <- rt_one_stage %>% 
+  lme4::lmer(z(rt) ~ outcome*amount_level + (1|subj), .,)
+
+export_ols(r00646_mod_lmer_z_2, 
+           key_effects = mod_coeffs(r00646_mod_lmer_z_2))
+```
+
+3
+
+```{r}
+one_stage = "next_startRT"
+rt_one_stage <- rt_long %>%
+      filter(stage == one_stage) %>% # select the rt of the selected stage
+      group_by(subj, outcome, amount_level) %>% # mean rt per amount level and outcome
+      dplyr::summarize(rt = mean(rt)) %>%
+      ungroup() %>%
+      mutate_at(c("subj", "outcome", "amount_level"), as.factor) %>% # turn these variables into factors
+      mutate(stage = one_stage)
+
+
+r00646_mod_rm_z_3 <- rt_one_stage %>% 
+  afex::aov_4(z(rt) ~ outcome*amount_level + (outcome*amount_level|subj), ., 
+              anova_table = list(correction = "GG"))
+
+export_ols(r00646_mod_rm_z_3, 
+           key_effects = c("outcome", "amount_level", "outcome:amount_level"))
+
+
+
+r00646_mod_lmer_z_3 <- rt_one_stage %>% 
+  lme4::lmer(z(rt) ~ outcome*amount_level + (1|subj), .,)
+
+export_ols(r00646_mod_lmer_z_3, 
+           key_effects = mod_coeffs(r00646_mod_lmer_z_3))
+```

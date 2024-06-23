@@ -1,0 +1,54 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-29'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df_1 <- readxl::read_excel("../data/raw_data/u00420_GASE DATA OSF_SWINGLER.xlsx", sheet = 1)
+df_2 <- readxl::read_excel("../data/raw_data/u00420_GASE DATA OSF_SWINGLER.xlsx", sheet = 2)
+```
+
+
+```{r}
+df <- rbind(
+  df_1 %>% dplyr::select(id = Identifier, score = `COMPOSITE GASE`) %>% dplyr::mutate(time = 1),
+  df_2 %>% dplyr::select(id = Identifier, score = `COMPOSITE GASE`) %>% dplyr::mutate(time = 2)
+) %>% 
+  dplyr::mutate(time = factor(time)) %>% 
+  dplyr::arrange(id) %>% 
+  dplyr::filter(
+    !id %in% c("Psych 47", "Psych 82")
+  )
+```
+
+
+```{r}
+t.test(df_1$`COMPOSITE GASE`, df_2$`COMPOSITE GASE`, paired = T, alternative = "less")
+
+u00420_mod_rm_z_1 <- df %>% 
+  afex::aov_4(z(score) ~ time + (time|id), .)
+
+export_ols(
+  u00420_mod_rm_z_1, 
+  key_effects = c("time")
+  )
+
+
+
+
+u00420_mod_lmer_z_1 <- df %>% 
+  lme4::lmer(z(score) ~ time + (1|id), .)
+
+export_ols(
+  u00420_mod_lmer_z_1, 
+  key_effects = c("time2")
+  )
+
+```
+

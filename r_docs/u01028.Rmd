@@ -1,0 +1,113 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-08-02'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+DS_S1_pRC <- readRDS("../data/raw_data/u01028_DS_S1_pRC.rds")
+DS_S1_pRI <- readRDS("../data/raw_data/u01028_DS_S1_pRI.rds")
+DS_S2_subjCI_img <- readRDS("../data/raw_data/u01028_DS_S2_subjCI_img.rds")
+DS_S3_subjCI_img <- readRDS("../data/raw_data/u01028_DS_S3_subjCI_img.rds")
+```
+
+
+# Study 1 
+
+Model 1 
+
+```{r}
+u01028_mod_rm_z_1 <- 
+  afex::aov_4(z(pRC) ~ StimulusType*StimulusGender+(1+StimulusType+StimulusGender|ParticipantID), data=DS_S1_pRC)
+
+export_ols(
+  u01028_mod_rm_z_1, 
+  key_effects = c("StimulusType", "StimulusGender", "StimulusType:StimulusGender")
+)
+
+u01028_mod_lmer_z_1 <-   
+  lme4::lmer(z(pRC) ~ StimulusType*StimulusGender+(1+StimulusType+StimulusGender|ParticipantID), data=DS_S1_pRC)
+
+
+export_ols(
+  u01028_mod_lmer_z_1, 
+  key_effects = c("StimulusTypeGAN", "StimulusGenderMale", "StimulusTypeGAN:StimulusGenderMale")
+)
+```
+
+Model 2 
+
+```{r}
+# basic model
+u01028_mod_z_2 <- lm(z(pRI) ~ StimulusType*StimulusGender + z(Attractiveness)+z(Expressiveness)+z(Trustworthiness), data=DS_S1_pRI)
+
+export_ols(u01028_mod_z_2, 
+           mod_coeffs(u01028_mod_z_2))
+```
+
+# Study 2 
+
+Model 3 
+
+```{r}
+DS_S2_subjCI_img
+```
+
+
+```{r}
+u01028_mod_rm_z_3 <- afex::aov_4(z(CI) ~ StimulusType*StimulusGender +
+                                 (StimulusType*StimulusGender|ParticipantID), 
+                                 data = DS_S2_subjCI_img)
+
+export_ols(
+  u01028_mod_rm_z_3, 
+  key_effects = c("StimulusGender", "StimulusType", "StimulusType:StimulusGender")
+)
+
+u01028_mod_lmer_z_3 <- lme4::lmer(z(CI) ~ StimulusType*StimulusGender  + 
+                                 (1|ParticipantID), 
+                                 data = DS_S2_subjCI_img)
+
+
+export_ols(
+  u01028_mod_lmer_z_3, 
+  key_effects = c("StimulusTypeReal_vs_GAN", "StimulusGenderMale_vs_Female", 
+                  "StimulusTypeReal_vs_GAN:StimulusGenderMale_vs_Female")
+)
+
+
+```
+
+# Study 3
+
+Model 4 
+
+```{r}
+# basic model 
+u01028_mod_rm_z_4 <- 
+  afex::aov_4(z(CI) ~ StimulusType*StimulusGender*Group+(StimulusType*StimulusGender|ParticipantID), data=DS_S3_subjCI_img) 
+
+export_ols(u01028_mod_rm_z_4, 
+           key_effects = c("Group", "StimulusType", "StimulusGender", 
+                           "Group:StimulusType", "Group:StimulusGender"))
+
+
+u01028_mod_lmer_z_4 <- 
+  lme4::lmer(z(CI) ~ StimulusType*StimulusGender*Group+(1|ParticipantID), data=DS_S3_subjCI_img) 
+
+export_ols(u01028_mod_lmer_z_4, 
+           key_effects = c("StimulusGenderMale_vs_Female", "StimulusTypeReal_vs_GAN", "GroupKnowledge_vs_NoKnowledge", 
+                           "StimulusTypeReal_vs_GAN:GroupKnowledge_vs_NoKnowledge", 
+                           "StimulusGenderMale_vs_Female:GroupKnowledge_vs_NoKnowledge"))
+
+```
+
+
+
+
+

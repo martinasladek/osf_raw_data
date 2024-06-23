@@ -1,0 +1,109 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-04'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df <- readxl::read_excel("../data/raw_data/p01041_RF ratings data.xlsx", sheet = 2, na = "99999") %>% 
+  dplyr::mutate(id = 1:nrow(.))
+
+df
+```
+
+
+```{r}
+df_long <- df %>% 
+  dplyr::select(id, Condition, Deep_R_Rating:Lure_F_Rating) %>% 
+  dplyr::mutate(across(.cols = c(Deep_R_Rating:Lure_F_Rating), .fns = as.numeric)) %>% 
+  tidyr::pivot_longer(-c(id, Condition)) %>% 
+  dplyr::mutate(
+    deep_shallow = case_when(
+      str_detect(name, "Deep") ~ "Deep", 
+      str_detect(name, "Shallow") ~ "Shallow",
+      str_detect(name, "Lure") ~ "Lure",
+    ), 
+    rf = case_when(
+      str_detect(name, "_R_") ~ "recollect", 
+      str_detect(name, "_F_") ~ "familiar"
+    )
+  ) 
+
+df_long_1 <- df_long %>% 
+  dplyr::filter(deep_shallow != "Lure", !is.na(Condition))
+```
+
+
+model 1
+
+```{r}
+p01041_mod_rm_z_1 <- df_long_1 %>% 
+  afex::aov_4(z(value) ~ deep_shallow*rf*Condition + (deep_shallow*rf|id), .)
+
+export_ols(p01041_mod_rm_z_1, 
+           key_effects = c("Condition", "deep_shallow", "rf", 
+                           "Condition:deep_shallow", "Condition:rf", "deep_shallow:rf", 
+                           "Condition:deep_shallow:rf"))
+
+
+p01041_mod_lmer_z_1 <- df_long_1 %>% 
+  lme4::lmer(z(value) ~ deep_shallow*rf*Condition + (1|id), .)
+
+export_ols(p01041_mod_lmer_z_1, 
+           key_effects = c("ConditionCON", "deep_shallowShallow", "rfrecollect", 
+                           "deep_shallowShallow:rfrecollect", "deep_shallowShallow:ConditionCON", 
+                           "rfrecollect:ConditionCON", "deep_shallowShallow:rfrecollect:ConditionCON"))
+```
+
+
+model 2 
+
+```{r}
+df_long_2 <- df %>% 
+  dplyr::select(id, Condition, Deep_propHit, Shallow_propHit) %>% 
+  tidyr::pivot_longer(cols = -c(id, Condition)) %>% 
+  dplyr::filter(!is.na(value)) 
+  
+p01041_mod_rm_z_2 <- df_long_2 %>% 
+  afex::aov_4(z(value) ~ Condition*name + (name|id), .)
+
+export_ols(p01041_mod_rm_z_2, 
+           key_effects = c("Condition", "name", "Condition:name"))
+
+
+p01041_mod_lmer_z_2 <- df_long_2 %>% 
+  lme4::lmer(z(value) ~ Condition*name + (1|id), .)
+
+export_ols(p01041_mod_lmer_z_2, 
+           key_effects = c("ConditionCON", "nameShallow_propHit", "ConditionCON:nameShallow_propHit"))
+```
+
+
+model 3 
+
+```{r}
+df_long_3 <- df %>% 
+  dplyr::select(id, Condition, Lure_R_Rating, Lure_F_Rating) %>% 
+  tidyr::pivot_longer(cols = -c(id, Condition)) %>% 
+  dplyr::mutate(value = as.numeric(value)) %>% 
+  dplyr::filter(!is.na(value)) 
+
+p01041_mod_rm_z_3 <- df_long_3 %>% 
+  afex::aov_4(z(value) ~ Condition*name + (name|id), .)
+
+export_ols(p01041_mod_rm_z_3, 
+           key_effects = c("Condition", "name", "Condition:name"))
+
+
+p01041_mod_lmer_z_3 <- df_long_3 %>% 
+  lme4::lmer(z(value) ~ Condition*name + (1|id), .)
+
+export_ols(p01041_mod_lmer_z_3, 
+           key_effects = c("ConditionCON", "nameLure_R_Rating", "ConditionCON:nameLure_R_Rating"))
+```
+

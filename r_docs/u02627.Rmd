@@ -1,0 +1,965 @@
+---
+title: "Conspiracy->stockpiling Markdown"
+author: ""
+date: "4/6/2020"
+output: html_document
+---
+  
+  ```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r }
+##################################################
+########## Conspiracy and panic buying  ##########
+##################################################
+
+library(PerformanceAnalytics)
+library(ggpubr)
+library(reshape2)
+library(reshape)
+require("apaTables")
+require("visreg")
+options(scipen = 999)
+library(lavaan)
+
+source("../scripts/helpers.R")
+```
+
+
+```{r }
+################################################################################################
+########################################### UK sample ##########################################
+################################################################################################
+
+rm(list=ls()) #remove objects
+chart.Correlation.edited <- function (R, histogram = TRUE, method = c("pearson", "kendall", 
+                                                                      "spearman"), ...) 
+{
+  x = checkData(R, method = "matrix")
+  if (missing(method)) 
+    method = method[1]
+  panel.cor <- function(x, y, digits = 2, prefix = "", 
+                        use = "pairwise", method = "pearson", 
+                        cex.cor, ...) {
+    usr <- par("usr")
+    on.exit(par(usr))
+    par(usr = c(0, 1, 0, 1))
+    r <- cor(x, y, use = use, method = method)
+    txt <- format(c(r, 0.123456789), digits = digits)[1]
+    txt <- paste(prefix, txt, sep = "")
+    if (missing(cex.cor)) 
+      cex <- 0.8/strwidth(txt)
+    test <- cor.test(as.numeric(x), as.numeric(y), method = method)
+    Signif <- symnum(test$p.value, corr = FALSE, na = FALSE, 
+                     cutpoints = c(0, 0.001, 0.01, 0.05, 0.1, 1), symbols = c("***", 
+                                                                              "**", "*", "†", " "))
+    text(0.5, 0.5, txt)
+    text(0.8, 0.8, Signif, col = 2)
+  }
+  f <- function(t) {
+    dnorm(t, mean = mean(x), sd = sd.xts(x))
+  }
+  dotargs <- list(...)
+  dotargs$method <- NULL
+  rm(method)
+  hist.panel = function(x, ... = NULL) {
+    par(new = TRUE)
+    hist(x, col = "light gray", probability = TRUE, 
+         axes = FALSE, main = "", breaks = "FD")
+    lines(density(x, na.rm = TRUE), col = "red", lwd = 1)
+    rug(x)
+  }
+  if (histogram) 
+    pairs(x, gap = 0, lower.panel = panel.cor, upper.panel = panel.smooth, 
+          diag.panel = hist.panel)
+  else pairs(x, gap = 0, lower.panel = panel.cor, upper.panel = panel.smooth)
+}
+```
+
+
+```{r }
+d=read.csv("../data/raw_data/u02627_UKdata.csv")
+nrow(d) 
+head(d) 
+table(d$Sex) #participants who abandon the survey are marked as "consent revoked"
+d$Sex<-ifelse(d$Sex=="Male",0,ifelse(d$Sex=="Female",1,NA)) #1=female, 0=male
+d$edu<-(ifelse(d$Highest.education.level.completed=="Doctorate degree (PhD/other)",6,
+               ifelse(d$Highest.education.level.completed=="Graduate degree (MA/MSc/MPhil/other)",5,
+                      ifelse(d$Highest.education.level.completed=="Undergraduate degree (BA/BSc/other)",4,
+                             ifelse(d$Highest.education.level.completed=="Technical/community college",3,
+                                    ifelse(d$Highest.education.level.completed=="High school diploma/A-levels"|d$Highest.education.level.completed=="Secondary education (e.g. GED/GCSE)",2,
+                                           ifelse(d$Highest.education.level.completed=="No formal qualifications",1,NA))))))-1)/5
+
+table(d$Sex)
+table(d$edu)
+mean(d$age,na.rm=T)
+sd(d$age,na.rm=T)
+summary(d$age)
+d$age<-(d$age-19)/68
+summary(d$age)
+d$income<-(ifelse(d$Household.Income..GBP.=="Less than £10,000",0,
+                  ifelse(d$Household.Income..GBP.=="£10,000 - £15,999",1,
+                         ifelse(d$Household.Income..GBP.=="£16,000 - £19,999",2,
+                                ifelse(d$Household.Income..GBP.=="£20,000 - £29,999",3,
+                                       ifelse(d$Household.Income..GBP.=="£30,000 - £39,999",4,
+                                              ifelse(d$Household.Income..GBP.=="£40,000 - £49,999",5,
+                                                     ifelse(d$Household.Income..GBP.=="£50,000 - £59,999",6,
+                                                            ifelse(d$Household.Income..GBP.=="£60,000 - £69,999",7,
+                                                                   ifelse(d$Household.Income..GBP.=="£70,000 - £79,999",8,
+                                                                          ifelse(d$Household.Income..GBP.=="£80,000 - £89,999",9,
+                                                                                 ifelse(d$Household.Income..GBP.=="£90,000 - £99,999",10,
+                                                                                        ifelse(d$Household.Income..GBP.=="£100,000 - £149,999",11,
+                                                                                               ifelse(d$Household.Income..GBP.=="More than £150,000",12,NA))))))))))))))/12
+
+mean(d$income,na.r=T)
+#d$income<-ifelse(is.na(d$income)=="TRUE",mean(d$income,na.r=T),d$income) #imputing missing income variables as mean    
+summary(d$income)
+
+table(d$Sex)
+
+# party affiliation 
+d$Labour<-ifelse(d$Political.Party.Affiliation.UK=="Labour",1,0)
+d$Conservative<-ifelse(d$Political.Party.Affiliation.UK=="Conservative",1,0)
+
+# this variable was somehow responded with 1, 2, 4, 5...skipped 3
+d$ideo<-(ifelse(d$ideo<3,d$ideo+1,d$ideo)-1)/10
+summary(d$ideo)
+
+#need for cognition higher is more need for cognition
+d$nfcog<-((d$nfcog_1+d$nfcog_2+6-d$nfcog_3+6-d$nfcog_4+d$nfcog_5+d$nfcog_6)/6-1)/4
+psych::alpha(cbind(d$nfcog_1,d$nfcog_2,8-d$nfcog_3,8-d$nfcog_4,d$nfcog_5,d$nfcog_6))
+summary(d$nfcog)
+
+#panic buying
+d$panicbuy<-((d$pb_1+d$pb_2+d$pb_3+d$pb_4+d$pb_5+d$pb_6)/6-1)/4
+psych::alpha(cbind(d$pb_1,d$pb_2,d$pb_3,d$pb_4,d$pb_5,d$pb_6))
+summary(d$panicbuy)
+
+d$pb_1<-(d$pb_1-1)/4
+summary(d$pb_1)
+
+d$pb_2<-(d$pb_2-1)/4
+summary(d$pb_2)
+
+d$pb_3<-(d$pb_3-1)/4
+summary(d$pb_3)
+
+d$pb_4<-(d$pb_4-1)/4
+summary(d$pb_4)
+
+d$pb_5<-(d$pb_5-1)/4
+summary(d$pb_5)
+
+d$pb_6<-(d$pb_6-1)/4
+summary(d$pb_6)
+
+dstockpilepeople<-d[which(d$panicbuy>0),]
+nrow(dstockpilepeople) # the number of people who stockpiled any category 
+hist(dstockpilepeople$panic_b)
+table(dstockpilepeople$panic_b) #among the people who stockpiled, how many say that they did so out of panic  
+
+# COVID conspiracy
+d$covid_consp<-((d$covid_consp_1+d$covid_consp_2+d$covid_consp_3)/3-1)/6
+psych::alpha(cbind(d$covid_consp_1,d$covid_consp_2,d$covid_consp_3))
+summary(d$covid_consp)
+
+d$covid_consp_1<-(d$covid_consp_1-1)/6
+d$covid_consp_2<-(d$covid_consp_2-1)/6
+d$covid_consp_3<-(d$covid_consp_3-1)/6
+
+#threat
+d$seri_you_1<-(7-d$seri_you_1)/6
+summary(d$seri_you_1)
+
+cordataA<-data.frame(
+  
+  "Conspiracy item 1"=d$covid_consp_1,
+  "Conspiracy item 2"=d$covid_consp_2,
+  "Conspiracy item 3"=d$covid_consp_3,
+  "Stockpiling food"=d$pb_1,
+  "Stockpiling produce"=d$pb_2,
+  "Stockpiling weapon"=d$pb_3,
+  "Stockpiling toilet paper"=d$pb_4,
+  "Stockpiling sanitary product"=d$pb_5,
+  "Stockpiling substance"=d$pb_6
+)
+
+chart.Correlation.edited(cordataA)
+cordataA<-data.frame("gender"=as.numeric(d$Sex),
+                     "age"=d$age,
+                     "edu"=d$edu,
+                     "income"=d$income,
+                     "ideo"=d$ideo,
+                     "Labour"=d$Labour,
+                     "Conservative"=d$Conservative,
+                     "nfcog"=d$nfcog,
+                     "threat"=d$seri_you_1,
+                     "covid_consp"=d$covid_consp,
+                     "panic_buy"=d$panicbuy,
+                     "consp1"=d$covid_consp_1,
+                     "consp2"=d$covid_consp_2,
+                     "consp3"=d$covid_consp_3,
+                     "pbfood"=d$pb_1,
+                     "pb_freshproduce"=d$pb_2,
+                     "pb_weapon"=d$pb_3,
+                     "pb_tp"=d$pb_4,
+                     "pb_sanit"=d$pb_5,
+                     "pb_subs"=d$pb_6
+)
+apa.cor.table(cordataA,
+              filename = "Conspiracy_stockpiling_UK3.doc", table.number = NA,
+              show.conf.interval = FALSE, landscape = TRUE)
+
+cor(cordataA,use = "pairwise")
+```
+
+
+```{r }
+################################################
+#########   overall panic buying scale  ########
+ukoverall<-summary(lm(panicbuy~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d)) 
+lsr::etaSquared(lm(panicbuy~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d))
+write.csv(cbind(ukoverall$coefficients,
+                confint(lm(panicbuy~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d))),
+          file="ukoverall.csv")
+write.csv(lsr::etaSquared(lm(panicbuy~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d)),file="ukoverall_efsz.csv")
+```
+
+
+# model 1 
+
+```{r}
+u02627_mod_z_1 <- lm(z(panicbuy) ~ 
+                       factor(Sex) + z(age) + z(edu) + z(income) + 
+                       z(ideo) + factor(Labour) + factor(Conservative) + z(nfcog) +
+                       z(covid_consp) + z(seri_you_1),
+                     data=d)
+
+export_ols(u02627_mod_z_1, 
+           key_effects = c("z(covid_consp)"))
+```
+
+
+```{r }
+################################################
+#########      shelf stable food       ########
+summary(lm(pb_1~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d)) 
+write.csv(cbind(summary(lm(pb_1~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d))$coefficients,
+                confint(lm(pb_1~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d))),
+          file="ukfood.csv")
+write.csv(lsr::etaSquared(lm(pb_1~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d)),file="ukfood_efsz.csv")
+```
+
+
+```{r }
+################################################
+#########      fresh produce       ########
+summary(lm(pb_2~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d)) 
+write.csv(cbind(summary(lm(pb_2~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d))$coefficients,
+                confint(lm(pb_2~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d))),
+          file="ukproduce.csv")
+write.csv(lsr::etaSquared(lm(pb_2~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d)),file="ukproduce_efsz.csv")
+```
+
+
+```{r }
+################################################
+#########            weapons            ########
+summary(lm(pb_3~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d)) 
+write.csv(cbind(summary(lm(pb_3~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d))$coefficients,
+                confint(lm(pb_3~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d))),
+          file="ukweapons.csv")
+write.csv(lsr::etaSquared(lm(pb_3~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d)),file="ukweapons_efsz.csv")
+```
+
+
+```{r }
+################################################
+#########        toilet paper          ########
+summary(lm(pb_4~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d)) 
+write.csv(cbind(summary(lm(pb_4~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d))$coefficients,
+                confint(lm(pb_4~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d))),
+          file="uktp.csv")
+write.csv(lsr::etaSquared(lm(pb_4~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d)),file="uktp_efsz.csv")
+```
+
+
+```{r }
+################################################
+#########     sanitizing products       ########
+summary(lm(pb_5~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d)) 
+write.csv(cbind(summary(lm(pb_5~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d))$coefficients,
+                confint(lm(pb_5~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d))),
+          file="uksanitizing.csv")
+write.csv(lsr::etaSquared(lm(pb_5~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d)),file="uksanitizing_efsz.csv")
+```
+
+
+```{r }
+################################################
+#########     substance products       ########
+summary(lm(pb_6~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d)) 
+write.csv(cbind(summary(lm(pb_6~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d))$coefficients,
+                confint(lm(pb_6~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d))),
+          file="uksubstance.csv")
+write.csv(lsr::etaSquared(lm(pb_6~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1,data=d)),file="uksubstance_efsz.csv")
+
+
+################################################# moderation  ################################################
+ukoverall_mod<-summary(lm(panicbuy~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1+income*covid_consp,data=d)) 
+lsr::etaSquared(lm(panicbuy~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1+income*covid_consp,data=d))
+write.csv(cbind(ukoverall_mod$coefficients,
+                confint(lm(panicbuy~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1+income*covid_consp,data=d))),
+          file="ukoverall_mod.csv")
+write.csv(lsr::etaSquared(lm(panicbuy~Sex+age+edu+income+ideo+Labour+Conservative+nfcog+covid_consp+seri_you_1+income*covid_consp,data=d)),file="ukoverall_mod_efsz.csv")
+```
+
+
+```{r }
+#### US sample ####
+#retrieving the main survey
+rm(list=ls()) #remove objects
+chart.Correlation.edited <- function (R, histogram = TRUE, method = c("pearson", "kendall", 
+                                                                      "spearman"), ...) 
+{
+  x = checkData(R, method = "matrix")
+  if (missing(method)) 
+    method = method[1]
+  panel.cor <- function(x, y, digits = 2, prefix = "", 
+                        use = "pairwise", method = "pearson", 
+                        cex.cor, ...) {
+    usr <- par("usr")
+    on.exit(par(usr))
+    par(usr = c(0, 1, 0, 1))
+    r <- cor(x, y, use = use, method = method)
+    txt <- format(c(r, 0.123456789), digits = digits)[1]
+    txt <- paste(prefix, txt, sep = "")
+    if (missing(cex.cor)) 
+      cex <- 0.8/strwidth(txt)
+    test <- cor.test(as.numeric(x), as.numeric(y), method = method)
+    Signif <- symnum(test$p.value, corr = FALSE, na = FALSE, 
+                     cutpoints = c(0, 0.001, 0.01, 0.05, 0.1, 1), symbols = c("***", 
+                                                                              "**", "*", "†", " "))
+    text(0.5, 0.5, txt)
+    text(0.8, 0.8, Signif, col = 2)
+  }
+  f <- function(t) {
+    dnorm(t, mean = mean(x), sd = sd.xts(x))
+  }
+  dotargs <- list(...)
+  dotargs$method <- NULL
+  rm(method)
+  hist.panel = function(x, ... = NULL) {
+    par(new = TRUE)
+    hist(x, col = "light gray", probability = TRUE, 
+         axes = FALSE, main = "", breaks = "FD")
+    lines(density(x, na.rm = TRUE), col = "red", lwd = 1)
+    rug(x)
+  }
+  if (histogram) 
+    pairs(x, gap = 0, lower.panel = panel.cor, upper.panel = panel.smooth, 
+          diag.panel = hist.panel)
+  else pairs(x, gap = 0, lower.panel = panel.cor, upper.panel = panel.smooth)
+}
+```
+
+
+```{r }
+d=read.csv("../data/raw_data/u02627_USdata.csv")
+nrow(d) #this is not total sample size, as it contains empty rows resulted from merging data with cases of covid 19 at different states etc
+head(d)
+table(d$Sex)
+27+392+424 #this is the total sample size that; participants who abandon the survey are marked as "consent revoked"
+
+barplot(table(d$ideo))
+barplot(table(d$pid),xlab = "Party identity,1=Strong Democrat, 7=Strong Republican")
+
+d$partyid<-ifelse(d$pid<4,0,ifelse(d$pid>4,2,1))
+table(d$partyid)
+
+d$pid<-(d$pid-1)/6
+summary(d$pid)
+
+d$ideo<-(d$ideo-1)/6
+summary(d$ideo)
+
+table(d$Ethnicity..Simplified.)
+mean(d$age,na.rm=T)
+sd(d$age,na.rm=T)
+
+d$age<-(d$age-18)/64
+summary(d$age)
+
+
+d$Sex<-ifelse(d$Sex=="Male",0,ifelse(d$Sex=="Female",1,NA))  #1=female, 0=male
+table(d$Sex)
+
+d$edu<-(ifelse(d$Highest.education.level.completed=="Doctorate degree (PhD/other)",6,
+               ifelse(d$Highest.education.level.completed=="Graduate degree (MA/MSc/MPhil/other)",5,
+                      ifelse(d$Highest.education.level.completed=="Undergraduate degree (BA/BSc/other)",4,
+                             ifelse(d$Highest.education.level.completed=="Technical/community college",3,
+                                    ifelse(d$Highest.education.level.completed=="High school diploma/A-levels"|d$Highest.education.level.completed=="Secondary education (e.g. GED/GCSE)",2,
+                                           ifelse(d$Highest.education.level.completed=="No formal qualifications",1,NA))))))-1)/5
+
+table(d$edu)
+
+d$income<-(ifelse(d$Household.Income..USD...US.participants.only.=="Less than $10000",0,
+                  ifelse(d$Household.Income..USD...US.participants.only.=="$10000–$15999",1,
+                         ifelse(d$Household.Income..USD...US.participants.only.=="$16000–$19999",2,
+                                ifelse(d$Household.Income..USD...US.participants.only.=="$20000–$29999",3,
+                                       ifelse(d$Household.Income..USD...US.participants.only.=="$30000–$39999",4,
+                                              ifelse(d$Household.Income..USD...US.participants.only.=="$40000–$49999",5,
+                                                     ifelse(d$Household.Income..USD...US.participants.only.=="$50000–$59999",6,
+                                                            ifelse(d$Household.Income..USD...US.participants.only.=="$60000–$69999",7,
+                                                                   ifelse(d$Household.Income..USD...US.participants.only.=="$70000–$79999",8,
+                                                                          ifelse(d$Household.Income..USD...US.participants.only.=="$80000–$89999",9,
+                                                                                 ifelse(d$Household.Income..USD...US.participants.only.=="$90000–$99999",10,
+                                                                                        ifelse(d$Household.Income..USD...US.participants.only.=="$100000–$149999",11,
+                                                                                               ifelse(d$Household.Income..USD...US.participants.only.=="More than $150000",12,NA))))))))))))))/12
+
+table(d$Household.Income..USD...US.participants.only.)
+table(d$income)
+
+######################## Pychometrics and recoding ########################
+
+# threat sensitivity 0-1 (1=high sensitivity)
+d$ts<-((d$ts_1+8-d$ts_2+8-d$ts_3+8-d$ts_4+8-d$ts_5+d$ts_6+8-d$ts_7)/7-1)/6
+psych::alpha(cbind(d$ts_1,8-d$ts_2,8-d$ts_3,8-d$ts_4,8-d$ts_5,d$ts_6,8-d$ts_7))
+
+table(d$ts)
+
+# need for closure
+d$nfcl_f<-(7-(d$nfclosure_1+d$nfclosure_2+d$nfclosure_3+d$nfclosure_4+d$nfclosure_5+d$nfclosure_6+d$nfcl2_1+d$nfcl2_2+d$nfcl2_3+d$nfcl2_4+d$nfcl2_5+d$nfcl2_6+d$nfcl2_7+d$nfcl2_8+d$nfcl2_9)/15)/6
+psych::alpha(cbind(d$nfclosure_1,d$nfclosure_2,d$nfclosure_3,d$nfclosure_4,d$nfclosure_5,d$nfclosure_6,d$nfcl2_1,d$nfcl2_2,d$nfcl2_3,d$nfcl2_4,d$nfcl2_5,d$nfcl2_6,d$nfcl2_7,d$nfcl2_8,d$nfcl2_9))
+
+table(d$nfcl_f)
+
+#need for cognition higher is more need for cognition
+d$nfcog<-((d$nfcog_1+d$nfcog_2+6-d$nfcog_3+6-d$nfcog_4+d$nfcog_5+d$nfcog_6)/6-1)/4
+psych::alpha(cbind(d$nfcog_1,d$nfcog_2,8-d$nfcog_3,8-d$nfcog_4,d$nfcog_5,d$nfcog_6))
+table(d$nfcog)
+summary(d$nfcog)
+sd(d$nfcog)
+
+# authoritarianism #higher score means more authoritarian
+d$auth<-(d$auth1+3-d$auth2+d$auth3+d$auth4)/4-1
+psych::alpha(cbind(d$auth1,3-d$auth2+d$auth3+d$auth4))
+summary(d$auth)
+
+# sdo
+d$sdo<-((d$sdo_1+d$sdo_2+8-d$sdo_3+8-d$sdo_4+d$sdo_5+d$sdo_6+8-d$sdo_7+8-d$sdo_8)/8-1)/7
+psych::alpha(cbind(d$sdo_1,d$sdo_2,8-d$sdo_3,8-d$sdo_4,d$sdo_5,d$sdo_6,8-d$sdo_7,8-d$sdo_8))
+summary(d$sdo)
+
+#panic buying at wave 1
+d$panicbuy<-((d$pb_1+d$pb_2+d$pb_3+d$pb_4+d$pb_5+d$pb_6)/6-1)/4 
+psych::alpha(cbind(d$pb_1,d$pb_2,d$pb_3,d$pb_4,d$pb_5,d$pb_6))
+summary(d$panicbuy)
+
+d$pb_1<-(d$pb_1-1)/4
+summary(d$pb_1)
+
+d$pb_2<-(d$pb_2-1)/4
+summary(d$pb_2)
+
+d$pb_3<-(d$pb_3-1)/4
+summary(d$pb_3)
+
+d$pb_4<-(d$pb_4-1)/4
+summary(d$pb_4)
+
+d$pb_5<-(d$pb_5-1)/4
+summary(d$pb_5)
+
+d$pb_6<-(d$pb_6-1)/4
+summary(d$pb_6)
+
+dstockpilepeople_w1<-d[which(d$panicbuy>0),]
+nrow(dstockpilepeople_w1) # the number of people who stockpiled any category 
+
+table(dstockpilepeople_w1$panic_b) #among the people who stockpiled, how many say that they did so out of panic  
+
+
+#panic buying at wave 2
+d$panicbuy_w2<-((d$pb_w2_1+d$pb_w2_2+d$pb_w2_3+d$pb_w2_4+d$pb_w2_5+d$pb_w2_6)/6-1)/4 
+psych::alpha(cbind(d$pb_w2_1,d$pb_w2_2,d$pb_w2_3,d$pb_w2_4,d$pb_w2_5,d$pb_w2_6))
+summary(d$panicbuy_w2)
+
+d$pb_w2_1<-(d$pb_w2_1-1)/4
+summary(d$pb_w2_1)
+
+d$pb_w2_2<-(d$pb_w2_2-1)/4
+summary(d$pb_w2_2)
+
+d$pb_w2_3<-(d$pb_w2_3-1)/4
+summary(d$pb_w2_3)
+
+d$pb_w2_4<-(d$pb_w2_4-1)/4
+summary(d$pb_w2_4)
+
+d$pb_w2_5<-(d$pb_w2_5-1)/4
+summary(d$pb_w2_5)
+
+d$pb_w2_6<-(d$pb_w2_6-1)/4
+summary(d$pb_w2_6)
+
+dstockpilepeople_w2<-d[which(d$panicbuy_w2>0),]
+nrow(dstockpilepeople_w2) # the number of people who stockpiled any category 
+
+# COVID conspiracy
+d$covid_consp<-((d$covid_consp_1+d$covid_consp_2+d$covid_consp_3)/3-1)/6
+psych::alpha(cbind(d$covid_consp_1,d$covid_consp_2,d$covid_consp_3))
+summary(d$covid_consp)
+
+d$covid_consp_1<-(d$covid_consp_1-1)/6
+d$covid_consp_2<-(d$covid_consp_2-1)/6
+d$covid_consp_3<-(d$covid_consp_3-1)/6
+
+#seriousness 
+d$seri_you_1<-(7-d$seri_you_1.x)/6
+summary(d$seri_you_1)
+
+# government's effectiveness
+d$gov_effect_us<-((d$gov_effect_1+d$gov_effect_2)/2-1)/6
+psych::alpha(cbind(d$gov_effect_1,d$gov_effect_2))
+summary(d$gov_effect_us)
+
+cordataA<-data.frame("gender"=as.numeric(d$Sex),
+                     "age"=d$age,
+                     "edu"=d$edu,
+                     "income"=d$income,
+                     "ideo"=d$ideo,
+                     "pid"=d$pid,
+                     "nfcog"=d$nfcog,
+                     "threat"=d$seri_you_1,
+                     "covid_consp"=d$covid_consp,
+                     "panic_buy_w1"=d$panicbuy,
+                     "panic_buy_w2"=d$panicbuy_w2,
+                     "consp1"=d$covid_consp_1,
+                     "consp2"=d$covid_consp_2,
+                     "consp3"=d$covid_consp_3,
+                     "pbfood_w1"=d$pb_1,
+                     "pb_freshproduce_w1"=d$pb_2,
+                     "pb_weapon_w1"=d$pb_3,
+                     "pb_tp_w1"=d$pb_4,
+                     "pb_sanit_w1"=d$pb_5,
+                     "pb_subs_w1"=d$pb_6,
+                     "pbfood_w2"=d$pb_w2_1,
+                     "pb_freshproduce_w2"=d$pb_w2_2,
+                     "pb_weapon_w2"=d$pb_w2_3,
+                     "pb_tp_w2"=d$pb_w2_4,
+                     "pb_sanit_w2"=d$pb_w2_5,
+                     "pb_subs_w2"=d$pb_w2_6
+)
+apa.cor.table(cordataA,
+              filename = "Conspiracy_stockpiling_US.doc", table.number = NA,
+              show.conf.interval = FALSE, landscape = TRUE)
+
+
+cordataAA<-data.frame(
+  
+  "Conspiracy item 1"=d$covid_consp_1,
+  "Conspiracy item 2"=d$covid_consp_2,
+  "Conspiracy item 3"=d$covid_consp_3,
+  "S food w1"=d$pb_1,
+  "S produce w1"=d$pb_2,
+  "S weapon w1"=d$pb_3,
+  "S toilet paper w1"=d$pb_4,
+  "S sanitary product w1"=d$pb_5,
+  "S substance w1"=d$pb_6,
+  "S food w2"=d$pb_w2_1,
+  "S produce w2"=d$pb_w2_2,
+  "S weapon w2"=d$pb_w2_3,
+  "S toilet paper w2"=d$pb_w2_4,
+  "S sanitary product w2"=d$pb_w2_5,
+  "S substance w2"=d$pb_w2_6
+)
+
+chart.Correlation.edited(cordataAA)
+
+cor(cordataA,use = "pairwise")
+Hmisc::rcorr(as.matrix(cordataA))
+```
+
+
+```{r }
+################################################
+#########   overall panic buying scale  ########
+### predicting wave 1 panic buying
+(usoverall_w1<-summary(usoverall_lm_w1<-lm(panicbuy~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1,data=d))) 
+lsr::etaSquared(usoverall_lm_w1)
+
+### predicting wave 2 panic buying
+(usoverall_w2<-summary(usoverall_lm_w2<-lm(panicbuy_w2~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1,data=d))) 
+lsr::etaSquared(usoverall_lm_w2)
+
+### predicting wave 1 panic buying controlling wave 1 panic buying
+(usoverallw2_l<-summary(usoverall_lmw2_l<-lm(panicbuy_w2~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+panicbuy,data=d))) 
+lsr::etaSquared(usoverall_lmw2_l)
+```
+
+# model 2 
+
+```{r}
+u02627_mod_z_2 <- lm(z(panicbuy) ~ factor(Sex) + z(age) + z(edu) + z(income) + 
+     z(ideo) + z(pid) + z(nfcog) + z(covid_consp) + 
+     z(seri_you_1),data=d)
+
+export_ols(u02627_mod_z_2, 
+           key_effects = c("z(covid_consp)"))
+```
+
+# model 3
+
+```{r}
+u02627_mod_z_3 <- lm(z(panicbuy_w2) ~ factor(Sex) + z(age) + z(edu) + z(income) + 
+     z(ideo) + z(pid) + z(nfcog) + z(covid_consp) + 
+     z(seri_you_1),data=d)
+
+export_ols(u02627_mod_z_3, 
+           key_effects = c("z(covid_consp)"))
+```
+
+
+```{r }
+################################################
+#########              food             ########
+### predicting wave 1 panic buying
+(usfood_w1<-summary(usfood_lm_w1<-lm(pb_1~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1,data=d))) 
+lsr::etaSquared(usfood_lm_w1)
+
+### predicting wave 2 panic buying
+(usfood_w2<-summary(usfood_lm_w2<-lm(pb_w2_1~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1,data=d))) 
+lsr::etaSquared(usfood_lm_w2)
+
+### predicting wave 1 panic buying controlling wave 1 panic buying
+(usfood_w2_l<-summary(usfood_lm_w2_l<-lm(pb_w2_1~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+pb_1,data=d))) 
+lsr::etaSquared(usfood_lm_w2_l)
+
+################################################
+#########              produce             ########
+### predicting wave 1 panic buying
+(usproduce_w1<-summary(usproduce_lm_w1<-lm(pb_2~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1,data=d))) 
+lsr::etaSquared(usproduce_lm_w1) 
+
+### predicting wave 2 panic buying
+(usproduce_w2<-summary(usproduce_lm_w2<-lm(pb_w2_2~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1,data=d))) 
+lsr::etaSquared(usproduce_lm_w2)
+
+### predicting wave 1 panic buying controlling wave 1 panic buying
+(usproduce_w2_l<-summary(usproduce_lm_w2_l<-lm(pb_w2_2~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+pb_2,data=d))) 
+lsr::etaSquared(usproduce_lm_w2_l)
+
+################################################
+#########              weapon           ########
+### predicting wave 1 panic buying
+(usweapon_w1<-summary(usweapon_lm_w1<-lm(pb_3~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1,data=d))) 
+lsr::etaSquared(usweapon_lm_w1) 
+
+### predicting wave 2 panic buying
+(usweapon_w2<-summary(usweapon_lm_w2<-lm(pb_w2_3~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1,data=d))) 
+lsr::etaSquared(usweapon_lm_w2)
+
+### predicting wave 1 panic buying controlling wave 1 panic buying
+(usweapon_w2_l<-summary(usweapon_lm_w2_l<-lm(pb_w2_3~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+pb_3,data=d))) 
+lsr::etaSquared(usweapon_lm_w2_l)
+
+################################################
+#########        toilet paper           ########
+### predicting wave 1 panic buying
+(ustp_w1<-summary(ustp_lm_w1<-lm(pb_4~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1,data=d))) 
+lsr::etaSquared(ustp_lm_w1)
+
+### predicting wave 2 panic buying
+(ustp_w2<-summary(ustp_lm_w2<-lm(pb_w2_4~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1,data=d))) 
+lsr::etaSquared(ustp_lm_w2)
+
+### predicting wave 1 panic buying controlling wave 1 panic buying
+(ustp_w2_l<-summary(ustp_lm_w2_l<-lm(pb_w2_4~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+pb_4,data=d))) 
+lsr::etaSquared(ustp_lm_w2_l)
+
+################################################
+#########         sanitary product      ########
+### predicting wave 1 panic buying
+(ussanitary_w1<-summary(ussanitary_lm_w1<-lm(pb_5~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1,data=d))) 
+lsr::etaSquared(ussanitary_lm_w1)
+
+### predicting wave 2 panic buying
+(ussanitary_w2<-summary(ussanitary_lm_w2<-lm(pb_w2_5~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1,data=d))) 
+lsr::etaSquared(ussanitary_lm_w2)
+
+### predicting wave 1 panic buying controlling wave 1 panic buying
+(ussanitary_w2_l<-summary(ussanitary_lm_w2_l<-lm(pb_w2_5~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+pb_5,data=d))) 
+lsr::etaSquared(ussanitary_lm_w2_l)
+
+################################################
+#########              substance        ########
+### predicting wave 1 panic buying
+(ussubstance_w1<-summary(ussubstance_lm_w1<-lm(pb_6~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1,data=d))) 
+lsr::etaSquared(ussubstance_lm_w1)
+
+### predicting wave 2 panic buying
+(ussubstance_w2<-summary(ussubstance_lm_w2<-lm(pb_w2_6~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1,data=d))) 
+lsr::etaSquared(ussubstance_lm_w2)
+
+### predicting wave 1 panic buying controlling wave 1 panic buying
+(ussubstance_w2_l<-summary(ussubstance_lm_w2_l<-lm(pb_w2_6~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+pb_6,data=d))) 
+lsr::etaSquared(ussubstance_lm_w2_l)
+
+
+write.csv(rbind(cbind(rbind(cbind(usoverall_w1$coefficients,"[",confint(usoverall_lm_w1),"]",rbind(NA,lsr::etaSquared(usoverall_lm_w1)),NA,
+                                  usoverall_w2$coefficients,"[",confint(usoverall_lm_w2),"]",rbind(NA,lsr::etaSquared(usoverall_lm_w2)),NA),NA),
+                      usoverallw2_l$coefficients,"[",confint(usoverall_lmw2_l),"]",rbind(NA,lsr::etaSquared(usoverall_lmw2_l))),
+                
+                cbind(rbind(cbind(usfood_w1$coefficients,"[",confint(usfood_lm_w1),"]",rbind(NA,lsr::etaSquared(usfood_lm_w1)),NA,
+                                  usfood_w2$coefficients,"[",confint(usfood_lm_w2),"]",rbind(NA,lsr::etaSquared(usfood_lm_w2)),NA),NA),
+                      usfood_w2_l$coefficients,"[",confint(usfood_lm_w2_l),"]",rbind(NA,lsr::etaSquared(usfood_lm_w2_l))),
+                
+                cbind(rbind(cbind(usproduce_w1$coefficients,"[",confint(usproduce_lm_w1),"]",rbind(NA,lsr::etaSquared(usproduce_lm_w1)),NA,
+                                  usproduce_w2$coefficients,"[",confint(usproduce_lm_w2),"]",rbind(NA,lsr::etaSquared(usproduce_lm_w2)),NA),NA),
+                      usproduce_w2_l$coefficients,"[",confint(usproduce_lm_w2_l),"]",rbind(NA,lsr::etaSquared(usproduce_lm_w2_l))),
+                
+                cbind(rbind(cbind(usweapon_w1$coefficients,"[",confint(usweapon_lm_w1),"]",rbind(NA,lsr::etaSquared(usweapon_lm_w1)),NA,
+                                  usweapon_w2$coefficients,"[",confint(usweapon_lm_w2),"]",rbind(NA,lsr::etaSquared(usweapon_lm_w2)),NA),NA),
+                      usweapon_w2_l$coefficients,"[",confint(usweapon_lm_w2_l),"]",rbind(NA,lsr::etaSquared(usweapon_lm_w2_l))),
+                
+                cbind(rbind(cbind(ustp_w1$coefficients,"[",confint(ustp_lm_w1),"]",rbind(NA,lsr::etaSquared(ustp_lm_w1)),NA,
+                                  ustp_w2$coefficients,"[",confint(ustp_lm_w2),"]",rbind(NA,lsr::etaSquared(ustp_lm_w2)),NA),NA),
+                      ustp_w2_l$coefficients,"[",confint(ustp_lm_w2_l),"]",rbind(NA,lsr::etaSquared(ustp_lm_w2_l))),
+                
+                cbind(rbind(cbind(ussanitary_w1$coefficients,"[",confint(ussanitary_lm_w1),"]",rbind(NA,lsr::etaSquared(ussanitary_lm_w1)),NA,
+                                  ussanitary_w2$coefficients,"[",confint(ussanitary_lm_w2),"]",rbind(NA,lsr::etaSquared(ussanitary_lm_w2)),NA),NA),
+                      ussanitary_w2_l$coefficients,"[",confint(ussanitary_lm_w2_l),"]",rbind(NA,lsr::etaSquared(ussanitary_lm_w2_l))),
+                
+                cbind(rbind(cbind(ussubstance_w1$coefficients,"[",confint(ussubstance_lm_w1),"]",rbind(NA,lsr::etaSquared(ussubstance_lm_w1)),NA,
+                                  ussubstance_w2$coefficients,"[",confint(ussubstance_lm_w2),"]",rbind(NA,lsr::etaSquared(ussubstance_lm_w2)),NA),NA),
+                      ussubstance_w2_l$coefficients,"[",confint(ussubstance_lm_w2_l),"]",rbind(NA,lsr::etaSquared(ussubstance_lm_w2_l)))
+                
+)
+, file="us_regression.csv")
+```
+
+
+```{r }
+############### Using each of the three conspiracy theories as predictor seperately--item 1 ###############
+### predicting wave 1 panic buying
+(usoverall_c1_w1<-summary(usoverall_lm_c1_w1<-lm(panicbuy~Sex+age+edu+income+ideo+pid+nfcog+covid_consp_1+seri_you_1,data=d))) 
+lsr::etaSquared(usoverall_lm_c1_w1)
+
+### predicting wave 2 panic buying
+(usoverall_c1_w2<-summary(usoverall_lm_c1_w2<-lm(panicbuy_w2~Sex+age+edu+income+ideo+pid+nfcog+covid_consp_1+seri_you_1,data=d))) 
+lsr::etaSquared(usoverall_lm_c1_w2)
+
+### predicting wave 1 panic buying controlling wave 1 panic buying
+(usoverallw2_c1_l<-summary(usoverall_lmw2_c1_l<-lm(panicbuy_w2~Sex+age+edu+income+ideo+pid+nfcog+covid_consp_1+seri_you_1+panicbuy,data=d))) 
+lsr::etaSquared(usoverall_lmw2_c1_l)
+
+############### Using each of the three conspiracy theories as predictor seperately--item 2 ###############
+### predicting wave 1 panic buying
+(usoverall_c2_w1<-summary(usoverall_lm_c2_w1<-lm(panicbuy~Sex+age+edu+income+ideo+pid+nfcog+covid_consp_2+seri_you_1,data=d))) 
+lsr::etaSquared(usoverall_lm_c2_w1)
+
+### predicting wave 2 panic buying
+(usoverall_c2_w2<-summary(usoverall_lm_c2_w2<-lm(panicbuy_w2~Sex+age+edu+income+ideo+pid+nfcog+covid_consp_2+seri_you_1,data=d))) 
+lsr::etaSquared(usoverall_lm_c2_w2)
+
+### predicting wave 1 panic buying controlling wave 1 panic buying
+(usoverallw2_c2_l<-summary(usoverall_lmw2_c2_l<-lm(panicbuy_w2~Sex+age+edu+income+ideo+pid+nfcog+covid_consp_2+seri_you_1+panicbuy,data=d))) 
+lsr::etaSquared(usoverall_lmw2_c2_l)
+
+############### Using each of the three conspiracy theories as predictor seperately--item 3 ###############
+### predicting wave 1 panic buying
+(usoverall_c3_w1<-summary(usoverall_lm_c3_w1<-lm(panicbuy~Sex+age+edu+income+ideo+pid+nfcog+covid_consp_3+seri_you_1,data=d))) 
+lsr::etaSquared(usoverall_lm_c3_w1)
+
+### predicting wave 2 panic buying
+(usoverall_c3_w2<-summary(usoverall_lm_c3_w2<-lm(panicbuy_w2~Sex+age+edu+income+ideo+pid+nfcog+covid_consp_3+seri_you_1,data=d))) 
+lsr::etaSquared(usoverall_lm_c3_w2)
+
+### predicting wave 1 panic buying controlling wave 1 panic buying
+(usoverallw2_c3_l<-summary(usoverall_lmw2_c3_l<-lm(panicbuy_w2~Sex+age+edu+income+ideo+pid+nfcog+covid_consp_3+seri_you_1+panicbuy,data=d))) 
+lsr::etaSquared(usoverall_lmw2_c3_l)
+
+
+################################################# stringent specification ################################################
+```
+
+
+```{r }
+################################################
+#########   overall panic buying scale  ########
+### predicting wave 1 panic buying
+(usoverall_s<-summary(usoverall_lm_s<-lm(panicbuy~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+sdo+auth+nfcl_f+ts+gov_effect_us+Number_of_cases_in_their_state,data=d))) 
+lsr::etaSquared(usoverall_lm_s)
+
+### predicting wave 2 panic buying
+(usoverall_w2_s<-summary(usoverall_lm_w2_s<-lm(panicbuy_w2~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+sdo+auth+nfcl_f+ts+gov_effect_us+Number_of_cases_in_their_state,data=d))) 
+lsr::etaSquared(usoverall_lm_w2_s)
+
+### predicting wave 1 panic buying controlling wave 1 panic buying
+(usoverall_w2_l_s<-summary(usoverall_lm_w2_l_s<-lm(panicbuy_w2~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+sdo+auth+nfcl_f+ts+gov_effect_us+Number_of_cases_in_their_state+panicbuy,data=d))) 
+lsr::etaSquared(usoverall_lm_w2_l_s)
+
+write.csv(rbind(cbind(rbind(cbind(usoverall_s$coefficients,"[",confint(usoverall_lm_s),"]",rbind(NA,lsr::etaSquared(usoverall_lm_s)),NA,
+                                  usoverall_w2_s$coefficients,"[",confint(usoverall_lm_w2_s),"]",rbind(NA,lsr::etaSquared(usoverall_lm_w2_s)),NA),NA),
+                      usoverall_w2_l_s$coefficients,"[",confint(usoverall_lm_w2_l_s),"]",rbind(NA,lsr::etaSquared(usoverall_lm_w2_l_s)))
+                
+)
+, file="us_regression_stringent.csv")
+################################################
+#########              food             ########
+### predicting wave 1 panic buying
+(usfood_s<-summary(usfood_lm_s<-lm(pb_1~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+sdo+auth+nfcl_f+ts+gov_effect_us+Number_of_cases_in_their_state,data=d))) 
+lsr::etaSquared(usfood_lm_s)
+write.csv(cbind(usfood_s$coefficients,confint(usfood_lm_s),rbind(NA,lsr::etaSquared(usfood_lm_s))), file="usfood_s.csv")
+
+### predicting wave 2 panic buying
+(usfood_w2_s<-summary(usfood_lm_w2_s<-lm(pb_w2_1~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+sdo+auth+nfcl_f+ts+gov_effect_us+Number_of_cases_in_their_state,data=d))) 
+lsr::etaSquared(usfood_lm_w2_s)
+write.csv(cbind(usfood_w2_s$coefficients,confint(usfood_lm_w2_s),rbind(NA,lsr::etaSquared(usfood_lm_w2_s))), file="usfood_w2_s.csv")
+
+### predicting wave 1 panic buying controlling wave 1 panic buying
+(usfood_w2_l_s<-summary(usfood_lm_w2_l_s<-lm(pb_w2_1~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+sdo+auth+nfcl_f+ts+gov_effect_us+Number_of_cases_in_their_state+pb_1,data=d))) 
+lsr::etaSquared(usfood_lm_w2_l_s)
+write.csv(cbind(usfood_w2_l_s$coefficients,confint(usfood_lm_w2_l_s),rbind(NA,lsr::etaSquared(usfood_lm_w2_l_s))), file="usfood_w2_l_s.csv")
+
+
+################################################
+#########              produce          ########
+### predicting wave 1 panic buying
+(usproduce_s<-summary(usproduce_lm_s<-lm(pb_2~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+sdo+auth+nfcl_f+ts+gov_effect_us+Number_of_cases_in_their_state,data=d))) 
+lsr::etaSquared(usproduce_lm_s)
+write.csv(cbind(usproduce_s$coefficients,confint(usproduce_lm_s),rbind(NA,lsr::etaSquared(usproduce_lm_s))), file="usproduce_s.csv")
+
+### predicting wave 2 panic buying
+(usproduce_w2_s<-summary(usproduce_lm_w2_s<-lm(pb_w2_2~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+sdo+auth+nfcl_f+ts+gov_effect_us+Number_of_cases_in_their_state,data=d))) 
+lsr::etaSquared(usproduce_lm_w2_s)
+write.csv(cbind(usproduce_w2_s$coefficients,confint(usproduce_lm_w2_s),rbind(NA,lsr::etaSquared(usproduce_lm_w2_s))), file="usproduce_w2_s.csv")
+
+### predicting wave 1 panic buying controlling wave 1 panic buying
+(usproduce_w2_l_s<-summary(usproduce_lm_w2_l_s<-lm(pb_w2_2~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+sdo+auth+nfcl_f+ts+gov_effect_us+Number_of_cases_in_their_state+pb_2,data=d))) 
+lsr::etaSquared(usproduce_lm_w2_l_s)
+write.csv(cbind(usproduce_w2_l_s$coefficients,confint(usproduce_lm_w2_l_s),rbind(NA,lsr::etaSquared(usproduce_lm_w2_l_s))), file="usproduce_w2_l_s.csv")
+
+
+################################################
+#########              weapon           ########
+### predicting wave 1 panic buying
+(usweapon_s<-summary(usweapon_lm_s<-lm(pb_3~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+sdo+auth+nfcl_f+ts+gov_effect_us+Number_of_cases_in_their_state,data=d))) 
+lsr::etaSquared(usweapon_lm_s)
+write.csv(cbind(usweapon_s$coefficients,confint(usweapon_lm_s),rbind(NA,lsr::etaSquared(usweapon_lm_s))), file="usweapon_s.csv")
+
+### predicting wave 2 panic buying
+(usweapon_w2_s<-summary(usweapon_lm_w2_s<-lm(pb_w2_3~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+sdo+auth+nfcl_f+ts+gov_effect_us+Number_of_cases_in_their_state,data=d))) 
+lsr::etaSquared(usweapon_lm_w2_s)
+write.csv(cbind(usweapon_w2_s$coefficients,confint(usweapon_lm_w2_s),rbind(NA,lsr::etaSquared(usweapon_lm_w2_s))), file="usweapon_w2_s.csv")
+
+### predicting wave 1 panic buying controlling wave 1 panic buying
+(usweapon_w2_l_s<-summary(usweapon_lm_w2_l_s<-lm(pb_w2_3~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+sdo+auth+nfcl_f+ts+gov_effect_us+Number_of_cases_in_their_state+pb_3,data=d))) 
+lsr::etaSquared(usweapon_lm_w2_l_s)
+write.csv(cbind(usweapon_w2_l_s$coefficients,confint(usweapon_lm_w2_l_s),rbind(NA,lsr::etaSquared(usweapon_lm_w2_l_s))), file="usweapon_w2_l_s.csv")
+```
+
+
+```{r }
+################################################
+#########        toilet paper           ########
+### predicting wave 1 panic buying
+(ustp_s<-summary(ustp_lm_s<-lm(pb_4~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+sdo+auth+nfcl_f+ts+gov_effect_us+Number_of_cases_in_their_state,data=d))) 
+lsr::etaSquared(ustp_lm_s)
+write.csv(cbind(ustp_s$coefficients,confint(ustp_lm_s),rbind(NA,lsr::etaSquared(ustp_lm_s))), file="ustp_s.csv")
+
+### predicting wave 2 panic buying
+(ustp_w2_s<-summary(ustp_lm_w2_s<-lm(pb_w2_4~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+sdo+auth+nfcl_f+ts+gov_effect_us+Number_of_cases_in_their_state,data=d))) 
+lsr::etaSquared(ustp_lm_w2_s)
+write.csv(cbind(ustp_w2_s$coefficients,confint(ustp_lm_w2_s),rbind(NA,lsr::etaSquared(ustp_lm_w2_s))), file="ustp_w2_s.csv")
+
+### predicting wave 1 panic buying controlling wave 1 panic buying
+(ustp_w2_l_s<-summary(ustp_lm_w2_l_s<-lm(pb_w2_4~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+sdo+auth+nfcl_f+ts+gov_effect_us+Number_of_cases_in_their_state+pb_4,data=d))) 
+lsr::etaSquared(ustp_lm_w2_l_s)
+write.csv(cbind(ustp_w2_l_s$coefficients,confint(ustp_lm_w2_l_s),rbind(NA,lsr::etaSquared(ustp_lm_w2_l_s))), file="ustp_w2_l_s.csv")
+
+
+################################################
+#########         sanitary product      ########
+### predicting wave 1 panic buying
+(ussanitary_s<-summary(ussanitary_lm_s<-lm(pb_5~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+sdo+auth+nfcl_f+ts+gov_effect_us+Number_of_cases_in_their_state,data=d))) 
+lsr::etaSquared(ussanitary_lm_s)
+write.csv(cbind(ussanitary_s$coefficients,confint(ussanitary_lm_s),rbind(NA,lsr::etaSquared(ussanitary_lm_s))), file="ussanitary_s.csv")
+
+### predicting wave 2 panic buying
+(ussanitary_w2_s<-summary(ussanitary_lm_w2_s<-lm(pb_w2_5~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+sdo+auth+nfcl_f+ts+gov_effect_us+Number_of_cases_in_their_state,data=d))) 
+lsr::etaSquared(ussanitary_lm_w2_s)
+write.csv(cbind(ussanitary_w2_s$coefficients,confint(ussanitary_lm_w2_s),rbind(NA,lsr::etaSquared(ussanitary_lm_w2_s))), file="ussanitary_w2_s.csv")
+
+### predicting wave 1 panic buying controlling wave 1 panic buying
+(ussanitary_w2_l_s<-summary(ussanitary_lm_w2_l_s<-lm(pb_w2_5~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+sdo+auth+nfcl_f+ts+gov_effect_us+Number_of_cases_in_their_state+pb_5,data=d))) 
+lsr::etaSquared(ussanitary_lm_w2_l_s)
+write.csv(cbind(ussanitary_w2_l_s$coefficients,confint(ussanitary_lm_w2_l_s),rbind(NA,lsr::etaSquared(ussanitary_lm_w2_l_s))), file="ussanitary_w2_l_s.csv")
+
+
+################################################
+#########          substance            ########
+### predicting wave 1 panic buying
+(ussubstance_s<-summary(ussubstance_lm_s<-lm(pb_6~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+sdo+auth+nfcl_f+ts+gov_effect_us+Number_of_cases_in_their_state,data=d))) 
+lsr::etaSquared(ussubstance_lm_s)
+write.csv(cbind(ussubstance_s$coefficients,confint(ussubstance_lm_s),rbind(NA,lsr::etaSquared(ussubstance_lm_s))), file="ussubstance_s.csv")
+
+### predicting wave 2 panic buying
+(ussubstance_w2_s<-summary(ussubstance_lm_w2_s<-lm(pb_w2_6~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+sdo+auth+nfcl_f+ts+gov_effect_us+Number_of_cases_in_their_state,data=d))) 
+lsr::etaSquared(ussubstance_lm_w2_s)
+write.csv(cbind(ussubstance_w2_s$coefficients,confint(ussubstance_lm_w2_s),rbind(NA,lsr::etaSquared(ussubstance_lm_w2_s))), file="ussubstance_w2_s.csv")
+
+### predicting wave 1 panic buying controlling wave 1 panic buying
+(ussubstance_w2_l_s<-summary(ussubstance_lm_w2_l_s<-lm(pb_w2_6~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+sdo+auth+nfcl_f+ts+gov_effect_us+Number_of_cases_in_their_state+pb_6,data=d))) 
+lsr::etaSquared(ussubstance_lm_w2_l_s)
+write.csv(cbind(ussubstance_w2_l_s$coefficients,confint(ussubstance_lm_w2_l_s),rbind(NA,lsr::etaSquared(ussubstance_lm_w2_l_s))), file="ussubstance_w2_l_s.csv")
+```
+
+
+```{r }
+################################################# moderation  ################################################
+
+(usoverall_mod<-summary(usoverall_mod_lm<-lm(panicbuy~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+income*covid_consp,data=d))) 
+lsr::etaSquared(usoverall_mod_lm)
+write.csv(cbind(usoverall_mod$coefficients,confint(usoverall_mod_lm)), file="usoverall_mod.csv")
+write.csv(lsr::etaSquared(usoverall_mod_lm),file="usoverall_mod_efsz.csv")
+
+(usoverall_mod_w2<-summary(usoverall_mod_lm_w2<-lm(panicbuy_w2~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+income*covid_consp,data=d))) 
+lsr::etaSquared(usoverall_mod_lm_w2)
+write.csv(cbind(usoverall_mod_w2$coefficients,confint(usoverall_mod_lm_w2)), file="usoverall_mod_w2.csv")
+write.csv(lsr::etaSquared(usoverall_mod_lm_w2),file="usoverall_mod_efsz_w2.csv")
+
+(usoverall_mod_w2_c<-summary(usoverall_mod_lm_w2_c<-lm(panicbuy_w2~Sex+age+edu+income+ideo+pid+nfcog+covid_consp+seri_you_1+panicbuy+income*covid_consp,data=d))) 
+lsr::etaSquared(usoverall_mod_lm_w2_c)
+write.csv(cbind(usoverall_mod_w2_c$coefficients,confint(usoverall_mod_lm_w2_c)), file="usoverall_mod_w2_c.csv")
+write.csv(lsr::etaSquared(usoverall_mod_lm_w2_c),file="usoverall_mod_efsz_w2_c.csv")
+
+
+library(lavaan)
+
+d$pidDR<-ifelse(d$pid>.5,1,ifelse(d$pid<.5,0,.5))
+semUScovid_cons_free<-'
+# measurement model
+ covid_=~covid_consp_1+covid_consp_2+covid_consp_3
+'
+summary(fitsem_covid_consp_free <- sem(model = semUScovid_cons_free, data = d,group = "pidDR"))
+
+semUScovid_cons_fix<-'
+# measurement model
+ covid_=~c(a,a,a)*covid_consp_1+c(b,b,b)*covid_consp_2+c(c,c,c,)*covid_consp_3
+'
+summary(fitsem_covid_consp_fix <- sem(model = semUScovid_cons_fix, data = d,group = "pidDR"))
+
+anova(fitsem_covid_consp_free,fitsem_covid_consp_fix)
+
+# structural paths
+covid_consp_1~~covid_consp_2
+covid_consp_1~~covid_consp_3
+covid_consp_2~~covid_consp_3
+
+
+```

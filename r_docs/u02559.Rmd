@@ -1,0 +1,89 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-06-28'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df <- haven::read_sav("../data/raw_data/u02559_Main Data for Re-analysis.sav")
+#df
+```
+
+
+model 1
+
+```{r}
+df_long_1 <- df  %>% 
+  dplyr::select(
+    id = ResponseId, 
+    condition, 
+    VU_percentage_overlap, U_percentage_overlap, L_percentage_overlap, VL_percentage_overlap
+  ) %>% 
+  tidyr::pivot_longer(cols = -c(id, condition)) %>% 
+  #dplyr::filter(!is.na(value), !is.na(condition)) |> 
+  dplyr::mutate(condition = factor(condition))
+
+df_long_1 <- df_long_1 |> 
+  dplyr::group_by(id) |> 
+  dplyr::filter(!any(is.na(value)))
+
+u02559_mod_rm_z_1 <- df_long_1 %>% 
+  afex::aov_4(z(value) ~ name*condition + (name|id), .)
+
+export_ols(
+  u02559_mod_rm_z_1, 
+  key_effects = c("condition", "name", "condition:name")
+)
+
+u02559_mod_lmer_z_1 <- df_long_1 %>% 
+  lme4::lmer(z(value) ~ name*condition + (1|id), .)
+
+export_ols(
+  u02559_mod_lmer_z_1, 
+  key_effects = mod_coeffs(u02559_mod_lmer_z_1)
+)
+
+
+```
+
+model 2 
+
+```{r}
+df_long_2 <- df  %>% 
+  dplyr::select(
+    id = ResponseId, 
+    condition, 
+    VU_winsor_best_in_range, U_winsor_best_in_range, L_winsor_best_in_range, VL_winsor_best_in_range
+  ) %>% 
+  tidyr::pivot_longer(cols = -c(id, condition)) %>% 
+  #dplyr::filter(!is.na(value), !is.na(condition)) |> 
+  dplyr::mutate(condition = factor(condition))
+
+
+df_long_2 <- df_long_2 |> 
+  dplyr::group_by(id) |> 
+  dplyr::filter(!any(is.na(value)))
+
+u02559_mod_rm_z_2 <- df_long_2 %>% 
+  afex::aov_4(z(value) ~ name*condition + (name|id), .)
+
+export_ols(
+  u02559_mod_rm_z_2, 
+  key_effects = c("condition", "name", "condition:name")
+)
+
+u02559_mod_lmer_z_2 <- df_long_2 %>% 
+  lme4::lmer(z(value) ~ name*condition + (1|id), .)
+
+export_ols(
+  u02559_mod_lmer_z_2, 
+  key_effects = mod_coeffs(u02559_mod_lmer_z_2)
+  )
+
+```
+

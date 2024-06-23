@@ -1,0 +1,137 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-06-12'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(mediation)
+
+source("../scripts/helpers.R")
+
+data_fin <- read.csv("../data/raw_data/u01918_exp_1.csv")
+dat <- read.csv("../data/raw_data/u01918_exp_2.csv")
+```
+
+# Study 1 
+
+## 1
+
+```{r}
+set.seed(55)
+modellm<-lm(meanRLall ~ lockoutall, data=data_fin)
+# model.all3 <- lm(correctreproduced ~ lockoutall + meanRLall, data=data_fin)
+# results3 <- mediate(modellm, model.all3, boot = TRUE, boot.ci.type="bca", sims=1000, treat ="lockoutall", mediator ="meanRLall")
+# 
+# results3 %>% summary()
+```
+
+```{r}
+u01918_mod_z_1 <-lm(z(meanRLall) ~ lockoutall, data=data_fin)
+export_ols(u01918_mod_z_1, key_effects = c("lockoutallyes"))
+
+# u01918_mod_z_2 <- lm(z(correctreproduced) ~ lockoutall + z(meanRLall), data=data_fin)
+# export_ols(u01918_mod_z_2, key_effects = c("lockoutallyes", "z(meanRLall)"))
+```
+
+
+## 2
+
+```{r}
+set.seed(55)
+modellm2<-lm(meanE1all ~ lockoutall, data=data_fin)
+# model.all6 <- lm(correctreproduced ~ lockoutall + meanE1all, data=data_fin)
+# results6 <- mediate(modellm2, model.all6, boot = TRUE, boot.ci.type="bca", sims=1000, treat ="lockoutall", mediator ="meanE1all")
+# 
+# results6 %>% summary()
+```
+
+```{r}
+u01918_mod_z_2 <- lm(z(meanE1all) ~ lockoutall, data=data_fin)
+export_ols(u01918_mod_z_2, key_effects = c("lockoutallyes"))
+
+# u01918_mod_z_4 <- lm(z(correctreproduced) ~ lockoutall + z(meanE1all), data=data_fin)
+# export_ols(u01918_mod_z_4, key_effects = c("lockoutallyes", "z(meanE1all)"))
+```
+
+
+## 3
+
+```{r}
+set.seed(55)
+modellm3<-lm(meanD1all ~ lockoutall, data=data_fin)
+# model.all9 <- lm(correctreproduced ~ lockoutall + meanD1all, data=data_fin)
+# results9 <- mediate(modellm3, model.all9, boot = TRUE, boot.ci.type="bca", sims=1000, treat ="lockoutall", mediator ="meanD1all")
+# results9 %>% summary()
+```
+
+```{r}
+u01918_mod_z_3 <- lm(z(meanD1all) ~ lockoutall, data=data_fin)
+export_ols(u01918_mod_z_3, key_effects = c("lockoutallyes"))
+# 
+# u01918_mod_z_6 <- lm(z(correctreproduced) ~ lockoutall + z(meanD1all), data=data_fin)
+# export_ols(u01918_mod_z_6, key_effects = c("lockoutallyes", "z(meanD1all"))
+```
+
+# Study 2 
+
+```{r}
+data_all <- dat
+```
+
+## 4
+
+```{r}
+u01918_mod_z_4 <- lm(z(meanRLall)~as.factor(longtermall)*as.factor(lockoutall), data=data_all)
+
+export_ols(u01918_mod_z_4, 
+           key_effects = c("as.factor(longtermall)implicit", "as.factor(lockoutall)yes", 
+                           "as.factor(longtermall)implicit:as.factor(lockoutall)yes"))
+```
+
+## 5
+
+```{r}
+u01918_mod_z_5 <- lm(z(meanD1all)~as.factor(longtermall)*as.factor(lockoutall), data=data_all)
+
+export_ols(u01918_mod_z_5, 
+           key_effects = c("as.factor(longtermall)implicit", "as.factor(lockoutall)yes", 
+                           "as.factor(longtermall)implicit:as.factor(lockoutall)yes"))
+```
+
+## 6 
+
+```{r}
+u01918_mod_z_6 <- lm(z(meanE1all)~as.factor(longtermall)*as.factor(lockoutall), data=data_all)
+
+export_ols(u01918_mod_z_6, 
+           key_effects = c("as.factor(longtermall)implicit", "as.factor(lockoutall)yes", 
+                           "as.factor(longtermall)implicit:as.factor(lockoutall)yes"))
+```
+
+## 7 
+
+```{r}
+u01918_mod_z_7 <- lm(z(recognitionall)~as.factor(longtermall)*as.factor(lockoutall), data=data_all)
+
+export_ols(u01918_mod_z_7, 
+           key_effects = c("as.factor(longtermall)implicit", "as.factor(lockoutall)yes", 
+                           "as.factor(longtermall)implicit:as.factor(lockoutall)yes"))
+```
+
+## 8 
+
+```{r}
+u01918_mod_z_8 <- lm(z(positionall)~as.factor(longtermall)*as.factor(lockoutall), data=data_all)
+
+export_ols(u01918_mod_z_8, 
+           key_effects = c("as.factor(longtermall)implicit", "as.factor(lockoutall)yes", 
+                           "as.factor(longtermall)implicit:as.factor(lockoutall)yes"))
+```
+
+# Study 3
+
+Zip folder on OSF corrupted - check with the authors. 

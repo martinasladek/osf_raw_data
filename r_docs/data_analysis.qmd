@@ -1,0 +1,2146 @@
+---
+title: "Data analysis"
+format: html
+---
+
+## Packages and helper files 
+
+```{r}
+library(betareg)
+library(brms)
+library(dplyr)
+library(here)
+library(HDInterval)
+library(purrr)
+library(sn)
+library(stringr)
+library(tidyr)
+library(zoo)
+
+source(here::here("scripts/helpers.R"))
+
+# Additional helpers
+
+quick_dist <- function(x_arg, fill_arg = "darkcyan", colour_arg = "#005250", bins_arg = 60){
+  ggplot2::ggplot(data = data.frame(), aes(x = x_arg)) + 
+  geom_histogram(bins = bins_arg, fill = fill_arg, colour = colour_arg) + 
+  theme_light()
+}
+
+quick_dens <- function(x_arg, fill_arg = "darkcyan", colour_arg = "#005250", bins_arg = 60){
+  ggplot2::ggplot(data = data.frame(), aes(x = x_arg)) + 
+  geom_density(fill = fill_arg, colour = colour_arg, alpha = 0.5, ) + 
+  theme_light()
+}
+
+
+# Row checking helper: 
+
+get_row <- function(paper_mod_id){
+  mod_df[which(mod_df$paper_mod_id == paper_mod_id), ]
+}
+
+
+# Model summaries: 
+
+brms_estimates <- function(brmsfit, exp = FALSE, param = "b_Intercept",  quick_dist = TRUE, shift = 0){
+  
+  brmsfit_df <- as.data.frame(brmsfit)
+  
+  if(exp == TRUE){
+    brmsfit_df[[param]] <- exp(brmsfit_df[[param]]) + shift
+  }
+  
+  hpd_intervals <- HDInterval::hdi(brmsfit_df[[param]] + shift)
+  
+  brmsfit_estimates = data.frame(
+    estimate = median(brmsfit_df[[param]] + shift), 
+    lower_hpd = hpd_intervals[["lower"]],
+    upper_hpd = hpd_intervals[["upper"]]
+  )
+  
+  if(quick_dist == TRUE){
+    
+    brmsfit_plot <- brmsfit_df  |> 
+      dplyr::mutate(
+        in_hpd = dplyr::between(!!sym(param), brmsfit_estimates$lower_hpd, brmsfit_estimates$upper_hpd)
+      ) |> 
+      ggplot2::ggplot(data = _) + 
+      geom_vline(xintercept = brmsfit_estimates$estimate, colour = "#d9048e", linewidth = 1) + 
+      geom_histogram(bins = 60, aes(x = !!sym(param), alpha = in_hpd),  fill = "darkcyan", colour = "#005250") +
+      scale_alpha_manual(values = c(0.3, 1)) + 
+      theme_light()
+    
+    return(
+      list(
+        brmsfit_estimates = brmsfit_estimates, 
+        brmsfit_plot = brmsfit_plot
+      )
+    )
+    
+  }
+  
+  return(brmsfit_estimates)
+  
+}
+```
+
+## Summary pre-processing 
+
+Note: residuals and fitted are already in Z-scores. 
+
+Remove cases where outliers were removed by the authors and only keep models with outliers 
+
+```{r}
+mod_df <- readRDS("../data/processed_data/mod_df.RDS")
+```
+
+```{r}
+mod_df <- mod_df |>
+  dplyr::filter(outlier_info != "no outliers") |> 
+  dplyr::ungroup()
+```
+
+Create afex- and lmer- containing version of the dataset: 
+
+```{r}
+mod_df_afex <- mod_df |> 
+  dplyr::filter(model_class != "lmerMod")
+
+```
+
+```{r}
+mod_df_lmer <- mod_df |> 
+  dplyr::filter(model_class != "afex_aov")
+```
+
+Define ID variables to select for reduced versions of the dataset:
+
+```{r}
+id_vars <- c("paper_id", "model_id", "paper_mod_id", "model_class")
+```
+
+Set up quantiles of interes: 
+
+```{r}
+quantiles <- c(0.05, 0.10, .15, .20, .80, .85, .90, .95)
+```
+
+
+Initiate lists for saving output: 
+
+```{r}
+estimates_list <- list()
+brm_list <- list()
+metrics_list <- list()
+quantile_list <- list()
+```
+
+## Model type summary 
+
+```{r}
+predicor_count <- function(all_preds_classes_i){
+  
+  all_preds_classes_count <- c(table(all_preds_classes_i))
+  paste(all_preds_classes_count, names(all_preds_classes_count), collapse = ", ")
+  
+}
+
+factor_count <- function(all_preds_classes_i){
+  
+  count_df <- as.data.frame(table(all_preds_classes_i))
+  sum(count_df[which(count_df$all_preds_classes_i== "factor"), "Freq"])
+  
+}
+
+numeric_count <- function(all_preds_classes_i){
+  
+  count_df <- as.data.frame(table(all_preds_classes_i))
+  sum(count_df[which(count_df$all_preds_classes_i== "numeric"), "Freq"])
+  
+}
+
+mod_df_afex <- mod_df_afex |> 
+  dplyr::rowwise() |> 
+  dplyr::mutate(
+    predictor_count = predicor_count(all_preds_classes_i = all_preds_classes), 
+    factor_count = factor_count(all_preds_classes),
+    numeric_count = numeric_count(all_preds_classes), 
+    interaction_count = length(interacting_preds_classes), 
+    interaction_binary = ifelse(interaction_count == 0, 0, 1)
+  )
+```
+
+
+```{r eval = FALSE}
+mod_df_afex |> 
+  dplyr::count(model_class, factor_count, numeric_count, interaction_count) |> 
+  dplyr::arrange(desc(n))
+```
+
+### Interaction counts
+
+```{r eval = FALSE}
+mod_df_afex |> 
+  dplyr::count(model_class, interaction_count) |> 
+  dplyr::arrange(model_class, desc(n))
+```
+
+afex mods: 
+
+- typically a model with 1 interaction only. 
+- followed by models with no interactions - presumably RM t-tests or ANOVAs with just one predictor. 
+
+lm: 
+
+- typically no interactions - this can be regressions, t-tests, ANOVAs or ANCOVAs
+- followed by 1 interaction - this can be moderations or factorial ANOVAs. 
+
+#### Mixed vs within interactions 
+
+For afex models: 
+
+1. Get formula
+2. Get raw predictor names
+3. Anything that's in (RM var | id) is repeated measures predictor Anything outside of that not a DV is an independent predictor 
+
+```{r}
+count_interaction_factor_levels <- function(mod_i,  return = "rm_label"){
+  
+  df_i <- mod_i$data$long
+  
+  all_factors_i <- rownames(mod_i$anova_table)
+  rm_factors_i <- names(mod_i$Anova$idata) # repeated measures factor 
+  non_rm_factors_i <- all_factors_i[which(!all_factors_i %in% rm_factors_i)]
+  interactions_i <- grep(pattern = ":", non_rm_factors_i, value = TRUE)
+  independent_factors_i <- non_rm_factors_i[which(!non_rm_factors_i %in% interactions_i)]
+  
+  
+  rm_factor_level_counts <- unlist(purrr::map(.x = rm_factors_i, 
+                                              .f = function(.x){length(unique(df_i[[.x]]))}))
+  ind_factor_level_counts <- unlist(purrr::map(.x = independent_factors_i, 
+                                               .f = function(.x){length(unique(df_i[[.x]]))}))
+  
+  rm_label <- paste0(rm_factor_level_counts, "-RM", collapse = " x ")
+  ind_label <- ifelse(
+    length(ind_factor_level_counts) > 0,
+    paste0(ind_factor_level_counts, "-IND", collapse = " x "), 
+    NA
+  )
+  
+  return_list <- list(
+    rm_label = rm_label, ind_label = ind_label
+  )
+  
+  return(
+    return_list[[return]]
+  )
+  
+}
+```
+
+```{r}
+mod_df_afex <- mod_df_afex |> 
+  dplyr::rowwise() |> 
+  dplyr::mutate(
+    rm_factor_label = 
+      ifelse(model_class == "afex_aov", count_interaction_factor_levels(mod_i = model,  return = "rm_label"), NA), 
+    ind_factor_label = 
+      ifelse(model_class == "afex_aov", count_interaction_factor_levels(mod_i = model,  return = "ind_label"), NA), 
+    design_label = paste0(rm_factor_label, " x ", ind_factor_label)
+  ) |> 
+  dplyr::ungroup() 
+
+# specify covariates: 
+
+mod_df_afex <- mod_df_afex |> 
+  dplyr::mutate(
+    num_label = ifelse(str_detect(design_label, "0-IND"), 
+                       paste0(lengths(gregexpr("0-IND", ind_factor_label)), "-NUM"), 
+                       NA), 
+    design_label = stringr::str_replace_all(design_label, "0-IND", "1-NUM") |> 
+      stringr::str_remove_all(pattern = " x NA")
+  )
+```
+
+Ones coded as 0-IND: numeric predictor involved in an interaction (re-coded to 1-COV above)
+
+11-RM - legitimate 11-level variable 
+
+#### Breakdown of AFEX models: 
+
+```{r eval = FALSE}
+metrics_list$model_design_rm <-  mod_df_afex |> 
+  dplyr::filter(model_class != "lm") |> 
+  dplyr::count(interaction_binary, design_label) |> 
+  dplyr::arrange(interaction_binary, nchar(design_label)) |> 
+  dplyr::mutate(
+    design = dplyr::case_when(
+      .default = "Mixed designs with a continuous predictor", 
+      stringr::str_detect(design_label, "^\\d+-RM$") ~ "t-tests and 1-way designs",
+      stringr::str_detect(design_label, "^(?!.*(?:NUM|IND))(?=.*RM)(?:[^x]*x[^x]*){1}$") ~ "2-way factorial repeated measures designs",
+      stringr::str_detect(design_label, "^(?!.*(?:NUM|IND))(?=.*RM)(?:[^x]*x[^x]*){2}$") ~ "3-way factorial repeated measures designs",
+      stringr::str_detect(design_label, "^(?=.*RM)(?=.*IND)(?!.*NUM)(?:[^x]*x[^x]*){1}$") ~ "2-way factorial mixed measures designs",
+      stringr::str_detect(design_label, "^(?=.*RM)(?=.*IND)(?!.*NUM)(?:[^x]*x[^x]*){2}$") ~ "3-way factorial mixed measures designs",
+      stringr::str_detect(design_label, "^(?=.*RM)(?=.*IND)(?!.*NUM)(?:[^x]*x[^x]*){3}$") ~ "4-way factorial mixed measures designs",
+      stringr::str_detect(design_label, "4-RM x 1-NUM") ~ "1-way designs with a continuous predictor",
+    )
+  )
+
+
+```
+
+#### Breakdown of LM models 
+
+```{r}
+count_ind_factor_levels <- function(mod_i){
+
+  df_i <- mod_i$model
+  
+  ind_factors_i <- sort(unlist(purrr::map(mod_i$xlevels, length)))
+  
+  ind_label = 
+    ifelse(
+      length(ind_factors_i) > 0,
+      paste0(ind_factors_i, "-IND", collapse = " ＋ "), NA
+    )
+  
+  return(ind_label)
+  
+}
+
+```
+
+
+```{r}
+mod_df_afex <- mod_df_afex |> 
+  dplyr::rowwise() |> 
+  dplyr::mutate(
+    ind_factor_label = case_when(
+      .default = ind_factor_label, 
+      model_class == "lm" ~ count_ind_factor_levels(mod_i = model)
+    ), 
+    num_label = case_when(
+      .default = num_label, 
+      model_class == "lm" & numeric_count > 0 ~ paste0(numeric_count, "-NUMS")
+    ), 
+    design_label = case_when(
+      .default = design_label, 
+      model_class == "lm" ~ paste0(num_label, " ＋ ", ind_factor_label)
+    ), 
+    design_label = stringr::str_remove_all(string = design_label, pattern = " ＋ NA") |>  # ALERT! THIS IS SPECIAL PLUS SO I DON'T HAVE TO DEAL WITH \\ IN REGEXs
+      stringr::str_remove_all(string = _, pattern = "NA ＋ ")
+  )
+```
+
+
+```{r eval = FALSE}
+metrics_list$model_design_bw <- mod_df_afex |> 
+  dplyr::filter(model_class == "lm") |> 
+  dplyr::count(interaction_binary, design_label) |> 
+  dplyr::arrange(interaction_binary, nchar(design_label)) |> 
+  dplyr::mutate(
+    design = dplyr::case_when(
+      .default = "", 
+      stringr::str_detect(design_label, "^\\d+-IND$") ~ "t-tests and 1-way designs",
+      stringr::str_detect(design_label, "^\\d+-NUMS$") ~ "Linear models with continuous predictors",
+      !stringr::str_detect(design_label, "-NUMS") ~ "Linear models with categorical predictors", 
+      stringr::str_detect(design_label, "(?=.*IND)(?=.*NUMS)") ~ 
+        "Linear models with both predictor types",
+    )
+  )
+```
+
+## Correlation between predictors 
+
+This analysis was run for the follow-up simulation (i.e. is not included in the raw data paper)
+
+### Repeated measures 
+
+```{r}
+extract_rm_cors <- function(afex_mod){
+  
+  cor_matrix_i <- afex_mod$data$wide |> 
+    dplyr::select(where(is.numeric)) |> 
+    cor()
+  
+  cor_matrix_i[upper.tri(cor_matrix_i, diag = FALSE)]
+  
+}
+
+metrics_cor_rm <- mod_df_afex |> 
+  dplyr::filter(model_class == "afex_aov") |> 
+  dplyr::select(paper_id, model_id, paper_mod_id, model) |> 
+  dplyr::rowwise() |> 
+  dplyr::mutate(
+    rm_cors = list(extract_rm_cors(afex_mod = model))
+  ) |> 
+  tidyr::unnest(cols = "rm_cors") |> 
+  dplyr::mutate(
+    abs_rm_cors = abs(rm_cors)
+  )
+
+```
+
+#### brms: RM correlations
+
+```{r eval=FALSE}
+set.seed(250623)
+
+brm_metrics_cor_rm <- metrics_cor_rm |> 
+  brms::brm(
+    abs_rm_cors ~ 1 + (1|paper_id), 
+    family =  brms::Beta(),
+    data = _, iter = 4000, 
+    cores = 4
+  )
+
+brm_list$brm_metrics_cor_rm <- brm_metrics_cor_rm
+```
+
+
+```{r eval=FALSE}
+brm_metrics_cor_rm_est <- summary(brm_metrics_cor_rm)$fixed$Estimate
+exp(brm_metrics_cor_rm_est)/(1 + exp(brm_metrics_cor_rm_est))
+brms::pp_check(brm_metrics_cor_rm, ndraws = 100)
+```
+
+### Independent measures 
+
+```{r}
+extract_ind_cors <- function(lm_model_df){
+  
+  cor_matrix_i <- lm_model_df[ -1] |> 
+    dplyr::select(where(is.numeric)) |> 
+    cor()
+  
+  cor_matrix_i[upper.tri(cor_matrix_i, diag = FALSE)]
+  
+}
+
+metrics_cor_ind <- mod_df_afex |> 
+  dplyr::filter(model_class == "lm") |> 
+  dplyr::select(paper_id, model_id, paper_mod_id, model_df) |> 
+  dplyr::rowwise() |> 
+  dplyr::mutate(
+    ind_cors = list(extract_ind_cors(lm_model_df = model_df))
+  ) |> 
+  tidyr::unnest(cols = "ind_cors") |> 
+  dplyr::mutate(
+    abs_ind_cors = abs(ind_cors)
+  )
+
+metrics_cor_ind$abs_ind_cors |> quick_dens()
+```
+
+#### brms: ind correlations
+
+```{r eval=FALSE}
+set.seed(250623)
+
+brm_metrics_cor_ind <- metrics_cor_ind |> 
+  brms::brm(
+    abs_ind_cors ~ 1 + (1|paper_id), 
+    family =  brms::Beta(),
+    data = _, iter = 2000, 
+    cores = 4
+  )
+
+brm_list$brm_metrics_cor_ind <- brm_metrics_cor_ind
+```
+
+
+```{r eval=FALSE}
+brm_metrics_cor_ind_est <- summary(brm_metrics_cor_ind)$fixed$Estimate
+exp(brm_metrics_cor_ind_est)/(1 + exp(brm_metrics_cor_ind_est))
+brms::pp_check(brm_metrics_cor_ind, ndraws = 100)
+```
+
+## Sample size 
+
+### Total N - between subjects
+
+```{r}
+metrics_n_total <- mod_df_afex |> 
+  dplyr::select(tidyr::all_of(id_vars), model_df_int) |> 
+  dplyr::filter(model_class != "afex_aov") |> 
+  dplyr::rowwise() |> 
+  dplyr::mutate(n_total = nrow(model_df_int))
+```
+
+#### brms: total N (between)
+
+```{r eval=FALSE}
+set.seed(250623)
+
+brm_metrics_n_total <- metrics_n_total |> 
+  brms::brm(
+    n_total ~ 1 + (1|paper_id), 
+    family = exponential(), 
+    data = _, 
+    cores = 4
+  )
+
+brm_list$brm_metrics_n_bw <- brm_metrics_n_total
+```
+
+
+```{r eval=FALSE}
+estimates_list$estimates_metrics_n_bw <- brms_estimates(brmsfit = brm_metrics_n_total, exp = TRUE)$brmsfit_estimates
+# brms::pp_check(brm_metrics_n_total, ndraws = 100) + 
+#   coord_cartesian(xlim = c(0, 2000))
+```
+
+#### quantiles
+
+```{r}
+quantile_list$quantiles_n_bw <- data.frame(
+  metric = "n_bw", 
+  value = metrics_n_total$n_total |> quantile(quantiles)
+)
+```
+
+#### metrics
+
+```{r}
+metrics_list$n_bw <- metrics_n_total |> 
+  dplyr::select(all_of(id_vars), n_total)
+```
+
+
+
+### Total N - within subjects
+
+```{r}
+extract_wide_data <- function(afex_mod){
+  afex_mod$data$wide
+}
+
+metrics_n_rm <- mod_df_afex |> 
+  dplyr::filter(model_class == "afex_aov") |> 
+  dplyr::select(paper_id, model_id, paper_mod_id, model) |> 
+  dplyr::rowwise() |> 
+  dplyr::mutate(
+    n_rm = nrow(extract_wide_data(model))
+  ) |> 
+  dplyr::select(-model)
+```
+
+#### brms: N for RM
+
+```{r eval=FALSE}
+set.seed(250623)
+
+brm_metrics_n_rm <- metrics_n_rm |> 
+  brms::brm(
+    n_rm ~ 1 + (1|paper_id), 
+    family = exponential(),
+    iter = 2000, 
+    data = _, 
+    cores = 4
+  )
+
+brm_list$brm_metrics_n_rm <- brm_metrics_n_rm
+```
+
+```{r}
+estimates_list$estimates_metrics_n_rm <- brms_estimates(brmsfit = brm_metrics_n_rm, exp = TRUE)$brmsfit_estimates
+#brms::pp_check(brm_metrics_n_rm)
+```
+
+#### quantiles 
+
+```{r}
+quantile_list$quantiles_n_rm <- data.frame(
+  metric = "n_rm", 
+  value = metrics_n_rm$n_rm |> quantile(quantiles)
+)
+```
+
+#### metrics
+
+```{r}
+metrics_list$n_rm <- metrics_n_rm
+```
+
+
+### N Ratio - within
+
+I.e. between-predictors in within-between models: 
+
+```{r}
+n_ratio_rm <- function(afex_model){
+  
+  factor_df_i <- afex_model$data$wide |> 
+    dplyr::select(where(is.factor)) |> 
+    dplyr::select(-1) 
+  
+  if(ncol(factor_df_i) == 0) {return(NA)}
+  
+  else{
+    
+    factor_names_i <- names(factor_df_i)
+    
+    purrr::map(.x = factor_names_i, 
+               .f = \(x) {
+                 n_table <- dplyr::count(factor_df_i, !!sym(x))
+                 max(n_table$n) / min(n_table$n)
+               }
+    ) |> unlist()
+  }
+}
+
+metrics_n_ratio_bw_rm <- mod_df_afex |> 
+  dplyr::filter(model_class == "afex_aov") |> 
+  dplyr::rowwise() |> 
+  dplyr::mutate(
+    n_ratio_bw_rm = list(n_ratio_rm(afex_model = model))
+  ) |> 
+  dplyr::select(paper_id, model_id, paper_mod_id, model_class, n_ratio_bw_rm) |> 
+  tidyr::unnest(cols = c(n_ratio_bw_rm)) |> 
+  dplyr::filter(!is.na(n_ratio_bw_rm))
+
+```
+
+#### brms: N ratio - within
+
+```{r}
+set.seed(250623)
+
+brm_metrics_n_ratio_bw_rm <- metrics_n_ratio_bw_rm |> 
+  brms::brm(
+    n_ratio_bw_rm ~ 1 + (1|paper_id), 
+    family = brms::frechet(), 
+    data = _, iter = 3000, 
+    cores = 4
+  )
+
+brm_list$brm_metrics_n_ratio_bw_rm <- brm_metrics_n_ratio_bw_rm
+```
+
+```{r}
+estimates_list$estimates_metrics_n_ratio_bw_rm <- brms_estimates(brmsfit = brm_metrics_n_ratio_bw_rm, exp = TRUE)$brmsfit_estimates
+# brms::pp_check(brm_metrics_n_ratio_bw_rm, ndraws = 100) + 
+#   coord_cartesian(xlim = c(0, 10))
+```
+
+#### quantiles
+
+```{r}
+quantile_list$quantiles_n_ratio_bw_rm <- data.frame(
+  metric = "n_ratio_bw_rm", 
+  value = metrics_n_ratio_bw_rm$n_ratio_bw_rm |> quantile(quantiles)
+)
+```
+
+#### metrics
+
+```{r}
+metrics_list$n_ratio_bw_rm <- metrics_n_ratio_bw_rm
+```
+
+
+### N Ratio - between
+
+Sample size ratio for main effects 
+
+```{r}
+n_for_main_effects <- function(all_preds_classes_i, model_df_int_i){
+
+  # categorical predictors: 
+  factor_preds_i <- names(all_preds_classes_i[which(all_preds_classes_i == "factor")])
+  
+  # iterate over all factors and return counts: 
+  factor_count_list <- purrr::map(
+    .x = factor_preds_i, 
+    .f = ~dplyr::count(model_df_int_i, !!sym(.x))$n
+  )
+  
+  # assign factor names to the counts: 
+  names(factor_count_list) = factor_preds_i
+  
+  return(factor_count_list)
+}
+
+metrics_n_main <- mod_df_lmer |> 
+  dplyr::select(tidyr::all_of(id_vars),  all_preds_classes, model_df_int) |> 
+  dplyr::rowwise() |> 
+  dplyr::mutate(
+    n_for_main_effects = list(n_for_main_effects(all_preds_classes_i = all_preds_classes, model_df_int_i = model_df_int)), 
+    main_effect_names = list(names(n_for_main_effects))
+  ) |> 
+  dplyr::select(paper_id, model_id, n_for_main_effects, main_effect_names) |> 
+  tidyr::unnest(col = c(n_for_main_effects, main_effect_names)) |> 
+  tidyr::unnest(col = n_for_main_effects)
+
+
+metrics_n_ratio <- metrics_n_main |> 
+  dplyr::group_by(paper_id, model_id, main_effect_names) |> 
+  dplyr::mutate(
+    n_ratio = max(n_for_main_effects) / min(n_for_main_effects)
+  ) |> 
+  dplyr::mutate(
+    paper_mod_id = paste0(paper_id, "_", model_id)
+  ) |> 
+  dplyr::filter(
+    !paper_mod_id %in% metrics_n_ratio_bw_rm$paper_mod_id, 
+    !duplicated(paste0(paper_mod_id, main_effect_names))
+  )
+```
+
+#### brms: N ratio - between
+
+```{r eval=FALSE}
+set.seed(250623)
+
+brm_metrics_n_ratio <- metrics_n_ratio |> 
+  brms::brm(
+    n_ratio ~ 1 + (1|paper_id), 
+    family = frechet(), 
+    data = _, iter = 5000, 
+    cores = 4
+    
+  )
+
+brm_list$brm_metrics_n_ratio <- brm_metrics_n_ratio
+```
+
+```{r eval=FALSE}
+estimates_list$estimates_metrics_n_ratio <- brms_estimates(brmsfit = brm_metrics_n_ratio, exp = TRUE)$brmsfit_estimates
+brms::pp_check(brm_metrics_n_ratio, ndraws = 100) + 
+  coord_cartesian(xlim = c(0, 5))
+```
+
+#### quantiles 
+
+```{r}
+quantile_list$quantiles_n_ratio_bw <- data.frame(
+  metric = "n_ratio_bw", 
+  value = metrics_n_ratio$n_ratio |> quantile(quantiles)
+)
+```
+
+#### metrics
+
+```{r}
+metrics_list$n_ratio_bw <- metrics_n_ratio
+```
+
+### p/n ratio
+
+```{r}
+pn <- function(residuals_i, model_i){
+  p = nrow(summary(model_i)$coefficients)-1
+  n = length(residuals_i)
+  p/n
+}
+
+metrics_pn <- mod_df_lmer |> 
+  dplyr::rowwise() |> 
+  dplyr::mutate(
+    pn_ratio = pn(residuals_i = residuals, model_i = model)
+  ) |> 
+  dplyr::select(paper_id, model_id, pn_ratio)
+```
+
+#### brms: p/n ratio
+
+beta more suitable than exp
+
+```{r eval=FALSE}
+set.seed(250623)
+
+brm_metrics_pn <- metrics_pn |> 
+  brms::brm(
+    pn_ratio ~ 1 + (1|paper_id), 
+    family = Beta(), 
+    iter = 4000, 
+    data = _, 
+    cores = 4
+  )
+
+brm_list$brm_metrics_pn <- brm_metrics_pn
+```
+
+```{r eval=FALSE}
+logit_exp <- function(x) exp(x)/(1 + exp(x))
+
+estimates_list$estimates_metrics_pn <- brms_estimates(brmsfit = brm_metrics_pn, FALSE)$brmsfit_estimates |> 
+  logit_exp()
+
+# brms::pp_check(brm_metrics_pn, ndraws = 100) + 
+#   coord_cartesian(xlim = c(0, 0.2))
+```
+
+#### quantiles 
+
+```{r}
+quantile_list$quantiles_pn <- data.frame(
+  metric = "pn", 
+  value = metrics_pn$pn_ratio |> quantile(quantiles)
+)
+```
+
+#### metrics
+
+```{r}
+metrics_list$pn <- metrics_pn
+```
+
+
+## Effect sizes 
+
+```{r}
+extract_key_effect_sizes <- function(mod_i, key_effects_i){
+  as.data.frame(summary(mod_i)$coefficients)[key_effects_i, "Estimate"]
+}
+
+metrics_effect_sizes <- mod_df_lmer |> 
+  dplyr::select(tidyr::all_of(id_vars), all_coeff_names, model, key_effects) |> 
+  dplyr::rowwise() |> 
+  dplyr::mutate(
+    effect_size = list(extract_key_effect_sizes(mod_i = model, key_effects_i = key_effects)), 
+  )
+
+
+metrics_effect_sizes <- metrics_effect_sizes |> 
+  dplyr::select(paper_id, model_id, paper_mod_id, effect_size, key_effects) |> 
+  tidyr::unnest(cols = c(effect_size, key_effects)) |> 
+  dplyr::mutate(
+    abs_effect_size = abs(effect_size), 
+    is_interaction = stringr::str_detect(key_effects, ":")
+  )
+```
+
+```{r}
+extract_all_effects <- function(mod_i){
+  as.data.frame(summary(mod_i)$coefficients)[-1, "Estimate"]
+}
+
+metrics_all_effects <- mod_df_lmer |> 
+  dplyr::select(tidyr::all_of(id_vars), model, all_coeff_names) |> 
+  dplyr::rowwise() |> 
+  dplyr::mutate(
+    all_effect_sizes = list(extract_all_effects(mod_i = model))
+  ) |> 
+  tidyr::unnest(cols = c(all_coeff_names, all_effect_sizes))
+
+metrics_all_effects <- metrics_all_effects |> 
+  dplyr::mutate(
+    abs_effect_size = abs(all_effect_sizes), 
+    is_interaction = stringr::str_detect(all_coeff_names, ":")
+  )
+```
+
+
+
+#### brms: effect size
+
+Notes: 
+
+Default settings return 7 divergent transitions after warm-up.
+Removing the 2nd level (model_id) fixed the problem. 
+
+```{r eval=FALSE}
+set.seed(250623)
+
+brm_metrics_effect_sizes <- metrics_effect_sizes |> 
+  brms::brm(
+    abs_effect_size ~ 1 + (1|paper_id), 
+    family = exponential(), 
+    data = _
+  )
+
+brm_list$brm_metrics_effect_sizes <- brm_metrics_effect_sizes
+```
+
+```{r eval=FALSE}
+estimates_list$estimates_metrics_effect_sizes <- brms_estimates(brm_metrics_effect_sizes, exp = TRUE)$brmsfit_estimates
+
+brms::pp_check(brm_metrics_effect_sizes, ndraws = 100) + 
+  coord_cartesian(xlim = c(0, 2))
+```
+
+
+#### quantiles
+
+```{r}
+es_main <- metrics_effect_sizes |> 
+  dplyr::pull(abs_effect_size)
+
+quantile_list$quantiles_es <- data.frame(
+  metric = "effect_size", 
+  value = quantile(es_main, quantiles)
+)
+```
+
+#### metrics
+
+```{r}
+metrics_list$es <- metrics_effect_sizes |> 
+  dplyr::select(paper_id, model_id, paper_mod_id, abs_effect_size)
+```
+
+
+## Assumption metrics 
+
+### Skewness & Kurtosis 
+
+```{r}
+metrics_norm <- mod_df_afex |> 
+  dplyr::select(tidyr::all_of(id_vars), residuals) |> 
+  dplyr::rowwise() |> 
+  dplyr::mutate(
+    skewness = moments::skewness(residuals), 
+    abs_skewness = abs(skewness),
+    kurtosis = moments::kurtosis(residuals), 
+    excess_kurtosis = kurtosis - 3, 
+  ) 
+```
+
+#### brms: skewness
+
+```{r eval=FALSE}
+set.seed(250623)
+
+brm_metrics_skew <- metrics_norm |> 
+  brms::brm(
+    abs_skewness ~ 1 + (1|paper_id), 
+    family = exponential(), 
+    data = _
+  )
+
+brm_list$brm_metrics_skew <- brm_metrics_skew
+```
+
+```{r eval=FALSE}
+estimates_list$estimates_metrics_skew <- brms_estimates(brm_metrics_skew, exp = TRUE)$brmsfit_estimates
+#brms::pp_check(brm_metrics_skew, ndraws = 100)
+```
+
+#### quantiles 
+
+```{r}
+quantile_list$quantiles_skew <- data.frame(
+  metric = "abs_skewness", 
+  value = quantile(metrics_norm$abs_skewness, quantiles)
+)
+```
+
+#### metrics 
+
+```{r}
+metrics_list$skew <- metrics_norm |> 
+  dplyr::select(all_of(id_vars), skewness, abs_skewness)
+```
+
+
+#### brms: excess kurtosis 
+
+```{r}
+metrics_norm <- metrics_norm |> 
+  dplyr::mutate(
+    excess_kurtosis_shift = excess_kurtosis + 2
+  )
+```
+
+```{r eval=FALSE}
+set.seed(250623)
+
+brm_metrics_excess_kurt_simple <- metrics_norm |> 
+  brms::brm(
+    excess_kurtosis_shift ~ 1 + (1|paper_id), 
+    family = brms::frechet(), 
+    data = _
+    cores = 4
+  )
+
+brm_list$brm_metrics_excess_kurt_simple <- brm_metrics_excess_kurt_simple
+```
+
+```{r eval=FALSE}
+estimates_list$brm_metrics_excess_kurt_simple <- brms_estimates(brm_metrics_excess_kurt_simple, exp = TRUE)$brmsfit_estimates-2
+brms::pp_check(brm_metrics_excess_kurt_simple, ndraws = 100)
+```
+
+#### quantiles 
+
+```{r}
+quantile_list$quantiles_kurt <- data.frame(
+  metric = "excess_kurtosis", 
+  value = quantile(metrics_norm$excess_kurtosis, quantiles)
+)
+```
+
+#### metrics
+
+```{r}
+metrics_list$kurt <- metrics_norm |> 
+  dplyr::select(all_of(id_vars), excess_kurtosis)
+```
+
+
+
+### Number of modes 
+
+> If a value occurs with at least 80% frequency of the true mode and the distance between the two is more than 2/3rds of a standard deviation, then it is counted as an additional mode (Micceri, 1989).
+
+```{r count-modes-fun}
+count_modes <- function(x){
+  
+  # get frequencies of unique values: 
+  binned_resid <- round(x, digits = 1) |> 
+    tibble::as_tibble() |> 
+    dplyr::group_by(value) |> 
+    dplyr::summarise(
+      n = dplyr::n()
+    ) |> 
+    dplyr::ungroup()
+  
+  # calculate mode as the most freq value: 
+  mode_tib <- binned_resid |>  dplyr::filter(n == max(n))
+  true_mode <- mode_tib$value[1]
+  true_mod_n <- mode_tib$n[1]
+  
+  # 2/3rds of sd of the residuals for calculating distance from true mode: 
+  
+  sd_x <- sd(x)
+  sd_dist = sd_x/3*2
+  
+  # calculate relative frequency of potential alternative models: 
+  binned_resid <- binned_resid |> 
+    dplyr::mutate(
+      rel_freq = n / true_mod_n, 
+      far_enough = (value < (true_mode - sd_dist)) | (value > (true_mode + sd_dist)), 
+      is_alt_mode = (rel_freq >= 0.8) & far_enough
+    )
+  
+  # count alternative modes plus the true mode: 
+  n_modes <- sum(binned_resid$is_alt_mode) + 1
+  
+  return(n_modes)
+}
+
+
+
+metrics_n_modes <- mod_df_afex |> 
+  dplyr::select(tidyr::all_of(id_vars), residuals) |> 
+  dplyr::rowwise() |> 
+  dplyr::mutate(
+    n_modes = count_modes(residuals)
+  )
+```
+
+#### brms: modes
+
+```{r eval=FALSE}
+set.seed(250623)
+
+brm_metrics_n_modes <- metrics_n_modes |> 
+  brms::brm(
+    n_modes ~ 1 + (1|paper_id), 
+    family = poisson, 
+    control = list(adapt_delta = 0.9),
+    data = _
+  )
+
+brm_list$brm_metrics_n_modes <- brm_metrics_n_modes
+```
+
+```{r eval=FALSE}
+estimates_list$estimates_metrics_n_modes <- brms_estimates(brm_metrics_n_modes, exp = TRUE)$brmsfit_estimates
+brms::pp_check(brm_metrics_n_modes)
+```
+
+#### quantiles
+
+```{r}
+quantile_list$quantiles_modes <- data.frame(
+  metric = "n_modes", 
+  value = quantile(metrics_n_modes$n_modes, quantiles)
+)
+```
+
+#### metrics
+
+```{r}
+metrics_list$mode <- metrics_n_modes |> 
+  dplyr::select(paper_id, model_id, paper_mod_id, n_modes)
+```
+
+
+### Proportions of residuals above cut-offs 
+
+Proportion of residuals above the 1.96, 2.58, and 3.29 z-score cut-off points
+
+```{r z-prop-fun}
+z_prop <- function(x, z){(length(which(abs(x) >= z))) / length(!is.na(x))}
+
+
+metrics_outliers <- mod_df_afex |> 
+  dplyr::select(tidyr::all_of(id_vars), residuals) |> 
+  dplyr::rowwise() |> 
+  dplyr::mutate(
+    resid_prop_1.96 = z_prop(residuals, 1.96),
+    resid_prop_2.58 = z_prop(residuals, 2.58),
+    resid_prop_3.29 = z_prop(residuals, 3.29)
+  )
+```
+
+#### brms: 1.96
+
+```{r eval=FALSE}
+set.seed(250623)
+
+brm_metrics_outliers_1.96 <- metrics_outliers |> 
+  brms::brm(
+    formula = resid_prop_1.96 ~ 1 + (1|paper_id),
+    data = _,
+    family = brms::zero_inflated_beta(), 
+    cores = 4
+  )
+
+brm_list$brm_metrics_outliers_1.96 <- brm_metrics_outliers_1.96
+```
+
+
+```{r eval=FALSE}
+estimates_list$estimates_metrics_outliers_1.96 <- brms_estimates(brm_metrics_outliers_1.96)$brmsfit_estimates |> logit_exp()
+estimates_list$estimates_metrics_outliers_1.96_zi <- brms_estimates(brm_metrics_outliers_1.96, param = "zi")$brmsfit_estimates #|> logit_exp()
+#brms::pp_check(brm_metrics_outliers_1.96, ndraws = 100) 
+```
+
+#### quantiles 
+
+```{r}
+quantile_list$quantiles_z_1.96 <- data.frame(
+  metric = "z_1.96", 
+  value = quantile(metrics_outliers$resid_prop_1.96, quantiles)
+)
+```
+
+#### metrics
+
+```{r}
+metrics_list$outliers_1.96 <- metrics_outliers |> 
+  dplyr::select(all_of(id_vars), resid_prop_1.96)
+```
+
+
+#### brms: 2.58
+
+```{r eval=FALSE}
+set.seed(250623)
+
+brm_metrics_outliers_2.58 <- metrics_outliers |> 
+  brms::brm(
+    formula = resid_prop_2.58 ~ 1 + (1|paper_id),
+    data = _,
+    family = brms::zero_inflated_beta
+  )
+
+brm_list$brm_metrics_outliers_2.58 <- brm_metrics_outliers_2.58
+```
+
+
+```{r eval=FALSE}
+estimates_list$estimates_metrics_outliers_2.58 <- brms_estimates(brm_metrics_outliers_2.58)$brmsfit_estimates |> logit_exp()
+estimates_list$estimates_metrics_outliers_2.58_zi <- brms_estimates(brm_metrics_outliers_2.58, param = "zi")$brmsfit_estimates #|> logit_exp()
+```
+
+
+#### quantiles 
+
+```{r}
+quantile_list$quantiles_z_2.58 <- data.frame(
+  metric = "z_2.58", 
+  value = quantile(metrics_outliers$resid_prop_2.58, quantiles)
+)
+```
+
+#### metrics 
+
+```{r}
+metrics_list$outliers_2.58 <- metrics_outliers |> 
+  dplyr::select(all_of(id_vars), resid_prop_2.58)
+```
+
+
+#### brms: 3.29
+
+```{r eval=FALSE}
+set.seed(250623)
+
+brm_metrics_outliers_3.29 <- metrics_outliers |> 
+  brms::brm(
+    formula = resid_prop_3.29 ~ 1 + (1|paper_id),
+    data = _,
+    family = brms::zero_inflated_beta, 
+    cores = 4
+  )
+
+
+brm_list$brm_metrics_outliers_3.29 <- brm_metrics_outliers_3.29
+```
+
+
+```{r eval=FALSE}
+estimates_list$estimates_metrics_outliers_3.29 <- brms_estimates(brm_metrics_outliers_3.29)$brmsfit_estimates |> logit_exp()
+estimates_list$estimates_metrics_outliers_3.29_zi <- brms_estimates(brm_metrics_outliers_3.29, param = "zi")$brmsfit_estimates #|> logit_exp()
+brms::pp_check(brm_metrics_outliers_3.29, ndraws = 100) 
+```
+
+#### quantiles 
+
+```{r}
+quantile_list$quantiles_z_3.29 <- data.frame(
+  metric = "z_3.29", 
+  value = quantile(metrics_outliers$resid_prop_3.29, quantiles)
+)
+```
+
+#### metrics 
+
+```{r}
+metrics_list$outliers_3.29 <- metrics_outliers |> 
+  dplyr::select(all_of(id_vars), resid_prop_3.29)
+```
+
+
+### OUTSTANDING: Influence stats 
+
+```{r}
+metrics_influence <- mod_df_lmer |> 
+  dplyr::select(tidyr::all_of(id_vars), model) |> 
+  dplyr::rowwise() |> 
+  dplyr::mutate(
+    inf_cook = list(cooks.distance(model)), 
+    inf_leverage = list(hatvalues(model))
+  ) 
+```
+
+```{r}
+metrics_influence_cook <- metrics_influence |>
+  dplyr::select(paper_mod_id, inf_cook) |>
+  tidyr::unnest(inf_cook) 
+
+
+metrics_influence_leverage <- metrics_influence |>
+  dplyr::select(paper_mod_id, inf_leverage) |>
+  tidyr::unnest(inf_leverage) 
+
+```
+
+
+### Heteroscedasticity
+
+```{r}
+quantile_smoother	 <- function(y, x, 
+                               prop_overlap = 0.75, # how much can the windows overlap
+                               window_prop = 0.05, # what proportion of the sample size should each rolling window use?
+                               tau = .95, # quantile 
+                               fr = 1, 
+                               window_alignment = c("center"), #
+                               window_function = function(x) {quantile(x, tau)}
+)
+{
+  
+  sample_size <- length(y)
+  window_size <- ceiling(sample_size*window_prop)
+  
+  window_distance <- window_size * (1-prop_overlap)
+  
+  
+  # creating our new X and Y
+  zoo.Y <- zoo(x = y, order.by = x)
+  #zoo.X <- attributes(zoo.Y)$index
+  
+  # center align 
+  new.Y <- rollapply(zoo.Y,
+                     width = window_size, 
+                     FUN = window_function,
+                     by = window_distance,
+                     align = "center" 
+  )
+  
+  new.X <- attributes(new.Y)$index
+  new.Y <- as.numeric(new.Y) 
+  
+  
+  # loess
+  # new.Y.mod <- loess(new.Y~new.X, family = "symmetric")
+  # new.Y.loess <- new.Y.mod$fitted
+  
+  
+  # # lowess
+  new.Y.mod <- lowess(new.Y~new.X)
+  new.Y.loess <- new.Y.mod$y
+  
+  
+  return(list(
+    x = new.X, 
+    y.loess = new.Y.loess
+  ))
+}
+
+quantreg_interval <- function(mod,
+                              lower_quant = .025,
+                              upper_quant = .975,
+
+                              window_prop = 0.05,
+                              prop_overlap = 0.75
+){
+
+
+  q_lower <- quantile_smoother(
+    y = z(mod$residuals),
+    x = z(mod$fitted.values),
+    prop_overlap = prop_overlap,
+    window_prop = window_prop,
+    tau = lower_quant
+  )
+
+  q_upper <- quantile_smoother(
+    y = z(mod$residuals),
+    x = z(mod$fitted.values),
+    prop_overlap = prop_overlap,
+    window_prop = window_prop,
+    tau = upper_quant
+  )
+
+  quantreg_interval <- data.frame(
+    x = q_lower$x,
+    q_lower_y_loess = q_lower$y.loess,
+    q_upper_y_loess = q_upper$y.loess,
+    loess_wide = q_upper$y.loess - q_lower$y.loess
+  )
+
+  return(quantreg_interval)
+}
+
+quantreg_mod_coefs <- function(quantreg_mod){
+  quantreg_mod <- quantreg_mod$coefficients |> 
+    t() |> 
+    as.data.frame()
+  
+  names(quantreg_mod) <- paste0("quantreg_", names(quantreg_mod))
+  
+  return(quantreg_mod)
+}
+
+```
+
+##### Variance ratio (main effects)
+
+```{r}
+var_ratio_main <- function(model_df_int_i, factor_name){
+  
+  var_sum <- model_df_int_i |> 
+    dplyr::group_by(!!sym(factor_name)) |> 
+    dplyr::summarise(var = var(residuals, na.rm = TRUE)) |> 
+    dplyr::filter(var > 0) # for cases where coded as factor but category omitted from the model
+  
+   vr = max(var_sum$var, na.rm = TRUE) / min(var_sum$var, na.rm = TRUE)
+  
+   return(vr)
+  
+}
+
+vr_for_main_effects <- function(all_preds_classes_i, model_df_int_i){
+
+  # catgorical predictors: 
+  factor_preds_i <- names(all_preds_classes_i[which(all_preds_classes_i == "factor")])
+  
+  
+  # iterate over all factors and return variance ratios: 
+  factor_vr_list <- purrr::map(
+    .x = factor_preds_i, 
+    .f = ~var_ratio_main(model_df_int_i = model_df_int_i, factor_name = .x)
+  )
+  
+  # assign factor names to the VRs: 
+  names(factor_vr_list) = factor_preds_i
+  
+  return(factor_vr_list)
+}
+
+
+metrics_vr_main <- mod_df_lmer |> 
+  dplyr::select(tidyr::all_of(id_vars), all_preds_classes, model_df_int) |> 
+  dplyr::rowwise() |> 
+  dplyr::mutate(
+    vr_for_main_effects = list(vr_for_main_effects(all_preds_classes_i = all_preds_classes, 
+                                                   model_df_int_i = model_df_int)), 
+    main_effect_names = list(names(vr_for_main_effects))
+  ) |> 
+  dplyr::select(paper_id, model_id, vr_for_main_effects, main_effect_names) |> 
+  tidyr::unnest(col = c(vr_for_main_effects, main_effect_names)) |> 
+  tidyr::unnest(col = vr_for_main_effects)
+
+```
+
+
+##### Variance ratio (interactions)
+
+```{r message=FALSE, warning=FALSE}
+var_ratio_int <- function(model_df_int_i, interactions_wo_names_i){
+  
+  var_sum <- model_df_int_i |> 
+    dplyr::group_by(dplyr::across(dplyr::all_of(interactions_wo_names_i))) |> 
+    dplyr::summarise(var = var(residuals, na.rm = TRUE)) |> 
+    dplyr::filter(var > 0) # for cases where coded as factor but category omitted from the model
+  
+  vr = max(var_sum$var, na.rm = TRUE) / min(var_sum$var, na.rm = TRUE)
+  
+  return(vr)
+  
+}
+
+vr_for_int_effects <- function(interacting_preds_classes_i, model_df_int_i){
+
+  # select interactions that are only categorical
+  interacting_factors_i <- purrr::keep(.x = interacting_preds_classes_i,.p =  ~all(names(.) == "factor"))
+  
+  # remove names, otherwise weird shit happens when grouping programmatically: 
+  interactions_wo_names_i <- purrr::map(.x = interacting_factors_i, 
+                                        .f = function(x){
+                                          names(x) <- NULL
+                                          return(x)
+                                        }
+  )
+  
+  # VR across interactions: 
+  interaction_vrs <- purrr::map(
+    .x = interactions_wo_names_i, 
+    .f = ~var_ratio_int(model_df_int_i = model_df_int_i, interactions_wo_names_i = .x)
+  )
+  
+  # assign names: 
+  names(interaction_vrs) <- purrr::map(interacting_factors_i, ~paste0(.x, collapse = "_X_"))
+  
+  return(interaction_vrs)
+  
+}
+
+metrics_vr_int <- mod_df_lmer |> 
+  dplyr::select(tidyr::all_of(id_vars), interacting_preds_classes, model_df_int) |> 
+  dplyr::rowwise() |> 
+  dplyr::mutate(
+    vr_for_int_effects = list(vr_for_int_effects(interacting_preds_classes_i = interacting_preds_classes, 
+                                                 model_df_int_i = model_df_int)), 
+    int_effect_names = list(names(vr_for_int_effects))
+  ) |> 
+  dplyr::select(paper_id, model_id, vr_for_int_effects, int_effect_names) |> 
+  tidyr::unnest(col = c(vr_for_int_effects, int_effect_names)) |> 
+  tidyr::unnest(col = vr_for_int_effects)
+```
+
+
+```{r}
+metrics_vr_main_merge <- metrics_vr_main |> 
+  dplyr::mutate(vr = vr_for_main_effects, effect_name = main_effect_names) |> 
+  dplyr::select(-vr_for_main_effects, -main_effect_names) |> 
+  dplyr::mutate(origin = "metrics_vr_main")
+
+metrics_vr_int_merge <- metrics_vr_int |> 
+  dplyr::mutate(vr = vr_for_int_effects, effect_name = int_effect_names) |> 
+  dplyr::select(-vr_for_int_effects, -int_effect_names) |> 
+  dplyr::mutate(origin = "metrics_vr_int")
+
+metrics_vr <- dplyr::bind_rows(metrics_vr_main_merge, metrics_vr_int_merge)
+```
+
+
+
+###### brms: vr
+
+```{r eval=FALSE}
+set.seed(250623)
+
+brm_metrics_vr <- metrics_vr |> 
+  brms::brm(
+    vr ~ 1 + (1|paper_id/model_id), 
+    family = brms::frechet(),
+    data = _,
+    cores = 4
+  )
+
+brm_list$brm_metrics_vr <- brm_metrics_vr
+```
+
+```{r eval=FALSE}
+estimates_list$estimates_metrics_vr <- brms_estimates(brm_metrics_vr, exp = TRUE)$brmsfit_estimates
+# brms::pp_check(brm_metrics_vr, ndraws = 100) + 
+#   coord_cartesian(xlim = c(0, 50))
+```
+
+###### quantiles
+
+```{r}
+quantile_list$quantiles_vr <- data.frame(
+  metric = "vr", 
+  value = quantile(metrics_vr$vr, quantiles)
+)
+```
+
+###### metrics
+
+```{r}
+metrics_list$vr <- metrics_vr
+```
+
+
+##### Heteroscedasticity (continuous + total, incl. interactions)
+
+```{r}
+quantreg_interval_pred <- function(model_df_int_i,
+                                   predictor, 
+                                   lower_quant = .025,
+                                   upper_quant = .975,
+                                   window_prop = 0.1,
+                                   prop_overlap = 0.75
+){
+
+  q_lower <- quantile_smoother(
+    y = model_df_int_i$residuals,
+    x = model_df_int_i[[predictor]],
+    prop_overlap = prop_overlap,
+    window_prop = window_prop,
+    tau = lower_quant
+  )
+
+  q_upper <- quantile_smoother(
+    y = model_df_int_i$residuals,
+    x = model_df_int_i[[predictor]],
+    prop_overlap = prop_overlap,
+    window_prop = window_prop,
+    tau = upper_quant
+  )
+
+  quantreg_interval <- data.frame(
+    x = q_lower$x,
+    q_lower_y_loess = q_lower$y.loess,
+    q_upper_y_loess = q_upper$y.loess,
+    loess_wide = q_upper$y.loess - q_lower$y.loess
+  )
+
+  return(quantreg_interval)
+}
+
+get_quantreg_preds <- function(model_df_int_i, outcome_i){
+  
+  numeric_preds_i <- model_df_int_i |> 
+    dplyr::select(-c(all_of(outcome_i), fitted, residuals)) |> 
+    dplyr::select(where(is.numeric)) |> 
+    colnames()
+  
+  if(length(numeric_preds_i) == 0){
+    return(
+      NA
+    )
+  }
+
+  numeric_preds_i <- c("fitted", numeric_preds_i)
+  
+  quantreg_list <- suppressWarnings(
+    purrr::map(
+      .x = numeric_preds_i, 
+      .f = ~quantreg_interval_pred(
+        model_df_int_i = model_df_int_i, 
+        lower_quant = 0.025, 
+        upper_quant = 0.975, 
+        predictor = .x
+      )
+    )
+  )
+  
+  quantreg_mod_list <- purrr::map(
+    .x = quantreg_list, 
+    .f = ~lm(loess_wide ~ x + I(x^2) + I(x^3) + I(x^4), data = .x)
+  )
+  
+  quantreg_coeff_df <- purrr::map(
+    .x = quantreg_mod_list, 
+    .f = quantreg_mod_coefs
+  ) |> 
+    purrr::reduce(.x = _, .f = rbind.data.frame) |> 
+    dplyr::select(-`quantreg_(Intercept)`) |> 
+    dplyr::mutate(predictor = numeric_preds_i)
+  
+  return(quantreg_coeff_df)
+}
+
+metrics_quantreg_numeric <- mod_df_lmer |> 
+  dplyr::select(tidyr::all_of(id_vars), model, id_var_name, all_preds_classes, model_df_int, outcome_name) |> 
+  dplyr::rowwise() |> 
+  dplyr::mutate(
+    quantreg_preds = list(get_quantreg_preds(model_df_int_i = model_df_int, outcome_i = outcome_name))
+  ) |> 
+  dplyr::filter(length(quantreg_preds) > 1) |> 
+  dplyr::select(paper_id, model_id, all_preds_classes, id_var_name, quantreg_preds) |> 
+  tidyr::unnest(quantreg_preds) 
+
+# remove ID variables:
+metrics_quantreg_numeric <- metrics_quantreg_numeric |> 
+  dplyr::filter(is.na(id_var_name) |( predictor != id_var_name)) |> 
+  dplyr::filter(predictor != "(weights)")
+
+# remove cases where "fitted" was computed for factorial only models:
+metrics_quantreg_numeric <- metrics_quantreg_numeric |> 
+  dplyr::rowwise() |> 
+  dplyr::mutate(
+    all_preds_factors = sum(all_preds_classes == "factor")
+  ) |> 
+  dplyr::filter(length(all_preds_classes) != all_preds_factors)
+
+
+metrics_quantreg_numeric <- metrics_quantreg_numeric |> 
+  dplyr::select(-all_preds_classes, -all_preds_factors) |> 
+  dplyr::mutate(
+    processing_route = "numeric_only"
+  )
+```
+
+##### Heteroscedasticity (mixed interactions)
+
+```{r eval=FALSE}
+mod_df_lmer |> 
+  dplyr::select(paper_mod_id, interaction_classes) |> 
+  tidyr::unnest(interaction_classes) |> 
+  tidyr::unnest(interaction_classes) |> 
+  dplyr::filter(interaction_classes == "mixed") |> 
+  count(paper_mod_id)
+```
+
+factor x numeric only: 
+
+p01392_1-2
+u00215_1,2,4
+u01190_1-6,10
+u02554_1-4
+u03812_1-2
+u05525_4-6
+
+factor x factor x numeric: 
+
+u00215_3
+u01353_1-2
+u02984_11-12
+u05525_1-3
+
+factor x numeric x numeric: 
+
+p01192_1-4
+
+```{r}
+fxn_ids_only <- 
+  c(
+    paste0("p01392_", 1:2), 
+    paste0("u00215_", c(1,2,4)),
+    paste0("u01190_", c(1:6, 10)),
+    paste0("u02554_", 1:4),
+    paste0("u03812_", 1:2),
+    paste0("u05525_", 4:6)
+  )
+
+fxfxn_ids <- 
+  c(
+    "u00215_3", 
+    paste0("u01353_", 1:2), 
+    paste0("u02984_", 11:12), 
+    paste0("u05525_", 1:2)
+  )
+
+fxnxn_ids <- paste0("p01192_", 1:4)
+```
+
+fxn_ids_only: 
+
+```{r warning=FALSE}
+quantreg_grouped <- function(interacting_preds_classes_ij, model_df_int_i){
+
+  #interacting_preds_classes_ij <- interacting_preds_classes_i[[1]]
+  
+  numeric_pred_i <- interacting_preds_classes_ij[which(names(interacting_preds_classes_ij) == "numeric")]
+  factor_pred_i <- interacting_preds_classes_ij[which(names(interacting_preds_classes_ij) == "factor")]
+  
+  model_df_int_i_split_list <- model_df_int_i |> 
+    #dplyr::group_by(!!rlang::ensym(factor_pred_i)) |> 
+    dplyr::group_by(across(all_of(c(factor_pred_i)))) |>
+    dplyr::group_split(.keep = TRUE)
+  
+  names(factor_pred_i) <- NULL
+  
+  quanreg_group_list <- purrr::map(
+    .x = model_df_int_i_split_list, 
+    .f = ~quantreg_interval_pred(model_df_int_i = .x, predictor = numeric_pred_i)
+  )
+  
+  quantreg_mod_list <- purrr::map(
+    .x = quanreg_group_list, 
+    .f = ~lm(loess_wide ~ x + I(x^2) + I(x^3) + I(x^4), data = .x)
+  )
+  
+  quantreg_coeff_df <- purrr::map(
+    .x = quantreg_mod_list, 
+    .f = quantreg_mod_coefs
+  ) |> 
+    purrr::reduce(.x = _, .f = rbind.data.frame) |> 
+    dplyr::select(-`quantreg_(Intercept)`) 
+  
+  quantreg_coeff_df <- quantreg_coeff_df|> 
+    dplyr::mutate(predictor = paste0(paste0(numeric_pred_i, "_X_", factor_pred_i), 1:nrow(quantreg_coeff_df)))
+  
+  return(quantreg_coeff_df)
+  
+}
+
+fxn_quantreg <- function(interacting_preds_classes_i, model_df_int_i){
+  
+  purrr::map(
+    .x = interacting_preds_classes_i, 
+    .f = ~quantreg_grouped(interacting_preds_classes_ij = .x, model_df_int_i = model_df_int_i)
+  )
+  
+}
+
+
+
+metrics_quantreg_fxn <- mod_df_lmer |>
+  dplyr::filter(paper_mod_id %in% fxn_ids_only) |> 
+  dplyr::rowwise() |> 
+  dplyr::mutate(
+    quantreg_preds_fxn = list(fxn_quantreg(interacting_preds_classes_i = interacting_preds_classes, 
+                                           model_df_int_i = model_df_int))
+  ) |> 
+  dplyr::select(paper_id, model_id, id_var_name, quantreg_preds_fxn) |> 
+  tidyr::unnest(quantreg_preds_fxn) |> 
+  tidyr::unnest(quantreg_preds_fxn) |>
+  dplyr::mutate(
+    processing_route = "factor_x_numeric"
+  )
+
+```
+
+
+fxfxn_ids: 
+
+```{r warning = FALSE}
+quantreg_grouped_fxfxn <- function(interacting_preds_classes_ij, model_df_int_i){
+
+#interacting_preds_classes_ij <- interacting_preds_classes_i_fxfxn[[1]]
+
+  numeric_pred_i <- interacting_preds_classes_ij[which(names(interacting_preds_classes_ij) == "numeric")]
+  factor_pred_i <- interacting_preds_classes_ij[which(names(interacting_preds_classes_ij) == "factor")]
+  
+  names(factor_pred_i) <- NULL
+  
+  model_df_int_i_split_list <- model_df_int_i |> 
+    dplyr::group_by(across(all_of(factor_pred_i))) |>
+    dplyr::group_split(.keep = TRUE)
+  
+  quanreg_group_list <- purrr::map(
+    .x = model_df_int_i_split_list, 
+    .f = ~quantreg_interval_pred(model_df_int_i = .x, predictor = numeric_pred_i)
+  )
+  
+  quantreg_mod_list <- purrr::map(
+    .x = quanreg_group_list, 
+    .f = ~lm(loess_wide ~ x + I(x^2) + I(x^3) + I(x^4), data = .x)
+  )
+  
+  quantreg_coeff_df <- purrr::map(
+    .x = quantreg_mod_list, 
+    .f = quantreg_mod_coefs
+  ) |> 
+    purrr::reduce(.x = _, .f = rbind.data.frame) |> 
+    dplyr::select(-`quantreg_(Intercept)`) 
+  
+  quantreg_coeff_df <- quantreg_coeff_df|> 
+    dplyr::mutate(
+      predictor = paste0(paste0(numeric_pred_i, "_X_", paste0(factor_pred_i, collapse = "_x_")), 1:nrow(quantreg_coeff_df)))
+
+  return(quantreg_coeff_df)
+
+}
+
+fxfxn_quantreg <- function(interacting_preds_classes_i, model_df_int_i){
+  
+  purrr::map(
+    .x = interacting_preds_classes_i, 
+    .f = ~quantreg_grouped_fxfxn(interacting_preds_classes_ij = .x, model_df_int_i = model_df_int_i)
+  )
+  
+}
+
+
+fxfxn_quantreg_full <- function(model_df_int_i, interacting_preds_classes_i){
+  
+  # identify fxn_only: 
+  
+  interacting_preds_classes_i_fxn_only <- 
+    interacting_preds_classes_i[sapply(
+      interacting_preds_classes_i, function(x) length(names(x)) == 2 & "numeric" %in% names(x) & "factor" %in% names(x)
+    )]
+  
+  # apply grouped quantreg to fxn_only interactions: 
+  
+  quantreg_coeff_df_fxn <- fxn_quantreg(
+    interacting_preds_classes_i = interacting_preds_classes_i_fxn_only, 
+    model_df_int_i = model_df_int_i) |> 
+    purrr::reduce(.x = _, rbind.data.frame)
+  
+  # identify fxfxn: 
+  
+  interacting_preds_classes_i_fxfxn <- interacting_preds_classes_i[sapply(interacting_preds_classes_i, function(x) {
+    factor_count <- sum(names(x) == "factor")
+    numeric_count <- sum(names(x) == "numeric")
+    factor_count >= 2 & numeric_count >= 1
+  })]
+  
+  # apply grouped quantreg: 
+  quantreg_coeff_df_fxfxn <- 
+    fxfxn_quantreg(interacting_preds_classes_i = interacting_preds_classes_i_fxfxn, model_df_int_i = model_df_int_i)
+  
+  # merge quanregs: 
+  dplyr::bind_rows(quantreg_coeff_df_fxn, quantreg_coeff_df_fxfxn)
+  
+}
+
+metrics_quantreg_fxfxn <- mod_df_lmer |> 
+  dplyr::filter(paper_mod_id %in% fxfxn_ids) |> 
+  dplyr::rowwise() |> 
+  dplyr::mutate(
+    quantreg_preds_fxfxn = list(fxfxn_quantreg_full(model_df_int_i = model_df_int,  
+                                                    interacting_preds_classes_i = interacting_preds_classes))
+  ) |> 
+  dplyr::select(paper_id, model_id, id_var_name, quantreg_preds_fxfxn) |> 
+  tidyr::unnest(quantreg_preds_fxfxn) |> 
+  dplyr::mutate(
+    processing_route = "factor_x_factor_x_numeric"
+  )
+```
+
+fxnxn_ids:
+
+```{r warning = FALSE}
+quantreg_grouped_fxnxn <- function(model_df_int_i, interacting_preds_classes_ij){
+  
+  numeric_pred_i <- interacting_preds_classes_ij[which(names(interacting_preds_classes_ij) == "numeric")]
+  factor_pred_i <- interacting_preds_classes_ij[which(names(interacting_preds_classes_ij) == "factor")]
+  
+  names(factor_pred_i) <- NULL
+  
+  numeric_int_i <- paste0(numeric_pred_i, collapse = "_X_")
+  
+  model_df_int_i_split_list <- model_df_int_i |> 
+    dplyr::group_by(across(all_of(factor_pred_i))) |>
+    dplyr::group_split(.keep = TRUE)
+  
+  quanreg_group_list <- purrr::map(
+    .x = model_df_int_i_split_list, 
+    .f = ~quantreg_interval_pred(model_df_int_i = .x, predictor = numeric_int_i)
+  )
+  
+  quantreg_mod_list <- purrr::map(
+    .x = quanreg_group_list, 
+    .f = ~lm(loess_wide ~ x + I(x^2) + I(x^3) + I(x^4), data = .x)
+  )
+  
+  quantreg_coeff_df <- purrr::map(
+    .x = quantreg_mod_list, 
+    .f = quantreg_mod_coefs
+  ) |> 
+    purrr::reduce(.x = _, .f = rbind.data.frame) |> 
+    dplyr::select(-`quantreg_(Intercept)`) 
+  
+  quantreg_coeff_df <- quantreg_coeff_df|> 
+    dplyr::mutate(
+      predictor = paste0(paste0(numeric_int_i, "_X_", paste0(factor_pred_i, collapse = "_x_")), 1:nrow(quantreg_coeff_df)))
+  
+  quantreg_coeff_df
+  
+}
+
+
+fxnxn_quantreg <- function(interacting_preds_classes_i, model_df_int_i){
+  
+  purrr::map(
+    .x = interacting_preds_classes_i, 
+    .f = ~quantreg_grouped_fxnxn(interacting_preds_classes_ij = .x, model_df_int_i = model_df_int_i)
+  )
+  
+}
+
+
+fxnxn_quantreg_full <- function(model_df_int_i, interacting_preds_classes_i){
+  
+  # deal with fxn:
+  
+  interacting_preds_classes_i_fxn_only <- 
+    interacting_preds_classes_i[sapply(
+      interacting_preds_classes_i, function(x) length(names(x)) == 2 & "numeric" %in% names(x) & "factor" %in% names(x)
+    )]
+  
+  
+  quantreg_coeff_df_fxn <- fxn_quantreg(
+    interacting_preds_classes_i = interacting_preds_classes_i_fxn_only, 
+    model_df_int_i = model_df_int_i) |> 
+    purrr::reduce(.x = _, rbind.data.frame)
+  
+  
+  # identify fxnxn: 
+  
+  interacting_preds_classes_i_fxnxn <- interacting_preds_classes_i[sapply(interacting_preds_classes_i, function(x) {
+    factor_count <- sum(names(x) == "factor")
+    numeric_count <- sum(names(x) == "numeric")
+    factor_count >= 1 & numeric_count >= 2
+  })]
+  
+  #interacting_preds_classes_ij <- interacting_preds_classes_i_fxnxn[[1]]
+  
+  quantreg_coeff_df_fxnxn <- 
+    fxnxn_quantreg(interacting_preds_classes_i = interacting_preds_classes_i_fxnxn, model_df_int_i = model_df_int_i)
+  
+  # merge quanregs: 
+  dplyr::bind_rows(quantreg_coeff_df_fxn, quantreg_coeff_df_fxnxn)
+  
+}
+
+metrics_quantreg_fxnxn <- mod_df_lmer |> 
+  dplyr::filter(paper_mod_id %in% fxnxn_ids) |> 
+  dplyr::rowwise() |> 
+  dplyr::mutate(
+    quantreg_preds_fxnxn = list(fxnxn_quantreg_full(model_df_int_i = model_df_int,  
+                                                    interacting_preds_classes_i = interacting_preds_classes))
+  ) |> 
+  dplyr::select(paper_id, model_id, id_var_name, quantreg_preds_fxnxn) |> 
+  tidyr::unnest(quantreg_preds_fxnxn) |> 
+  dplyr::mutate(
+    processing_route = "factor_x_numeric_x_numeric"
+  )
+```
+
+Merge processing routes: 
+
+```{r}
+metrics_quantreg <- dplyr::bind_rows(
+  metrics_quantreg_numeric, 
+  metrics_quantreg_fxn, 
+  metrics_quantreg_fxfxn, 
+  metrics_quantreg_fxnxn
+) |> 
+  dplyr::arrange(paper_id, model_id)
+```
+
+```{r}
+metrics_quantreg <- metrics_quantreg |> 
+  dplyr::mutate(
+    abs_quantreg_x = abs(quantreg_x), 
+    abs_quantreg_x_1 = abs(quantreg_x) + 0.0000001, 
+    quantreg_x2 = `quantreg_I(x^2)`, # renaming because brms doesn't like this name format
+    quantreg_x3 = `quantreg_I(x^3)`,
+    quantreg_x4 = `quantreg_I(x^4)`,
+    abs_quantreg_x2_1 = abs(quantreg_x2) + 0.0000001,
+    quantreg_x2_sign = ifelse(quantreg_x2 >= 0, "pos", "neg")
+  ) |> 
+  dplyr::ungroup()
+
+```
+
+###### brms: x^1
+
+```{r eval=FALSE}
+set.seed(250623)
+
+brm_metrics_quantreg_x1 <- metrics_quantreg |> 
+  dplyr::filter(predictor != "fitted") |> 
+  brms::brm(
+    abs_quantreg_x_1 ~ 1 + (1|paper_id), 
+    family = exponential(), 
+    data = _
+  )
+
+brm_list$brm_metrics_quantreg_x1 <- brm_metrics_quantreg_x1
+```
+
+```{r eval=FALSE}
+estimates_list$estimates_metrics_quantreg_x1 <- brms_estimates(brm_metrics_quantreg_x1, exp = TRUE)$brmsfit_estimates -0.0000001
+brms::pp_check(brm_metrics_quantreg_x1)
+```
+
+###### quantiles 
+
+```{r}
+quantile_list$quantiles_qh_x1 <- data.frame(
+  metric = "qh_x1", 
+  value = metrics_quantreg$abs_quantreg_x |> quantile(quantiles)
+)
+```
+
+
+###### brms: x^2 simple positive
+
+```{r eval=FALSE}
+set.seed(250623)
+
+brm_metrics_quantreg_x2_simple_pos <- 
+  metrics_quantreg |> 
+  dplyr::filter(predictor != "fitted") |> 
+  dplyr::filter(quantreg_x2 > 0)  |> 
+  brms::brm(
+    quantreg_x2 ~ 1 + (1|paper_id), 
+    family = exponential(), 
+    data = _, 
+    cores = 4
+  )
+
+```
+
+```{r eval=FALSE}
+estimates_list$brm_metrics_quantreg_x2_simple_pos <- brms_estimates(brm_metrics_quantreg_x2_simple_pos, exp = TRUE)$brmsfit_estimates
+```
+
+###### brms: x^2 simple negative
+
+```{r eval=FALSE}
+set.seed(250623)
+
+brm_metrics_quantreg_x2_simple_neg <- 
+  metrics_quantreg |> 
+  dplyr::filter(predictor != "fitted") |> 
+  dplyr::filter(quantreg_x2 < 0) |>
+  dplyr::mutate(
+    quantreg_x2_neg_shift = quantreg_x2 * (-1)
+  ) |> 
+  brms::brm(
+    quantreg_x2_neg_shift ~ 1 + (1|paper_id), 
+    family = exponential(), 
+    data = _, 
+    cores = 4
+  )
+```
+
+```{r eval=FALSE}
+estimates_list$brm_metrics_quantreg_x2_simple_neg <- brms_estimates(brm_metrics_quantreg_x2_simple_neg, exp = TRUE)$brmsfit_estimates * (-1)
+```
+
+Which shape is more frequent? 
+
+```{r}
+metrics_quantreg |> 
+  dplyr::count(quantreg_x2_sign)
+```
+
+
+###### quantiles 
+
+```{r}
+quantile_list$quantiles_qh_x2_pos <- data.frame(
+  metric = "qh_x2_pos", 
+  value = metrics_quantreg |> 
+  dplyr::filter(quantreg_x2 > 0) |> 
+  dplyr::pull(quantreg_x2) |> 
+  quantile(quantiles)
+)
+
+quantile_list$quantiles_qh_x2_neg <- data.frame(
+  metric = "qh_x2_neg", 
+  value = metrics_quantreg |> 
+  dplyr::filter(quantreg_x2 < 0) |> 
+  dplyr::pull(quantreg_x2) |> 
+  quantile(quantiles)
+)
+```
+
+###### brms: x^3
+
+```{r eval=FALSE}
+set.seed(250623)
+
+brm_metrics_quantreg_x3 <- metrics_quantreg |> 
+  dplyr::filter(predictor != "fitted") |> 
+  brms::brm(
+    quantreg_x3 ~ 1 + (1|paper_id), 
+    family = student(), 
+    data = _
+  )
+
+brm_list$brm_metrics_quantreg_x3 <- brm_metrics_quantreg_x3
+```
+
+```{r eval=FALSE}
+estimates_list$estimates_metrics_quantreg_x3 <- brms_estimates(brm_metrics_quantreg_x3, exp = FALSE)$brmsfit_estimates
+```
+
+###### quantiles
+
+```{r}
+quantile_list$quantiles_qh_x3 <- data.frame(
+  metric = "qh_x3_neg", 
+  value = metrics_quantreg |> 
+  dplyr::pull(quantreg_x3) |> 
+  quantile(quantiles, na.rm = TRUE)
+)
+```
+
+
+###### brms: x^4
+
+```{r eval=FALSE}
+set.seed(250623)
+
+brm_metrics_quantreg_x4 <- metrics_quantreg |> 
+  dplyr::filter(predictor != "fitted") |> 
+  brms::brm(
+    quantreg_x4 ~ 1 + (1|paper_id), 
+    family = student(), 
+    data = _, 
+    iter = 3000, 
+    control = list(
+      adapt_delta = 0.99
+    ), 
+    cores = 4
+  )
+
+brm_list$brm_metrics_quantreg_x4 <- brm_metrics_quantreg_x4
+```
+
+```{r eval=FALSE}
+estimates_list$estimates_metrics_quantreg_x4 <- brms_estimates(brm_metrics_quantreg_x4, exp = FALSE)$brmsfit_estimates
+```
+
+###### quantiles 
+
+```{r}
+quantile_list$quantiles_qh_x4 <- data.frame(
+  metric = "qh_x4_neg", 
+  value = metrics_quantreg |> 
+  dplyr::pull(quantreg_x4) |> 
+  quantile(quantiles, na.rm = TRUE)
+)
+```
+
+###### metrics 
+
+```{r}
+metrics_list$qli <- metrics_quantreg |> 
+  dplyr::select(paper_id, model_id, 
+                predictor, quantreg_x, quantreg_x2, quantreg_x3, quantreg_x4, quantreg_x2_sign) |> 
+  dplyr::filter(predictor != "fitted")
+```
+
+## Export 
+
+```{r}
+backpack <- list()
+
+backpack$estimates_list <- estimates_list
+backpack$quantiles_list <- quantile_list
+backpack$metrics_list <- metrics_list
+```
+
+```{r eval=FALSE}
+#saveRDS(backpack, "../data/processed_data/backpack.rds")
+```
+

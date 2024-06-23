@@ -1,0 +1,203 @@
+---
+title: ""
+output: html_document
+---
+
+No previous research has addressed the fact that some individuals emigrate and must consequently acculturate into stereotypical beliefs about senior citizens that may differ from the predominant beliefs in their origin cultures. I argue that immigrants can integrate such novel content into preexisting stereotypes facilitating their stereotype accommodation. I here operationalize stereotype accommodation as the (in-)accurate perception of the stereotype prevailing in the host- and origin-cultures. Drawing on two multinational surveys (European Social Survey and World Value Survey), larger cross-cultural differences in the stereotype about older people’s warmth predicted more accurate perceptions of the host-cultural stereotype of older people’s warmth. I discuss the findings in the context of existing research on the effects of old-age stereotypes and propose possible theoretical bridges to (older) immigrants’ socio-cognitive adaptation and well-being due to cultural learning.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+library(gtools)
+library(robustbase)
+library(magrittr) # unless you routinely load tidyverse, in which case leave this one out. You just need it for the pipe. 
+library(moments)
+
+
+variables <- c("paper", "outcome", "n", "skew", "kurt", "z_1.96", "z_2.58", "z_3.29", "mode_n", "var", "var_ratio")
+
+list.files("../data/raw_data/", pattern = "u00176")
+
+u00176_tib_1 <- haven::read_sav("../data/raw_data/u00176_stanciu2020150920 ESS4t.sav")
+u00176_tib_2 <- haven::read_sav("../data/raw_data/u00176_stanciu2020_150920 wvs.sav")
+
+
+u00176_tib_1 %>% names()
+u00176_tib_2 %>% names()
+```
+
+# ESS
+
+```{r}
+u00176_tib_1 %<>% 
+  dplyr::mutate(
+    # eduyrs = z(eduyrs), 
+    # ochangr = z(ochangr), 
+    # consvr = z(consvr), 
+    # eduyrs = z(eduyrs), 
+    # dw = z(dw), 
+    # dc = z(dc), 
+  
+    fem = dplyr::if_else(gndr == 2, 1, 0) %>% as.factor(),
+    gmc_eduyrs = eduyrs - mean(eduyrs, na.rm = TRUE), 
+    gmc_ochangr = ochangr - mean(ochangr, na.rm = TRUE), 
+    gmc_consvr = consvr - mean(consvr, na.rm = TRUE), 
+    gmc_agea = agea - mean(agea, na.rm = TRUE), 
+    gmc_dw = dw - mean(dw, na.rm = TRUE), 
+    gmc_dc = dc - mean(dc, na.rm = TRUE), 
+    
+    yag5 = dplyr::case_when(
+      livecntr == 5 ~ 0, 
+      livecntr == 4 ~ 0, 
+      livecntr == 3 ~ 0, 
+      livecntr == 2 ~ 1, 
+      livecntr == 1 ~ 1, 
+    ) %>%  as.factor(), 
+    yag620 = dplyr::case_when(
+      livecntr == 5 ~ 0, 
+      livecntr == 4 ~ 1, 
+      livecntr == 3 ~ 1, 
+      livecntr == 2 ~ 0, 
+      livecntr == 1 ~ 0, 
+    ) %>% as.factor()
+  ) %>% dplyr::filter(!is.na(fem))
+
+```
+
+
+warmth
+
+```{r}
+u00176_mod_original_1 <- lm(z(distw) ~
+                              z(gmc_agea)
+                            + fem
+                            + z(gmc_eduyrs)
+                            + z(gmc_ochangr)
+                            + z(gmc_consvr)
+                            + yag5
+                            + yag620
+                            + z(gmc_dw)
+                            , weights = new_weight
+                            , data = u00176_tib_1
+) 
+
+u00176_mod_original_1 %>% summary()
+
+```
+
+```{r}
+u00176_mod_z_1 <- u00176_mod_original_1
+key_effects = c("z(gmc_ochangr)", "z(gmc_consvr)", "yag51", "yag6201", "z(gmc_dw)")
+export_ols(u00176_mod_z_1, key_effects)
+```
+
+
+competence
+
+```{r}
+u00176_mod_original_2 <- lm(z(distc) ~
+                              z(gmc_agea)
+                            + fem
+                            + z(gmc_eduyrs)
+                            + z(gmc_ochangr)
+                            + z(gmc_consvr)
+                            + yag5
+                            + yag620
+                            + z(gmc_dc)
+                            , weights = new_weight
+                            , data = u00176_tib_1
+) 
+
+u00176_mod_original_2 %>% summary()
+
+```
+
+```{r}
+u00176_mod_z_2 <- u00176_mod_original_2
+key_effects = c("z(gmc_ochangr)", "z(gmc_consvr)", "yag51", "yag6201", "z(gmc_dc)")
+export_ols(u00176_mod_z_2, key_effects)
+```
+
+
+
+
+
+
+
+
+# WVS
+
+```{r}
+u00176_tib_2 %<>% 
+  dplyr::mutate(
+
+    fem = dplyr::if_else(gndr == 2, 1, 0) %>% as.factor(),
+    gmc_educyrs = educyrs - mean(educyrs, na.rm = TRUE), 
+    gmc_ochangr = ochangr - mean(ochangr, na.rm = TRUE), 
+    gmc_consvr = consvr - mean(consvr, na.rm = TRUE), 
+    gmc_agea = agea - mean(agea, na.rm = TRUE), 
+    gmc_dw = dw - mean(dw, na.rm = TRUE), 
+    gmc_dc = dc - mean(dc, na.rm = TRUE), 
+
+  ) %>% dplyr::filter(useobs == 1)
+```
+
+```{r}
+u00176_mod_original_3 <- lm(z(distw) ~
+     z(gmc_agea)
+   + fem
+   + z(gmc_educyrs)
+   + z(gmc_ochangr)
+   + z(gmc_consvr)
+   + z(gmc_dw)
+   , weights = weight
+  , data = u00176_tib_2
+) 
+
+
+
+u00176_mod_original_3 %>% summary()
+
+
+u00176_mod_original_3$model <- u00176_mod_original_3$model |> 
+  dplyr::mutate(
+    `(weights)` = as.numeric(`(weights)`)
+  )
+```
+
+```{r}
+u00176_mod_z_3 <- u00176_mod_original_3
+key_effects = c("z(gmc_ochangr)", "z(gmc_consvr)", "z(gmc_dw)")
+export_ols(u00176_mod_z_3, key_effects)
+```
+
+
+
+
+```{r}
+u00176_mod_original_4 <- lm(z(distc) ~
+     z(gmc_agea)
+   + fem
+   + z(gmc_educyrs)
+   + z(gmc_ochangr)
+   + z(gmc_consvr)
+   + z(gmc_dc)
+   , weights = weight
+  , data = u00176_tib_2
+)
+
+u00176_mod_original_4 %>% summary()
+
+u00176_mod_original_4$model <- u00176_mod_original_4$model |> 
+  dplyr::mutate(
+    `(weights)` = as.numeric(`(weights)`)
+  )
+```
+
+```{r}
+u00176_mod_z_4 <- u00176_mod_original_4
+key_effects = c("z(gmc_ochangr)", "z(gmc_consvr)", "z(gmc_dc)")
+export_ols(u00176_mod_z_4, key_effects)
+```

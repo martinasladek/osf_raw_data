@@ -1,0 +1,159 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-19'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+df_1 <- read.csv("../data/raw_data/u01567_exp_1.csv")
+df_2 <- read.csv("../data/raw_data/u01567_exp_2.csv")
+df_3a <- read.csv("../data/raw_data/u01567_exp_3a.csv")
+df_3b <- read.csv("../data/raw_data/u01567_exp_3b.csv")
+```
+
+# Experiment 1
+
+```{r}
+df_1 %>% dplyr::group_by(condition) %>% 
+  dplyr::summarise(across(c(slope1_3, slope1_4), .fns = list(min, max)))
+```
+
+cond 1 , slopes1_3 = unconnected/parts
+cond 2 , slopes1_3 = connected/whole
+
+cond 1 , slopes1_4 = unconnected/parts
+cond 2 , slopes1_4 = connected/whole
+
+Model 1
+
+```{r}
+u01567_mod_rm_z_1 <- df_1 %>%
+  afex::aov_4(z(slope1_3) ~ condition + (condition|id), .)
+
+export_ols(
+  u01567_mod_rm_z_1, 
+  key_effects = c("condition")
+)
+
+u01567_mod_lmer_z_1 <- df_1 %>%
+  lme4::lmer(z(slope1_3) ~ factor(condition) + (1|id), .)
+
+export_ols(
+  u01567_mod_lmer_z_1, 
+  key_effects = c("factor(condition)2")
+)
+```
+
+Model 2 
+
+```{r}
+u01567_mod_rm_z_2 <- df_1 %>%
+  dplyr::mutate(
+    dv = c(slope1_3[1:20], slope1_4[21:40])
+  ) %>% 
+  afex::aov_4(z(dv) ~ condition + (condition|id), .)
+
+export_ols(
+  u01567_mod_rm_z_2, 
+  key_effects = c("condition")
+)
+
+
+u01567_mod_lmer_z_2 <- df_1 %>%
+  dplyr::mutate(
+    dv = c(slope1_3[1:20], slope1_4[21:40])
+  ) %>% 
+  lme4::lmer(z(dv) ~ as.factor(condition) + (1|id), .)
+
+export_ols(
+  u01567_mod_lmer_z_2, 
+  key_effects = c("as.factor(condition)2")
+)
+```
+
+
+
+# Experiment 2 
+
+model 3
+
+```{r}
+u01567_mod_rm_z_3 <- df_2 %>% 
+  afex::aov_4(z(allslopes1_3) ~ blockconds*conds + (blockconds*conds|id), ., )
+
+export_ols(
+  u01567_mod_rm_z_3, 
+  key_effects = c("blockconds", "conds", "blockconds:conds")
+)
+
+
+u01567_mod_lmer_z_3 <- df_2 %>% 
+  lme4::lmer(z(allslopes1_3) ~ blockconds*as.factor(conds) + (1|id), ., )
+
+export_ols(
+  u01567_mod_lmer_z_3, 
+  key_effects = c("blockcondsdist pre", "as.factor(conds)2", 
+                  "blockcondsdist pre:as.factor(conds)2")
+)
+```
+
+# Experiment 3a
+
+```{r}
+df_3a %>% 
+  group_by(conds) %>% 
+  summarise(across(c(allslopes1_3, allslopes1_4), max))
+```
+
+model 4 
+
+```{r}
+t.test(allslopes1_3 ~ conds, paired = T, var.equal = T, data = df_3a)
+
+
+u01567_mod_rm_z_4 <- df_3a %>% 
+  afex::aov_4(z(allslopes1_3) ~ as.factor(conds) + (conds|id), .)
+
+export_ols(
+  u01567_mod_rm_z_4, 
+  key_effects = c("conds")
+)
+
+u01567_mod_lmer_z_4 <- df_3a %>% 
+  lme4::lmer(z(allslopes1_3) ~ as.factor(conds) + (1|id), .)
+
+export_ols(
+  u01567_mod_lmer_z_4, 
+  key_effects = c("as.factor(conds)2")
+)
+```
+
+model 5
+
+```{r}
+t.test(allslopes1_3 ~ conds, paired = T, var.equal = T, data = df_3b)
+
+
+u01567_mod_rm_z_5 <- df_3b %>% 
+  afex::aov_4(z(allslopes1_3) ~ as.factor(conds) + (conds|id), .)
+
+export_ols(
+  u01567_mod_rm_z_5, 
+  key_effects = c("conds")
+)
+
+u01567_mod_lmer_z_5 <- df_3b %>% 
+  lme4::lmer(z(allslopes1_3) ~ as.factor(conds) + (1|id), .)
+
+export_ols(
+  u01567_mod_lmer_z_5, 
+  key_effects = c("as.factor(conds)2")
+)
+```
+
+

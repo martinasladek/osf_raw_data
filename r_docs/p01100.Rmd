@@ -1,0 +1,154 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-07-05'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("../scripts/helpers.R")
+
+library(ggplot2)
+library(tidyverse)
+library(lmerTest)
+library(car)
+library(TOSTER)
+library(Hmisc)
+library(optimx)
+library(RColorBrewer)
+library(reshape2)
+library(psych)
+source("https://gist.githubusercontent.com/benmarwick/2a1bb0133ff568cbe28d/raw/fb53bd97121f7f9ce947837ef1a4c65a73bffb3f/geom_flat_violin.R")
+
+library(knitr)
+opts_chunk$set(tidy.opts=list(width.cutoff=40),tidy=TRUE)
+
+#setwd("~/~grad school/research/8 psych sci replication")
+
+d=read.csv("../data/raw_data/p01100_beliefsuperiority_all.csv")
+d[] <- lapply(d, function(x) {
+    if(is.factor(x)) as.numeric(as.character(x)) else x
+})
+
+```
+
+```{r}
+d= filter(d,Q62 == 1)
+
+#remove those who failed the attention check items and make a separate dataframe
+d_attn= filter(d,AC_a==3) %>% 
+  filter(AC_b==5)
+
+#remove attention check items from dataframe
+d_attn=dplyr::select(d_attn,-starts_with('AC'))
+
+#Creating a mean dogmatism score
+#First, items 2, 4, 5, 7, 10, 11, 13, 16, 18, 19 need to be reverse scored
+d_attn$Q37_2 = recode(d_attn$Q37_2, '1=9; 2=8; 3=7; 4=6; 6=4; 7=3; 8=2; 9=1')
+d_attn$Q37_4 = recode(d_attn$Q37_4, '1=9; 2=8; 3=7; 4=6; 6=4; 7=3; 8=2; 9=1')
+d_attn$Q37_5 = recode(d_attn$Q37_5, '1=9; 2=8; 3=7; 4=6; 6=4; 7=3; 8=2; 9=1')
+d_attn$Q37_7 = recode(d_attn$Q37_7, '1=9; 2=8; 3=7; 4=6; 6=4; 7=3; 8=2; 9=1')
+d_attn$Q37_10 = recode(d_attn$Q37_10, '1=9; 2=8; 3=7; 4=6; 6=4; 7=3; 8=2; 9=1')
+d_attn$Q37_11 = recode(d_attn$Q37_11, '1=9; 2=8; 3=7; 4=6; 6=4; 7=3; 8=2; 9=1')
+d_attn$Q37_13 = recode(d_attn$Q37_13, '1=9; 2=8; 3=7; 4=6; 6=4; 7=3; 8=2; 9=1')
+d_attn$Q37_16 = recode(d_attn$Q37_16, '1=9; 2=8; 3=7; 4=6; 6=4; 7=3; 8=2; 9=1')
+d_attn$Q37_18 = recode(d_attn$Q37_18, '1=9; 2=8; 3=7; 4=6; 6=4; 7=3; 8=2; 9=1')
+d_attn$Q37_19 = recode(d_attn$Q37_19, '1=9; 2=8; 3=7; 4=6; 6=4; 7=3; 8=2; 9=1')
+
+dogscale=dplyr::select(d_attn,starts_with('Q37'))
+d_attn$meanD=rowMeans(dogscale,na.rm = TRUE)
+
+hist(d_attn$meanD)
+#positive skew (not as many people high on dogmatism, mean is almost exactly midpoint of scale)
+
+#Next, transform 4-pt attitude scales to 5-pt: vote, torture, affirmaction
+#(5 - 1) * (x - 1) / (4 - 1) + 1
+d_attn$vote_a = recode(d_attn$vote_a, '2=1; 3=2.3333; 4=3.6667; 5=5')
+d_attn$torture_a = recode(d_attn$torture_a, '2=1; 3=2.3333; 4=3.6667; 5=5')
+d_attn$affirmaction_a = recode(d_attn$affirmaction_a, '2=1; 3=2.3333; 4=3.6667; 5=5')
+
+#Calculate an average attitude score per participant (for dogmatism analysis)
+attitudes=dplyr::select(d_attn,ends_with('_a'))
+d_attn$meanA=rowMeans(attitudes,na.rm = TRUE)
+
+#mean center the variables
+#dogmatism
+d_attn$meanD_c= d_attn$meanD-mean(d_attn$meanD,na.rm=TRUE)
+#mean attitude 
+d_attn$meanA_c= d_attn$meanA-mean(d_attn$meanA,na.rm=TRUE)
+#individual attitude ratings
+d_attn$immigration_a_c=d_attn$immigration_a-mean(d_attn$immigration_a,na.rm=TRUE)
+d_attn$abortion_a_c=d_attn$abortion_a-mean(d_attn$abortion_a,na.rm=TRUE)
+d_attn$vote_a_c=d_attn$vote_a-mean(d_attn$vote_a,na.rm=TRUE)
+d_attn$tax_a_c=d_attn$tax_a-mean(d_attn$tax_a,na.rm=TRUE)
+d_attn$torture_a_c=d_attn$torture_a-mean(d_attn$torture_a,na.rm=TRUE)
+d_attn$affirmaction_a_c=d_attn$affirmaction_a-mean(d_attn$affirmaction_a,na.rm=TRUE)
+d_attn$military_a_c=d_attn$military_a-mean(d_attn$military_a,na.rm=TRUE)
+d_attn$covidgov_a_c=d_attn$covidgov_a-mean(d_attn$covidgov_a,na.rm=TRUE)
+#political orientation
+d_attn$PO_c= d_attn$Q12-mean(d_attn$Q12,na.rm=TRUE)
+```
+
+--
+
+Dogmatism analyses - 1
+
+```{r}
+#multiple regression in which dogmatism is regressed onto a linear 
+#and quadratic term for average political attitude
+p01100_mod_z_1 = lm(z(meanD)~z(meanA_c)+I(z(meanA_c)^2),d_attn)
+
+p01100_mod_z_1$model <- p01100_mod_z_1$model |> 
+  dplyr::mutate(`I(z(meanA_c)^2)` = as.numeric(`I(z(meanA_c)^2)`))
+
+export_ols(p01100_mod_z_1, 
+           key_effects = c("z(meanA_c)", "I(z(meanA_c)^2)"))
+```
+
+Dogmatism analyses - 2
+
+```{r}
+#same analysis but with the predictor being self-reported political orientation
+p01100_mod_z_2 = lm(z(meanD) ~ z(PO_c) + I(z(PO_c)^2), d_attn)
+
+p01100_mod_z_2$model <- p01100_mod_z_2$model |> 
+  dplyr::mutate(`I(z(PO_c)^2)` = as.numeric(`I(z(PO_c)^2)`))
+
+export_ols(p01100_mod_z_2, 
+           key_effects = c("z(PO_c)", "I(z(PO_c)^2)"))
+
+```
+
+Dogmatism analyses - 3
+
+```{r}
+#simple t-test comparing the average dogmatism scores of self-identified Democrats and Republicans
+dems=filter(d_attn,Q16==1)
+reps=filter(d_attn,Q16==2)
+t.test(dems$meanD,reps$meanD)
+
+
+p01100_mod_z_3 <- d_attn %>% 
+  dplyr::filter(Q16 %in% c(1,2)) %>% 
+  lm(z(meanD) ~ as.factor(Q16), .) 
+
+export_ols(p01100_mod_z_3, 
+           key_effects = c("as.factor(Q16)2"))
+```
+Dogmatism analyses - 4 (exploratory)
+
+```{r}
+#regress dogmatism onto the participants’ economic conservatism score and social conservatism score
+d_attn$SC_c= d_attn$Q39 - mean(d_attn$Q39,na.rm=TRUE)
+d_attn$EC_c= d_attn$Q40 - mean(d_attn$Q40,na.rm=TRUE)
+
+p01100_mod_z_4 = lm(z(meanD)~z(SC_c)+z(EC_c),d_attn)
+
+export_ols(
+  p01100_mod_z_4, 
+  key_effects = c("z(SC_c)", "z(EC_c)")
+)
+ 
+```

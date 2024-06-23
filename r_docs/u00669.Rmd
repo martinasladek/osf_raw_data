@@ -1,0 +1,179 @@
+---
+title: "Untitled"
+author: "MS"
+date: '2022-06-04'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(reshape2)
+
+source("../scripts/helpers.R")
+
+data_exp1A <- readr::read_csv("../data/raw_data/u00669_Wait_Study_Experiment1A_final.csv")
+data_exp2 <- readr::read_csv("../data/raw_data/u00669_Wait_Study_Experiment2_final.csv")
+data_exp3 <- readr::read_csv("../data/raw_data/u00669_Wait_Study_Experiment3_final.csv")
+data_exp5 <- readr::read_csv("../data/raw_data/u00669_Wait_Study_Experiment5_final.csv")
+```
+
+# 1 
+
+```{r}
+data_exp1A$Predicted_Intrinsic_Motivation_Index <- as.numeric(as.character(data_exp1A$Predicted_Intrinsic_Motivation_Index))
+data_exp1A$Experienced_Intrinsic_Motivation_Index <- as.numeric(as.character(data_exp1A$Experienced_Intrinsic_Motivation_Index))
+
+t.test(data_exp1A$Predicted_Intrinsic_Motivation_Index, data_exp1A$Experienced_Intrinsic_Motivation_Index, paired = T)
+
+
+data_exp1A_long <- data_exp1A %>% 
+  dplyr::select(Participant_ID, 
+                Predicted_Intrinsic_Motivation_Index, Experienced_Intrinsic_Motivation_Index) %>% 
+  tidyr::pivot_longer(cols = -Participant_ID)
+
+data_exp1A_long %<>% dplyr::filter(!Participant_ID %in% c(2))
+
+u00669_mod_rm_z_1 <- data_exp1A_long %>% 
+  afex::aov_4(z(value) ~ name + (name|Participant_ID), .)
+
+export_ols(u00669_mod_rm_z_1, 
+           key_effects = c("name"))
+
+
+u00669_mod_lmer_z_1 <- data_exp1A_long %>% 
+  lme4::lmer(z(value) ~ name + (1|Participant_ID), .)
+
+export_ols(u00669_mod_lmer_z_1, 
+           key_effects = c("namePredicted_Intrinsic_Motivation_Index"))
+```
+
+# 2 
+
+```{r}
+data_exp2$Predicted_Intrinsic_Motivation_Index <- as.numeric(as.character(data_exp2$Predicted_Intrinsic_Motivation_Index))
+data_exp2$Experienced_Intrinsic_Motivation_Index <- as.numeric(as.character(data_exp2$Experienced_Intrinsic_Motivation_Index))
+
+t.test(data_exp2$Predicted_Intrinsic_Motivation_Index, data_exp2$Experienced_Intrinsic_Motivation_Index, paired = T)
+
+data_exp2_long <- data_exp2 %>% 
+  dplyr::select(Participant_ID, 
+                Predicted_Intrinsic_Motivation_Index, Experienced_Intrinsic_Motivation_Index) %>% 
+  tidyr::pivot_longer(cols = -Participant_ID)
+
+
+u00669_mod_rm_z_2 <- data_exp2_long %>% 
+  afex::aov_4(z(value) ~ name + (name|Participant_ID), .)
+
+export_ols(u00669_mod_rm_z_2, 
+           key_effects = c("name"))
+
+u00669_mod_lmer_z_2 <- data_exp2_long %>% 
+  lme4::lmer(z(value) ~ name + (1|Participant_ID), .)
+
+export_ols(u00669_mod_lmer_z_2, 
+           key_effects = c("namePredicted_Intrinsic_Motivation_Index"))
+
+```
+
+# 3
+
+```{r}
+data_exp3$Predicted_Intrinsic_Motivation_Index_LONG <- as.numeric(as.character(data_exp3$Predicted_Intrinsic_Motivation_Index_LONG))
+data_exp3$Predicted_Intrinsic_Motivation_Index_SHORT <- as.numeric(as.character(data_exp3$Predicted_Intrinsic_Motivation_Index_SHORT))
+data_exp3$Experienced_Intrinsic_Motivation_Index <- as.numeric(as.character(data_exp3$Experienced_Intrinsic_Motivation_Index))
+
+data_exp3_melt<-melt(data_exp3, id.vars = "Waiting_Condition", measure.vars = c("Predicted_Intrinsic_Motivation_Index_LONG", "Predicted_Intrinsic_Motivation_Index_SHORT", "Experienced_Intrinsic_Motivation_Index"))
+data_exp3_melt<-cbind(data_exp3_melt, rep(data_exp3$Participant_ID,3))
+data_exp3_subset <- subset(data_exp3_melt, (!(data_exp3_melt$Waiting_Condition=="L" &
+                                            data_exp3_melt$variable=="Predicted_Intrinsic_Motivation_Index_SHORT") &
+                                            !(data_exp3_melt$Waiting_Condition=="S" &
+                                            data_exp3_melt$variable=="Predicted_Intrinsic_Motivation_Index_LONG")))
+data_exp3_subset$variable <- ifelse(data_exp3_subset$variable=="Predicted_Intrinsic_Motivation_Index_LONG" | data_exp3_subset$variable=="Predicted_Intrinsic_Motivation_Index_SHORT","prediction", "experience")
+colnames(data_exp3_subset) <- c("Waiting_Condition", "Rating_type", "Intrinsic_Motivation_Score", "Participant_ID")
+
+data_exp3_subset$Waiting_Condition <- ifelse(data_exp3_subset$Waiting_Condition=="L", -1, 1)
+data_exp3_subset$Waiting_Condition <- as.factor(data_exp3_subset$Waiting_Condition)
+
+data_exp3_subset$Rating_type <- ifelse(data_exp3_subset$Rating_type=="prediction", -1, 1)
+data_exp3_subset$Rating_type <- as.factor(data_exp3_subset$Rating_type)
+
+
+res.aov <- rstatix::anova_test(data = data_exp3_subset, dv = Intrinsic_Motivation_Score, wid = Participant_ID, between = Waiting_Condition, within = Rating_type)
+rstatix::get_anova_table(res.aov)
+
+
+
+####
+
+u00669_mod_rm_z_3 <- data_exp3_subset %>% 
+  afex::aov_4(z(Intrinsic_Motivation_Score) ~ Waiting_Condition*Rating_type 
+              + (Rating_type|Participant_ID),.)
+
+export_ols(u00669_mod_rm_z_3, 
+           key_effects = c("Waiting_Condition", "Rating_type", "Waiting_Condition:Rating_type"))
+
+
+
+u00669_mod_lmer_z_3 <- data_exp3_subset %>% 
+  lme4::lmer(z(Intrinsic_Motivation_Score) ~ Waiting_Condition*Rating_type 
+              + (1|Participant_ID),.)
+
+export_ols(u00669_mod_lmer_z_3, 
+           key_effects = c("Waiting_Condition1", "Rating_type1", "Waiting_Condition1:Rating_type1"))
+
+```
+
+# 4
+
+Linear mixed effects model 
+
+# 5 
+
+```{r}
+data_exp5$Experienced_Intrinsic_Motivation_Index <- as.numeric(as.character(data_exp5$Experienced_Intrinsic_Motivation_Index))
+
+data_exp5_melt <- melt(data_exp5, id.vars = "Activity_Condition", 
+                                  measure.vars =c("Predicted_Intrinsic_Motivation_Index_NEWS",
+                                                  "Predicted_Intrinsic_Motivation_Index_THINKING", 
+                                                  "Experienced_Intrinsic_Motivation_Index"))
+data_exp5_melt <- cbind(data_exp5_melt, rep(data_exp5$Participant_ID, 3))
+data_exp5_subset <- subset(data_exp5_melt, (!(data_exp5_melt$Activity_Condition==0 &
+                                              data_exp5_melt$variable=="Predicted_Intrinsic_Motivation_Index_NEWS") &
+                                            !(data_exp5_melt$Activity_Condition==1 &
+                                              data_exp5_melt$variable=="Predicted_Intrinsic_Motivation_Index_THINKING")))
+
+data_exp5_subset$variable <- ifelse(data_exp5_subset$variable=="Predicted_Intrinsic_Motivation_Index_NEWS" |
+                                    data_exp5_subset$variable=="Predicted_Intrinsic_Motivation_Index_THINKING","prediction", "experience")
+colnames(data_exp5_subset) <- c("Activity_Condition", "Rating_type", "Intrinsic_Motivation_Score", "Participant_ID")
+
+data_exp5_subset$Activity_Condition <- ifelse(data_exp5_subset$Activity_Condition==0, -1, 1)
+data_exp5_subset$Activity_Condition <- as.factor(data_exp5_subset$Activity_Condition)
+
+data_exp5_subset$Rating_type <- ifelse(data_exp5_subset$Rating_type=="prediction", -1, 1)
+data_exp5_subset$Rating_type <- as.factor(data_exp5_subset$Rating_type)
+
+data_exp5_subset$Intrinsic_Motivation_Score <- as.numeric(as.character(data_exp5_subset$Intrinsic_Motivation_Score))
+
+
+res.aov <- rstatix::anova_test(data = data_exp5_subset, dv = Intrinsic_Motivation_Score, wid = Participant_ID, between = Activity_Condition, within = Rating_type)
+rstatix::get_anova_table(res.aov)
+
+
+u00669_mod_rm_z_5 <- data_exp5_subset %>% 
+  afex::aov_4(z(Intrinsic_Motivation_Score) ~ Activity_Condition*Rating_type 
+              + (Rating_type|Participant_ID), .)
+
+export_ols(u00669_mod_rm_z_5, 
+           key_effects = c("Activity_Condition", "Rating_type", "Activity_Condition:Rating_type"))
+
+
+
+u00669_mod_lmer_z_5 <- data_exp5_subset %>% 
+  lme4::lmer(z(Intrinsic_Motivation_Score) ~ Activity_Condition*Rating_type 
+             + (1|Participant_ID), .)
+
+export_ols(u00669_mod_lmer_z_5, 
+           key_effects = c("Activity_Condition1", "Rating_type1", "Activity_Condition1:Rating_type1"))
+```
+
