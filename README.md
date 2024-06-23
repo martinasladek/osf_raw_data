@@ -2,7 +2,9 @@
 
 This repository contains data and supplementary material for Chapter 5 of the thesis Role of Robust Statistical Methods in the Credibility Movement of Psychological Science. 
 
-The R folder contains data and all the analysis scripts. The folder is organised as follows: 
+The associated OSF repository can be found here: https://osf.io/znfc2/ 
+
+The repository is organised as follows: 
 
 - `data` folder: 
   - `helper_data/raw_data_database_osf_public.csv` contains the list of included and excluded studies, reasons for exclusions, links to raw data and dois/links to papers. Each paper has been assigned an ID. This ID is used to for the matching dataset files and analysis files specified below. 
@@ -13,7 +15,7 @@ The R folder contains data and all the analysis scripts. The folder is organised
   - Individual analysis files for each paper labelled with appropriate ID. 
 - `objects` folder: 
   - `lm` folder has the exports of all linear models from individual papers 
-  - `models` contains the results and MCMC draws from all Bayesian models fitted to obtain typical estimates. 
+  - `models` contains the results and MCMC draws from all Bayesian models fitted to obtain typical estimates. Note that this file was too large to host on github. It's hosted on OSF instead - you can access it through the repository link above, or use this link that links directly to the file: https://osf.io/ts9fb
 - `scripts` folder contains helper functions used for re-analyses of linear models and for extracting information about residual metrics. 
 
 
