@@ -1,0 +1,5 @@
+Due to file size, object raw_data_estimates_full_models.rds is hosted on OSF. 
+
+It can be downloaded from the main repository: https://osf.io/znfc2/ 
+
+Alternatively, this is the direct link to the file: https://osf.io/ts9fb
