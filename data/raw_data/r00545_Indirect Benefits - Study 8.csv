@@ -1,0 +1,203 @@
+StartDate,EndDate,Status,Progress,Duration (in seconds),Finished,RecordedDate,ResponseId,RecipientLastName,RecipientFirstName,RecipientEmail,ExternalReference,DistributionChannel,UserLanguage,f_agreement,neg_conseq,unfair,attn_check,SC0,age,gender,educationScore,femalesAs1MaleAs0,income,incomeScore,householdIncomeEstimate,participant_id,assignment_id,computer_country,condition,proposal,proposals
+01/04/2020 18:36,01/04/2020 18:36,0,100,28,1,01/04/2020 18:36,R_2tgSAOxMcjWCzFF,,,,,anonymous,EN-GB,7,7,5,1,7,36,male,5,,,,225000,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:35,01/04/2020 18:37,0,100,86,1,01/04/2020 18:37,R_2D5lc7hCWtrvvYf,,,,,anonymous,EN-GB,5,5,6,1,5,37,female,5,,,,72500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:37,01/04/2020 18:37,0,100,31,1,01/04/2020 18:37,R_pSG0JDlaPNvbs7n,,,,,anonymous,EN-GB,6,2,6,1,6,40,male,6,,,,17500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:38,01/04/2020 18:39,0,100,32,1,01/04/2020 18:39,R_C9tuLFpmErCpBYt,,,,,anonymous,EN-GB,4,6,5,1,4,26,male,5,,,,225000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:40,01/04/2020 18:41,0,100,61,1,01/04/2020 18:41,R_2Ugu2qdzxx1z8w9,,,,,anonymous,EN-GB,2,6,7,1,2,28,male,5,,,,72500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:41,01/04/2020 18:42,0,100,39,1,01/04/2020 18:42,R_1GTTOlRxZjWbj21,,,,,anonymous,EN-GB,3,6,6,1,3,33,male,5,,,,32500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:42,01/04/2020 18:43,0,100,69,1,01/04/2020 18:43,R_6FohJlNE36YrkGd,,,,,anonymous,EN-GB,6,5,7,1,6,32,male,3,,,,32500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:44,01/04/2020 18:44,0,100,17,1,01/04/2020 18:44,R_2ZHYmV7oYq10IBA,,,,,anonymous,EN-GB,5,2,3,1,5,20,male,4,,,,100000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:44,01/04/2020 18:44,0,100,8,1,01/04/2020 18:44,R_1QJzDfOtYTIrLyq,,,,,anonymous,EN-GB,5,3,5,3,5,29,male,5,,,,72500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:44,01/04/2020 18:44,0,100,25,1,01/04/2020 18:44,R_2U3N34yurxJxCWi,,,,,anonymous,EN-GB,5,5,5,1,5,37,female,5,,,,72500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:44,01/04/2020 18:44,0,100,21,1,01/04/2020 18:44,R_1IzJb9zPqO1i4tj,,,,,anonymous,EN-GB,3,7,5,1,3,32,male,5,,,,100000,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:44,01/04/2020 18:45,0,100,30,1,01/04/2020 18:45,R_Zz3aFSeICzFUh0Z,,,,,anonymous,EN-GB,6,6,5,1,6,35,female,5,,,,17500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:44,01/04/2020 18:45,0,100,34,1,01/04/2020 18:45,R_3rZHvaaKDVERusA,,,,,anonymous,EN-GB,5,4,5,1,5,34,male,5,,,,32500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:44,01/04/2020 18:45,0,100,26,1,01/04/2020 18:45,R_2Pdn32jAbZ3MbLz,,,,,anonymous,EN-GB,4,3,5,1,4,42,male,2,,,,17500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:44,01/04/2020 18:45,0,100,24,1,01/04/2020 18:45,R_2EytSzBaS2tPDrK,,,,,anonymous,EN-GB,2,6,5,1,2,37,male,5,,,,17500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:44,01/04/2020 18:45,0,100,31,1,01/04/2020 18:45,R_12MDh3dyzbNGoOU,,,,,anonymous,EN-GB,7,4,2,1,7,28,male,2,,,,17500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:44,01/04/2020 18:45,0,100,27,1,01/04/2020 18:45,R_3k4If5ECM7MHMOf,,,,,anonymous,EN-GB,6,5,3,1,6,32,male,7,,,,132500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:44,01/04/2020 18:45,0,100,24,1,01/04/2020 18:45,R_1jBABgn2oc5PfYX,,,,,anonymous,EN-GB,5,6,4,1,5,30,male,5,,,,50000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:44,01/04/2020 18:45,0,100,33,1,01/04/2020 18:45,R_SC1IqGsDzVBxM9r,,,,,anonymous,EN-GB,4,5,4,1,4,44,male,5,,,,50000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:44,01/04/2020 18:45,0,100,40,1,01/04/2020 18:45,R_302l6aChpieH7RI,,,,,anonymous,EN-GB,3,5,5,1,3,25,female,4,,,,32500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:44,01/04/2020 18:45,0,100,21,1,01/04/2020 18:45,R_0DFqMkqzrtUq5W1,,,,,anonymous,EN-GB,5,6,5,1,5,30,male,5,,,,32500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:44,01/04/2020 18:45,0,100,48,1,01/04/2020 18:45,R_2eXLEZnJRWhrzRK,,,,,anonymous,EN-GB,3,6,7,1,3,35,female,6,,,,32500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:44,01/04/2020 18:45,0,100,47,1,01/04/2020 18:45,R_eUJdXKI647zT3Et,,,,,anonymous,EN-GB,7,1,1,1,7,54,female,5,,,,132500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:45,01/04/2020 18:45,0,100,12,1,01/04/2020 18:45,R_1Ihl3kHNYDnzQ8R,,,,,anonymous,EN-GB,6,6,4,1,6,37,male,5,,,,175000,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:44,01/04/2020 18:45,0,100,55,1,01/04/2020 18:45,R_3n6NUMXh3T1cnN6,,,,,anonymous,EN-GB,3,5,6,1,3,51,female,5,,,,50000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:44,01/04/2020 18:45,0,100,52,1,01/04/2020 18:45,R_2tflTYacZol4OnH,,,,,anonymous,EN-GB,3,6,6,1,3,23,male,5,,,,32500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:44,01/04/2020 18:45,0,100,38,1,01/04/2020 18:45,R_1N2jiC3HOY1LYby,,,,,anonymous,EN-GB,5,4,4,1,5,37,male,5,,,,100000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:45,01/04/2020 18:45,0,100,18,1,01/04/2020 18:45,R_2zubeauM9ZSSyZS,,,,,anonymous,EN-GB,6,6,2,2,6,22,male,3,,,,50000,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:44,01/04/2020 18:45,0,100,54,1,01/04/2020 18:45,R_r8UhvSgPlB7ZHJT,,,,,anonymous,EN-GB,7,1,1,1,7,34,male,5,,,,100000,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:45,01/04/2020 18:45,0,100,36,1,01/04/2020 18:45,R_Ufm1OkhYFG8Vli9,,,,,anonymous,EN-GB,6,5,4,1,6,35,female,1,,,,32500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:45,01/04/2020 18:45,0,100,24,1,01/04/2020 18:45,R_UmcSGWeQ4fiAsVj,,,,,anonymous,EN-GB,7,2,1,1,7,24,female,5,,,,132500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:44,01/04/2020 18:45,0,100,43,1,01/04/2020 18:45,R_1pKGJlYoGLb4MSH,,,,,anonymous,EN-GB,2,6,7,1,2,30,female,5,,,,50000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:44,01/04/2020 18:45,0,100,41,1,01/04/2020 18:45,R_1H5Kk9lvewhURXZ,,,,,anonymous,EN-GB,2,4,7,1,2,35,male,5,,,,72500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:45,01/04/2020 18:45,0,100,36,1,01/04/2020 18:45,R_1jBTixOUgh09YZY,,,,,anonymous,EN-GB,6,5,3,1,6,36,female,2,,,,72500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:44,01/04/2020 18:45,0,100,48,1,01/04/2020 18:45,R_1MMruhPftYRPAN3,,,,,anonymous,EN-GB,1,7,7,1,1,25,female,5,,,,50000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:44,01/04/2020 18:45,0,100,55,1,01/04/2020 18:45,R_2Po5tVM6I7LdDib,,,,,anonymous,EN-GB,2,6,7,1,2,40,male,5,,,,32500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:45,01/04/2020 18:45,0,100,29,1,01/04/2020 18:45,R_2SrwPyke0VY9OAJ,,,,,anonymous,EN-GB,4,6,5,1,4,26,male,5,,,,225000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:45,01/04/2020 18:45,0,100,24,1,01/04/2020 18:45,R_2En4VjDRw6RpSZE,,,,,anonymous,EN-GB,2,5,6,1,2,25,male,5,,,,72500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:45,01/04/2020 18:46,0,100,52,1,01/04/2020 18:46,R_3NxDvnTJu4n9G34,,,,,anonymous,EN-GB,1,7,7,1,1,44,female,7,,,,72500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:44,01/04/2020 18:46,0,100,67,1,01/04/2020 18:46,R_8iivOW44AMVUDkJ,,,,,anonymous,EN-GB,6,2,7,1,6,47,female,6,,,,72500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:45,01/04/2020 18:46,0,100,29,1,01/04/2020 18:46,R_xfQSEn3mmiUfVhD,,,,,anonymous,EN-GB,3,5,6,1,3,23,male,5,,,,50000,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:45,01/04/2020 18:46,0,100,67,1,01/04/2020 18:46,R_11jsjKkAnvVVH3g,,,,,anonymous,EN-GB,4,7,7,3,4,28,male,2,,,,17500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:45,01/04/2020 18:46,0,100,35,1,01/04/2020 18:46,R_31ovo4ET1KsaF81,,,,,anonymous,EN-GB,6,6,6,1,6,48,female,6,,,,132500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:45,01/04/2020 18:46,0,100,38,1,01/04/2020 18:46,R_2D5rBIsThfr5d92,,,,,anonymous,EN-GB,5,6,6,1,5,32,male,4,,,,32500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:45,01/04/2020 18:46,0,100,46,1,01/04/2020 18:46,R_2yq0qmDNmaoP3El,,,,,anonymous,EN-GB,6,6,2,3,6,49,female,6,,,,72500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:44,01/04/2020 18:46,0,100,99,1,01/04/2020 18:46,R_1hPS9sBcfiHYLc1,,,,,anonymous,EN-GB,3,5,6,1,3,31,male,5,,,,32500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:46,01/04/2020 18:46,0,100,34,1,01/04/2020 18:46,R_1GZU5WPDX4Z8rFy,,,,,anonymous,EN-GB,3,6,5,1,3,37,female,5,,,,175000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:44,01/04/2020 18:46,0,100,100,1,01/04/2020 18:46,R_ThKwN43vYeUafGp,,,,,anonymous,EN-GB,1,6,7,1,1,32,female,4,,,,32500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:46,01/04/2020 18:46,0,100,33,1,01/04/2020 18:46,R_1lhoxZQS5KkZa3G,,,,,anonymous,EN-GB,6,5,2,4,6,25,male,5,,,,72500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:46,01/04/2020 18:46,0,100,37,1,01/04/2020 18:46,R_272Pwp8kCqtC5jt,,,,,anonymous,EN-GB,5,5,5,1,5,37,female,7,,,,100000,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:46,01/04/2020 18:46,0,100,17,1,01/04/2020 18:46,R_u2eKyYdyYC6PHnH,,,,,anonymous,EN-GB,7,6,5,1,7,36,male,5,,,,225000,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:46,01/04/2020 18:47,0,100,28,1,01/04/2020 18:47,R_1Dr8wQJ05lLtba8,,,,,anonymous,EN-GB,5,7,6,1,5,24,male,5,,,,225000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:46,01/04/2020 18:47,0,100,45,1,01/04/2020 18:47,R_1gtjwg3fXzYFtqU,,,,,anonymous,EN-GB,6,6,4,1,6,26,male,2,,,,100000,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:46,01/04/2020 18:47,0,100,34,1,01/04/2020 18:47,R_3CIeLPQr4bwvX8P,,,,,anonymous,EN-GB,7,2,2,1,7,24,male,2,,,,32500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:46,01/04/2020 18:47,0,100,63,1,01/04/2020 18:47,R_2wvEntdvXo80N91,,,,,anonymous,EN-GB,1,7,7,1,1,29,male,5,,,,100000,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:44,01/04/2020 18:47,0,100,158,1,01/04/2020 18:47,R_1LFgefBAhP9AvOt,,,,,anonymous,EN-GB,1,7,7,1,1,41,male,7,,,,225000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:47,01/04/2020 18:47,0,100,15,1,01/04/2020 18:47,R_3fMDYIIIjxoQb8n,,,,,anonymous,EN-GB,7,7,1,3,7,31,female,2,,,,50000,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:47,01/04/2020 18:47,0,100,25,1,01/04/2020 18:47,R_3iULnx9wSN8PQjh,,,,,anonymous,EN-GB,3,7,6,1,3,21,male,4,,,,225000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:46,01/04/2020 18:47,0,100,47,1,01/04/2020 18:47,R_2q8k81bzAxJJ59J,,,,,anonymous,EN-GB,6,5,5,1,6,33,male,3,,,,17500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:47,01/04/2020 18:48,0,100,37,1,01/04/2020 18:48,R_1LjvdjkIg1XtOJH,,,,,anonymous,EN-GB,2,5,6,1,2,24,male,5,,,,50000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:47,01/04/2020 18:48,0,100,64,1,01/04/2020 18:48,R_DRX2FnuGeSqXXsR,,,,,anonymous,EN-GB,2,7,7,1,2,51,male,4,,,,32500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:48,01/04/2020 18:49,0,100,57,1,01/04/2020 18:49,R_2c2eo4ZE7lqZoD1,,,,,anonymous,EN-GB,4,5,5,1,4,38,female,6,,,,132500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:45,01/04/2020 18:49,0,100,229,1,01/04/2020 18:49,R_1ey1bkrwqRlFFV6,,,,,anonymous,EN-GB,4,6,6,1,4,28,male,4,,,,32500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:48,01/04/2020 18:49,0,100,41,1,01/04/2020 18:49,R_2TpzL7QJ96UsCXF,,,,,anonymous,EN-GB,2,6,6,3,2,36,male,3,,,,72500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:48,01/04/2020 18:49,0,100,46,1,01/04/2020 18:49,R_3DvDwtV8R1rOJLr,,,,,anonymous,EN-GB,6,6,4,1,6,25,male,2,,,,50000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:48,01/04/2020 18:49,0,100,41,1,01/04/2020 18:49,R_d50aU09ASgu7ZhT,,,,,anonymous,EN-GB,6,5,3,1,6,41,male,5,,,,50000,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:49,01/04/2020 18:49,0,100,19,1,01/04/2020 18:49,R_xErTNDGiVSPriCt,,,,,anonymous,EN-GB,1,7,7,1,1,38,male,2,,,,17500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:48,01/04/2020 18:49,0,100,52,1,01/04/2020 18:49,R_1gN0dn4PMgtmUYD,,,,,anonymous,EN-GB,6,5,5,1,6,40,male,6,,,,17500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:49,01/04/2020 18:49,0,100,31,1,01/04/2020 18:49,R_2cin12Jhxt7u5CS,,,,,anonymous,EN-GB,4,5,4,1,4,36,male,5,,,,50000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:49,01/04/2020 18:50,0,100,64,1,01/04/2020 18:50,R_AcfrwvEHGoO6W6B,,,,,anonymous,EN-GB,5,4,5,1,5,26,male,5,,,,100000,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:50,01/04/2020 18:50,0,100,30,1,01/04/2020 18:50,R_DkMxLbLc1CXTKlH,,,,,anonymous,EN-GB,5,6,6,2,5,28,female,5,,,,100000,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:49,01/04/2020 18:51,0,100,99,1,01/04/2020 18:51,R_2eVSGkF4TfHWZOB,,,,,anonymous,EN-GB,2,6,7,1,2,37,male,5,,,,100000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:50,01/04/2020 18:51,0,100,52,1,01/04/2020 18:51,R_1OUYoFL1BNboG5Q,,,,,anonymous,EN-GB,3,5,5,1,3,44,male,6,,,,175000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:51,01/04/2020 18:52,0,100,51,1,01/04/2020 18:52,R_O3RuNPzhx0H6SCB,,,,,anonymous,EN-GB,1,7,6,1,1,59,female,4,,,,17500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:53,01/04/2020 18:53,0,100,37,1,01/04/2020 18:53,R_2uQDOxu62IucBmO,,,,,anonymous,EN-GB,2,6,6,1,2,29,male,3,,,,50000,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:53,01/04/2020 18:53,0,100,23,1,01/04/2020 18:53,R_3KYG2Guj8fI4ldq,,,,,anonymous,EN-GB,5,5,4,3,5,29,male,2,,,,32500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:52,01/04/2020 18:53,0,100,48,1,01/04/2020 18:53,R_3qwDKOpgJRbX00X,,,,,anonymous,EN-GB,2,6,6,1,2,72,male,5,,,,32500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:53,01/04/2020 18:54,0,100,41,1,01/04/2020 18:54,R_u4dYputZrmS8v9D,,,,,anonymous,EN-GB,7,7,4,1,7,36,female,6,,,,72500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:53,01/04/2020 18:54,0,100,59,1,01/04/2020 18:54,R_1d7aOtFV6e7ZA9R,,,,,anonymous,EN-GB,5,6,3,1,5,59,male,6,,,,32500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:54,01/04/2020 18:54,0,100,30,1,01/04/2020 18:54,R_0IXaai39GFgBG0h,,,,,anonymous,EN-GB,3,6,7,1,3,37,female,5,,,,225000,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:53,01/04/2020 18:54,0,100,88,1,01/04/2020 18:54,R_Oxpxg1mLUME4b5L,,,,,anonymous,EN-GB,5,6,4,1,5,57,male,5,,,,17500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:54,01/04/2020 18:55,0,100,44,1,01/04/2020 18:55,R_3J2vzGhK7ec2HSO,,,,,anonymous,EN-GB,2,7,6,1,2,34,male,6,,,,175000,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:54,01/04/2020 18:55,0,100,33,1,01/04/2020 18:55,R_21F0JSBjh5Pzo82,,,,,anonymous,EN-GB,4,4,4,1,4,33,male,5,,,,4500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:54,01/04/2020 18:55,0,100,37,1,01/04/2020 18:55,R_2f41PnJ7IDXv6Vi,,,,,anonymous,EN-GB,5,6,5,1,5,27,female,4,,,,72500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:55,01/04/2020 18:55,0,100,36,1,01/04/2020 18:55,R_2Vg3xdqRHOO8aby,,,,,anonymous,EN-GB,2,5,5,1,2,40,male,6,,,,132500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:55,01/04/2020 18:56,0,100,36,1,01/04/2020 18:56,R_RQapj9i8reGck7L,,,,,anonymous,EN-GB,5,5,4,1,5,28,male,5,,,,132500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:55,01/04/2020 18:56,0,100,23,1,01/04/2020 18:56,R_1eQPulDmg50NRMc,,,,,anonymous,EN-GB,5,6,7,1,5,57,male,5,,,,225000,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:55,01/04/2020 18:56,0,100,44,1,01/04/2020 18:56,R_3oR8Ms45vsD6YYX,,,,,anonymous,EN-GB,2,5,7,1,2,36,female,5,,,,72500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:54,01/04/2020 18:56,0,100,83,1,01/04/2020 18:56,R_33ajIkpPyfCQ2kk,,,,,anonymous,EN-GB,4,7,7,1,4,30,male,2,,,,100000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:55,01/04/2020 18:56,0,100,43,1,01/04/2020 18:56,R_3HGDx2xERzCO9NO,,,,,anonymous,EN-GB,5,6,5,1,5,30,male,2,,,,50000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:55,01/04/2020 18:56,0,100,45,1,01/04/2020 18:56,R_31AChyFmrQTQewL,,,,,anonymous,EN-GB,1,6,7,1,1,32,male,3,,,,132500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:55,01/04/2020 18:56,0,100,26,1,01/04/2020 18:56,R_RKpwGQJ3TuEDcD7,,,,,anonymous,EN-GB,7,6,5,1,7,39,male,3,,,,72500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 18:55,01/04/2020 18:56,0,100,57,1,01/04/2020 18:56,R_3JvX1ncamBodDNf,,,,,anonymous,EN-GB,5,5,6,1,5,27,female,4,,,,50000,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:56,01/04/2020 18:57,0,100,43,1,01/04/2020 18:57,R_2sZqVXCYmkQWN5E,,,,,anonymous,EN-GB,5,6,4,1,5,33,female,4,,,,72500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:54,01/04/2020 18:58,0,100,228,1,01/04/2020 18:58,R_3CK5LY2M13xHaGW,,,,,anonymous,EN-GB,5,7,5,1,5,49,female,6,,,,72500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:58,01/04/2020 18:59,0,100,36,1,01/04/2020 18:59,R_2TZxIolXxyeZ9C4,,,,,anonymous,EN-GB,7,2,1,1,7,35,male,2,,,,32500,,,,oneoff,proposal,proposed general policies
+01/04/2020 18:59,01/04/2020 19:00,0,100,39,1,01/04/2020 19:00,R_1M55O7ystZFj6Og,,,,,anonymous,EN-GB,4,4,4,1,4,34,female,5,,,,100000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 19:02,01/04/2020 19:02,0,100,46,1,01/04/2020 19:02,R_2WuGXNC2R8zZvyF,,,,,anonymous,EN-GB,6,3,3,1,6,32,male,5,,,,100000,,,,oneoff,proposal,proposed general policies
+01/04/2020 19:05,01/04/2020 19:06,0,100,28,1,01/04/2020 19:06,R_2drVuck6wWcr1D0,,,,,anonymous,EN-GB,1,7,7,1,1,31,male,5,,,,225000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 19:12,01/04/2020 19:13,0,100,63,1,01/04/2020 19:13,R_27VW37phmEMRze0,,,,,anonymous,EN-GB,7,6,6,1,7,26,female,5,,,,50000,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:13,01/04/2020 20:13,0,100,8,1,01/04/2020 20:13,R_1d0O4OEPcBUvYEm,,,,,anonymous,EN-GB,5,5,3,1,5,31,male,2,,,,50000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:13,01/04/2020 20:13,0,100,16,1,01/04/2020 20:13,R_2YbTdciTaJ3t6AP,,,,,anonymous,EN-GB,1,6,7,1,1,39,female,6,,,,50000,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:13,01/04/2020 20:14,0,100,18,1,01/04/2020 20:14,R_20YetTP1vX7br24,,,,,anonymous,EN-GB,3,5,6,1,3,22,male,4,,,,132500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:13,01/04/2020 20:14,0,100,36,1,01/04/2020 20:14,R_1JQlkARqYH7E3Fq,,,,,anonymous,EN-GB,5,6,5,1,5,27,female,4,,,,72500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:13,01/04/2020 20:14,0,100,29,1,01/04/2020 20:14,R_27NArCWuhal1Lep,,,,,anonymous,EN-GB,2,6,6,1,2,26,female,4,,,,4500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:13,01/04/2020 20:14,0,100,30,1,01/04/2020 20:14,R_2BzI9Sfj7ZniN3w,,,,,anonymous,EN-GB,5,6,5,1,5,26,male,5,,,,225000,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:13,01/04/2020 20:14,0,100,50,1,01/04/2020 20:14,R_3kvNGpxIvcLcUQo,,,,,anonymous,EN-GB,3,2,5,1,3,42,male,5,,,,132500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:13,01/04/2020 20:14,0,100,42,1,01/04/2020 20:14,R_2WSdXkjnH65RAK0,,,,,anonymous,EN-GB,6,3,2,3,6,47,male,4,,,,100000,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:14,01/04/2020 20:14,0,100,23,1,01/04/2020 20:14,R_12PAm0st0Lz7AOs,,,,,anonymous,EN-GB,6,6,5,1,6,36,male,5,,,,225000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:13,01/04/2020 20:14,0,100,55,1,01/04/2020 20:14,R_24bFW8bL3Q8U0Va,,,,,anonymous,EN-GB,1,7,7,1,1,58,male,5,,,,100000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:13,01/04/2020 20:14,0,100,52,1,01/04/2020 20:14,R_1F9TivVYKUXZe89,,,,,anonymous,EN-GB,6,4,4,1,6,31,male,7,,,,175000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:14,01/04/2020 20:14,0,100,34,1,01/04/2020 20:14,R_1q9QqEXVtlMwJs6,,,,,anonymous,EN-GB,7,3,3,1,7,28,,4,,,,4500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:14,01/04/2020 20:14,0,100,36,1,01/04/2020 20:14,R_DFXA3ZdwGbX3ZjH,,,,,anonymous,EN-GB,1,7,7,1,1,23,male,2,,,,17500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:13,01/04/2020 20:14,0,100,49,1,01/04/2020 20:14,R_2ugyaPzyuvTHQop,,,,,anonymous,EN-GB,4,4,7,1,4,40,male,5,,,,50000,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:14,01/04/2020 20:14,0,100,27,1,01/04/2020 20:14,R_2P6iWIYUSozccWe,,,,,anonymous,EN-GB,4,4,4,1,4,39,female,2,,,,4500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:14,01/04/2020 20:14,0,100,25,1,01/04/2020 20:14,R_qXzHQtoJQu3Dvdn,,,,,anonymous,EN-GB,2,6,6,1,2,26,male,5,,,,17500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:13,01/04/2020 20:14,0,100,57,1,01/04/2020 20:14,R_V26r9LHNECCQkHT,,,,,anonymous,EN-GB,2,7,7,1,2,48,male,5,,,,50000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:14,01/04/2020 20:14,0,100,25,1,01/04/2020 20:14,R_1DBkIE2hkkEcKpU,,,,,anonymous,EN-GB,1,7,7,1,1,29,male,5,,,,100000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:14,01/04/2020 20:14,0,100,25,1,01/04/2020 20:14,R_3qDJuO9zIW8ekMg,,,,,anonymous,EN-GB,5,5,4,1,5,31,male,5,,,,50000,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:14,01/04/2020 20:14,0,100,32,1,01/04/2020 20:14,R_A5R43TErSRN3Wdb,,,,,anonymous,EN-GB,5,6,6,1,5,28,female,5,,,,100000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:14,01/04/2020 20:14,0,100,27,1,01/04/2020 20:14,R_3hEgj3mtvaHVB4T,,,,,anonymous,EN-GB,7,6,5,1,7,39,male,3,,,,72500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:13,01/04/2020 20:14,0,100,75,1,01/04/2020 20:14,R_1jNAWKhjfkSUwQG,,,,,anonymous,EN-GB,4,5,4,1,4,40,female,5,,,,50000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:14,01/04/2020 20:15,0,100,34,1,01/04/2020 20:15,R_1kTz6GVqlHEEW1z,,,,,anonymous,EN-GB,2,6,6,1,2,37,male,5,,,,17500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:14,01/04/2020 20:15,0,100,47,1,01/04/2020 20:15,R_2Cg17QpTsoYdg1Q,,,,,anonymous,EN-GB,5,3,2,1,5,35,female,5,,,,50000,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:14,01/04/2020 20:15,0,100,20,1,01/04/2020 20:15,R_24iu2K7xW4ZEqH2,,,,,anonymous,EN-GB,7,1,2,1,7,28,male,2,,,,17500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:14,01/04/2020 20:15,0,100,22,1,01/04/2020 20:15,R_xDtSJXLWGPIuERb,,,,,anonymous,EN-GB,6,3,3,1,6,25,female,2,,,,17500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:14,01/04/2020 20:15,0,100,48,1,01/04/2020 20:15,R_tYCRncb8GxDfVlv,,,,,anonymous,EN-GB,1,7,7,1,1,36,female,5,,,,32500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:14,01/04/2020 20:15,0,100,35,1,01/04/2020 20:15,R_27P5AuZTn71kPYj,,,,,anonymous,EN-GB,7,4,3,1,7,32,male,5,,,,32500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:14,01/04/2020 20:15,0,100,68,1,01/04/2020 20:15,R_uz8aWGUb1EK4tTH,,,,,anonymous,EN-GB,7,4,4,1,7,38,male,4,,,,72500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:15,01/04/2020 20:16,0,100,20,1,01/04/2020 20:16,R_vir0Qq4Fhimi0lb,,,,,anonymous,EN-GB,2,6,6,1,2,31,male,5,,,,50000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:15,01/04/2020 20:16,0,100,59,1,01/04/2020 20:16,R_211Escz0R2bIupe,,,,,anonymous,EN-GB,3,7,7,1,3,62,female,5,,,,17500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:15,01/04/2020 20:16,0,100,34,1,01/04/2020 20:16,R_u4xrbs86CQRJNQJ,,,,,anonymous,EN-GB,6,5,5,1,6,30,female,4,,,,32500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:15,01/04/2020 20:16,0,100,44,1,01/04/2020 20:16,R_b7QMAkWpuYio4uZ,,,,,anonymous,EN-GB,5,5,3,1,5,21,female,5,,,,4500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:15,01/04/2020 20:16,0,100,22,1,01/04/2020 20:16,R_3n3r3pk6S3hpxoN,,,,,anonymous,EN-GB,6,3,3,1,6,29,male,4,,,,17500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:15,01/04/2020 20:16,0,100,70,1,01/04/2020 20:16,R_1M5If90hySVHQ6N,,,,,anonymous,EN-GB,2,6,6,1,2,32,male,5,,,,50000,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:15,01/04/2020 20:16,0,100,41,1,01/04/2020 20:16,R_2zomO7DzWkUTDFz,,,,,anonymous,EN-GB,6,3,6,1,6,24,male,2,,,,32500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:15,01/04/2020 20:16,0,100,61,1,01/04/2020 20:16,R_2Uhzz0Zr1p3uTCu,,,,,anonymous,EN-GB,2,7,6,1,2,55,male,6,,,,72500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:15,01/04/2020 20:16,0,100,40,1,01/04/2020 20:16,R_1q87rjswtOEgHQZ,,,,,anonymous,EN-GB,2,7,4,1,2,38,male,6,,,,100000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:15,01/04/2020 20:16,0,100,48,1,01/04/2020 20:16,R_2QXVdWDXxWVJOwE,,,,,anonymous,EN-GB,3,5,6,1,3,42,male,5,,,,132500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:15,01/04/2020 20:16,0,100,54,1,01/04/2020 20:16,R_1GylYBwO4XVskWU,,,,,anonymous,EN-GB,4,4,4,1,4,25,male,4,,,,17500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:15,01/04/2020 20:16,0,100,48,1,01/04/2020 20:16,R_2zVblGxJGmEI6xs,,,,,anonymous,EN-GB,5,6,6,1,5,24,male,2,,,,72500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:16,01/04/2020 20:16,0,100,33,1,01/04/2020 20:16,R_1Os0OwVUuLAjCYh,,,,,anonymous,EN-GB,3,6,7,1,3,51,female,5,,,,100000,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:15,01/04/2020 20:16,0,100,53,1,01/04/2020 20:16,R_1PUdbPWO3XQIMws,,,,,anonymous,EN-GB,5,6,6,1,5,39,female,5,,,,132500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:15,01/04/2020 20:16,0,100,61,1,01/04/2020 20:16,R_ZrfEp2YkeqHNyPD,,,,,anonymous,EN-GB,1,6,6,1,1,43,male,5,,,,132500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:15,01/04/2020 20:16,0,100,85,1,01/04/2020 20:16,R_1j6TlXDLrnbIKRa,,,,,anonymous,EN-GB,7,2,3,1,7,37,female,2,,,,72500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:16,01/04/2020 20:16,0,100,42,1,01/04/2020 20:16,R_tMTk6HlPIzfEDx7,,,,,anonymous,EN-GB,5,5,5,1,5,27,male,5,,,,32500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:16,01/04/2020 20:16,0,100,24,1,01/04/2020 20:16,R_OfmvPzgWOGTHFXH,,,,,anonymous,EN-GB,5,4,4,3,5,31,male,0,,,,50000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:15,01/04/2020 20:16,0,100,66,1,01/04/2020 20:16,R_R4R7ALksSkqsIRH,,,,,anonymous,EN-GB,2,7,6,1,2,70,male,5,,,,50000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:16,01/04/2020 20:17,0,100,55,1,01/04/2020 20:17,R_3e4VSAZqVEe4Z3K,,,,,anonymous,EN-GB,2,6,7,1,2,35,female,4,,,,72500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:16,01/04/2020 20:17,0,100,56,1,01/04/2020 20:17,R_2X57HfQIJiPfv03,,,,,anonymous,EN-GB,7,3,1,1,7,33,male,2,,,,50000,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:16,01/04/2020 20:17,0,100,47,1,01/04/2020 20:17,R_1EidahMCRKi93Er,,,,,anonymous,EN-GB,6,2,2,1,6,36,male,4,,,,72500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:17,01/04/2020 20:17,0,100,34,1,01/04/2020 20:17,R_2xxUisjHQF0o0sp,,,,,anonymous,EN-GB,6,5,5,1,6,27,male,2,,,,17500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:16,01/04/2020 20:17,0,100,55,1,01/04/2020 20:17,R_3q8SenSnGsx5a6y,,,,,anonymous,EN-GB,7,2,1,1,7,1990,male,5,,,,32500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:15,01/04/2020 20:17,0,100,163,1,01/04/2020 20:17,R_1meBCsAwkTBxRgY,,,,,anonymous,EN-GB,3,6,5,1,3,59,female,2,,,,100000,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:17,01/04/2020 20:17,0,100,34,1,01/04/2020 20:17,R_2Pk6upjoQukHOdW,,,,,anonymous,EN-GB,2,7,7,1,2,24,male,2,,,,72500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:17,01/04/2020 20:18,0,100,18,1,01/04/2020 20:18,R_R3jYqhkMHOigyfD,,,,,anonymous,EN-GB,5,5,6,1,5,37,female,5,,,,72500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:17,01/04/2020 20:18,0,100,46,1,01/04/2020 20:18,R_1kLZrm3pF5jmrq0,,,,,anonymous,EN-GB,6,6,6,1,6,35,female,5,,,,17500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:17,01/04/2020 20:18,0,100,43,1,01/04/2020 20:18,R_3QEGrIqGKd45a2f,,,,,anonymous,EN-GB,5,6,6,1,5,41,female,5,,,,100000,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:17,01/04/2020 20:18,0,100,61,1,01/04/2020 20:18,R_OktjBMhyCyCEi3f,,,,,anonymous,EN-GB,6,5,6,1,6,28,male,7,,,,72500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:18,01/04/2020 20:18,0,100,33,1,01/04/2020 20:18,R_2uQB2CY7T637Hzd,,,,,anonymous,EN-GB,2,5,7,1,2,35,male,5,,,,72500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:17,01/04/2020 20:18,0,100,60,1,01/04/2020 20:18,R_3P4ESP2EYPQk6DP,,,,,anonymous,EN-GB,5,3,5,1,5,54,male,6,,,,32500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:19,01/04/2020 20:19,0,100,42,1,01/04/2020 20:19,R_xocKSK3Tqe4ywLv,,,,,anonymous,EN-GB,6,4,4,1,6,30,male,2,,,,72500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:21,01/04/2020 20:22,0,100,28,1,01/04/2020 20:22,R_10OaGmjhI0vDv0o,,,,,anonymous,EN-GB,5,6,6,1,5,29,male,5,,,,72500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:22,01/04/2020 20:22,0,100,14,1,01/04/2020 20:22,R_2nwQTAYaDeO6x8d,,,,,anonymous,EN-GB,2,5,7,1,2,35,male,5,,,,72500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:22,01/04/2020 20:22,0,100,44,1,01/04/2020 20:22,R_1MMcnLjYccGZSvF,,,,,anonymous,EN-GB,3,7,7,1,3,33,female,5,,,,100000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:22,01/04/2020 20:22,0,100,45,1,01/04/2020 20:22,R_2VDXaYtyal9c6L8,,,,,anonymous,EN-GB,6,5,4,1,6,27,male,5,,,,32500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:22,01/04/2020 20:23,0,100,42,1,01/04/2020 20:23,R_2qgSj1MIjXps9yy,,,,,anonymous,EN-GB,4,5,3,1,4,52,male,2,,,,32500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:22,01/04/2020 20:23,0,100,36,1,01/04/2020 20:23,R_3rR41ktmhNhPh6x,,,,,anonymous,EN-GB,4,5,7,1,4,33,female,5,,,,50000,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:22,01/04/2020 20:23,0,100,67,1,01/04/2020 20:23,R_1Q0Mc033SlgWjBi,,,,,anonymous,EN-GB,7,5,6,1,7,40,other,5,,,,17500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:22,01/04/2020 20:23,0,100,38,1,01/04/2020 20:23,R_YQSarhxcKwzEgfv,,,,,anonymous,EN-GB,5,4,4,1,5,48,female,2,,,,100000,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:22,01/04/2020 20:23,0,100,88,1,01/04/2020 20:23,R_OJCO4NiKdUzScTL,,,,,anonymous,EN-GB,2,6,7,1,2,42,male,4,,,,32500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:22,01/04/2020 20:23,0,100,56,1,01/04/2020 20:23,R_1nV2phU2WQWPSH6,,,,,anonymous,EN-GB,5,5,4,1,5,24,female,5,,,,50000,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:23,01/04/2020 20:23,0,100,34,1,01/04/2020 20:23,R_yko2xWz3wOD3ZZv,,,,,anonymous,EN-GB,2,6,6,1,2,61,male,5,,,,100000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:23,01/04/2020 20:24,0,100,57,1,01/04/2020 20:24,R_2y9Jg9iPLKBQPBj,,,,,anonymous,EN-GB,1,7,7,1,1,50,female,6,,,,50000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:24,01/04/2020 20:24,0,100,32,1,01/04/2020 20:24,R_3fqnLoSnAQocvGc,,,,,anonymous,EN-GB,5,6,5,1,5,36,female,2,,,,132500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:23,01/04/2020 20:24,0,100,96,1,01/04/2020 20:24,R_2RVxd9CT8X6XCPW,,,,,anonymous,EN-GB,5,5,3,1,5,31,female,5,,,,175000,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:23,01/04/2020 20:25,0,100,119,1,01/04/2020 20:25,R_1nPGD06AW8GWqYg,,,,,anonymous,EN-GB,5,6,5,1,5,46,female,4,,,,17500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:24,01/04/2020 20:25,0,100,33,1,01/04/2020 20:25,R_tL3paUm34ZNZpx7,,,,,anonymous,EN-GB,2,4,6,1,2,39,female,2,,,,4500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:25,01/04/2020 20:25,0,100,9,1,01/04/2020 20:25,R_3s4AuUU4ftpyuDx,,,,,anonymous,EN-GB,6,6,5,2,6,22,male,3,,,,50000,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:25,01/04/2020 20:25,0,100,17,1,01/04/2020 20:25,R_2w4wPvmlYm869Sx,,,,,anonymous,EN-GB,3,7,7,1,3,32,male,2,,,,17500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:24,01/04/2020 20:25,0,100,54,1,01/04/2020 20:25,R_1mF9Z21S2kEN5d5,,,,,anonymous,EN-GB,7,6,2,1,7,50,female,2,,,,17500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:24,01/04/2020 20:25,0,100,63,1,01/04/2020 20:25,R_2OJT2HOnpLvv7qo,,,,,anonymous,EN-GB,5,6,6,1,5,41,female,2,,,,32500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:24,01/04/2020 20:25,0,100,48,1,01/04/2020 20:25,R_1Qz7ZPdtUWplrwS,,,,,anonymous,EN-GB,2,7,7,1,2,72,female,3,,,,50000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:25,01/04/2020 20:25,0,100,23,1,01/04/2020 20:25,R_r73gKo1hjgzvvqN,,,,,anonymous,EN-GB,6,4,4,1,6,23,female,4,,,,4500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:25,01/04/2020 20:26,0,100,47,1,01/04/2020 20:26,R_3hygf09pRHdHhe1,,,,,anonymous,EN-GB,4,5,4,3,4,37,male,2,,,,32500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:25,01/04/2020 20:26,0,100,39,1,01/04/2020 20:26,R_1JKO4U7l1XInyCA,,,,,anonymous,EN-GB,6,3,4,1,6,47,female,5,,,,72500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:25,01/04/2020 20:26,0,100,46,1,01/04/2020 20:26,R_ZIbaZXUuz1RBZ2V,,,,,anonymous,EN-GB,5,6,3,1,5,29,male,6,,,,132500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:25,01/04/2020 20:26,0,100,47,1,01/04/2020 20:26,R_1hYhlWPXjaZ7FXZ,,,,,anonymous,EN-GB,3,7,5,1,3,37,male,8,,,,100000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:25,01/04/2020 20:26,0,100,80,1,01/04/2020 20:26,R_1GVVUE0fcbjXGL8,,,,,anonymous,EN-GB,4,5,3,1,4,65,male,5,,,,225000,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:26,01/04/2020 20:26,0,100,30,1,01/04/2020 20:26,R_1DnIsERYHAdLYxR,,,,,anonymous,EN-GB,5,3,3,1,5,39,female,5,,,,225000,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:26,01/04/2020 20:27,0,100,68,1,01/04/2020 20:27,R_8qUeRHZzAnhkf0B,,,,,anonymous,EN-GB,6,6,5,3,6,30,female,5,,,,50000,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:27,01/04/2020 20:28,0,100,63,1,01/04/2020 20:28,R_3D6Lxwy61Yhw0oQ,,,,,anonymous,EN-GB,5,5,3,1,5,45,female,2,,,,175000,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:27,01/04/2020 20:28,0,100,40,1,01/04/2020 20:28,R_Xjp3zOsbmmypmDf,,,,,anonymous,EN-GB,6,4,2,1,6,34,male,5,,,,72500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:27,01/04/2020 20:28,0,100,96,1,01/04/2020 20:28,R_2EaFDd3DS6BdQYq,,,,,anonymous,EN-GB,1,7,7,1,1,52,male,5,,,,100000,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:28,01/04/2020 20:29,0,100,56,1,01/04/2020 20:29,R_sI16lxW2u4GVt0B,,,,,anonymous,EN-GB,7,5,5,1,7,30,female,5,,,,72500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:28,01/04/2020 20:29,0,100,43,1,01/04/2020 20:29,R_2e4Fx0KYrM5W14k,,,,,anonymous,EN-GB,2,6,6,1,2,29,,,,,,,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:26,01/04/2020 20:29,0,100,198,1,01/04/2020 20:29,R_1LY8wZuBYoaoh1b,,,,,anonymous,EN-GB,3,6,4,1,3,35,male,2,,,,32500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:29,01/04/2020 20:30,0,100,40,1,01/04/2020 20:30,R_0uEyVZ8gX1fw6bv,,,,,anonymous,EN-GB,1,4,7,1,1,34,female,4,,,,32500,,,,rule,proposed general policy,proposed general policies
+01/04/2020 20:28,01/04/2020 20:30,0,100,138,1,01/04/2020 20:30,R_2z5DHeHvKfH0CoN,,,,,anonymous,EN-GB,3,6,7,1,3,38,female,2,,,,32500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:31,01/04/2020 20:32,0,100,41,1,01/04/2020 20:32,R_1jiVx13gARY5pAz,,,,,anonymous,EN-GB,5,4,4,1,5,35,female,3,,,,132500,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:35,01/04/2020 20:36,0,100,62,1,01/04/2020 20:36,R_1FFivxQnouwwXme,,,,,anonymous,EN-GB,4,6,4,1,4,52,male,5,,,,50000,,,,oneoff,proposal,proposed general policies
+01/04/2020 20:40,01/04/2020 20:40,0,100,42,1,01/04/2020 20:40,R_1kXouxfEKkQUCnW,,,,,anonymous,EN-GB,1,7,7,1,1,66,female,5,,,,17500,,,,oneoff,proposal,proposed general policies

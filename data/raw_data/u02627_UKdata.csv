@@ -1,0 +1,826 @@
+age,Ethnicity..Simplified.,Highest.education.level.completed,Household.Income..GBP.,Political.Party.Affiliation.UK,Sex,ideo,nfcog_1,nfcog_2,nfcog_3,nfcog_4,nfcog_5,nfcog_6,seri_you_1,covid_consp_1,covid_consp_2,covid_consp_3,pb_1,pb_2,pb_3,pb_4,pb_5,pb_6,panic_b
+26,White,Graduate degree (MA/MSc/MPhil/other),"£20,000 - £29,999",Liberal Democrats,Female,4,5,5,2,2,5,5,5,1,1,1,3,1,1,2,1,2,1
+49,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Green Party,Male,5,4,4,2,2,4,4,2,1,1,1,2,2,1,2,2,1,1
+38,White,High school diploma/A-levels,"£50,000 - £59,999",Labour,Female,6,2,2,3,4,3,3,1,3,2,1,1,1,1,1,1,1,1
+30,White,Technical/community college,"£20,000 - £29,999",Labour,Male,5,3,3,2,2,4,4,1,1,1,1,2,2,1,1,1,1,1
+54,White,High school diploma/A-levels,"£20,000 - £29,999",Conservative,Female,7,4,4,1,2,4,4,1,2,1,1,4,1,1,3,2,1,2
+30,White,Undergraduate degree (BA/BSc/other),"£10,000 - £15,999",Not applicable / rather not say,Female,7,4,4,2,2,4,4,1,4,4,4,1,1,1,1,1,1,1
+51,White,Secondary education (e.g. GED/GCSE),"£16,000 - £19,999",Other,Female,7,1,3,5,1,3,2,1,4,4,4,1,1,1,1,1,1,1
+40,White,Technical/community college,"£30,000 - £39,999",Labour,Female,4,4,4,2,2,1,3,1,4,2,1,1,1,1,1,1,1,1
+23,White,Undergraduate degree (BA/BSc/other),,Green Party,Male,2,4,4,2,2,4,4,1,1,1,1,1,1,1,1,1,1,1
+59,White,Undergraduate degree (BA/BSc/other),,Labour,Male,2,4,3,2,1,4,4,1,1,1,1,2,1,1,1,1,3,1
+45,White,Graduate degree (MA/MSc/MPhil/other),"£60,000 - £69,999",Scottish National Party (SNP),Male,4,4,3,1,2,4,4,1,1,1,1,3,3,1,3,3,2,1
+33,White,High school diploma/A-levels,,Not applicable / rather not say,Male,6,1,1,4,5,3,1,2,2,1,1,1,1,1,1,1,1,1
+68,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Liberal Democrats,Female,5,3,2,2,2,4,3,2,2,2,2,1,4,1,1,1,1,1
+38,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Conservative,Female,8,4,4,1,2,4,4,2,2,1,1,3,2,1,1,2,1,1
+49,White,Undergraduate degree (BA/BSc/other),,UKIP,Male,7,3,3,3,3,4,3,3,2,2,2,1,1,1,1,1,1,1
+65,White,Secondary education (e.g. GED/GCSE),"£40,000 - £49,999",Conservative,Female,9,2,2,3,4,3,1,1,1,1,1,3,1,1,2,2,1,2
+35,White,High school diploma/A-levels,"£16,000 - £19,999",Labour,Male,4,2,2,4,4,2,2,2,5,5,2,2,2,1,1,2,1,1
+37,White,Undergraduate degree (BA/BSc/other),"£40,000 - £49,999",Conservative,Female,9,2,3,4,4,4,3,2,1,1,1,1,2,1,1,1,1,1
+38,Asian,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Conservative,Female,9,2,2,4,2,4,4,1,1,1,2,1,1,1,1,1,1,1
+56,White,Undergraduate degree (BA/BSc/other),"£16,000 - £19,999",Conservative,Female,5,4,4,3,2,2,4,1,2,1,1,1,1,1,1,1,1,1
+56,White,Undergraduate degree (BA/BSc/other),"£16,000 - £19,999",Conservative,Female,7,4,4,2,4,2,2,1,2,1,1,1,1,1,1,1,1,1
+38,White,Graduate degree (MA/MSc/MPhil/other),"£20,000 - £29,999",Liberal Democrats,Female,6,2,3,4,4,4,3,4,3,4,3,2,1,1,1,1,1,2
+28,White,Undergraduate degree (BA/BSc/other),"£40,000 - £49,999",Conservative,Female,8,5,5,1,1,5,5,2,5,5,2,1,1,1,1,1,1,1
+25,Mixed,Graduate degree (MA/MSc/MPhil/other),"£10,000 - £15,999",Labour,Male,4,2,4,3,4,4,4,1,1,2,2,2,2,1,2,3,2,2
+22,White,Secondary education (e.g. GED/GCSE),,Labour,Female,2,4,4,2,1,4,4,2,1,1,1,3,2,1,1,1,1,2
+24,White,Graduate degree (MA/MSc/MPhil/other),,Not applicable / rather not say,Female,6,2,2,4,4,2,3,4,1,1,1,1,1,1,1,1,1,1
+32,White,Undergraduate degree (BA/BSc/other),"£70,000 - £79,999",Green Party,Female,6,2,3,4,4,2,2,4,7,6,2,1,1,1,1,1,1,3
+31,Asian,Graduate degree (MA/MSc/MPhil/other),"£90,000 - £99,999",Labour,Male,5,5,5,1,1,5,5,1,1,1,1,3,1,1,2,3,1,1
+30,White,Undergraduate degree (BA/BSc/other),"£60,000 - £69,999",Labour,Male,4,2,3,2,3,4,2,1,1,1,1,1,1,1,2,2,1,1
+60,White,Secondary education (e.g. GED/GCSE),"£50,000 - £59,999",Conservative,Female,8,4,4,1,2,4,4,2,2,3,1,1,1,1,3,1,1,1
+42,White,Undergraduate degree (BA/BSc/other),"£16,000 - £19,999",Labour,Female,4,4,4,2,2,4,4,1,2,1,2,2,1,1,1,1,1,1
+28,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Labour,Female,6,3,3,3,3,3,3,4,1,1,1,1,1,1,1,1,1,1
+55,White,Undergraduate degree (BA/BSc/other),"£50,000 - £59,999",Liberal Democrats,Female,6,2,1,4,4,2,2,2,3,3,2,2,1,1,2,1,3,1
+31,White,Secondary education (e.g. GED/GCSE),"£50,000 - £59,999",Not applicable / rather not say,Male,8,2,2,2,4,4,1,4,6,5,1,1,1,1,4,4,1,1
+53,White,Undergraduate degree (BA/BSc/other),"£70,000 - £79,999",Other,Female,8,2,2,4,4,2,1,1,1,1,1,2,1,1,1,1,1,1
+54,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Conservative,Female,9,3,3,2,2,3,3,2,1,1,1,3,1,1,2,1,1,1
+59,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Labour,Female,2,4,2,4,5,2,2,1,1,1,1,2,1,1,1,1,1,1
+37,White,Undergraduate degree (BA/BSc/other),,Conservative,Female,7,2,2,4,4,3,2,2,3,2,1,3,1,1,3,3,1,1
+64,White,Undergraduate degree (BA/BSc/other),"£80,000 - £89,999",Conservative,Female,9,2,3,2,1,4,4,5,4,5,3,4,3,1,2,1,1,1
+64,White,High school diploma/A-levels,"£20,000 - £29,999",Other,Male,5,4,4,2,2,4,3,3,2,3,2,3,1,1,2,1,1,1
+62,White,Technical/community college,Rather not say,Conservative,Female,7,4,4,1,1,4,4,1,1,1,1,2,1,1,1,1,1,2
+31,White,High school diploma/A-levels,,Not applicable / rather not say,Female,6,1,1,4,4,2,2,2,6,6,2,3,3,3,3,3,3,2
+29,White,Undergraduate degree (BA/BSc/other),"£60,000 - £69,999",Liberal Democrats,Male,6,2,4,1,2,4,4,5,1,1,1,2,2,1,1,1,1,1
+33,Asian,Undergraduate degree (BA/BSc/other),"£60,000 - £69,999",Conservative,Female,8,1,1,5,5,1,1,4,1,1,1,1,1,1,1,1,1,1
+51,White,Doctorate degree (PhD/other),"More than £150,000",Liberal Democrats,Female,2,5,4,1,1,5,4,1,1,1,1,3,3,1,3,2,2,1
+36,White,Undergraduate degree (BA/BSc/other),"£40,000 - £49,999",Labour,Male,5,4,4,1,2,4,4,1,1,1,1,1,1,1,1,1,1,1
+36,White,Graduate degree (MA/MSc/MPhil/other),"£40,000 - £49,999",Not applicable / rather not say,Male,6,4,4,2,2,5,4,1,1,1,1,1,1,1,1,1,1,1
+60,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Not applicable / rather not say,Female,8,2,2,3,3,2,4,1,2,1,1,2,1,1,1,1,1,1
+57,White,Graduate degree (MA/MSc/MPhil/other),"£20,000 - £29,999",Other,Male,6,4,5,1,2,5,5,7,1,1,1,1,1,1,1,1,1,1
+31,White,Secondary education (e.g. GED/GCSE),"£16,000 - £19,999",Labour,Female,6,4,5,1,2,5,4,1,4,4,4,1,1,1,1,1,1,1
+52,White,Undergraduate degree (BA/BSc/other),"£10,000 - £15,999",Labour,Female,2,4,5,1,1,4,5,1,4,5,5,4,3,1,4,4,1,1
+30,White,Secondary education (e.g. GED/GCSE),"£10,000 - £15,999",Liberal Democrats,Female,5,1,1,2,4,3,1,1,3,1,1,1,1,1,1,1,1,1
+54,White,High school diploma/A-levels,"£40,000 - £49,999",Conservative,Female,7,4,4,2,3,4,4,1,2,1,1,1,1,1,3,2,1,2
+38,White,High school diploma/A-levels,,Liberal Democrats,Male,6,3,4,4,3,4,4,1,5,7,2,1,2,1,1,1,1,3
+38,White,High school diploma/A-levels,,Not applicable / rather not say,Male,5,2,4,3,3,4,4,2,1,1,1,1,1,1,1,2,1,1
+58,White,Undergraduate degree (BA/BSc/other),,Not applicable / rather not say,Female,6,4,3,1,2,4,4,1,6,6,6,3,2,1,1,1,1,2
+25,White,Undergraduate degree (BA/BSc/other),"£16,000 - £19,999",Not applicable / rather not say,Female,8,4,4,2,3,4,2,2,2,1,1,2,2,1,3,2,1,1
+45,White,Undergraduate degree (BA/BSc/other),"£100,000 - £149,999",Liberal Democrats,Male,6,3,4,2,3,5,3,3,2,1,2,2,2,1,2,1,1,1
+46,White,Undergraduate degree (BA/BSc/other),,Green Party,Male,6,4,4,1,2,4,4,2,1,1,1,1,1,1,1,1,1,1
+52,White,High school diploma/A-levels,"£10,000 - £15,999",Not applicable / rather not say,Female,7,1,1,5,5,1,1,1,2,1,1,4,1,1,3,1,1,2
+24,White,Undergraduate degree (BA/BSc/other),Rather not say,Labour,Female,2,1,2,4,5,3,2,4,1,1,1,2,1,1,1,1,1,2
+23,Asian,High school diploma/A-levels,"£20,000 - £29,999",Not applicable / rather not say,Female,7,3,2,4,4,3,4,3,1,5,5,4,4,1,4,4,1,2
+48,White,Undergraduate degree (BA/BSc/other),"£50,000 - £59,999",Other,Female,5,2,2,2,4,2,2,2,2,1,2,3,2,1,2,1,1,1
+45,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Conservative,Male,6,3,4,2,2,4,4,1,1,1,1,1,1,1,1,1,1,1
+51,White,Secondary education (e.g. GED/GCSE),"£30,000 - £39,999",Conservative,Female,8,4,4,2,2,4,4,1,1,1,1,1,1,1,1,1,1,1
+32,White,Undergraduate degree (BA/BSc/other),"£40,000 - £49,999",Labour,Female,4,4,4,2,2,4,4,2,1,1,1,3,3,1,1,1,1,3
+48,White,Undergraduate degree (BA/BSc/other),,Liberal Democrats,Male,7,4,3,4,4,3,4,2,1,1,1,4,2,1,3,4,1,1
+54,White,Undergraduate degree (BA/BSc/other),,Conservative,Female,8,3,4,2,3,4,3,2,4,2,2,3,2,1,2,1,1,2
+47,White,High school diploma/A-levels,"£40,000 - £49,999",Liberal Democrats,Male,5,2,1,4,4,2,2,2,1,1,1,1,1,1,1,1,1,1
+63,Mixed,Technical/community college,"£60,000 - £69,999",Conservative,Male,11,3,3,2,2,4,4,3,1,1,1,1,1,1,1,1,1,1
+44,White,Doctorate degree (PhD/other),,Liberal Democrats,Female,4,2,4,1,1,4,5,1,1,1,1,2,2,1,1,1,1,1
+50,White,High school diploma/A-levels,"£10,000 - £15,999",Conservative,Female,7,3,4,2,2,4,4,2,1,1,1,1,1,1,1,1,1,1
+34,Black,Undergraduate degree (BA/BSc/other),"£60,000 - £69,999",Conservative,Male,6,3,4,2,2,4,4,2,2,2,2,3,2,1,3,2,3,2
+58,White,Undergraduate degree (BA/BSc/other),"£60,000 - £69,999",Conservative,Male,8,4,5,2,2,3,4,2,2,1,1,4,1,1,4,2,1,1
+39,White,Doctorate degree (PhD/other),"£60,000 - £69,999",Labour,Female,1,4,4,1,1,4,4,1,2,2,2,2,1,1,2,1,1,1
+51,White,High school diploma/A-levels,,Conservative,Female,8,3,3,2,2,4,3,1,1,1,1,3,3,1,3,2,1,1
+55,White,Graduate degree (MA/MSc/MPhil/other),"£50,000 - £59,999",Green Party,Female,5,5,5,1,2,5,5,2,4,3,2,4,3,1,3,2,1,1
+57,White,Secondary education (e.g. GED/GCSE),"£20,000 - £29,999",Conservative,Male,6,2,2,2,2,3,2,1,2,2,1,3,3,1,1,3,4,2
+52,White,Graduate degree (MA/MSc/MPhil/other),,Labour,Male,5,2,3,2,3,3,3,1,7,7,3,3,1,1,1,1,2,2
+28,Mixed,Undergraduate degree (BA/BSc/other),,Green Party,Female,4,3,4,2,3,4,5,1,2,1,1,1,1,1,1,1,1,1
+46,White,Graduate degree (MA/MSc/MPhil/other),"£40,000 - £49,999",Labour,Female,4,4,4,2,2,4,4,2,3,2,2,2,2,1,3,3,2,2
+35,Mixed,Doctorate degree (PhD/other),Rather not say,,Female,2,4,4,1,2,5,4,1,1,1,1,1,1,1,1,1,1,3
+63,White,Undergraduate degree (BA/BSc/other),"£70,000 - £79,999",Conservative,Male,8,4,5,1,2,5,5,2,1,1,1,3,3,1,4,3,1,2
+34,White,High school diploma/A-levels,"£30,000 - £39,999",UKIP,Male,8,4,4,2,3,3,3,1,5,5,2,2,1,1,1,1,1,1
+65,White,Undergraduate degree (BA/BSc/other),Rather not say,Liberal Democrats,Female,8,5,4,1,1,5,5,1,4,2,2,1,1,1,1,1,3,2
+40,White,Doctorate degree (PhD/other),"£40,000 - £49,999",Liberal Democrats,Male,4,4,4,1,2,4,5,2,1,1,1,3,1,1,1,2,1,1
+21,White,High school diploma/A-levels,"Less than £10,000 ",Labour,Female,2,4,4,1,2,5,4,2,1,2,1,2,2,1,3,3,1,1
+47,Black,Technical/community college,Rather not say,Not applicable / rather not say,Female,4,2,2,4,4,4,2,2,4,3,2,2,1,1,2,3,1,2
+40,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Liberal Democrats,Male,5,4,4,1,1,5,4,2,1,1,1,1,1,1,1,1,1,1
+61,White,Doctorate degree (PhD/other),,Labour,Male,1,5,5,1,2,4,5,1,1,1,1,3,2,1,1,2,1,1
+56,White,High school diploma/A-levels,"£16,000 - £19,999",Conservative,Female,11,3,2,3,3,3,3,1,2,2,1,2,1,1,1,1,1,1
+34,Mixed,Undergraduate degree (BA/BSc/other),,Liberal Democrats,Male,7,4,4,2,2,4,4,2,1,1,1,3,1,1,2,1,1,1
+38,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Labour,Male,2,3,3,2,3,3,4,2,1,1,1,1,1,1,2,3,3,1
+26,White,Undergraduate degree (BA/BSc/other),"£40,000 - £49,999",Not applicable / rather not say,Female,5,2,4,1,3,4,2,3,2,1,1,4,2,1,1,1,4,2
+51,White,High school diploma/A-levels,,Labour,Male,4,3,3,3,2,3,3,1,4,2,1,1,1,1,1,1,1,1
+53,White,Graduate degree (MA/MSc/MPhil/other),"£100,000 - £149,999",Liberal Democrats,Male,4,4,4,1,1,5,5,2,3,5,1,3,2,1,3,2,3,1
+35,White,Graduate degree (MA/MSc/MPhil/other),"£30,000 - £39,999",Labour,Male,4,4,3,3,4,4,3,3,1,2,1,3,3,1,1,2,2,1
+51,White,Undergraduate degree (BA/BSc/other),"£40,000 - £49,999",Conservative,Male,8,5,5,1,1,5,5,2,1,1,1,1,1,1,1,1,1,1
+63,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Labour,Female,4,5,4,2,2,5,4,1,2,1,1,1,1,1,1,1,1,1
+32,Mixed,Technical/community college,"£30,000 - £39,999",Not applicable / rather not say,Male,6,3,3,3,4,4,3,1,4,4,4,3,2,1,4,3,1,2
+44,White,Undergraduate degree (BA/BSc/other),"Less than £10,000 ",Labour,Female,4,4,3,1,2,4,4,2,1,1,1,2,2,1,1,2,1,1
+74,White,Graduate degree (MA/MSc/MPhil/other),"£50,000 - £59,999",Labour,Male,2,4,4,1,1,5,5,1,1,1,1,3,1,1,2,2,2,2
+47,White,Undergraduate degree (BA/BSc/other),Rather not say,,Female,4,3,2,2,3,4,4,1,4,4,4,1,1,1,1,1,1,1
+58,White,High school diploma/A-levels,,Conservative,Female,9,4,4,4,4,4,4,6,5,5,5,3,3,4,4,4,4,2
+36,White,Undergraduate degree (BA/BSc/other),Rather not say,Not applicable / rather not say,Female,5,3,2,2,4,4,3,3,1,1,1,1,1,1,1,1,1,1
+57,White,Undergraduate degree (BA/BSc/other),"£50,000 - £59,999",Conservative,Female,11,5,4,1,2,4,4,3,4,1,1,5,5,1,3,5,3,1
+48,CONSENT REVOKED,CONSENT REVOKED,CONSENT REVOKED,CONSENT REVOKED,CONSENT REVOKED,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+56,White,High school diploma/A-levels,"£30,000 - £39,999",Conservative,Female,7,3,2,2,2,4,2,1,1,1,1,3,2,1,2,3,1,1
+49,White,Graduate degree (MA/MSc/MPhil/other),"£20,000 - £29,999",UKIP,Male,10,2,4,1,4,5,4,6,7,6,1,4,3,3,3,3,4,1
+26,White,High school diploma/A-levels,Rather not say,Labour,Female,7,3,3,4,4,3,4,3,2,3,3,3,2,1,3,2,2,2
+60,White,Technical/community college,Rather not say,Other,Male,7,4,2,2,3,3,2,2,2,3,3,3,1,1,2,2,1,1
+22,White,High school diploma/A-levels,,Conservative,Male,8,4,4,2,2,3,3,2,3,3,2,3,1,1,2,3,2,1
+25,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Conservative,Male,7,4,2,2,2,4,4,2,4,2,1,3,3,1,4,3,2,1
+26,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Green Party,Female,2,2,5,2,2,4,4,4,6,2,2,4,3,1,4,4,4,1
+29,White,Undergraduate degree (BA/BSc/other),"£40,000 - £49,999",Labour,Female,6,3,4,1,1,4,4,2,1,1,1,2,2,1,1,1,1,1
+31,White,High school diploma/A-levels,"£20,000 - £29,999",Labour,Female,4,4,5,1,2,4,4,2,2,1,1,4,1,1,1,4,1,3
+24,White,Graduate degree (MA/MSc/MPhil/other),,Labour,Male,5,5,4,2,2,4,4,3,1,1,1,3,1,1,2,3,1,2
+44,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Conservative,Male,8,3,3,1,2,5,3,2,2,2,2,1,1,1,1,1,1,1
+55,White,Undergraduate degree (BA/BSc/other),,Liberal Democrats,Female,4,3,5,2,3,4,3,1,3,3,3,3,1,1,3,3,1,1
+21,White,High school diploma/A-levels,"£90,000 - £99,999",Green Party,Female,4,4,4,1,4,4,4,2,3,3,4,1,1,1,1,3,1,1
+53,White,Undergraduate degree (BA/BSc/other),,Not applicable / rather not say,Female,7,3,4,2,2,3,3,3,1,1,1,2,1,1,2,1,1,1
+49,White,High school diploma/A-levels,"£60,000 - £69,999",Scottish National Party (SNP),Male,4,4,4,1,1,4,4,5,6,6,1,1,1,1,2,1,1,1
+44,White,High school diploma/A-levels,"£30,000 - £39,999",Liberal Democrats,Male,4,2,2,4,3,4,3,1,2,2,2,4,2,1,3,4,2,2
+25,White,Graduate degree (MA/MSc/MPhil/other),"£20,000 - £29,999",Liberal Democrats,Male,5,2,2,4,4,2,2,1,1,1,1,2,1,1,1,1,1,2
+53,White,Graduate degree (MA/MSc/MPhil/other),"£50,000 - £59,999",Labour,Female,4,4,4,2,4,4,2,2,2,2,2,2,1,1,1,1,1,1
+21,White,High school diploma/A-levels,,Scottish National Party (SNP),Male,2,2,4,1,1,4,2,1,1,1,1,1,1,1,2,1,1,2
+31,White,High school diploma/A-levels,,Labour,Female,2,1,1,4,4,1,4,3,1,1,1,1,1,1,1,1,1,3
+22,White,Graduate degree (MA/MSc/MPhil/other),"Less than £10,000 ",Green Party,Female,5,4,4,4,2,5,3,2,2,1,1,2,2,1,1,4,2,1
+20,White,High school diploma/A-levels,"£40,000 - £49,999",,Female,1,2,2,3,4,4,4,1,1,1,1,3,3,1,3,3,1,2
+47,White,Undergraduate degree (BA/BSc/other),"£50,000 - £59,999",Liberal Democrats,Female,5,4,4,1,1,4,5,2,2,1,1,2,2,1,1,1,1,1
+52,Black,High school diploma/A-levels,"£40,000 - £49,999",Liberal Democrats,Female,5,2,2,4,4,3,2,2,3,1,1,1,1,1,1,1,1,1
+53,White,Undergraduate degree (BA/BSc/other),"£80,000 - £89,999",Conservative,Female,8,4,4,2,2,4,4,1,1,1,1,2,2,1,2,2,2,1
+47,White,Undergraduate degree (BA/BSc/other),,Not applicable / rather not say,Male,7,3,3,2,3,3,4,4,1,1,1,1,1,1,1,1,1,1
+41,Black,Undergraduate degree (BA/BSc/other),,Labour,Female,6,2,4,1,2,4,3,2,4,4,2,3,2,1,3,3,1,1
+35,White,Technical/community college,"£16,000 - £19,999",Labour,Female,7,4,4,2,2,4,4,1,2,2,2,3,2,1,2,2,1,2
+29,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Labour,Male,4,3,3,2,4,4,4,2,1,1,1,4,3,1,3,5,2,2
+64,White,Graduate degree (MA/MSc/MPhil/other),,Liberal Democrats,Male,1,2,3,2,3,4,4,2,1,1,1,1,1,1,1,1,1,1
+67,White,Graduate degree (MA/MSc/MPhil/other),,Conservative,Male,8,2,2,2,3,3,3,2,5,5,1,3,1,1,2,2,1,1
+47,White,Technical/community college,Rather not say,Conservative,Female,9,3,3,3,3,4,4,1,1,1,1,2,1,1,1,1,1,1
+54,White,Technical/community college,"£20,000 - £29,999",Other,Female,7,4,5,4,1,5,4,1,4,1,4,3,1,1,1,2,1,1
+56,White,Secondary education (e.g. GED/GCSE),"£20,000 - £29,999",Liberal Democrats,Male,7,4,4,2,2,5,4,1,2,1,1,4,1,1,1,1,1,1
+52,White,Secondary education (e.g. GED/GCSE),"£60,000 - £69,999",Not applicable / rather not say,Female,7,1,1,3,2,4,1,1,4,3,1,4,1,1,3,3,3,2
+63,White,Doctorate degree (PhD/other),"£50,000 - £59,999",Conservative,Male,8,4,4,2,2,5,4,2,1,1,1,2,3,1,1,1,4,1
+56,White,Graduate degree (MA/MSc/MPhil/other),"£10,000 - £15,999",Green Party,Female,4,2,2,4,4,2,2,1,4,2,3,3,2,1,2,2,1,1
+30,White,High school diploma/A-levels,,Green Party,Female,4,3,3,1,2,3,3,2,1,1,1,2,2,1,1,1,1,1
+65,White,Secondary education (e.g. GED/GCSE),Rather not say,Other,Female,6,3,4,1,2,4,2,1,1,1,1,1,1,1,1,1,1,1
+48,White,Graduate degree (MA/MSc/MPhil/other),"£80,000 - £89,999",Liberal Democrats,Male,7,2,2,3,3,4,2,1,1,1,1,1,1,1,2,1,1,1
+47,White,Technical/community college,"£30,000 - £39,999",Conservative,Male,6,4,4,5,1,4,2,2,1,1,1,4,1,1,4,5,1,2
+54,White,Graduate degree (MA/MSc/MPhil/other),"£80,000 - £89,999",Labour,Female,5,3,4,2,2,4,4,1,1,1,1,1,1,1,1,1,1,1
+49,White,Graduate degree (MA/MSc/MPhil/other),,Scottish National Party (SNP),Male,7,4,4,2,2,4,4,5,1,1,1,1,1,1,1,1,1,2
+47,White,Undergraduate degree (BA/BSc/other),"£40,000 - £49,999",Labour,Male,4,4,4,1,1,5,4,1,1,1,1,3,2,1,2,2,1,2
+39,White,Undergraduate degree (BA/BSc/other),,Conservative,Female,7,4,3,2,2,3,3,3,4,4,5,2,1,1,1,1,1,1
+32,White,Secondary education (e.g. GED/GCSE),Rather not say,Conservative,Female,6,3,3,3,3,3,3,2,4,4,4,3,3,1,3,3,1,1
+29,White,Technical/community college,"£40,000 - £49,999",Not applicable / rather not say,Female,7,1,1,5,5,1,1,3,3,2,2,1,1,1,1,1,1,1
+63,White,Technical/community college,"£10,000 - £15,999",Conservative,Female,10,5,5,2,3,5,5,1,7,6,6,4,4,1,3,3,3,3
+36,Asian,Undergraduate degree (BA/BSc/other),"£50,000 - £59,999",Labour,Female,7,4,4,2,2,4,4,2,3,2,2,2,2,1,1,1,1,1
+42,White,Graduate degree (MA/MSc/MPhil/other),"£50,000 - £59,999",Labour,Female,1,5,5,2,4,4,2,3,4,4,4,4,2,1,4,2,2,2
+54,White,Secondary education (e.g. GED/GCSE),,Labour,Female,1,1,1,4,4,1,2,1,6,6,1,3,1,1,1,1,1,2
+56,White,Secondary education (e.g. GED/GCSE),"£20,000 - £29,999",Conservative,Male,7,4,3,2,3,3,4,2,1,1,1,2,2,1,1,1,1,1
+27,White,High school diploma/A-levels,"£20,000 - £29,999",Other,Female,1,1,5,1,2,5,5,3,1,2,3,2,1,1,1,2,2,1
+55,Black,Undergraduate degree (BA/BSc/other),"£60,000 - £69,999",Labour,Female,4,3,3,2,2,4,3,2,4,4,3,3,1,1,2,1,1,1
+66,White,High school diploma/A-levels,,Green Party,Male,1,3,3,3,3,3,3,3,2,2,2,1,1,1,1,1,1,1
+36,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Conservative,Female,7,3,2,2,2,4,3,1,2,2,2,2,1,1,1,1,1,1
+50,White,Secondary education (e.g. GED/GCSE),"Less than £10,000 ",UKIP,Female,4,2,2,4,4,2,2,1,6,2,2,1,2,1,1,1,2,2
+50,White,Technical/community college,"£20,000 - £29,999",Labour,Male,5,4,2,1,2,4,3,2,2,1,1,1,1,1,1,1,1,1
+39,White,Technical/community college,,Conservative,Male,8,2,4,2,4,2,4,5,1,1,1,1,1,1,1,2,1,1
+60,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Other,Male,11,5,5,1,1,5,5,7,1,1,1,1,1,1,1,1,1,1
+61,White,Technical/community college,"£10,000 - £15,999",Green Party,Male,4,5,4,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1
+32,White,Secondary education (e.g. GED/GCSE),Rather not say,UKIP,Male,7,4,4,2,2,4,4,3,6,6,2,1,1,1,1,1,1,1
+38,White,Undergraduate degree (BA/BSc/other),Rather not say,Labour,Female,4,4,4,1,2,4,4,2,2,2,1,4,2,1,4,5,1,1
+23,White,Undergraduate degree (BA/BSc/other),"£16,000 - £19,999",Labour,Female,4,2,4,1,3,4,3,1,2,2,2,1,1,1,1,1,1,1
+30,White,High school diploma/A-levels,"£30,000 - £39,999",Green Party,Male,1,4,4,1,2,4,4,7,1,3,1,1,1,1,2,3,1,2
+23,Mixed,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Labour,Female,2,4,3,2,2,3,3,2,2,2,2,1,1,1,1,1,1,1
+23,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Labour,Male,1,4,4,1,2,4,4,2,1,1,1,2,1,1,1,1,1,1
+46,White,Technical/community college,,Labour,Male,2,5,4,2,2,5,3,1,1,1,1,1,1,1,2,1,1,1
+46,White,Technical/community college,,Labour,Male,2,5,4,2,1,5,4,1,1,1,1,2,1,1,2,1,1,1
+46,White,Technical/community college,"£50,000 - £59,999",Labour,Male,2,5,4,2,2,5,3,1,1,1,1,1,1,1,2,1,1,1
+46,White,Technical/community college,"£50,000 - £59,999",Labour,Male,2,5,4,2,1,5,4,1,1,1,1,2,1,1,2,1,1,1
+59,White,Secondary education (e.g. GED/GCSE),"£70,000 - £79,999",Labour,Male,2,4,5,2,5,5,5,1,4,5,1,5,3,1,5,5,4,1
+40,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Labour,Female,2,4,4,2,2,4,4,2,1,1,1,1,1,1,1,1,1,1
+54,White,High school diploma/A-levels,"Less than £10,000 ",Labour,Female,4,3,2,3,4,3,2,2,3,3,2,2,1,1,1,1,2,2
+59,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Labour,Male,4,2,2,2,2,4,2,2,1,1,1,2,1,1,1,1,1,1
+36,White,Undergraduate degree (BA/BSc/other),"Less than £10,000 ",Labour,Male,6,4,4,1,2,4,4,2,2,1,1,1,1,1,1,1,1,1
+48,White,Technical/community college,"£40,000 - £49,999",Green Party,Male,4,4,2,2,2,4,4,1,2,2,2,2,1,1,1,1,1,1
+55,White,Doctorate degree (PhD/other),"£30,000 - £39,999",Conservative,Male,9,4,5,1,2,5,5,1,1,1,1,1,2,1,1,1,1,1
+24,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",,Female,2,4,4,1,2,4,4,2,1,1,1,2,1,1,2,1,1,1
+41,Asian,Undergraduate degree (BA/BSc/other),"£50,000 - £59,999",Not applicable / rather not say,Male,9,2,2,4,4,2,2,1,4,4,1,4,2,1,1,1,1,3
+28,White,Undergraduate degree (BA/BSc/other),Rather not say,Green Party,Male,2,3,3,2,2,3,4,3,1,1,1,2,2,1,3,3,2,2
+44,White,Secondary education (e.g. GED/GCSE),"Less than £10,000 ",Not applicable / rather not say,Female,7,5,4,4,3,4,3,1,7,7,7,1,1,1,1,1,1,1
+44,White,Undergraduate degree (BA/BSc/other),"£90,000 - £99,999",Labour,Male,5,4,4,1,2,4,4,1,1,1,1,1,1,1,2,1,1,1
+39,White,Undergraduate degree (BA/BSc/other),,Conservative,Female,6,4,4,2,2,4,4,4,1,1,1,1,1,1,3,1,1,1
+41,White,Undergraduate degree (BA/BSc/other),,Conservative,Female,8,2,4,3,4,2,3,5,5,5,4,2,1,1,1,1,1,1
+33,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Green Party,Female,2,2,1,4,4,3,2,1,1,1,1,2,1,1,1,1,2,2
+52,White,Technical/community college,"£30,000 - £39,999",Labour,Female,5,3,4,2,2,5,4,4,3,3,3,2,1,1,1,1,1,1
+55,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Conservative,Male,8,4,4,1,2,4,4,1,4,4,2,1,1,1,1,1,1,1
+44,White,High school diploma/A-levels,,Labour,Female,6,1,1,5,5,1,1,1,1,1,1,1,1,1,1,1,1,1
+32,White,Graduate degree (MA/MSc/MPhil/other),,Scottish National Party (SNP),Male,4,4,4,2,2,4,4,2,1,1,1,2,1,1,1,1,1,1
+55,White,Doctorate degree (PhD/other),Rather not say,Other,Female,1,4,4,1,1,5,5,2,2,1,1,1,1,1,2,2,1,3
+43,White,Undergraduate degree (BA/BSc/other),Rather not say,Liberal Democrats,Female,6,3,2,3,4,3,2,1,1,1,1,3,1,1,3,1,1,1
+49,Black,High school diploma/A-levels,,Not applicable / rather not say,Female,6,3,2,4,4,3,2,1,1,1,1,1,1,1,1,2,2,3
+55,White,Undergraduate degree (BA/BSc/other),"£60,000 - £69,999",Conservative,Male,8,4,5,2,2,4,4,2,3,2,2,2,3,1,1,4,2,1
+45,White,Graduate degree (MA/MSc/MPhil/other),"£90,000 - £99,999",Conservative,Female,7,4,4,2,2,4,4,2,1,1,1,3,3,1,3,3,1,1
+53,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Labour,Male,4,4,4,1,2,4,4,2,5,2,2,4,3,1,4,4,1,1
+42,White,Undergraduate degree (BA/BSc/other),,UKIP,Male,7,4,4,3,4,4,4,1,4,7,4,4,4,4,4,4,4,1
+40,White,Technical/community college,"£16,000 - £19,999",Not applicable / rather not say,Female,6,4,5,1,1,5,5,1,1,1,1,2,2,1,3,3,1,1
+54,White,Undergraduate degree (BA/BSc/other),,Green Party,Female,2,4,4,2,2,4,4,1,1,1,1,2,1,1,1,1,1,1
+58,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Labour,Male,4,4,5,1,1,4,5,1,2,2,1,1,1,1,1,1,1,1
+40,White,Undergraduate degree (BA/BSc/other),,Liberal Democrats,Male,5,2,2,3,4,2,2,2,1,1,1,4,2,1,4,4,4,1
+35,White,Graduate degree (MA/MSc/MPhil/other),"£60,000 - £69,999",Liberal Democrats,Female,7,4,4,2,2,3,2,2,1,1,3,1,1,1,2,1,1,1
+34,White,Graduate degree (MA/MSc/MPhil/other),"£60,000 - £69,999",Labour,Female,2,4,4,2,4,2,4,3,5,3,3,1,2,1,1,2,2,1
+50,White,High school diploma/A-levels,,,Male,1,3,4,2,2,4,4,1,4,4,4,2,1,1,2,2,2,2
+36,White,Technical/community college,"£40,000 - £49,999",Labour,Male,6,4,4,2,2,4,4,3,2,2,2,1,1,1,1,1,2,1
+40,White,Technical/community college,"£30,000 - £39,999",,Female,6,3,4,2,2,4,2,2,2,2,1,3,2,1,3,3,3,2
+87,White,High school diploma/A-levels,"£10,000 - £15,999",Liberal Democrats,Female,5,4,4,2,1,4,5,1,2,2,1,4,2,1,2,2,1,1
+59,White,Undergraduate degree (BA/BSc/other),"£16,000 - £19,999",Conservative,Female,7,4,4,2,2,4,4,1,3,1,1,3,2,1,1,1,1,2
+63,White,Undergraduate degree (BA/BSc/other),"Less than £10,000 ",,Female,9,4,4,1,1,5,5,3,4,4,3,1,1,1,1,1,1,1
+64,White,High school diploma/A-levels,,Other,Female,8,4,4,1,2,4,4,3,5,4,4,1,1,1,1,1,1,1
+31,White,Technical/community college,"£10,000 - £15,999",Labour,Female,4,3,3,3,2,3,2,2,3,2,2,3,2,1,3,2,1,2
+40,White,No formal qualifications,"£30,000 - £39,999",Not applicable / rather not say,Female,5,4,4,2,1,5,4,3,4,3,2,4,4,1,3,2,1,1
+31,White,High school diploma/A-levels,"£30,000 - £39,999",Conservative,Female,9,4,3,2,4,4,3,2,4,2,3,1,1,1,1,2,2,1
+29,White,Undergraduate degree (BA/BSc/other),"£16,000 - £19,999",Not applicable / rather not say,Female,5,2,2,4,4,4,3,4,2,2,2,1,1,1,1,1,1,1
+29,White,Technical/community college,"£10,000 - £15,999",Green Party,Male,1,3,3,1,1,3,3,7,4,4,4,1,1,1,1,1,1,1
+65,White,Technical/community college,,Scottish National Party (SNP),Female,6,2,4,2,2,4,2,1,7,3,2,4,3,1,3,3,1,2
+40,White,Undergraduate degree (BA/BSc/other),Rather not say,Green Party,Female,4,3,4,1,2,4,4,1,1,1,1,1,1,1,2,1,1,1
+31,Black,Graduate degree (MA/MSc/MPhil/other),"£30,000 - £39,999",Labour,Female,5,4,4,2,3,4,4,5,1,1,1,1,1,1,1,1,1,1
+24,White,High school diploma/A-levels,"£70,000 - £79,999",Labour,Male,2,3,4,2,1,4,4,1,1,1,1,1,1,1,1,1,1,1
+25,White,No formal qualifications,,Other,Female,6,4,2,2,2,4,4,2,1,1,1,2,1,1,2,2,2,1
+41,White,Graduate degree (MA/MSc/MPhil/other),"£60,000 - £69,999",Labour,Male,4,2,4,1,2,3,4,1,1,1,1,3,1,1,3,3,1,1
+36,White,Secondary education (e.g. GED/GCSE),"£16,000 - £19,999",Conservative,Female,8,2,3,3,5,3,3,6,3,1,2,1,1,1,1,1,1,1
+50,White,Undergraduate degree (BA/BSc/other),"£40,000 - £49,999",Conservative,Female,10,4,4,2,2,4,4,2,5,4,2,2,3,1,2,2,1,1
+43,White,Technical/community college,"£30,000 - £39,999",Labour,Male,6,4,4,2,1,4,5,2,5,4,2,2,1,1,2,1,1,1
+63,White,Graduate degree (MA/MSc/MPhil/other),"£40,000 - £49,999",Liberal Democrats,Female,5,4,4,2,1,5,5,1,1,1,1,2,1,1,2,2,1,1
+49,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Labour,Male,4,4,4,1,2,5,5,2,1,1,1,2,1,1,1,1,1,1
+35,White,Secondary education (e.g. GED/GCSE),"£30,000 - £39,999",Conservative,Male,8,1,2,4,4,2,2,5,1,1,1,2,3,1,3,2,1,1
+61,White,High school diploma/A-levels,"£10,000 - £15,999",Conservative,Female,7,2,3,3,2,4,3,2,4,4,4,1,1,1,1,1,1,1
+53,White,Graduate degree (MA/MSc/MPhil/other),"£40,000 - £49,999",Labour,Female,4,4,4,2,3,3,3,1,2,1,2,3,2,1,3,1,1,2
+49,White,High school diploma/A-levels,Rather not say,Liberal Democrats,Male,6,3,2,2,2,3,3,3,2,2,2,1,1,1,1,1,1,1
+49,White,High school diploma/A-levels,Rather not say,Liberal Democrats,Male,6,3,4,2,3,4,3,2,2,2,2,1,1,1,1,1,1,1
+49,White,High school diploma/A-levels,,Liberal Democrats,Male,6,3,2,2,2,3,3,3,2,2,2,1,1,1,1,1,1,1
+49,White,High school diploma/A-levels,,Liberal Democrats,Male,6,3,4,2,3,4,3,2,2,2,2,1,1,1,1,1,1,1
+48,CONSENT REVOKED,CONSENT REVOKED,,CONSENT REVOKED,CONSENT REVOKED,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+53,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Green Party,Female,4,4,4,2,2,5,4,1,1,1,1,3,1,1,3,3,1,2
+65,White,Secondary education (e.g. GED/GCSE),"£100,000 - £149,999",Liberal Democrats,Female,5,2,2,4,5,1,2,1,4,4,1,4,1,1,4,3,2,2
+55,White,Technical/community college,"£20,000 - £29,999",Liberal Democrats,Male,4,4,4,2,2,5,4,2,1,1,1,3,3,1,2,1,1,1
+38,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Labour,Female,7,3,4,2,3,4,4,1,2,1,1,2,1,1,1,1,1,1
+32,White,Graduate degree (MA/MSc/MPhil/other),,Labour,Female,1,4,2,3,3,4,3,1,5,5,5,3,3,1,3,3,1,2
+50,White,Technical/community college,,Conservative,Male,9,2,2,4,2,3,3,3,1,1,1,2,1,1,1,1,1,1
+42,Black,Graduate degree (MA/MSc/MPhil/other),,Not applicable / rather not say,Female,6,3,3,3,2,4,4,1,1,1,1,1,1,1,1,1,1,1
+43,White,Graduate degree (MA/MSc/MPhil/other),,Conservative,Male,9,2,2,3,4,1,3,3,1,1,1,1,1,1,1,1,1,1
+34,White,Graduate degree (MA/MSc/MPhil/other),Rather not say,Conservative,Female,7,4,4,1,2,4,4,3,1,1,1,2,1,1,1,1,1,1
+57,White,Undergraduate degree (BA/BSc/other),,Liberal Democrats,Female,7,4,4,1,1,5,5,2,1,1,1,3,1,1,3,2,1,1
+37,White,Undergraduate degree (BA/BSc/other),"Less than £10,000 ",Liberal Democrats,Male,5,2,3,3,3,4,3,1,1,1,1,3,3,1,2,3,2,1
+39,White,Secondary education (e.g. GED/GCSE),"£10,000 - £15,999",Labour,Female,7,2,2,4,4,2,2,1,2,2,2,2,1,1,2,2,1,2
+38,White,Undergraduate degree (BA/BSc/other),"Less than £10,000 ",Scottish National Party (SNP),Male,1,4,4,2,2,5,4,1,1,1,1,1,1,1,1,1,1,1
+34,White,Secondary education (e.g. GED/GCSE),"£20,000 - £29,999",Labour,Male,6,3,2,3,2,4,3,3,6,5,5,1,1,5,1,1,1,1
+60,White,Secondary education (e.g. GED/GCSE),"£20,000 - £29,999",Other,Female,7,2,2,4,4,2,2,2,5,2,1,1,1,1,1,1,1,1
+29,White,High school diploma/A-levels,"£20,000 - £29,999",Liberal Democrats,Male,4,2,3,2,3,2,4,3,1,1,1,3,1,1,2,2,1,2
+50,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Labour,Female,4,3,3,2,2,4,2,2,2,2,2,4,3,1,3,3,3,2
+37,Asian,Undergraduate degree (BA/BSc/other),,Labour,Female,5,2,2,4,3,2,2,3,1,1,1,1,1,1,1,1,1,1
+27,White,High school diploma/A-levels,"£40,000 - £49,999",Conservative,Female,6,4,4,2,2,5,5,1,7,7,1,1,1,1,1,1,1,1
+53,White,Undergraduate degree (BA/BSc/other),"£16,000 - £19,999",Not applicable / rather not say,Female,4,4,5,1,1,5,2,1,3,5,5,2,3,1,1,1,1,1
+46,White,Technical/community college,"£80,000 - £89,999",Labour,Male,2,4,4,2,2,5,5,1,1,1,1,2,1,1,1,2,1,1
+49,White,High school diploma/A-levels,"£40,000 - £49,999",Labour,Female,5,3,2,3,2,3,3,2,2,2,3,2,1,1,2,1,1,1
+63,White,Graduate degree (MA/MSc/MPhil/other),"£50,000 - £59,999",Conservative,Female,9,4,4,2,2,4,4,1,1,1,1,1,1,1,1,1,3,1
+38,White,Undergraduate degree (BA/BSc/other),"£16,000 - £19,999",Other,Male,11,4,5,1,1,5,4,1,1,5,1,3,2,1,4,3,1,2
+33,White,Secondary education (e.g. GED/GCSE),"£30,000 - £39,999",Green Party,Female,5,2,2,4,4,2,2,2,2,2,2,2,1,1,1,1,1,1
+42,White,Secondary education (e.g. GED/GCSE),"£20,000 - £29,999",,Female,7,2,4,2,2,4,4,1,4,4,4,1,1,1,1,1,1,1
+60,White,Secondary education (e.g. GED/GCSE),"£40,000 - £49,999",Conservative,Female,9,4,4,2,4,4,4,1,4,1,1,2,1,1,3,2,1,2
+47,White,Technical/community college,,Conservative,Female,8,2,1,4,4,2,2,2,3,2,1,4,3,1,1,1,1,2
+63,White,Graduate degree (MA/MSc/MPhil/other),"£30,000 - £39,999",Labour,Female,2,4,5,1,1,5,5,1,1,1,1,1,1,1,1,1,2,1
+60,White,Technical/community college,Rather not say,Not applicable / rather not say,Female,7,2,2,3,4,3,2,3,3,2,1,3,2,1,4,3,1,2
+53,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Labour,Male,1,4,4,1,2,4,4,3,1,1,1,1,1,1,1,1,1,1
+49,White,High school diploma/A-levels,"£30,000 - £39,999",Other,Male,9,2,4,3,2,5,4,3,1,1,1,1,1,1,1,1,1,1
+29,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Liberal Democrats,Female,7,3,4,1,1,4,4,2,1,1,1,3,3,1,3,3,1,1
+53,White,High school diploma/A-levels,,Labour,Female,1,2,4,2,1,4,3,1,1,2,4,4,2,1,4,3,1,3
+36,White,Undergraduate degree (BA/BSc/other),,Liberal Democrats,Male,4,4,4,2,2,4,4,5,1,1,1,1,1,1,1,1,1,1
+36,White,High school diploma/A-levels,"£20,000 - £29,999",Labour,Female,7,4,4,4,2,4,4,3,6,4,4,2,2,1,2,2,2,1
+40,White,Technical/community college,,Green Party,Female,5,2,4,2,2,4,3,2,4,4,4,2,2,1,2,2,2,1
+59,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Labour,Male,5,4,4,2,2,4,4,2,2,1,1,2,1,1,2,1,1,1
+54,White,Secondary education (e.g. GED/GCSE),Rather not say,Labour,Female,6,2,4,3,2,2,2,1,4,1,4,2,1,1,1,1,1,2
+26,White,Undergraduate degree (BA/BSc/other),"£16,000 - £19,999",Conservative,Male,10,3,4,2,2,4,5,5,1,1,1,1,1,1,1,1,1,1
+28,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Conservative,Female,6,4,4,2,2,4,4,1,7,2,1,2,1,1,1,1,1,1
+54,White,Undergraduate degree (BA/BSc/other),"£90,000 - £99,999",Liberal Democrats,Female,6,3,2,3,3,3,3,2,3,4,4,3,2,1,3,3,1,2
+41,White,High school diploma/A-levels,"£20,000 - £29,999",Labour,Male,4,4,4,1,2,4,4,1,1,1,1,3,1,1,2,1,1,1
+37,White,Undergraduate degree (BA/BSc/other),"£40,000 - £49,999",Green Party,Male,6,4,4,2,2,4,4,1,1,1,1,1,1,1,1,1,1,1
+60,White,Technical/community college,"£16,000 - £19,999",Conservative,Female,6,2,3,4,4,2,3,1,4,6,5,2,2,1,3,4,1,2
+61,White,Secondary education (e.g. GED/GCSE),"£40,000 - £49,999",Liberal Democrats,Female,6,2,3,2,2,3,2,3,1,1,1,1,2,1,1,1,1,1
+28,White,High school diploma/A-levels,"Less than £10,000 ",Labour,Male,6,2,2,4,4,2,2,5,5,6,2,1,1,1,1,1,1,1
+30,White,Secondary education (e.g. GED/GCSE),,Not applicable / rather not say,Female,7,4,4,2,4,4,4,1,2,2,2,1,1,1,1,1,1,1
+42,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Labour,Female,2,2,2,1,2,5,4,4,5,5,4,3,3,1,2,2,1,2
+52,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Liberal Democrats,Male,6,4,4,2,2,4,4,4,1,1,1,3,3,1,1,1,1,2
+53,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Labour,Female,2,4,4,2,2,4,4,1,2,2,2,2,1,1,2,1,1,1
+33,White,High school diploma/A-levels,,Labour,Female,5,5,4,2,2,5,4,2,1,1,1,2,1,1,1,1,2,1
+46,White,Undergraduate degree (BA/BSc/other),"£40,000 - £49,999",Labour,Female,5,4,4,2,2,4,3,2,1,1,4,1,1,1,1,1,1,1
+50,White,High school diploma/A-levels,"£40,000 - £49,999",Liberal Democrats,Male,6,4,4,1,2,4,4,2,1,1,1,1,1,1,1,1,3,1
+47,White,Undergraduate degree (BA/BSc/other),"£40,000 - £49,999",Green Party,Female,2,3,3,3,2,3,3,1,2,1,1,4,2,1,2,4,1,2
+49,White,Technical/community college,,Labour,Female,4,2,4,2,2,4,4,1,5,3,3,4,2,1,3,3,3,1
+54,White,Technical/community college,,Labour,Female,4,2,4,2,2,5,3,1,1,2,1,1,1,1,1,1,1,1
+40,White,High school diploma/A-levels,"Less than £10,000 ",Green Party,Female,1,5,4,1,1,5,5,1,1,1,1,1,1,1,1,1,1,1
+22,White,Undergraduate degree (BA/BSc/other),,Liberal Democrats,Male,4,3,4,2,2,2,4,2,1,1,1,4,1,1,1,3,1,3
+42,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Scottish National Party (SNP),Male,2,4,4,2,2,4,4,4,4,4,4,2,2,2,2,2,2,1
+43,White,Graduate degree (MA/MSc/MPhil/other),"£40,000 - £49,999",Labour,Female,4,4,4,1,2,5,5,1,4,3,4,2,2,1,1,1,1,1
+39,White,High school diploma/A-levels,,Not applicable / rather not say,Female,6,4,4,2,3,4,4,5,6,6,5,1,1,1,1,1,1,1
+26,White,Graduate degree (MA/MSc/MPhil/other),"£70,000 - £79,999",Not applicable / rather not say,Female,5,4,4,1,1,2,5,2,1,1,1,2,1,1,3,3,1,2
+40,White,Graduate degree (MA/MSc/MPhil/other),"£16,000 - £19,999",Not applicable / rather not say,Female,6,4,3,2,1,1,1,3,4,4,4,1,1,1,1,2,1,1
+52,White,High school diploma/A-levels,Rather not say,Not applicable / rather not say,Female,9,2,3,4,3,2,2,1,6,6,2,3,2,1,2,2,1,2
+64,White,Graduate degree (MA/MSc/MPhil/other),"£30,000 - £39,999",Labour,Female,5,4,4,1,2,5,3,1,2,2,3,2,3,1,2,2,1,1
+39,White,Undergraduate degree (BA/BSc/other),"£50,000 - £59,999",Liberal Democrats,Female,8,4,4,2,1,4,4,1,2,1,1,2,2,1,3,3,1,2
+34,White,High school diploma/A-levels,,Scottish National Party (SNP),Female,4,1,2,2,3,3,3,2,4,4,4,1,1,1,1,1,1,1
+40,White,High school diploma/A-levels,"£30,000 - £39,999",Liberal Democrats,Female,6,4,4,2,2,4,4,1,1,1,1,1,1,1,1,1,1,1
+51,White,Secondary education (e.g. GED/GCSE),"£10,000 - £15,999",Not applicable / rather not say,Female,7,1,1,2,1,3,1,1,2,4,6,4,3,1,5,5,1,2
+58,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Other,Female,8,3,4,2,4,2,3,2,2,3,2,1,1,1,1,2,1,1
+48,White,Secondary education (e.g. GED/GCSE),"£20,000 - £29,999",UKIP,Male,8,4,4,2,2,4,4,1,5,5,1,3,1,1,3,2,1,1
+41,White,Graduate degree (MA/MSc/MPhil/other),"£30,000 - £39,999",Labour,Female,9,4,5,1,1,5,5,1,2,2,2,2,1,1,1,1,1,1
+32,White,Secondary education (e.g. GED/GCSE),,Labour,Male,5,1,1,5,4,1,3,1,1,1,1,1,1,1,1,1,1,1
+38,White,High school diploma/A-levels,"£30,000 - £39,999",Labour,Female,5,4,4,2,2,4,2,2,5,3,4,1,1,1,1,1,1,1
+67,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Labour,Female,4,2,4,2,2,3,2,1,4,1,4,3,1,1,1,1,3,2
+30,White,Undergraduate degree (BA/BSc/other),,Labour,Male,1,3,4,2,2,4,5,3,1,2,1,2,2,1,1,1,1,2
+27,Mixed,High school diploma/A-levels,"£30,000 - £39,999",Not applicable / rather not say,Female,4,4,4,2,2,2,4,2,1,1,1,2,2,1,2,1,1,1
+56,White,Graduate degree (MA/MSc/MPhil/other),"£100,000 - £149,999",Labour,Female,5,4,4,1,1,5,4,2,1,1,1,5,1,1,1,1,1,1
+57,White,High school diploma/A-levels,,Green Party,Female,4,4,3,2,2,4,4,2,4,3,2,1,2,1,1,1,1,1
+53,White,Undergraduate degree (BA/BSc/other),,Labour,Male,6,3,4,3,2,4,4,1,1,1,1,1,1,1,1,1,1,1
+40,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Conservative,Female,9,5,5,1,5,5,1,1,4,4,4,2,2,1,3,4,2,2
+35,White,High school diploma/A-levels,"£10,000 - £15,999",Labour,Female,7,3,4,2,2,4,2,5,4,3,4,1,2,1,1,1,1,1
+26,White,Secondary education (e.g. GED/GCSE),"Less than £10,000 ",,Female,1,4,4,2,2,4,4,1,1,1,1,1,1,1,1,1,1,1
+64,White,High school diploma/A-levels,"£80,000 - £89,999",Conservative,Female,11,5,4,1,1,5,5,1,1,1,1,2,1,1,2,1,1,3
+39,White,Technical/community college,"£20,000 - £29,999",Labour,Female,6,4,2,4,4,4,3,2,2,2,1,4,2,1,3,2,1,2
+59,White,High school diploma/A-levels,"£20,000 - £29,999",Scottish National Party (SNP),Male,5,4,4,1,4,5,4,1,1,1,1,1,1,1,1,1,1,1
+43,White,Secondary education (e.g. GED/GCSE),"£16,000 - £19,999",Labour,Female,5,2,2,3,3,2,2,3,3,2,3,1,1,1,1,1,2,1
+65,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Liberal Democrats,Female,5,3,3,2,2,1,2,1,1,1,1,3,3,1,3,3,1,1
+69,White,Secondary education (e.g. GED/GCSE),"Less than £10,000 ",Labour,Female,4,2,3,4,2,3,2,1,1,1,1,1,1,1,2,1,1,1
+34,White,Undergraduate degree (BA/BSc/other),"£60,000 - £69,999",Labour,Female,7,3,2,2,2,4,3,4,4,4,4,1,1,1,1,1,1,1
+40,White,Secondary education (e.g. GED/GCSE),"£20,000 - £29,999",Labour,Female,11,5,1,4,5,1,3,2,2,3,3,2,1,1,1,2,1,2
+41,Asian,Undergraduate degree (BA/BSc/other),,Labour,Male,2,1,2,4,5,2,1,1,2,3,3,4,2,1,2,2,1,2
+35,White,High school diploma/A-levels,"£30,000 - £39,999",Not applicable / rather not say,Female,7,4,4,2,2,4,2,1,4,4,4,3,3,1,3,3,1,2
+29,White,Secondary education (e.g. GED/GCSE),"£40,000 - £49,999",Not applicable / rather not say,Female,7,5,5,2,2,5,2,3,4,1,4,1,1,1,1,1,1,1
+61,White,Undergraduate degree (BA/BSc/other),"Less than £10,000 ",Labour,Male,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+48,White,Secondary education (e.g. GED/GCSE),"£10,000 - £15,999",Other,Female,6,3,3,2,4,4,3,1,2,1,1,1,1,1,2,1,2,1
+64,White,Undergraduate degree (BA/BSc/other),"£50,000 - £59,999",Liberal Democrats,Male,6,4,4,1,1,5,5,2,1,1,1,1,1,1,1,1,1,1
+73,White,High school diploma/A-levels,"£20,000 - £29,999",Liberal Democrats,Female,7,5,5,1,1,5,1,1,1,1,1,1,1,1,1,1,1,1
+55,White,Secondary education (e.g. GED/GCSE),"£40,000 - £49,999",UKIP,Male,11,4,4,3,4,4,4,3,7,6,2,3,3,1,4,3,1,2
+63,White,Secondary education (e.g. GED/GCSE),"£10,000 - £15,999",UKIP,Female,8,2,2,3,3,4,4,4,5,5,3,1,1,1,1,1,1,1
+53,White,Technical/community college,"£30,000 - £39,999",,Female,6,4,4,2,2,4,3,1,4,3,2,3,1,1,2,1,1,2
+59,White,Graduate degree (MA/MSc/MPhil/other),,Conservative,Female,9,2,1,4,4,2,2,2,1,1,1,4,2,1,4,2,1,3
+54,White,Undergraduate degree (BA/BSc/other),"£16,000 - £19,999",Labour,Male,4,4,4,2,3,4,4,1,1,1,1,1,1,1,1,1,1,1
+33,White,Undergraduate degree (BA/BSc/other),Rather not say,Scottish National Party (SNP),Female,2,3,4,2,2,4,4,2,1,1,1,1,1,1,1,1,1,1
+63,White,Technical/community college,Rather not say,Conservative,Male,5,4,4,2,3,4,4,1,3,1,1,3,1,1,1,1,3,1
+75,White,High school diploma/A-levels,"£10,000 - £15,999",Conservative,Female,8,4,4,2,2,4,4,5,4,4,3,4,3,1,4,3,3,1
+57,White,Secondary education (e.g. GED/GCSE),"£16,000 - £19,999",Conservative,Female,9,2,3,2,2,4,4,6,4,5,4,3,3,1,3,3,2,1
+28,White,High school diploma/A-levels,"£40,000 - £49,999",Labour,Female,4,3,2,1,2,4,3,1,3,4,2,3,1,2,1,1,1,1
+20,White,High school diploma/A-levels,"£16,000 - £19,999",Labour,Female,1,4,3,1,2,4,4,2,1,1,1,2,3,1,2,3,1,1
+55,White,Graduate degree (MA/MSc/MPhil/other),"£50,000 - £59,999",Scottish National Party (SNP),Female,2,4,4,1,2,5,4,2,1,1,1,1,1,1,1,1,1,1
+70,White,Undergraduate degree (BA/BSc/other),"£10,000 - £15,999",Conservative,Female,9,4,4,2,2,4,4,1,2,1,1,3,2,1,2,2,1,1
+36,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Conservative,Female,10,2,4,4,4,5,4,1,2,1,1,4,4,1,4,4,1,2
+50,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Green Party,Female,8,3,4,2,2,4,4,1,4,4,4,1,1,1,2,1,1,1
+41,White,Undergraduate degree (BA/BSc/other),,Labour,Female,5,3,3,2,3,4,4,1,1,1,1,2,2,1,2,1,1,1
+55,White,Technical/community college,"£60,000 - £69,999",Labour,Male,4,4,4,2,4,4,4,2,1,1,1,1,1,1,1,1,1,1
+43,White,Technical/community college,,Labour,Female,6,2,4,2,1,5,4,1,4,3,3,2,1,1,1,1,1,1
+47,White,Undergraduate degree (BA/BSc/other),"£100,000 - £149,999",Labour,Male,4,5,5,1,2,5,5,4,4,5,5,3,2,1,3,3,1,2
+27,White,Technical/community college,"£20,000 - £29,999",Labour,Female,1,2,4,4,4,2,3,1,6,4,5,2,2,2,3,4,2,2
+39,Asian,Undergraduate degree (BA/BSc/other),Rather not say,Labour,Female,6,2,2,3,2,4,4,2,5,6,6,4,2,1,3,2,1,3
+43,White,Undergraduate degree (BA/BSc/other),Rather not say,Labour,Female,7,3,3,2,3,4,3,3,5,5,4,4,2,1,4,3,3,2
+24,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Labour,Male,5,2,2,4,3,2,2,3,1,1,1,2,1,1,2,2,1,3
+41,White,Undergraduate degree (BA/BSc/other),"£40,000 - £49,999",Labour,Female,4,4,2,2,2,4,4,2,1,1,1,4,4,1,4,2,1,2
+23,White,Graduate degree (MA/MSc/MPhil/other),"£30,000 - £39,999",Labour,Female,5,4,4,2,2,4,3,3,7,5,6,1,1,1,1,1,1,1
+54,White,Undergraduate degree (BA/BSc/other),,Conservative,Female,7,4,3,2,4,4,3,6,5,5,5,3,2,1,2,2,1,1
+59,White,Secondary education (e.g. GED/GCSE),"£20,000 - £29,999",Labour,Male,5,4,4,2,2,4,4,1,1,1,1,1,1,1,1,1,1,1
+32,White,Undergraduate degree (BA/BSc/other),,Other,Male,9,5,4,3,3,5,3,2,6,3,1,5,3,1,4,4,1,1
+33,White,Graduate degree (MA/MSc/MPhil/other),,Labour,Female,2,4,4,3,3,4,3,1,1,1,1,3,2,1,1,1,1,2
+52,White,Undergraduate degree (BA/BSc/other),"£70,000 - £79,999",Other,Female,9,3,4,3,3,4,4,1,6,6,1,3,3,1,3,1,1,2
+61,White,Undergraduate degree (BA/BSc/other),"£100,000 - £149,999",Labour,Female,4,4,4,1,2,4,4,1,1,1,1,1,1,1,1,1,1,1
+39,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Labour,Female,1,2,3,2,4,4,4,3,5,4,5,4,3,1,2,2,1,2
+73,White,Technical/community college,"£10,000 - £15,999",Labour,Female,5,4,5,1,1,4,5,1,2,1,1,3,1,1,3,2,1,1
+38,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Green Party,Female,4,3,4,3,3,3,3,3,2,2,1,2,1,1,1,2,1,2
+54,White,Secondary education (e.g. GED/GCSE),"Less than £10,000 ",Labour,Female,5,3,3,4,3,3,3,2,4,3,4,1,1,1,1,1,1,1
+44,White,Secondary education (e.g. GED/GCSE),"£30,000 - £39,999",Labour,Female,7,1,1,4,4,3,2,1,4,4,1,1,1,1,1,1,1,1
+69,White,Technical/community college,"£20,000 - £29,999",Other,Female,8,3,4,1,2,3,4,2,4,2,1,2,1,1,1,1,1,1
+40,White,Graduate degree (MA/MSc/MPhil/other),"£30,000 - £39,999",Green Party,Female,10,4,4,2,2,4,4,2,6,4,3,4,4,1,3,3,3,1
+55,Mixed,Secondary education (e.g. GED/GCSE),"Less than £10,000 ",Liberal Democrats,Female,7,2,3,2,3,2,2,1,2,2,1,2,1,1,1,1,2,1
+44,White,Technical/community college,"£20,000 - £29,999",UKIP,Male,8,1,4,2,2,2,3,6,4,6,3,3,2,1,1,2,1,1
+76,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Labour,Male,4,4,2,2,2,4,4,1,1,1,1,1,1,1,1,1,1,1
+24,White,Secondary education (e.g. GED/GCSE),"£70,000 - £79,999",UKIP,Female,9,2,2,4,4,3,2,3,2,2,2,3,2,2,3,2,2,1
+30,White,Undergraduate degree (BA/BSc/other),"£10,000 - £15,999",Labour,Female,7,2,3,1,1,4,3,2,1,1,1,1,1,1,1,1,1,1
+47,White,Undergraduate degree (BA/BSc/other),,Labour,Male,4,3,4,1,2,5,4,4,1,1,1,1,1,1,1,1,3,2
+31,White,Undergraduate degree (BA/BSc/other),,Not applicable / rather not say,Female,6,4,4,2,2,4,3,2,2,1,1,2,2,1,2,3,1,2
+40,White,Secondary education (e.g. GED/GCSE),"£10,000 - £15,999",Labour,Female,7,2,3,4,2,3,4,1,4,1,1,2,1,1,2,2,2,2
+28,White,Secondary education (e.g. GED/GCSE),"£20,000 - £29,999",Not applicable / rather not say,Female,6,2,4,4,4,4,4,1,5,5,5,1,1,1,1,1,1,1
+32,Asian,Graduate degree (MA/MSc/MPhil/other),"£20,000 - £29,999",Conservative,Male,6,5,4,1,1,4,4,4,4,4,1,5,1,1,1,5,1,1
+50,White,Secondary education (e.g. GED/GCSE),"Less than £10,000 ",UKIP,Male,7,4,4,1,2,5,5,1,4,4,4,1,1,1,1,2,3,2
+53,White,Secondary education (e.g. GED/GCSE),,Conservative,Female,6,1,2,4,4,2,2,1,1,1,1,4,2,1,4,3,4,3
+53,White,Secondary education (e.g. GED/GCSE),,Conservative,Female,6,2,2,4,4,2,2,1,1,1,1,4,2,1,4,3,4,3
+53,White,Secondary education (e.g. GED/GCSE),"£50,000 - £59,999",Conservative,Female,6,1,2,4,4,2,2,1,1,1,1,4,2,1,4,3,4,3
+53,White,Secondary education (e.g. GED/GCSE),"£50,000 - £59,999",Conservative,Female,6,2,2,4,4,2,2,1,1,1,1,4,2,1,4,3,4,3
+51,White,Technical/community college,"£40,000 - £49,999",Labour,Female,7,3,4,3,2,4,2,2,4,5,3,4,4,1,4,4,3,2
+27,White,Graduate degree (MA/MSc/MPhil/other),Rather not say,Not applicable / rather not say,Female,6,4,4,2,2,4,4,2,2,2,2,1,1,1,1,1,1,1
+66,White,Undergraduate degree (BA/BSc/other),Rather not say,Other,Male,7,3,4,2,2,4,3,3,4,4,2,2,2,1,2,1,1,1
+37,White,Undergraduate degree (BA/BSc/other),"£50,000 - £59,999",Labour,Female,6,3,4,2,2,4,3,1,3,3,2,1,1,1,1,1,1,3
+27,White,Technical/community college,"£10,000 - £15,999",Green Party,Female,4,1,1,4,4,1,1,4,1,1,1,1,1,1,2,1,1,1
+24,White,Technical/community college,,Not applicable / rather not say,Male,7,3,2,3,3,2,1,4,4,4,4,2,1,1,2,1,1,1
+47,White,Graduate degree (MA/MSc/MPhil/other),"£20,000 - £29,999",Labour,Female,8,4,4,1,2,4,5,1,5,5,3,1,1,1,1,1,1,1
+34,White,High school diploma/A-levels,,Scottish National Party (SNP),Female,5,1,2,4,4,4,2,1,1,1,1,3,3,1,2,3,1,2
+42,Asian,Undergraduate degree (BA/BSc/other),"£100,000 - £149,999",Liberal Democrats,Male,7,4,4,2,2,4,5,3,2,2,3,3,1,1,2,3,3,2
+49,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Conservative,Male,7,2,3,3,3,2,2,1,1,1,1,1,1,1,1,1,1,1
+42,White,Doctorate degree (PhD/other),"£30,000 - £39,999",Conservative,Male,9,4,4,2,2,4,4,3,4,4,1,4,2,1,3,3,1,2
+40,White,High school diploma/A-levels,"£60,000 - £69,999",Liberal Democrats,Female,6,3,4,2,2,4,3,1,2,1,1,1,1,1,1,1,1,1
+21,White,High school diploma/A-levels,"£30,000 - £39,999",Labour,Female,2,4,4,1,1,4,4,1,2,2,3,3,3,1,2,4,5,2
+33,Asian,Undergraduate degree (BA/BSc/other),"£60,000 - £69,999",Labour,Male,4,4,4,1,2,3,4,1,3,3,1,1,1,1,1,1,1,3
+30,White,Technical/community college,"£20,000 - £29,999",Liberal Democrats,Male,4,3,3,3,4,3,3,2,2,1,2,3,3,1,3,3,2,1
+35,White,Undergraduate degree (BA/BSc/other),"£60,000 - £69,999",,Female,6,4,4,2,4,4,4,1,4,1,1,3,1,1,3,3,1,1
+34,White,Technical/community college,"£16,000 - £19,999",Labour,Female,2,3,4,2,4,4,4,1,4,3,3,2,2,1,1,1,1,1
+26,White,Graduate degree (MA/MSc/MPhil/other),,Labour,Female,2,4,4,2,2,4,4,4,4,4,4,4,4,1,3,4,1,2
+34,White,Graduate degree (MA/MSc/MPhil/other),,Green Party,Female,1,4,4,1,2,5,4,1,1,1,1,2,1,1,2,1,1,1
+50,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",UKIP,Female,9,2,4,1,2,2,2,1,4,2,2,2,1,1,2,2,2,3
+59,White,Technical/community college,"£40,000 - £49,999",Conservative,Female,7,2,3,3,3,3,2,1,1,1,1,3,5,1,5,2,1,2
+37,Asian,Undergraduate degree (BA/BSc/other),"£50,000 - £59,999",Conservative,Male,8,4,4,1,2,4,4,6,3,3,3,4,4,4,5,5,5,2
+45,White,No formal qualifications,"Less than £10,000 ",Not applicable / rather not say,Female,8,5,1,4,2,2,1,1,1,1,1,1,1,1,1,1,1,1
+48,White,High school diploma/A-levels,"£50,000 - £59,999",Conservative,Female,8,4,3,3,4,4,4,3,4,4,2,2,2,1,2,1,1,1
+32,White,Graduate degree (MA/MSc/MPhil/other),"£20,000 - £29,999",Liberal Democrats,Female,7,2,4,4,3,2,2,4,4,4,3,3,3,1,3,2,1,2
+32,White,Undergraduate degree (BA/BSc/other),"£16,000 - £19,999",Labour,Female,2,2,2,4,4,4,4,1,3,1,1,5,5,1,4,3,1,2
+66,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Conservative,Male,10,4,4,1,2,3,4,2,4,4,1,5,3,1,5,3,2,2
+38,White,Secondary education (e.g. GED/GCSE),"£20,000 - £29,999",Labour,Female,4,1,1,5,5,1,1,2,3,1,1,4,1,1,4,3,1,3
+63,White,Graduate degree (MA/MSc/MPhil/other),"£40,000 - £49,999",Labour,Male,2,4,4,2,2,5,5,1,2,2,1,1,1,1,1,1,1,1
+31,White,Undergraduate degree (BA/BSc/other),,Not applicable / rather not say,Male,6,4,3,3,4,4,3,1,1,1,1,5,4,1,2,4,3,1
+38,Asian,Technical/community college,Rather not say,Green Party,Male,4,4,4,2,2,5,4,5,5,5,1,3,2,1,2,3,1,3
+33,White,Secondary education (e.g. GED/GCSE),Rather not say,Other,Female,6,2,3,2,3,4,3,1,3,3,3,3,1,1,1,3,1,1
+55,White,High school diploma/A-levels,,Labour,Female,5,4,4,2,2,4,4,1,1,1,1,1,2,1,1,1,1,1
+37,White,Technical/community college,"£20,000 - £29,999",Labour,Female,4,4,2,2,2,4,4,2,2,1,2,4,1,1,4,4,1,1
+36,White,Secondary education (e.g. GED/GCSE),"£30,000 - £39,999",Not applicable / rather not say,Female,7,4,4,2,2,4,3,2,3,3,2,2,2,1,2,2,1,2
+30,White,Undergraduate degree (BA/BSc/other),,Labour,Female,2,2,1,2,3,4,2,2,2,1,1,3,1,1,2,1,2,2
+43,White,Secondary education (e.g. GED/GCSE),"£30,000 - £39,999",Conservative,Female,7,2,2,4,4,2,2,1,4,4,4,1,1,1,3,1,1,1
+60,White,High school diploma/A-levels,"£10,000 - £15,999",Conservative,Female,9,4,4,1,2,4,4,2,3,3,2,1,2,1,3,1,1,2
+34,White,High school diploma/A-levels,"£50,000 - £59,999",Labour,Female,5,2,3,4,2,4,3,4,2,2,2,2,2,1,1,1,1,1
+30,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Labour,Female,5,4,4,2,1,4,4,3,3,3,2,1,1,1,1,2,1,1
+62,White,Technical/community college,"£40,000 - £49,999",Other,Male,7,3,4,2,2,4,2,1,7,6,1,1,1,1,1,1,1,1
+35,White,Technical/community college,"£40,000 - £49,999",Labour,Female,6,4,2,2,2,4,4,2,4,3,2,2,1,1,3,2,1,3
+21,White,Secondary education (e.g. GED/GCSE),,Liberal Democrats,Male,8,4,3,2,4,4,3,3,2,3,2,2,1,1,2,3,2,2
+66,White,Graduate degree (MA/MSc/MPhil/other),"£90,000 - £99,999",Liberal Democrats,Male,7,2,3,1,2,4,3,2,1,1,1,1,2,1,1,1,2,1
+26,White,Graduate degree (MA/MSc/MPhil/other),,Liberal Democrats,Male,5,5,5,1,2,5,5,1,2,2,2,2,1,1,2,2,1,2
+28,White,Graduate degree (MA/MSc/MPhil/other),"£40,000 - £49,999",Liberal Democrats,Female,2,3,4,2,2,4,4,2,4,3,2,3,2,1,3,2,1,1
+34,White,Graduate degree (MA/MSc/MPhil/other),"£80,000 - £89,999",UKIP,Male,10,4,5,1,2,4,4,6,3,5,1,3,1,1,1,1,1,2
+46,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Scottish National Party (SNP),Male,4,2,4,2,2,5,4,1,2,3,3,1,1,1,1,1,1,1
+30,White,Graduate degree (MA/MSc/MPhil/other),"£60,000 - £69,999",Liberal Democrats,Male,2,4,4,2,2,4,4,2,1,1,1,2,1,1,1,1,1,1
+45,White,Graduate degree (MA/MSc/MPhil/other),Rather not say,Not applicable / rather not say,Male,7,4,5,1,1,4,5,3,2,1,1,2,1,1,2,2,1,1
+41,White,Undergraduate degree (BA/BSc/other),,Scottish National Party (SNP),Female,7,4,5,1,2,5,5,2,1,1,1,3,1,1,3,2,1,1
+41,White,High school diploma/A-levels,,Not applicable / rather not say,Male,6,4,4,4,2,4,4,1,1,1,1,5,3,3,5,5,4,1
+27,CONSENT REVOKED,CONSENT REVOKED,CONSENT REVOKED,CONSENT REVOKED,CONSENT REVOKED,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+56,White,Technical/community college,"£50,000 - £59,999",Conservative,Male,7,4,4,1,2,4,4,1,2,1,3,3,2,1,2,3,1,1
+60,White,Undergraduate degree (BA/BSc/other),Rather not say,Conservative,Female,9,4,4,1,3,4,4,3,4,3,1,1,1,1,1,1,1,1
+64,White,Secondary education (e.g. GED/GCSE),,Labour,Female,1,4,1,4,3,2,3,1,1,1,1,1,1,1,1,1,1,1
+57,White,Technical/community college,"£30,000 - £39,999",Liberal Democrats,Male,4,4,3,2,2,3,3,3,2,4,5,1,1,1,2,1,1,1
+22,White,Undergraduate degree (BA/BSc/other),"£50,000 - £59,999",Conservative,Male,11,5,5,1,3,3,3,3,3,1,1,1,1,1,1,1,1,1
+31,White,Technical/community college,"Less than £10,000 ",Labour,Female,1,3,4,2,2,4,3,1,4,4,4,1,1,1,1,1,1,1
+55,White,Secondary education (e.g. GED/GCSE),"£16,000 - £19,999",Conservative,Female,11,1,3,1,5,1,1,5,4,1,4,1,1,1,1,1,1,1
+33,White,Secondary education (e.g. GED/GCSE),,Green Party,Female,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+33,White,Secondary education (e.g. GED/GCSE),,Green Party,Female,2,4,4,2,2,3,4,2,1,1,1,1,1,1,1,1,2,1
+33,CONSENT REVOKED,CONSENT REVOKED,CONSENT REVOKED,CONSENT REVOKED,CONSENT REVOKED,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+33,CONSENT REVOKED,CONSENT REVOKED,CONSENT REVOKED,CONSENT REVOKED,CONSENT REVOKED,2,4,4,2,2,3,4,2,1,1,1,1,1,1,1,1,2,1
+31,White,Technical/community college,"£40,000 - £49,999",Conservative,Male,6,5,5,1,1,5,5,1,2,2,2,1,1,1,1,1,1,1
+22,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Labour,Female,4,2,3,2,2,4,2,3,2,3,1,1,1,1,2,1,1,2
+49,White,Graduate degree (MA/MSc/MPhil/other),Rather not say,Conservative,Female,9,2,2,4,4,1,2,1,2,2,1,2,1,1,1,1,1,1
+64,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Liberal Democrats,Male,6,4,5,2,3,4,3,1,2,1,1,2,2,1,2,2,2,1
+54,White,High school diploma/A-levels,"£50,000 - £59,999",Not applicable / rather not say,Female,4,4,4,1,1,5,4,1,1,1,1,1,1,1,1,1,1,1
+67,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",,Male,7,4,4,2,2,4,3,1,4,2,2,1,1,1,1,1,1,1
+38,White,Technical/community college,"£20,000 - £29,999",Not applicable / rather not say,Female,5,3,4,2,4,4,4,2,2,2,4,2,1,1,2,3,1,1
+21,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Not applicable / rather not say,Male,6,3,3,3,3,3,3,4,4,1,1,1,1,1,1,1,1,1
+33,White,Undergraduate degree (BA/BSc/other),"£50,000 - £59,999",Labour,Female,5,1,2,5,5,2,2,2,4,4,1,1,1,1,1,1,1,1
+46,White,Graduate degree (MA/MSc/MPhil/other),"£90,000 - £99,999",Liberal Democrats,Female,7,4,4,2,2,2,4,1,1,1,1,2,1,1,1,1,1,1
+23,White,High school diploma/A-levels,"£20,000 - £29,999",Conservative,Male,8,4,4,2,2,5,4,2,1,1,1,3,1,1,2,4,1,1
+57,White,Technical/community college,,Labour,Female,4,4,4,3,2,4,4,2,2,2,2,2,1,1,1,1,1,1
+26,White,Technical/community college,,Conservative,Male,8,4,3,2,3,3,4,5,1,1,1,1,1,1,1,1,1,1
+39,White,Undergraduate degree (BA/BSc/other),"£40,000 - £49,999",Labour,Female,7,2,2,2,3,4,3,1,2,2,2,3,2,1,2,2,2,2
+51,White,Technical/community college,"£20,000 - £29,999",Conservative,Male,8,3,4,2,3,4,4,3,2,2,1,1,1,1,1,1,1,1
+57,White,Undergraduate degree (BA/BSc/other),,Green Party,Female,6,4,4,2,1,5,4,1,1,1,1,2,2,1,2,2,1,1
+32,White,High school diploma/A-levels,"£30,000 - £39,999",Labour,Female,4,4,4,2,2,4,2,4,5,4,3,2,2,1,1,2,2,2
+32,White,Technical/community college,,Not applicable / rather not say,Male,6,4,3,2,2,5,4,3,1,2,1,3,3,1,1,1,1,1
+32,White,Technical/community college,,Not applicable / rather not say,Male,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+32,CONSENT REVOKED,CONSENT REVOKED,CONSENT REVOKED,CONSENT REVOKED,CONSENT REVOKED,6,4,3,2,2,5,4,3,1,2,1,3,3,1,1,1,1,1
+32,CONSENT REVOKED,CONSENT REVOKED,CONSENT REVOKED,CONSENT REVOKED,CONSENT REVOKED,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+30,White,Undergraduate degree (BA/BSc/other),Rather not say,Not applicable / rather not say,Female,4,4,4,2,1,4,4,6,4,4,4,3,2,1,2,1,1,2
+55,White,Technical/community college,"£20,000 - £29,999",Not applicable / rather not say,Male,7,2,2,2,4,2,2,5,5,5,4,3,3,1,3,3,1,2
+58,White,Undergraduate degree (BA/BSc/other),,Labour,Female,9,2,4,1,1,5,4,1,1,1,1,4,2,1,3,2,2,2
+50,Asian,Undergraduate degree (BA/BSc/other),Rather not say,Not applicable / rather not say,Female,7,2,2,2,4,4,4,1,5,5,5,2,2,1,3,3,1,1
+59,White,High school diploma/A-levels,"£16,000 - £19,999",Conservative,Male,6,4,4,3,2,4,4,5,1,4,1,2,1,1,1,2,1,1
+29,White,Graduate degree (MA/MSc/MPhil/other),,Liberal Democrats,Female,5,2,3,5,4,1,2,2,1,1,1,3,1,1,2,1,1,2
+36,White,Secondary education (e.g. GED/GCSE),"£20,000 - £29,999",Labour,Female,4,4,4,2,1,5,5,1,7,7,4,1,1,1,1,1,1,1
+47,White,Undergraduate degree (BA/BSc/other),"£10,000 - £15,999",Green Party,Male,2,4,2,2,2,4,4,1,1,1,1,1,1,1,1,1,1,1
+49,White,Secondary education (e.g. GED/GCSE),"£30,000 - £39,999",Conservative,Male,7,3,2,2,3,3,3,2,4,4,4,1,1,1,1,1,1,2
+35,White,High school diploma/A-levels,"£20,000 - £29,999",Conservative,Male,7,2,3,3,4,4,2,1,1,1,1,1,1,1,1,1,1,1
+39,Asian,Undergraduate degree (BA/BSc/other),"£50,000 - £59,999",Labour,Female,6,3,3,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1
+53,White,Secondary education (e.g. GED/GCSE),"£20,000 - £29,999",Conservative,Female,6,4,5,2,2,5,4,1,7,4,7,3,3,1,3,3,4,1
+64,White,Graduate degree (MA/MSc/MPhil/other),,Scottish National Party (SNP),Female,4,3,4,2,2,3,3,2,1,1,1,1,1,1,1,1,1,1
+38,White,Secondary education (e.g. GED/GCSE),"£60,000 - £69,999",Labour,Female,6,4,5,2,2,4,4,1,4,4,1,2,1,1,3,2,1,1
+37,White,Graduate degree (MA/MSc/MPhil/other),"£20,000 - £29,999",Liberal Democrats,Female,6,1,1,5,5,2,2,3,4,4,4,3,1,1,3,3,1,3
+36,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Liberal Democrats,Male,4,2,4,3,3,4,4,2,2,2,2,1,1,1,1,1,1,1
+27,White,High school diploma/A-levels,"£16,000 - £19,999",Liberal Democrats,Female,5,1,2,3,4,4,4,3,2,4,5,3,3,1,3,2,1,1
+38,White,Undergraduate degree (BA/BSc/other),"£10,000 - £15,999",Labour,Female,2,2,2,4,3,2,2,2,2,2,2,1,1,1,1,1,1,1
+23,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Labour,Female,2,2,4,3,4,4,4,2,3,2,2,2,1,1,1,1,1,1
+40,White,Undergraduate degree (BA/BSc/other),Rather not say,Not applicable / rather not say,Female,7,4,4,2,4,4,3,1,6,4,4,1,1,1,1,1,1,1
+32,Other,Graduate degree (MA/MSc/MPhil/other),Rather not say,Not applicable / rather not say,Female,4,2,2,2,2,4,4,1,1,1,1,2,1,1,2,1,1,2
+50,White,High school diploma/A-levels,"£16,000 - £19,999",Labour,Female,6,4,4,2,2,4,4,2,3,3,3,4,3,1,4,4,3,2
+21,Asian,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Conservative,Female,8,2,1,2,2,3,2,3,4,4,4,2,2,1,1,2,1,1
+56,White,Technical/community college,"£20,000 - £29,999",Labour,Female,2,4,3,2,2,4,4,2,3,3,4,3,1,1,1,1,3,2
+36,White,High school diploma/A-levels,"£30,000 - £39,999",Green Party,Female,6,4,4,2,1,4,3,3,4,3,2,3,1,1,2,1,2,2
+32,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Labour,Female,4,4,4,2,2,4,4,3,1,1,1,1,1,1,2,1,1,1
+36,White,Secondary education (e.g. GED/GCSE),"Less than £10,000 ",Not applicable / rather not say,Female,7,3,3,3,3,3,3,1,4,4,4,3,3,3,3,3,3,1
+31,White,Technical/community college,,Labour,Female,6,2,2,3,4,2,2,1,6,2,6,2,2,1,4,2,2,1
+22,Asian,Secondary education (e.g. GED/GCSE),,Labour,Male,6,3,3,3,3,3,3,2,4,4,4,2,3,2,3,4,3,1
+33,White,Undergraduate degree (BA/BSc/other),"£40,000 - £49,999",Labour,Male,2,4,4,2,2,4,4,3,1,1,1,2,1,1,1,2,1,1
+27,Black,High school diploma/A-levels,,Labour,Female,2,1,1,4,4,2,1,1,7,4,2,1,5,1,1,1,1,1
+35,White,Undergraduate degree (BA/BSc/other),"£50,000 - £59,999",Other,Female,7,4,4,2,3,4,2,1,1,1,1,2,1,1,1,3,1,2
+56,White,Undergraduate degree (BA/BSc/other),"£50,000 - £59,999",Conservative,Female,7,4,3,1,1,4,3,1,1,1,1,3,2,1,3,3,3,1
+61,White,High school diploma/A-levels,,Conservative,Male,9,5,5,1,1,5,5,2,6,4,3,1,1,1,1,1,1,1
+38,White,High school diploma/A-levels,"£20,000 - £29,999",Labour,Female,4,4,5,1,1,4,4,2,1,2,1,1,1,1,1,1,1,1
+24,White,No formal qualifications,"£40,000 - £49,999",Green Party,Female,1,3,3,4,3,4,3,2,1,1,1,2,1,1,1,2,1,1
+61,White,Technical/community college,"£40,000 - £49,999",Other,Male,5,4,5,1,2,5,4,2,4,3,1,4,3,1,3,3,1,2
+56,White,High school diploma/A-levels,,Green Party,Female,4,4,3,2,3,3,2,2,2,2,1,3,2,1,1,1,1,2
+41,White,Secondary education (e.g. GED/GCSE),,Labour,Male,4,3,4,2,3,3,4,6,1,2,5,1,1,1,1,1,1,1
+64,White,Undergraduate degree (BA/BSc/other),"£40,000 - £49,999",Liberal Democrats,Female,6,4,4,1,4,4,4,1,1,1,1,4,2,1,3,1,1,2
+42,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Liberal Democrats,Female,5,4,2,2,2,4,4,5,2,3,2,3,2,1,3,1,1,2
+28,White,High school diploma/A-levels,Rather not say,Green Party,Female,4,4,4,2,2,4,4,2,2,2,2,3,1,1,1,2,2,2
+28,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Green Party,Female,4,2,2,4,4,4,4,2,1,1,1,2,1,1,1,1,1,1
+28,White,Undergraduate degree (BA/BSc/other),Rather not say,Not applicable / rather not say,Female,4,4,4,2,3,3,4,3,6,5,3,2,1,1,2,2,1,1
+30,White,Undergraduate degree (BA/BSc/other),"£90,000 - £99,999",Scottish National Party (SNP),Male,5,4,4,2,2,4,4,2,1,1,1,2,2,1,2,2,1,1
+48,White,High school diploma/A-levels,Rather not say,Conservative,Female,6,5,2,4,4,2,2,2,2,2,2,5,2,1,3,2,4,3
+47,White,Graduate degree (MA/MSc/MPhil/other),,Labour,Male,1,4,5,1,1,4,3,1,1,1,2,2,1,1,1,1,1,1
+78,White,Secondary education (e.g. GED/GCSE),"£10,000 - £15,999",Conservative,Female,9,4,5,1,1,5,4,3,4,4,1,1,1,1,1,1,1,1
+40,Mixed,High school diploma/A-levels,"£20,000 - £29,999",Other,Male,6,3,4,2,2,4,3,1,2,2,1,3,3,1,1,3,1,2
+50,Mixed,Undergraduate degree (BA/BSc/other),,Green Party,Female,5,4,4,1,1,4,3,1,1,1,1,3,2,1,1,1,2,1
+60,White,Graduate degree (MA/MSc/MPhil/other),,Liberal Democrats,Female,5,4,5,1,2,4,5,1,1,1,1,2,4,1,1,3,1,3
+27,White,Graduate degree (MA/MSc/MPhil/other),"£30,000 - £39,999",Conservative,Female,6,1,2,2,4,3,2,1,5,5,5,5,3,1,4,5,3,2
+50,White,Technical/community college,Rather not say,Liberal Democrats,Female,6,4,4,2,2,4,4,4,1,1,1,1,1,1,1,1,1,1
+36,White,High school diploma/A-levels,"£20,000 - £29,999",Labour,Male,2,4,4,2,2,4,4,3,2,2,1,1,1,1,1,1,1,1
+30,White,Undergraduate degree (BA/BSc/other),"£40,000 - £49,999",Labour,Male,2,5,5,1,1,5,4,1,1,1,1,3,3,1,5,5,1,1
+49,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Labour,Female,2,4,3,2,3,4,3,1,1,1,1,3,2,1,2,1,1,3
+49,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Labour,Female,2,4,2,2,3,4,3,1,1,1,1,3,2,1,2,1,1,3
+49,White,Undergraduate degree (BA/BSc/other),,Labour,Female,2,4,3,2,3,4,3,1,1,1,1,3,2,1,2,1,1,3
+49,White,Undergraduate degree (BA/BSc/other),,Labour,Female,2,4,2,2,3,4,3,1,1,1,1,3,2,1,2,1,1,3
+29,White,High school diploma/A-levels,,Not applicable / rather not say,Female,6,3,4,4,3,3,4,1,5,5,6,3,2,1,3,3,3,1
+62,White,Graduate degree (MA/MSc/MPhil/other),"£20,000 - £29,999",Liberal Democrats,Female,6,4,4,2,2,4,4,6,3,3,3,1,1,1,1,1,1,1
+51,White,Secondary education (e.g. GED/GCSE),"£16,000 - £19,999",Liberal Democrats,Male,7,4,4,2,2,4,4,1,2,2,1,2,2,1,4,4,1,2
+36,Asian,Graduate degree (MA/MSc/MPhil/other),"£100,000 - £149,999",Labour,Female,5,4,4,1,2,4,4,1,2,2,1,3,2,1,2,3,3,1
+30,White,High school diploma/A-levels,,Labour,Male,2,2,3,2,2,4,4,2,1,2,4,2,2,1,2,2,1,1
+42,White,Undergraduate degree (BA/BSc/other),,Labour,Female,6,4,4,2,2,4,4,1,3,2,3,3,2,1,3,3,3,2
+46,White,Technical/community college,"£30,000 - £39,999",Labour,Male,1,2,3,3,4,3,3,5,1,1,1,1,1,1,1,1,1,2
+25,White,High school diploma/A-levels,,Labour,Female,6,2,4,2,4,3,4,1,4,2,1,4,1,1,2,2,1,2
+66,White,Doctorate degree (PhD/other),"£40,000 - £49,999",Conservative,Male,7,4,4,2,2,4,4,2,1,1,1,3,3,1,3,3,3,1
+48,White,Secondary education (e.g. GED/GCSE),"£30,000 - £39,999",Conservative,Female,8,2,2,4,3,4,3,2,5,5,3,3,3,1,2,3,3,2
+19,Asian,Technical/community college,"£16,000 - £19,999",Labour,Female,1,1,1,5,5,4,1,5,7,5,7,3,3,1,2,3,1,2
+40,Asian,Doctorate degree (PhD/other),"Less than £10,000 ",Labour,Female,4,4,4,1,1,5,5,1,4,4,1,3,2,1,3,3,1,2
+29,White,High school diploma/A-levels,"£20,000 - £29,999",Liberal Democrats,Female,1,4,4,2,2,4,4,3,1,1,1,2,1,1,1,2,2,1
+37,White,Graduate degree (MA/MSc/MPhil/other),"£30,000 - £39,999",Green Party,Male,4,5,5,2,2,5,4,2,1,1,1,2,1,1,1,1,1,1
+61,White,Undergraduate degree (BA/BSc/other),"£16,000 - £19,999",Green Party,Male,4,3,3,2,2,4,4,1,1,1,1,1,1,1,1,1,1,1
+31,White,Undergraduate degree (BA/BSc/other),"£10,000 - £15,999",Liberal Democrats,Female,5,2,4,1,2,4,3,3,2,2,2,2,1,1,3,1,3,2
+65,White,Undergraduate degree (BA/BSc/other),"£10,000 - £15,999",Not applicable / rather not say,Male,8,4,4,2,1,4,4,6,2,1,1,3,2,1,1,1,2,1
+34,White,Undergraduate degree (BA/BSc/other),"£40,000 - £49,999",Liberal Democrats,Female,4,1,1,2,5,2,2,1,4,5,1,4,3,1,3,1,1,2
+36,White,Graduate degree (MA/MSc/MPhil/other),,Liberal Democrats,Female,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+36,White,Graduate degree (MA/MSc/MPhil/other),,Liberal Democrats,Female,7,4,4,2,2,4,4,2,1,1,1,3,3,1,3,3,1,2
+36,CONSENT REVOKED,CONSENT REVOKED,CONSENT REVOKED,CONSENT REVOKED,CONSENT REVOKED,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+36,CONSENT REVOKED,CONSENT REVOKED,CONSENT REVOKED,CONSENT REVOKED,CONSENT REVOKED,7,4,4,2,2,4,4,2,1,1,1,3,3,1,3,3,1,2
+63,White,Doctorate degree (PhD/other),,Liberal Democrats,Male,6,4,4,1,1,4,4,2,2,1,1,3,1,1,2,1,1,1
+44,White,Technical/community college,"£20,000 - £29,999",Not applicable / rather not say,Female,5,4,4,2,2,3,4,3,5,5,3,3,3,1,3,3,1,2
+27,White,High school diploma/A-levels,"£20,000 - £29,999",Not applicable / rather not say,Female,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+43,White,Undergraduate degree (BA/BSc/other),,Scottish National Party (SNP),Male,4,3,4,1,2,4,4,1,1,1,1,1,1,1,1,1,1,1
+25,Mixed,Undergraduate degree (BA/BSc/other),,Scottish National Party (SNP),Female,6,3,3,3,3,3,3,5,2,4,5,1,1,1,1,1,1,1
+22,White,Undergraduate degree (BA/BSc/other),,Labour,Male,2,5,4,3,3,4,2,7,4,6,1,1,1,1,1,1,1,1
+33,White,High school diploma/A-levels,"£10,000 - £15,999",Scottish National Party (SNP),Female,4,5,4,1,2,5,4,2,1,1,1,3,1,1,2,2,1,1
+23,White,High school diploma/A-levels,"£20,000 - £29,999",Labour,Male,5,4,4,2,2,4,4,3,6,5,2,2,2,1,2,1,3,1
+36,White,Undergraduate degree (BA/BSc/other),,Labour,Female,1,4,4,2,3,4,4,1,1,1,1,4,2,1,2,1,3,2
+42,White,Secondary education (e.g. GED/GCSE),"£10,000 - £15,999",Conservative,Male,6,3,4,2,2,4,4,1,2,1,1,4,1,1,3,2,1,1
+32,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Other,Female,7,5,5,1,1,5,5,1,4,4,1,5,4,1,5,4,1,1
+33,Asian,Undergraduate degree (BA/BSc/other),,Conservative,Female,7,4,4,1,4,5,4,1,1,3,1,3,4,1,4,5,1,2
+40,White,Graduate degree (MA/MSc/MPhil/other),"£20,000 - £29,999",Conservative,Male,9,4,4,2,2,5,5,5,2,2,1,3,2,1,3,2,2,1
+47,White,Undergraduate degree (BA/BSc/other),"£80,000 - £89,999",Green Party,Female,1,3,4,2,2,4,3,4,1,4,4,1,1,1,1,1,1,1
+19,White,High school diploma/A-levels,"£40,000 - £49,999",Conservative,Male,6,4,4,3,3,3,4,7,4,4,3,1,1,2,2,1,1,2
+54,White,Undergraduate degree (BA/BSc/other),Rather not say,UKIP,Female,11,5,3,2,2,4,4,1,4,3,2,1,2,1,2,2,1,3
+42,White,Technical/community college,"£50,000 - £59,999",Not applicable / rather not say,Female,7,2,2,3,2,3,2,1,2,2,2,2,2,1,2,2,1,1
+61,White,Technical/community college,,Conservative,Male,10,4,5,2,2,4,2,2,4,4,4,2,2,1,2,4,2,1
+30,White,Technical/community college,"£40,000 - £49,999",Labour,Female,6,2,2,4,4,4,3,1,5,5,2,1,1,1,1,1,1,1
+28,White,Undergraduate degree (BA/BSc/other),,Not applicable / rather not say,Female,6,2,4,2,2,4,4,3,1,1,1,1,1,1,1,1,1,1
+37,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Labour,Female,4,5,5,1,1,5,5,2,2,2,2,1,1,1,2,1,1,2
+54,White,Undergraduate degree (BA/BSc/other),"£40,000 - £49,999",Liberal Democrats,Male,6,2,2,4,4,3,2,1,2,1,1,1,1,1,1,1,1,1
+23,White,Undergraduate degree (BA/BSc/other),,Labour,Male,4,2,4,2,4,4,4,3,1,1,1,1,1,1,2,2,1,1
+35,White,Graduate degree (MA/MSc/MPhil/other),"£80,000 - £89,999",Conservative,Female,8,4,4,2,2,5,2,1,3,3,3,3,2,1,4,3,4,2
+36,White,Undergraduate degree (BA/BSc/other),Rather not say,Green Party,Female,2,3,4,1,2,5,4,1,1,1,1,3,3,1,2,4,2,2
+53,White,Undergraduate degree (BA/BSc/other),,Green Party,Female,5,4,4,2,2,4,4,1,1,1,2,3,3,1,1,1,3,1
+62,White,Technical/community college,"£60,000 - £69,999",Not applicable / rather not say,Female,7,4,4,2,2,4,4,2,4,4,4,2,1,1,1,2,1,2
+64,White,Technical/community college,"£40,000 - £49,999",Labour,Female,5,3,2,4,3,4,3,1,1,1,1,4,2,1,4,2,1,2
+42,White,Graduate degree (MA/MSc/MPhil/other),"£80,000 - £89,999",Liberal Democrats,Female,4,4,4,2,2,4,4,5,1,1,1,1,1,1,1,1,1,1
+52,White,Undergraduate degree (BA/BSc/other),"£70,000 - £79,999",Liberal Democrats,Male,6,4,3,2,2,4,3,3,4,4,4,2,2,1,2,2,2,1
+54,White,High school diploma/A-levels,"£40,000 - £49,999",Labour,Female,4,4,4,2,2,5,3,2,6,7,4,3,2,1,3,3,3,2
+41,White,Undergraduate degree (BA/BSc/other),,Green Party,Male,1,5,5,1,1,5,5,2,1,1,1,4,1,1,3,1,1,2
+31,White,Secondary education (e.g. GED/GCSE),"£30,000 - £39,999",Scottish National Party (SNP),Male,6,3,4,2,4,4,3,1,1,4,1,1,1,1,1,1,2,1
+43,White,Technical/community college,"£30,000 - £39,999",UKIP,Female,5,4,4,2,3,2,5,5,5,5,5,2,1,1,3,2,1,3
+31,White,Undergraduate degree (BA/BSc/other),,Labour,Female,2,4,4,1,2,4,4,1,1,1,1,3,2,1,3,2,1,2
+55,White,Technical/community college,"£16,000 - £19,999",Liberal Democrats,Female,7,4,4,2,2,4,4,4,4,4,2,1,1,1,1,1,1,2
+24,White,No formal qualifications,Rather not say,Not applicable / rather not say,Female,8,2,4,2,2,4,4,4,3,2,3,1,1,1,1,3,2,1
+30,White,Graduate degree (MA/MSc/MPhil/other),"£30,000 - £39,999",Liberal Democrats,Female,7,3,4,3,3,4,4,3,1,1,1,2,1,1,2,3,1,2
+29,White,Undergraduate degree (BA/BSc/other),,Not applicable / rather not say,Female,5,2,4,1,2,5,4,2,4,3,4,1,1,1,2,1,2,1
+58,White,High school diploma/A-levels,Rather not say,Labour,Male,5,4,4,2,2,3,4,1,2,2,2,4,2,1,3,2,1,2
+27,White,High school diploma/A-levels,,Conservative,Male,5,3,5,2,3,3,3,5,4,6,5,3,4,2,5,2,3,3
+26,White,Technical/community college,"£16,000 - £19,999",Not applicable / rather not say,Male,7,4,3,3,2,4,4,1,3,3,3,2,1,1,1,3,1,2
+22,White,Undergraduate degree (BA/BSc/other),,Conservative,Female,8,2,2,4,2,4,4,2,1,1,1,2,1,1,2,2,1,1
+43,White,Undergraduate degree (BA/BSc/other),,Liberal Democrats,Female,4,3,4,1,2,2,3,1,3,3,3,3,2,1,3,3,1,2
+46,White,Graduate degree (MA/MSc/MPhil/other),"£30,000 - £39,999",Labour,Male,6,4,4,1,3,4,4,1,1,1,1,3,3,1,2,4,1,2
+30,White,Undergraduate degree (BA/BSc/other),Rather not say,Labour,Female,6,2,4,2,2,4,2,2,5,3,3,2,2,1,2,2,2,1
+62,White,Technical/community college,"£30,000 - £39,999",Green Party,Male,7,3,4,2,2,4,4,2,3,3,3,1,1,1,1,1,1,2
+29,White,Graduate degree (MA/MSc/MPhil/other),,Labour,Female,4,3,4,2,4,2,3,6,1,2,1,3,2,1,2,2,3,2
+52,White,High school diploma/A-levels,,Other,Female,5,4,4,1,2,4,4,1,1,1,1,3,2,1,2,3,2,2
+33,White,Undergraduate degree (BA/BSc/other),,Not applicable / rather not say,Female,6,1,2,4,4,2,2,2,2,2,2,4,2,1,4,4,2,2
+48,White,Secondary education (e.g. GED/GCSE),"£50,000 - £59,999",Conservative,Male,8,2,3,3,2,2,3,1,5,5,4,2,2,1,1,2,2,1
+50,White,Undergraduate degree (BA/BSc/other),"£40,000 - £49,999",Labour,Female,2,4,4,2,2,4,4,1,2,1,1,1,1,1,3,3,1,2
+68,White,Graduate degree (MA/MSc/MPhil/other),"£40,000 - £49,999",Conservative,Male,9,4,4,1,1,5,4,2,1,1,1,3,1,1,1,1,1,1
+50,White,Secondary education (e.g. GED/GCSE),"£20,000 - £29,999",Conservative,Female,9,2,2,2,4,4,4,1,2,1,1,1,1,1,1,1,1,1
+35,White,Undergraduate degree (BA/BSc/other),,Conservative,Male,9,4,4,1,2,5,4,2,1,1,1,2,1,1,2,1,1,2
+54,White,Undergraduate degree (BA/BSc/other),,Labour,Female,4,4,3,2,2,2,4,2,2,1,2,4,2,1,3,1,1,2
+25,White,Undergraduate degree (BA/BSc/other),"£70,000 - £79,999",UKIP,Female,11,3,4,4,2,3,2,5,1,7,4,4,2,1,4,2,3,2
+27,White,Undergraduate degree (BA/BSc/other),"£70,000 - £79,999",Labour,Male,6,4,5,2,4,2,5,2,2,3,2,2,1,1,2,2,2,1
+57,White,High school diploma/A-levels,"£16,000 - £19,999",Liberal Democrats,Female,6,2,2,1,2,4,4,1,2,1,1,2,3,1,2,3,2,2
+69,White,Secondary education (e.g. GED/GCSE),"£30,000 - £39,999",Labour,Female,7,2,2,2,1,4,2,1,3,3,3,1,1,1,1,1,1,1
+44,White,High school diploma/A-levels,,Labour,Male,2,4,4,1,2,5,4,1,2,1,1,1,1,1,1,1,1,1
+29,White,Doctorate degree (PhD/other),"£50,000 - £59,999",Liberal Democrats,Male,2,2,4,2,2,4,4,2,1,1,1,1,1,1,1,2,1,1
+26,White,High school diploma/A-levels,"£100,000 - £149,999",Not applicable / rather not say,Male,7,4,4,2,1,4,4,1,2,2,1,1,1,1,1,1,1,1
+29,White,High school diploma/A-levels,Rather not say,Not applicable / rather not say,Female,6,4,4,3,4,4,4,4,2,3,3,3,2,1,2,2,3,1
+20,White,Undergraduate degree (BA/BSc/other),,Liberal Democrats,Male,4,4,4,2,2,5,4,2,1,1,1,1,1,1,1,1,1,1
+31,White,Secondary education (e.g. GED/GCSE),"£10,000 - £15,999",Not applicable / rather not say,Female,4,2,4,2,2,4,4,1,2,2,1,1,1,1,1,1,1,1
+20,White,High school diploma/A-levels,"£16,000 - £19,999",Labour,Female,4,3,3,2,1,4,3,1,1,1,1,2,1,1,1,1,1,2
+39,White,Graduate degree (MA/MSc/MPhil/other),"£20,000 - £29,999",Labour,Female,5,2,2,4,5,4,2,2,2,2,2,2,2,1,2,2,1,1
+53,White,Graduate degree (MA/MSc/MPhil/other),"£100,000 - £149,999",Labour,Female,1,4,4,2,3,4,4,2,4,2,2,1,1,1,1,1,1,1
+46,White,Graduate degree (MA/MSc/MPhil/other),,Conservative,Male,10,4,5,2,2,4,4,3,1,1,1,2,1,1,2,2,3,1
+39,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",UKIP,Female,10,3,2,1,2,2,4,1,1,1,1,2,2,1,3,1,1,3
+47,White,Undergraduate degree (BA/BSc/other),"£50,000 - £59,999",Labour,Female,4,2,2,4,4,2,2,1,2,1,1,1,1,1,1,1,1,1
+45,White,Graduate degree (MA/MSc/MPhil/other),"£50,000 - £59,999",Liberal Democrats,Male,6,5,4,1,1,5,4,1,2,1,1,4,3,1,3,3,1,2
+38,White,Secondary education (e.g. GED/GCSE),,Labour,Female,2,5,5,1,1,5,5,1,1,2,3,1,1,1,2,2,1,1
+41,White,Graduate degree (MA/MSc/MPhil/other),"£30,000 - £39,999",Liberal Democrats,Female,7,4,4,2,3,4,3,2,1,1,1,3,3,1,3,3,2,1
+23,White,Undergraduate degree (BA/BSc/other),,Labour,Female,2,4,4,3,2,4,3,1,1,1,1,2,1,1,2,2,1,1
+34,White,High school diploma/A-levels,"£30,000 - £39,999",Scottish National Party (SNP),Female,5,4,4,2,2,4,2,1,5,5,3,5,4,1,4,4,2,2
+47,White,Graduate degree (MA/MSc/MPhil/other),,Liberal Democrats,Male,6,4,4,2,3,4,4,2,1,1,1,3,2,1,2,1,1,1
+25,White,Technical/community college,,Not applicable / rather not say,Male,6,1,1,5,5,2,2,3,2,1,1,1,1,1,1,1,1,1
+34,White,Graduate degree (MA/MSc/MPhil/other),"£30,000 - £39,999",Not applicable / rather not say,Male,1,3,4,2,2,4,4,3,2,1,1,1,1,1,1,1,1,1
+48,White,Technical/community college,,Liberal Democrats,Male,4,4,4,2,2,4,4,2,1,6,6,1,1,1,1,1,1,1
+35,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Not applicable / rather not say,Female,5,2,1,4,2,4,2,1,4,4,1,1,1,1,1,1,1,1
+43,White,Graduate degree (MA/MSc/MPhil/other),"£50,000 - £59,999",Other,Male,4,5,5,1,1,5,5,2,4,2,2,3,4,1,2,3,3,1
+64,White,Secondary education (e.g. GED/GCSE),"£10,000 - £15,999",Conservative,Female,11,1,1,5,5,1,1,1,7,7,1,1,1,1,1,1,1,1
+55,Black,Undergraduate degree (BA/BSc/other),,Not applicable / rather not say,Female,6,4,4,1,2,4,2,5,3,6,6,1,1,1,1,1,1,1
+35,White,Technical/community college,"Less than £10,000 ",Not applicable / rather not say,Female,4,4,4,1,2,4,2,1,5,4,3,2,2,1,2,2,1,2
+32,Asian,Undergraduate degree (BA/BSc/other),,Scottish National Party (SNP),Female,7,3,3,2,3,4,3,6,1,1,1,1,1,1,1,1,1,1
+32,White,Graduate degree (MA/MSc/MPhil/other),"£20,000 - £29,999",Other,Female,6,4,2,2,2,3,4,1,2,2,2,2,2,1,2,1,1,2
+28,White,Undergraduate degree (BA/BSc/other),"£70,000 - £79,999",Labour,Female,2,2,2,4,4,2,2,4,1,1,1,2,2,1,1,2,1,1
+64,White,High school diploma/A-levels,"£10,000 - £15,999",Labour,Male,4,4,4,1,1,4,4,1,1,1,1,2,1,1,4,1,1,1
+65,White,High school diploma/A-levels,"£20,000 - £29,999",Labour,Male,2,4,4,1,1,5,4,2,1,1,1,2,2,1,2,3,1,1
+29,White,Undergraduate degree (BA/BSc/other),"£16,000 - £19,999",Not applicable / rather not say,Female,6,4,4,2,2,4,2,4,1,1,1,1,1,1,1,1,1,1
+54,White,Graduate degree (MA/MSc/MPhil/other),,Conservative,Female,9,4,4,1,2,5,4,1,2,1,1,2,2,1,1,2,1,2
+53,White,Technical/community college,"£20,000 - £29,999",UKIP,Female,5,2,2,2,3,2,2,3,3,3,1,1,1,1,1,1,1,1
+22,White,Undergraduate degree (BA/BSc/other),,Not applicable / rather not say,Female,7,4,5,3,2,4,4,1,2,2,2,3,2,1,2,4,1,2
+30,White,High school diploma/A-levels,Rather not say,Not applicable / rather not say,Male,7,4,4,4,2,5,5,1,4,4,4,3,3,1,3,3,3,2
+60,White,Graduate degree (MA/MSc/MPhil/other),,Other,Female,7,3,3,2,2,3,3,5,4,3,1,1,1,1,1,1,1,1
+53,White,Graduate degree (MA/MSc/MPhil/other),,Labour,Female,4,4,4,1,1,5,5,1,1,1,1,3,2,1,2,2,4,1
+45,White,Technical/community college,,Labour,Male,2,4,4,1,2,5,4,1,2,2,2,1,1,1,1,1,1,1
+68,White,Technical/community college,"£10,000 - £15,999",Labour,Female,6,5,5,1,1,5,5,1,4,1,3,1,3,1,4,4,1,1
+41,White,Undergraduate degree (BA/BSc/other),"£40,000 - £49,999",Conservative,Male,7,4,4,2,2,4,3,3,2,2,3,1,1,1,1,1,1,1
+43,White,Undergraduate degree (BA/BSc/other),Rather not say,Green Party,Male,6,5,4,1,2,5,5,1,1,1,1,1,1,1,1,1,1,1
+30,White,Technical/community college,,Green Party,Female,8,4,4,3,3,4,4,3,6,2,3,1,1,1,1,1,1,1
+34,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Green Party,Female,2,3,4,2,2,4,4,1,2,2,1,1,1,1,1,1,1,1
+28,White,Secondary education (e.g. GED/GCSE),"£16,000 - £19,999",Labour,Male,4,4,3,2,3,3,2,3,2,3,5,2,2,2,2,2,2,1
+41,White,High school diploma/A-levels,"£10,000 - £15,999",Labour,Female,5,4,4,2,1,5,5,5,1,1,1,1,1,1,1,1,1,1
+27,White,Secondary education (e.g. GED/GCSE),,Other,Female,6,1,1,5,5,1,1,4,4,3,3,3,2,1,2,2,2,1
+56,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Conservative,Male,8,4,4,2,2,4,4,2,2,1,1,1,1,1,1,1,2,1
+26,Asian,Graduate degree (MA/MSc/MPhil/other),"£30,000 - £39,999",Labour,Female,5,4,4,2,2,4,4,4,3,3,3,1,1,1,1,1,1,1
+26,White,Undergraduate degree (BA/BSc/other),"£80,000 - £89,999",Labour,Female,5,4,3,1,1,3,4,6,3,3,1,1,1,1,1,1,1,1
+36,White,Undergraduate degree (BA/BSc/other),,Green Party,Male,4,3,4,2,3,4,4,2,2,3,3,2,2,2,2,3,2,2
+29,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Conservative,Male,7,4,4,4,4,4,4,4,4,4,4,2,2,2,3,2,2,1
+40,White,Undergraduate degree (BA/BSc/other),"£70,000 - £79,999",Conservative,Male,6,5,5,2,2,5,4,3,2,1,1,4,2,1,4,3,1,2
+20,White,High school diploma/A-levels,"£40,000 - £49,999",Green Party,Female,1,2,2,4,4,2,4,2,3,5,5,3,2,1,3,2,3,1
+21,White,High school diploma/A-levels,"£30,000 - £39,999",Labour,Female,2,4,4,2,2,3,4,2,1,1,1,1,1,1,1,2,1,1
+38,White,Secondary education (e.g. GED/GCSE),"£20,000 - £29,999",,Male,6,2,4,2,2,4,5,1,5,4,1,1,1,1,1,3,3,1
+20,White,High school diploma/A-levels,,Labour,Male,4,4,4,2,2,4,2,1,1,1,1,3,2,1,3,3,3,2
+37,White,Secondary education (e.g. GED/GCSE),"£20,000 - £29,999",UKIP,Female,7,4,5,2,2,5,4,2,6,5,5,1,1,1,1,1,1,1
+44,White,Undergraduate degree (BA/BSc/other),"£50,000 - £59,999",Conservative,Male,8,2,2,4,4,2,2,2,3,3,1,2,1,1,2,2,1,2
+55,White,Technical/community college,"£30,000 - £39,999",Conservative,Female,7,2,4,2,2,4,3,1,2,3,3,2,1,1,2,2,1,2
+43,White,Undergraduate degree (BA/BSc/other),Rather not say,Green Party,Female,6,4,4,4,2,5,4,2,3,4,4,4,2,1,1,3,1,1
+30,White,Undergraduate degree (BA/BSc/other),"£16,000 - £19,999",Labour,Female,5,2,3,4,4,4,5,5,7,5,3,2,3,1,1,2,3,1
+31,White,Technical/community college,Rather not say,Scottish National Party (SNP),Female,5,5,5,1,2,5,5,1,4,6,7,4,3,1,3,3,1,3
+60,White,Undergraduate degree (BA/BSc/other),"£40,000 - £49,999",Not applicable / rather not say,Female,6,4,3,2,4,4,4,2,5,4,1,1,1,1,1,1,1,1
+47,White,Undergraduate degree (BA/BSc/other),"£60,000 - £69,999",Conservative,Male,7,2,4,4,2,5,4,1,2,1,1,4,2,1,1,1,1,1
+47,White,Secondary education (e.g. GED/GCSE),"£20,000 - £29,999",Other,Male,6,4,2,3,4,4,4,7,4,6,5,1,1,1,1,1,1,1
+31,White,Undergraduate degree (BA/BSc/other),"£60,000 - £69,999",Liberal Democrats,Female,7,4,4,2,2,3,4,1,1,1,1,3,1,1,4,4,1,1
+39,White,Undergraduate degree (BA/BSc/other),,Not applicable / rather not say,Male,5,4,4,2,2,4,4,3,2,2,1,2,2,1,2,3,2,1
+33,White,Graduate degree (MA/MSc/MPhil/other),"£70,000 - £79,999",Labour,Male,6,4,5,2,1,5,4,1,1,1,1,2,1,1,1,2,1,1
+24,White,Graduate degree (MA/MSc/MPhil/other),"£100,000 - £149,999",Labour,Female,6,1,4,4,4,4,3,1,1,1,1,3,1,1,3,4,1,2
+33,White,Undergraduate degree (BA/BSc/other),,Labour,Female,6,1,1,3,2,1,4,1,4,2,4,3,2,1,2,4,1,2
+37,White,Graduate degree (MA/MSc/MPhil/other),"£70,000 - £79,999",Labour,Female,2,4,4,2,2,4,4,1,1,1,1,1,1,1,1,1,1,1
+26,White,Secondary education (e.g. GED/GCSE),"£10,000 - £15,999",Not applicable / rather not say,Female,7,3,4,2,3,2,3,6,4,3,2,1,1,1,1,1,1,1
+53,White,Secondary education (e.g. GED/GCSE),"Less than £10,000 ",Conservative,Female,11,4,2,4,4,2,1,5,7,7,3,1,1,1,1,1,1,1
+38,White,Technical/community college,,Conservative,Female,8,4,4,2,2,4,4,1,2,1,1,1,2,1,1,1,2,1
+27,White,High school diploma/A-levels,"£40,000 - £49,999",Labour,Female,7,1,5,1,1,5,5,1,1,1,1,2,1,1,1,3,1,2
+29,White,High school diploma/A-levels,"£30,000 - £39,999",Green Party,Female,4,2,3,4,4,4,2,2,3,3,3,2,2,1,3,3,4,2
+30,White,Undergraduate degree (BA/BSc/other),"£50,000 - £59,999",Labour,Female,8,3,4,3,2,3,4,3,3,3,4,3,2,1,3,4,1,1
+22,White,High school diploma/A-levels,"£90,000 - £99,999",Not applicable / rather not say,Female,5,3,5,3,2,3,4,4,1,1,1,1,1,1,1,1,1,1
+50,White,Graduate degree (MA/MSc/MPhil/other),"£30,000 - £39,999",Liberal Democrats,Male,4,5,5,2,2,5,5,2,1,1,1,1,1,1,1,1,1,1
+63,White,High school diploma/A-levels,"£16,000 - £19,999",Scottish National Party (SNP),Female,6,2,4,3,2,4,4,1,1,1,1,4,3,1,3,3,1,1
+36,White,Undergraduate degree (BA/BSc/other),"£40,000 - £49,999",Labour,Female,4,3,2,2,4,4,4,1,3,3,4,4,4,1,2,3,3,2
+20,White,Undergraduate degree (BA/BSc/other),,Conservative,Female,4,1,3,4,3,4,4,2,6,2,4,1,1,1,2,1,1,1
+31,White,Graduate degree (MA/MSc/MPhil/other),"£50,000 - £59,999",Not applicable / rather not say,Female,7,5,4,2,2,4,4,1,3,1,1,1,1,1,1,2,2,1
+32,White,Secondary education (e.g. GED/GCSE),"£16,000 - £19,999",Conservative,Male,7,4,4,2,2,4,3,2,1,1,1,2,1,1,1,1,1,1
+31,White,High school diploma/A-levels,"£30,000 - £39,999",Liberal Democrats,Female,6,2,2,2,4,4,3,2,2,5,2,2,2,1,2,2,2,1
+35,White,Undergraduate degree (BA/BSc/other),,Labour,Male,5,4,4,4,2,5,4,3,2,2,1,1,1,1,1,1,2,1
+36,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Liberal Democrats,Female,5,2,4,4,4,4,2,3,5,5,3,2,1,1,3,4,1,1
+33,White,Technical/community college,"£16,000 - £19,999",Not applicable / rather not say,Male,6,4,4,2,1,4,2,2,5,5,3,3,3,1,3,4,1,1
+26,White,High school diploma/A-levels,,Scottish National Party (SNP),Female,8,2,3,3,3,4,3,2,4,4,4,2,2,2,2,2,2,1
+34,White,Graduate degree (MA/MSc/MPhil/other),,Labour,Male,5,1,1,5,5,1,1,3,1,1,1,1,1,1,1,1,1,1
+39,White,High school diploma/A-levels,"£40,000 - £49,999",Labour,Male,4,4,5,1,1,5,5,2,1,1,1,1,1,1,1,1,1,1
+28,White,Undergraduate degree (BA/BSc/other),,Green Party,Male,5,2,3,3,2,4,3,1,2,1,1,3,3,1,3,2,3,2
+38,White,High school diploma/A-levels,"£10,000 - £15,999",Labour,Male,2,4,4,2,1,4,5,1,1,1,1,1,1,1,1,1,1,1
+27,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Labour,Female,1,2,3,2,2,3,4,1,5,2,1,1,1,1,1,1,1,1
+45,White,Undergraduate degree (BA/BSc/other),"£50,000 - £59,999",Liberal Democrats,Female,4,4,4,1,1,4,3,1,4,4,1,4,1,1,3,1,1,2
+32,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Other,Male,6,4,5,1,2,5,5,3,6,6,1,3,1,1,1,1,1,1
+49,White,Graduate degree (MA/MSc/MPhil/other),,Labour,Male,2,2,4,2,2,4,4,1,1,1,1,3,3,1,3,3,3,2
+27,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Liberal Democrats,Female,4,4,5,1,1,4,4,1,6,4,1,3,2,1,2,3,1,1
+21,White,High school diploma/A-levels,Rather not say,Labour,Female,1,2,2,2,2,3,2,1,1,1,1,2,1,1,1,1,1,2
+34,White,Doctorate degree (PhD/other),,Green Party,Male,5,4,4,1,2,4,5,5,1,1,1,3,2,1,2,1,1,1
+36,White,Undergraduate degree (BA/BSc/other),,Labour,Female,8,4,4,2,2,4,4,1,2,2,2,2,2,1,2,2,1,1
+25,White,High school diploma/A-levels,"£20,000 - £29,999",Labour,Male,1,1,1,2,4,2,2,4,1,1,1,1,1,1,1,1,1,1
+25,White,Undergraduate degree (BA/BSc/other),"£40,000 - £49,999",Conservative,Female,6,2,4,1,2,4,4,1,2,2,1,1,1,1,1,1,1,1
+33,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Labour,Male,6,2,2,5,5,4,3,6,1,1,1,3,2,1,2,2,1,2
+39,White,Secondary education (e.g. GED/GCSE),"£20,000 - £29,999",Not applicable / rather not say,Female,6,4,3,3,2,4,3,1,1,1,1,3,1,1,4,3,1,2
+25,Asian,Graduate degree (MA/MSc/MPhil/other),,Other,Female,6,5,5,1,5,5,5,1,7,7,7,5,5,1,5,5,1,2
+63,White,Undergraduate degree (BA/BSc/other),"£100,000 - £149,999",Conservative,Male,5,5,5,2,2,5,5,2,3,4,1,1,1,1,1,1,3,2
+49,White,Secondary education (e.g. GED/GCSE),"£10,000 - £15,999",Other,Female,6,2,2,4,4,2,2,2,7,7,5,1,1,1,1,2,2,2
+32,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Labour,Female,4,4,4,2,2,4,4,2,2,2,2,3,3,1,3,4,2,2
+41,White,Technical/community college,,Labour,Male,7,5,5,1,1,5,5,1,1,1,1,1,1,1,1,1,1,1
+37,White,Undergraduate degree (BA/BSc/other),Rather not say,Labour,Female,4,5,5,1,1,5,4,1,6,4,1,4,4,1,4,4,4,2
+44,White,Graduate degree (MA/MSc/MPhil/other),,Green Party,Female,5,4,4,2,4,4,4,3,1,1,1,4,1,1,2,1,1,2
+24,White,Undergraduate degree (BA/BSc/other),"£40,000 - £49,999",Not applicable / rather not say,Female,7,4,4,2,2,4,4,3,4,3,3,3,2,1,3,3,1,3
+19,White,High school diploma/A-levels,Rather not say,Labour,Female,4,2,4,3,3,4,4,1,4,4,4,3,2,1,3,3,2,2
+51,White,High school diploma/A-levels,,Conservative,Male,9,4,4,2,3,4,3,1,1,1,1,2,1,1,1,1,1,1
+22,White,Undergraduate degree (BA/BSc/other),,Labour,Male,4,4,2,3,3,4,4,1,1,1,1,1,1,1,1,1,1,1
+23,Asian,Undergraduate degree (BA/BSc/other),,,Male,2,1,3,3,4,1,2,1,4,2,1,4,2,1,5,3,4,3
+44,White,Undergraduate degree (BA/BSc/other),,Labour,Female,2,3,4,3,3,4,4,2,2,2,2,2,1,1,2,2,1,1
+28,White,Secondary education (e.g. GED/GCSE),"£16,000 - £19,999",Labour,Male,2,1,1,4,2,2,3,1,2,2,2,4,4,1,4,4,1,1
+23,White,High school diploma/A-levels,"£50,000 - £59,999",Other,Female,7,4,4,2,2,4,4,3,2,2,2,1,1,1,1,1,1,1
+32,White,Technical/community college,"£50,000 - £59,999",Not applicable / rather not say,Female,7,2,4,2,4,4,4,1,1,1,1,1,1,1,1,1,1,3
+32,White,Undergraduate degree (BA/BSc/other),"£40,000 - £49,999",Green Party,Male,2,2,1,4,4,4,1,2,1,1,1,4,1,1,2,2,1,3
+45,White,Technical/community college,"£16,000 - £19,999",UKIP,Female,7,1,5,1,5,5,1,1,4,4,1,4,1,1,2,3,3,2
+34,White,Graduate degree (MA/MSc/MPhil/other),"£50,000 - £59,999",Labour,Female,5,3,4,2,2,4,4,3,3,3,3,1,1,1,2,1,1,1
+23,White,Graduate degree (MA/MSc/MPhil/other),"£30,000 - £39,999",Liberal Democrats,Female,5,3,2,4,4,5,5,5,4,3,2,3,3,1,3,2,1,2
+28,White,Undergraduate degree (BA/BSc/other),"£100,000 - £149,999",Conservative,Female,8,4,4,1,1,4,4,1,2,1,1,2,1,1,1,2,1,1
+43,White,Technical/community college,"£30,000 - £39,999",Labour,Female,5,2,3,3,2,4,4,1,5,6,2,3,2,1,3,4,3,3
+24,White,Secondary education (e.g. GED/GCSE),,Not applicable / rather not say,Female,6,2,2,4,4,3,2,1,1,1,1,1,1,1,1,1,1,1
+56,White,Doctorate degree (PhD/other),,Green Party,Female,5,4,4,2,2,4,4,3,2,2,2,1,1,1,1,1,1,1
+57,White,High school diploma/A-levels,"£40,000 - £49,999",Conservative,Male,9,2,3,2,4,2,2,2,1,1,1,4,1,1,5,4,1,2
+32,White,High school diploma/A-levels,"£40,000 - £49,999",Green Party,Female,7,4,4,1,2,4,4,3,2,2,2,1,1,1,1,1,1,1
+27,White,High school diploma/A-levels,"£50,000 - £59,999",Not applicable / rather not say,Female,11,4,3,3,2,3,2,1,5,5,1,1,1,1,1,1,1,1
+36,White,High school diploma/A-levels,"£70,000 - £79,999",Labour,Female,2,4,4,2,2,5,4,1,1,1,1,1,1,1,1,1,1,1
+56,White,Secondary education (e.g. GED/GCSE),Rather not say,Other,Male,2,2,3,3,4,3,4,2,1,1,1,1,2,1,2,1,3,1
+47,White,High school diploma/A-levels,"£70,000 - £79,999",Labour,Female,4,3,2,3,4,3,3,2,3,2,2,2,1,1,1,1,3,2
+59,White,Secondary education (e.g. GED/GCSE),"Less than £10,000 ",UKIP,Female,9,1,1,3,3,2,2,1,1,1,1,2,1,1,2,2,1,1
+36,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Other,Female,4,4,4,3,2,4,3,4,3,5,4,3,3,1,1,2,4,2
+33,White,Graduate degree (MA/MSc/MPhil/other),,Labour,Male,6,4,4,2,2,4,4,4,3,2,2,1,1,1,1,1,1,1
+54,White,Graduate degree (MA/MSc/MPhil/other),"£40,000 - £49,999",Conservative,Female,6,4,5,1,1,5,5,1,2,2,2,2,1,1,2,1,1,1
+32,White,Graduate degree (MA/MSc/MPhil/other),"£40,000 - £49,999",Green Party,Female,4,2,2,2,2,4,4,1,2,2,1,1,1,1,1,1,1,1
+30,White,Graduate degree (MA/MSc/MPhil/other),,Other,Male,2,5,5,1,1,5,5,2,1,1,1,1,1,1,1,1,1,1
+22,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Labour,Female,2,3,4,2,3,4,4,2,1,1,1,3,1,1,3,1,1,1
+66,White,Undergraduate degree (BA/BSc/other),"£30,000 - £39,999",Other,Male,7,4,4,2,2,4,4,2,1,1,1,1,1,1,3,1,1,2
+48,White,Secondary education (e.g. GED/GCSE),"£30,000 - £39,999",Conservative,Male,6,4,4,2,2,4,4,1,1,1,1,1,1,1,2,2,2,1
+59,White,Technical/community college,"£10,000 - £15,999",UKIP,Male,5,4,4,2,2,5,4,4,5,5,4,1,1,1,1,1,1,2
+22,White,Graduate degree (MA/MSc/MPhil/other),"£20,000 - £29,999",Green Party,Female,4,4,4,2,2,4,4,2,3,3,3,1,1,1,1,1,1,3
+21,White,High school diploma/A-levels,"£50,000 - £59,999",Green Party,Female,6,4,3,2,1,4,5,2,1,1,1,3,2,1,1,1,1,1
+35,White,Doctorate degree (PhD/other),"£16,000 - £19,999",Green Party,Female,4,5,5,1,1,4,5,2,1,1,1,2,1,1,2,1,1,1
+47,White,Secondary education (e.g. GED/GCSE),"£40,000 - £49,999",Conservative,Female,4,4,3,2,4,4,3,3,1,2,2,4,3,1,1,1,1,3
+47,White,Technical/community college,,Scottish National Party (SNP),Male,6,4,5,1,1,5,3,1,1,4,1,1,1,1,1,1,1,1
+39,White,Graduate degree (MA/MSc/MPhil/other),Rather not say,Labour,Female,1,4,3,1,2,4,4,1,1,1,1,2,1,1,1,1,1,1
+47,White,High school diploma/A-levels,"£30,000 - £39,999",Conservative,Female,5,4,4,2,2,4,3,1,4,2,1,1,1,1,1,1,1,1
+34,White,Secondary education (e.g. GED/GCSE),Rather not say,,Female,6,4,4,3,2,4,2,2,4,3,4,1,1,1,1,1,1,1
+35,White,Undergraduate degree (BA/BSc/other),"£10,000 - £15,999",Liberal Democrats,Male,4,4,4,1,2,4,4,1,2,2,1,4,1,1,3,3,1,2
+54,White,Graduate degree (MA/MSc/MPhil/other),Rather not say,Labour,Female,2,4,4,2,2,4,3,1,1,1,1,3,4,1,3,2,4,2
+32,White,Undergraduate degree (BA/BSc/other),"£60,000 - £69,999",Labour,Male,2,5,5,1,1,5,5,1,4,4,4,1,1,1,1,1,1,1
+36,White,Secondary education (e.g. GED/GCSE),,Not applicable / rather not say,Female,7,3,2,1,3,4,2,2,4,4,3,2,2,1,1,1,1,1
+59,White,Graduate degree (MA/MSc/MPhil/other),"More than £150,000",Liberal Democrats,Male,4,2,2,4,2,3,3,1,1,1,1,1,3,1,5,1,3,2
+26,Mixed,Undergraduate degree (BA/BSc/other),,Liberal Democrats,Female,2,2,1,4,4,3,1,1,1,2,1,3,1,1,2,1,1,2
+49,White,Technical/community college,"£30,000 - £39,999",Scottish National Party (SNP),Male,6,4,4,1,1,4,4,6,4,7,4,1,1,1,1,1,1,1
+38,White,Graduate degree (MA/MSc/MPhil/other),,Conservative,Female,8,4,4,2,2,5,5,5,5,5,3,2,1,2,1,2,1,1
+57,White,Undergraduate degree (BA/BSc/other),,Other,Male,7,4,4,2,2,3,4,3,1,1,1,1,1,1,1,1,4,1
+38,White,Undergraduate degree (BA/BSc/other),,Conservative,Female,6,4,4,1,2,4,5,3,3,4,2,2,1,1,1,1,1,1
+36,White,Undergraduate degree (BA/BSc/other),"£10,000 - £15,999",Labour,Female,5,2,2,2,2,4,4,1,1,1,1,4,3,1,3,4,1,1
+31,White,Undergraduate degree (BA/BSc/other),"£50,000 - £59,999",Conservative,Female,7,4,4,1,1,5,4,2,1,1,1,2,1,1,2,1,1,1
+23,Black,Graduate degree (MA/MSc/MPhil/other),"£16,000 - £19,999",Conservative,Male,7,2,4,3,1,3,4,4,5,3,4,3,5,3,4,2,4,2
+22,White,High school diploma/A-levels,,Labour,Female,1,4,4,2,1,5,5,2,1,1,1,1,1,1,1,1,1,1
+22,White,High school diploma/A-levels,,Labour,Female,8,2,4,1,2,4,4,2,4,5,5,2,1,1,1,1,1,1
+30,White,Doctorate degree (PhD/other),"£10,000 - £15,999",Green Party,Male,2,4,4,2,2,4,5,2,1,1,1,3,2,1,3,3,1,2
+59,White,High school diploma/A-levels,Rather not say,Not applicable / rather not say,Male,7,3,4,2,3,4,2,1,5,1,1,3,1,1,3,2,1,2
+34,White,Secondary education (e.g. GED/GCSE),,Not applicable / rather not say,Male,7,2,4,2,2,4,4,4,6,7,7,2,2,5,2,3,4,1
+42,White,Graduate degree (MA/MSc/MPhil/other),Rather not say,Labour,Female,1,5,4,1,1,4,5,1,1,1,1,1,1,1,1,1,1,1
+44,White,High school diploma/A-levels,,Scottish National Party (SNP),Female,6,2,2,2,3,4,4,2,1,2,2,1,1,1,1,1,1,1
+52,White,High school diploma/A-levels,,Liberal Democrats,Male,4,4,2,1,2,4,4,6,4,1,1,1,1,1,2,1,1,1
+33,White,Technical/community college,"£20,000 - £29,999",Labour,Female,5,4,4,2,2,4,4,3,2,1,1,1,1,1,2,1,1,3
+31,White,Graduate degree (MA/MSc/MPhil/other),"£30,000 - £39,999",Conservative,Female,8,3,4,2,2,4,3,1,2,1,1,2,2,1,2,2,1,1
+24,Asian,Undergraduate degree (BA/BSc/other),,Not applicable / rather not say,Male,6,4,4,2,2,4,4,2,3,5,3,1,1,1,1,1,1,1
+54,White,Technical/community college,"£50,000 - £59,999",Labour,Female,4,4,3,1,2,4,3,7,4,4,4,1,1,1,1,1,1,1
+50,White,Graduate degree (MA/MSc/MPhil/other),,Labour,Female,4,4,4,2,2,4,4,1,1,1,1,3,2,1,3,3,1,2
+23,White,Secondary education (e.g. GED/GCSE),"£10,000 - £15,999",Other,Male,2,4,4,2,2,5,4,2,1,1,1,1,1,1,1,1,1,1
+47,White,Undergraduate degree (BA/BSc/other),"£60,000 - £69,999",Labour,Female,4,5,5,1,2,4,4,2,6,4,1,2,1,1,2,3,2,2
+58,White,Secondary education (e.g. GED/GCSE),"£40,000 - £49,999",Labour,Female,6,3,2,3,2,4,2,3,4,2,2,1,1,1,1,1,1,1
+51,White,High school diploma/A-levels,,Labour,Male,2,3,1,3,4,3,2,2,1,1,1,2,1,1,1,1,1,1
+51,White,Secondary education (e.g. GED/GCSE),,Liberal Democrats,Male,7,4,4,1,1,4,4,2,2,2,2,2,1,1,1,2,2,1
+41,White,High school diploma/A-levels,"£30,000 - £39,999",Labour,Female,4,4,4,3,4,4,4,3,4,4,3,2,1,1,2,2,1,3
+51,Black,Undergraduate degree (BA/BSc/other),,Labour,Female,6,4,5,2,2,4,3,4,6,5,5,1,1,1,1,1,1,1
+70,White,Secondary education (e.g. GED/GCSE),,Labour,Female,6,4,4,1,4,4,4,2,1,1,1,1,1,1,2,1,1,1
+51,White,Graduate degree (MA/MSc/MPhil/other),,Not applicable / rather not say,Female,7,4,4,1,1,4,4,1,5,4,2,4,1,1,4,4,1,2
+56,White,Graduate degree (MA/MSc/MPhil/other),,Labour,Male,7,2,2,4,4,3,2,2,2,1,1,3,2,1,2,3,2,2
+31,White,Undergraduate degree (BA/BSc/other),Rather not say,Scottish National Party (SNP),Female,2,4,4,2,2,5,3,3,1,1,1,1,1,1,2,1,1,1
+51,White,Secondary education (e.g. GED/GCSE),,Not applicable / rather not say,Female,4,2,2,2,3,4,3,1,1,1,1,2,3,1,1,3,1,2
+20,White,High school diploma/A-levels,,Green Party,Female,4,3,3,2,1,4,4,5,2,3,2,1,1,1,1,1,1,1
+62,White,Secondary education (e.g. GED/GCSE),"£10,000 - £15,999",Labour,Male,5,3,4,2,4,2,4,3,2,2,1,2,1,1,1,1,1,1
+39,Mixed,Undergraduate degree (BA/BSc/other),,Conservative,Male,7,4,3,3,2,5,4,6,4,5,1,1,1,1,1,1,1,2
+41,White,Undergraduate degree (BA/BSc/other),,Conservative,Male,7,4,4,1,1,4,5,2,2,2,2,3,3,1,3,3,1,1
+47,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Liberal Democrats,Male,2,4,4,2,2,5,4,1,1,1,1,2,1,1,2,2,1,2
+47,White,Graduate degree (MA/MSc/MPhil/other),"£20,000 - £29,999",Green Party,Male,5,4,4,3,3,4,4,1,2,2,2,3,2,1,1,2,1,1
+33,White,Undergraduate degree (BA/BSc/other),"£60,000 - £69,999",Labour,Male,4,2,2,3,3,3,4,1,4,4,1,2,1,1,3,1,3,3
+41,White,Undergraduate degree (BA/BSc/other),"£80,000 - £89,999",Green Party,Male,6,4,4,2,2,5,5,1,2,2,2,2,2,1,2,1,1,3
+44,White,Technical/community college,"£20,000 - £29,999",Not applicable / rather not say,Male,6,4,4,2,2,4,4,1,3,2,5,1,1,1,1,1,1,1
+61,White,Undergraduate degree (BA/BSc/other),"£20,000 - £29,999",Liberal Democrats,Male,6,4,3,2,2,4,4,1,2,2,4,1,1,1,1,1,1,1
+37,White,Doctorate degree (PhD/other),"£70,000 - £79,999",Scottish National Party (SNP),Female,6,4,5,2,1,5,5,2,1,1,1,3,3,1,3,4,2,2
+31,Mixed,High school diploma/A-levels,"£10,000 - £15,999",Conservative,Female,8,3,2,2,3,4,4,3,3,3,2,3,2,2,2,3,3,1
+27,White,High school diploma/A-levels,"£10,000 - £15,999",Labour,Female,2,1,1,4,4,3,2,2,3,2,2,1,1,1,1,1,1,1
+34,White,Graduate degree (MA/MSc/MPhil/other),"£70,000 - £79,999",Green Party,Female,6,4,4,2,2,5,4,1,2,2,1,1,1,1,1,3,1,2

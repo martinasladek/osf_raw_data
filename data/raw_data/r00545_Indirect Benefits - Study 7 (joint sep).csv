@@ -1,0 +1,310 @@
+StartDate,EndDate,Status,Progress,Duration (in seconds),Finished,RecordedDate,ResponseId,RecipientLastName,RecipientFirstName,RecipientEmail,ExternalReference,DistributionChannel,UserLanguage,o_agreement,r_agreement,o_agreement,r_agreement,r_agreement,o_agreement,consistent,explain,attn_check,SC0,age,gender,educationScore,femalesAs1MaleAs0,income,incomeScore,householdIncomeEstimate,participant_id,assignment_id,computer_country,condition,joofirst,hospitalA,hospitalB
+02/04/2020 15:44,02/04/2020 15:45,0,100,19,1,02/04/2020 15:45,R_1f1PRm4J1QfAhWG,,,,,anonymous,EN-GB,5,,,,,,,,4,5,32,male,2,,,,32500,,,,sep_current,0,B,A
+02/04/2020 15:45,02/04/2020 15:46,0,100,37,1,02/04/2020 15:46,R_1n78DV7XPnWBQMo,,,,,anonymous,EN-GB,,5,,,,,,,4,5,37,male,5,,,,17500,,,,sep_general,0,B,A
+02/04/2020 15:47,02/04/2020 15:47,0,100,33,1,02/04/2020 15:47,R_33xNFqQ7Irii683,,,,,anonymous,EN-GB,5,,,,,,,,4,5,39,male,6,,,,32500,,,,sep_current,0,B,A
+02/04/2020 15:45,02/04/2020 15:47,0,100,99,1,02/04/2020 15:47,R_22zAfDqyI2KHRgG,,,,,anonymous,EN-GB,,5,,,,,,,4,5,39,male,3,,,,17500,,,,sep_general,1,A,B
+02/04/2020 15:49,02/04/2020 15:49,0,100,23,1,02/04/2020 15:49,R_d12EdfoiLJw6eOJ,,,,,anonymous,EN-GB,,6,,,,,,,4,6,38,male,5,,,,50000,,,,sep_general,1,A,B
+02/04/2020 15:51,02/04/2020 15:51,0,100,14,1,02/04/2020 15:51,R_3QYPiIrGYzOYArR,,,,,anonymous,EN-GB,7,,,,,,,,4,7,39,male,3,,,,72500,,,,sep_current,0,B,A
+02/04/2020 15:53,02/04/2020 15:53,0,100,48,1,02/04/2020 15:53,R_1oHcrJrYOqcHheg,,,,,anonymous,EN-GB,7,,,,,,,,4,7,32,female,5,,,,100000,,,,sep_current,1,A,B
+02/04/2020 15:51,02/04/2020 15:54,0,100,188,1,02/04/2020 15:54,R_2PAtA5h1lEX3fMk,,,,,anonymous,EN-GB,,,,,2,4,3,A single decision in a particular situation tends to be more subjective than a totalizing policy.,4,9,34,female,2,,,,4500,,,,joint,0,B,A
+02/04/2020 15:56,02/04/2020 15:59,0,100,148,1,02/04/2020 15:59,R_3g8vWA3VQUMfcC5,,,,,anonymous,EN-GB,,,4,2,,,3,A general policy would create societal problems in the long run. ,4,9,34,female,3,,,,32500,,,,joint,1,A,B
+02/04/2020 16:04,02/04/2020 16:05,0,100,23,1,02/04/2020 16:05,R_DpE8SWn8Ohb9OEN,,,,,anonymous,EN-GB,5,,,,,,,,4,5,42,female,5,,,,100000,,,,sep_current,0,B,A
+02/04/2020 16:04,02/04/2020 16:05,0,100,45,1,02/04/2020 16:05,R_33ssUwle1bwiz3B,,,,,anonymous,EN-GB,,6,,,,,,,4,6,34,female,3,,,,100000,,,,sep_general,1,A,B
+02/04/2020 16:04,02/04/2020 16:05,0,100,52,1,02/04/2020 16:05,R_1CJHwLXVvlEtiRr,,,,,anonymous,EN-GB,,,3,1,,,6,,4,10,43,male,5,,,,72500,,,,joint,1,A,B
+02/04/2020 16:05,02/04/2020 16:05,0,100,36,1,02/04/2020 16:05,R_3pgsfGpR3GDpbym,,,,,anonymous,EN-GB,6,,,,,,,,4,6,30,female,4,,,,32500,,,,sep_current,1,A,B
+02/04/2020 16:05,02/04/2020 16:05,0,100,37,1,02/04/2020 16:05,R_8qRrleIOWtCMpu9,,,,,anonymous,EN-GB,,3,,,,,,,4,3,32,male,5,,,,100000,,,,sep_general,0,B,A
+02/04/2020 16:05,02/04/2020 16:05,0,100,26,1,02/04/2020 16:05,R_2dlNhbQE8XRWpW2,,,,,anonymous,EN-GB,7,,,,,,,,4,7,29,male,5,,,,32500,,,,sep_current,1,A,B
+02/04/2020 16:04,02/04/2020 16:05,0,100,58,1,02/04/2020 16:05,R_vw7Nu4CHKUNF6mZ,,,,,anonymous,EN-GB,1,,,,,,,,4,1,34,female,5,,,,50000,,,,sep_current,0,B,A
+02/04/2020 16:05,02/04/2020 16:05,0,100,54,1,02/04/2020 16:05,R_1mkOoIDwGwTxBot,,,,,anonymous,EN-GB,,2,,,,,,,4,2,52,female,5,,,,132500,,,,sep_general,0,B,A
+02/04/2020 16:04,02/04/2020 16:05,0,100,67,1,02/04/2020 16:05,R_12meVlIcajv303h,,,,,anonymous,EN-GB,,2,,,,,,,4,2,37,female,5,,,,32500,,,,sep_general,0,B,A
+02/04/2020 16:05,02/04/2020 16:06,0,100,20,1,02/04/2020 16:06,R_6u4PqM78pByMHap,,,,,anonymous,EN-GB,6,,,,,,,,4,6,31,female,5,,,,50000,,,,sep_current,1,A,B
+02/04/2020 16:05,02/04/2020 16:06,0,100,22,1,02/04/2020 16:06,R_2xFezyqoJtZAvM5,,,,,anonymous,EN-GB,4,,,,,,,,4,4,29,male,2,,,,17500,,,,sep_current,0,B,A
+02/04/2020 16:04,02/04/2020 16:06,0,100,84,1,02/04/2020 16:06,R_2f9XiN37w6LnXiV,,,,,anonymous,EN-GB,,,6,5,,,5,,4,16,31,female,5,,,,50000,,,,joint,1,A,B
+02/04/2020 16:05,02/04/2020 16:06,0,100,27,1,02/04/2020 16:06,R_1ohZgGnQrU5lfxG,,,,,anonymous,EN-GB,7,,,,,,,,4,7,32,male,5,,,,50000,,,,sep_current,1,A,B
+02/04/2020 16:06,02/04/2020 16:06,0,100,14,1,02/04/2020 16:06,R_3imVODsspYMcW7Z,,,,,anonymous,EN-GB,,,7,1,,,7,,4,15,31,female,2,,,,50000,,,,joint,1,A,B
+02/04/2020 16:05,02/04/2020 16:06,0,100,58,1,02/04/2020 16:06,R_2c208hwZNL5QB5n,,,,,anonymous,EN-GB,,7,,,,,,,4,7,31,female,5,,,,100000,,,,sep_general,0,B,A
+02/04/2020 16:05,02/04/2020 16:06,0,100,79,1,02/04/2020 16:06,R_zUMcFZQmXDtXotP,,,,,anonymous,EN-GB,,,,,4,4,7,,4,15,25,female,5,,,,100000,,,,joint,0,B,A
+02/04/2020 16:06,02/04/2020 16:06,0,100,36,1,02/04/2020 16:06,R_3eknrybGMLzbECx,,,,,anonymous,EN-GB,5,,,,,,,,4,5,24,male,5,,,,32500,,,,sep_current,0,B,A
+02/04/2020 16:06,02/04/2020 16:06,0,100,36,1,02/04/2020 16:06,R_3nBFrbfbj8Rnfd5,,,,,anonymous,EN-GB,,3,,,,,,,4,3,26,female,2,,,,72500,,,,sep_general,0,B,A
+02/04/2020 16:06,02/04/2020 16:06,0,100,24,1,02/04/2020 16:06,R_1GTQILuvz8GHEFp,,,,,anonymous,EN-GB,,5,,,,,,,4,5,40,female,6,,,,72500,,,,sep_general,1,A,B
+02/04/2020 16:04,02/04/2020 16:07,0,100,147,1,02/04/2020 16:07,R_3egIEclmN8FimvB,,,,,anonymous,EN-GB,,5,,,,,,,4,5,39,male,3,,,,17500,,,,sep_general,0,B,A
+02/04/2020 16:05,02/04/2020 16:07,0,100,96,1,02/04/2020 16:07,R_26mvxrFmI9XOPj3,,,,,anonymous,EN-GB,,5,,,,,,,4,5,27,male,4,,,,72500,,,,sep_general,1,A,B
+02/04/2020 16:05,02/04/2020 16:07,0,100,83,1,02/04/2020 16:07,R_3KwtfeqiJDc2Ti0,,,,,anonymous,EN-GB,,,,,6,6,7,I didn't,4,19,23,male,5,,,,132500,,,,joint,0,B,A
+02/04/2020 16:06,02/04/2020 16:07,0,100,85,1,02/04/2020 16:07,R_1hKEAaXRRETzHXo,,,,,anonymous,EN-GB,,,1,1,,,7,,4,9,27,female,5,,,,50000,,,,joint,1,A,B
+02/04/2020 16:07,02/04/2020 16:07,0,100,24,1,02/04/2020 16:07,R_2D1WtM87VibmcvC,,,,,anonymous,EN-GB,,1,,,,,,,4,1,50,female,2,,,,132500,,,,sep_general,1,A,B
+02/04/2020 16:07,02/04/2020 16:07,0,100,26,1,02/04/2020 16:07,R_TbzOUQkgKnRYWit,,,,,anonymous,EN-GB,,1,,,,,,,4,1,33,male,5,,,,17500,,,,sep_general,1,A,B
+02/04/2020 16:06,02/04/2020 16:07,0,100,60,1,02/04/2020 16:07,R_3h0IInFQwfDrbtI,,,,,anonymous,EN-GB,,5,,,,,,,4,5,30,male,2,,,,50000,,,,sep_general,0,B,A
+02/04/2020 16:07,02/04/2020 16:07,0,100,25,1,02/04/2020 16:07,R_1QtoknRcDxxmfg2,,,,,anonymous,EN-GB,,,6,6,,,7,,1,19,33,male,4,,,,17500,,,,joint,1,A,B
+02/04/2020 16:07,02/04/2020 16:08,0,100,45,1,02/04/2020 16:08,R_10rbbuuZBdquSrd,,,,,anonymous,EN-GB,6,,,,,,,,3,6,31,male,5,,,,100000,,,,sep_current,0,B,A
+02/04/2020 16:06,02/04/2020 16:08,0,100,103,1,02/04/2020 16:08,R_3sB3FuRT2c1Ohfv,,,,,anonymous,EN-GB,5,,,,,,,,4,5,39,male,6,,,,32500,,,,sep_current,0,B,A
+02/04/2020 16:08,02/04/2020 16:08,0,100,21,1,02/04/2020 16:08,R_3t5dUjKQssYzGnf,,,,,anonymous,EN-GB,6,,,,,,,,4,6,32,female,4,,,,32500,,,,sep_current,1,A,B
+02/04/2020 16:07,02/04/2020 16:08,0,100,52,1,02/04/2020 16:08,R_1PcQT3dcI3xKX6j,,,,,anonymous,EN-GB,7,,,,,,,,4,7,39,male,5,,,,50000,,,,sep_current,0,B,A
+02/04/2020 16:07,02/04/2020 16:08,0,100,74,1,02/04/2020 16:08,R_31jBCKJB4L40yPa,,,,,anonymous,EN-GB,,,,,6,6,7,,4,19,45,male,2,,,,50000,,,,joint,0,B,A
+02/04/2020 16:06,02/04/2020 16:08,0,100,121,1,02/04/2020 16:08,R_1dcbDNFuEdpWHRG,,,,,anonymous,EN-GB,5,,,,,,,,2,5,38,male,5,,,,50000,,,,sep_current,1,A,B
+02/04/2020 16:05,02/04/2020 16:09,0,100,197,1,02/04/2020 16:09,R_D2DhHe9VfSBTQTT,,,,,anonymous,EN-GB,,,5,5,,,7,,4,17,43,female,5,,,,50000,,,,joint,1,A,B
+02/04/2020 16:08,02/04/2020 16:09,0,100,59,1,02/04/2020 16:09,R_VO9if11khi2qlUZ,,,,,anonymous,EN-GB,5,,,,,,,,4,5,31,male,5,,,,50000,,,,sep_current,1,A,B
+02/04/2020 16:08,02/04/2020 16:09,0,100,70,1,02/04/2020 16:09,R_1o4LAvuH52hgVqo,,,,,anonymous,EN-GB,5,,,,,,,,4,5,42,male,6,,,,72500,,,,sep_current,1,A,B
+02/04/2020 16:07,02/04/2020 16:09,0,100,82,1,02/04/2020 16:09,R_2Cky62wtmQPLFns,,,,,anonymous,EN-GB,,1,,,,,,,4,1,39,female,2,,,,72500,,,,sep_general,0,B,A
+02/04/2020 16:06,02/04/2020 16:09,0,100,201,1,02/04/2020 16:09,R_3h3xR3JnYzqe97O,,,,,anonymous,EN-GB,,2,,,,,,,4,2,68,female,5,,,,32500,,,,sep_general,0,B,A
+02/04/2020 16:09,02/04/2020 16:09,0,100,13,1,02/04/2020 16:09,R_vDqtGdHuhAgfw6R,,,,,anonymous,EN-GB,,5,,,,,,,4,5,38,male,5,,,,100000,,,,sep_general,0,B,A
+02/04/2020 16:08,02/04/2020 16:09,0,100,71,1,02/04/2020 16:09,R_2tqW47Qd99HaqRa,,,,,anonymous,EN-GB,,,,,7,7,7,i didnt. they seemed the same mostly,4,21,39,male,3,,,,72500,,,,joint,0,B,A
+02/04/2020 16:07,02/04/2020 16:09,0,100,99,1,02/04/2020 16:09,R_2b0K8ucNlO7KLEO,,,,,anonymous,EN-GB,,2,,,,,,,4,2,36,male,3,,,,72500,,,,sep_general,0,B,A
+02/04/2020 16:05,02/04/2020 16:10,0,100,272,1,02/04/2020 16:10,R_25vx2ATkvjeYPky,,,,,anonymous,EN-GB,,6,,,,,,,4,6,37,female,4,,,,32500,,,,sep_general,0,B,A
+02/04/2020 16:07,02/04/2020 16:11,0,100,284,1,02/04/2020 16:11,R_1QAxQfG33cPRsaI,,,,,anonymous,EN-GB,,,5,4,,,5,Just ent with my gut choice ranking/rating.,4,14,44,male,5,,,,72500,,,,joint,1,A,B
+02/04/2020 16:10,02/04/2020 16:12,0,100,90,1,02/04/2020 16:12,R_1Pca3zQEOENYBdE,,,,,anonymous,EN-GB,,,6,5,,,5,"The second case is more ambiguous because my question is who would be deciding which person would be more useful? In the first situation, the doctor is likely to provide more usefulness in the future, but applying this in a sweeping manner is unclear.",4,16,32,male,7,,,,132500,,,,joint,1,A,B
+02/04/2020 16:11,02/04/2020 16:13,0,100,153,1,02/04/2020 16:13,R_2ASir5P3Yx68XG2,,,,,anonymous,EN-GB,,5,,,,,,,4,5,28,male,5,,,,72500,,,,sep_general,1,A,B
+02/04/2020 16:14,02/04/2020 16:15,0,100,57,1,02/04/2020 16:15,R_1GwRMntUO94wIE5,,,,,anonymous,EN-GB,4,,,,,,,,4,4,45,male,4,,,,72500,,,,sep_current,0,B,A
+02/04/2020 16:16,02/04/2020 16:17,0,100,40,1,02/04/2020 16:17,R_psHX8WSNKwxthBf,,,,,anonymous,EN-GB,,2,,,,,,,4,2,38,male,5,,,,225000,,,,sep_general,1,A,B
+02/04/2020 16:16,02/04/2020 16:18,0,100,87,1,02/04/2020 16:18,R_W80C2i9lHhvxoVX,,,,,anonymous,EN-GB,6,,,,,,,,2,6,35,female,5,,,,50000,,,,sep_current,1,A,B
+02/04/2020 16:17,02/04/2020 16:18,0,100,63,1,02/04/2020 16:18,R_2TFWPus1pNLCgN3,,,,,anonymous,EN-GB,,1,,,,,,,4,1,38,male,2,,,,17500,,,,sep_general,0,B,A
+02/04/2020 16:18,02/04/2020 16:18,0,100,25,1,02/04/2020 16:18,R_Bsa5psQBpaHmkrn,,,,,anonymous,EN-GB,3,,,,,,,,4,3,31,male,5,,,,132500,,,,sep_current,1,A,B
+02/04/2020 16:18,02/04/2020 16:18,0,100,34,1,02/04/2020 16:18,R_12o7Q75Zj7s0Bja,,,,,anonymous,EN-GB,,5,,,,,,,4,5,31,female,5,,,,175000,,,,sep_general,0,B,A
+02/04/2020 16:18,02/04/2020 16:18,0,100,15,1,02/04/2020 16:18,R_3LdLhMaKMAqDpnM,,,,,anonymous,EN-GB,,,5,5,,,4,,1,14,33,female,3,,,,72500,,,,joint,1,A,B
+02/04/2020 16:18,02/04/2020 16:18,0,100,19,1,02/04/2020 16:19,R_3QY5SsU5bCyfTjK,,,,,anonymous,EN-GB,,,,,5,5,7,,4,17,37,male,5,,,,17500,,,,joint,0,B,A
+02/04/2020 16:18,02/04/2020 16:19,0,100,57,1,02/04/2020 16:19,R_1rkc41fMP4OaE8b,,,,,anonymous,EN-GB,6,,,,,,,,4,6,27,male,4,,,,17500,,,,sep_current,1,A,B
+02/04/2020 16:18,02/04/2020 16:19,0,100,31,1,02/04/2020 16:19,R_2EyQLJxlvHI1wjy,,,,,anonymous,EN-GB,6,,,,,,,,4,6,31,male,8,,,,100000,,,,sep_current,1,A,B
+02/04/2020 16:18,02/04/2020 16:19,0,100,36,1,02/04/2020 16:19,R_1GVUxG3khAhRold,,,,,anonymous,EN-GB,,,7,7,,,7,,4,21,51,male,5,,,,132500,,,,joint,1,A,B
+02/04/2020 16:18,02/04/2020 16:19,0,100,21,1,02/04/2020 16:19,R_1gAe3z6ZilA7iKg,,,,,anonymous,EN-GB,1,,,,,,,,4,1,29,male,5,,,,100000,,,,sep_current,1,A,B
+02/04/2020 16:18,02/04/2020 16:19,0,100,20,1,02/04/2020 16:19,R_2B51yvWcKB1iwgs,,,,,anonymous,EN-GB,,3,,,,,,,4,3,34,male,5,,,,72500,,,,sep_general,1,A,B
+02/04/2020 16:18,02/04/2020 16:19,0,100,41,1,02/04/2020 16:19,R_1IgYOWFSBTq4r8R,,,,,anonymous,EN-GB,,5,,,,,,,4,5,44,female,5,,,,32500,,,,sep_general,1,A,B
+02/04/2020 16:18,02/04/2020 16:19,0,100,43,1,02/04/2020 16:19,R_PXs21882f38noEV,,,,,anonymous,EN-GB,6,,,,,,,,4,6,38,female,2,,,,32500,,,,sep_current,1,A,B
+02/04/2020 16:18,02/04/2020 16:19,0,100,21,1,02/04/2020 16:19,R_1Doja6vSsQrKslz,,,,,anonymous,EN-GB,5,,,,,,,,4,5,35,male,2,,,,72500,,,,sep_current,1,A,B
+02/04/2020 16:18,02/04/2020 16:19,0,100,45,1,02/04/2020 16:19,R_uy5te8gdmOaL4yZ,,,,,anonymous,EN-GB,7,,,,,,,,4,7,29,female,3,,,,32500,,,,sep_current,0,B,A
+02/04/2020 16:18,02/04/2020 16:19,0,100,35,1,02/04/2020 16:19,R_1lzxoBaMJzq3VYg,,,,,anonymous,EN-GB,5,,,,,,,,4,5,38,male,5,,,,72500,,,,sep_current,1,A,B
+02/04/2020 16:18,02/04/2020 16:19,0,100,30,1,02/04/2020 16:19,R_rkc1QLHSKq8Dmzn,,,,,anonymous,EN-GB,6,,,,,,,,4,6,34,male,2,,,,32500,,,,sep_current,0,B,A
+02/04/2020 16:19,02/04/2020 16:19,0,100,26,1,02/04/2020 16:19,R_2dvhYtOcLUfNBm6,,,,,anonymous,EN-GB,5,,,,,,,,4,5,29,female,5,,,,32500,,,,sep_current,0,B,A
+02/04/2020 16:18,02/04/2020 16:19,0,100,33,1,02/04/2020 16:19,R_Z9L0XzuByyYlbPj,,,,,anonymous,EN-GB,,5,,,,,,,4,5,35,male,2,,,,32500,,,,sep_general,1,A,B
+02/04/2020 16:19,02/04/2020 16:19,0,100,19,1,02/04/2020 16:19,R_2WTPQ1z2ZQJOET3,,,,,anonymous,EN-GB,,,5,4,,,4,,3,13,31,male,4,,,,50000,,,,joint,1,A,B
+02/04/2020 16:17,02/04/2020 16:19,0,100,108,1,02/04/2020 16:19,R_1JLcFMX4iKapJEG,,,,,anonymous,EN-GB,,,,,6,6,4,They are basically the same outcome,4,16,43,female,5,,,,225000,,,,joint,0,B,A
+02/04/2020 16:18,02/04/2020 16:19,0,100,61,1,02/04/2020 16:19,R_2DSPACX9WTZSwui,,,,,anonymous,EN-GB,,3,,,,,,,4,3,26,female,4,,,,4500,,,,sep_general,0,B,A
+02/04/2020 16:19,02/04/2020 16:19,0,100,27,1,02/04/2020 16:19,R_4MbWwOW1zTAvbHP,,,,,anonymous,EN-GB,6,,,,,,,,4,6,32,female,5,,,,72500,,,,sep_current,1,A,B
+02/04/2020 16:19,02/04/2020 16:19,0,100,21,1,02/04/2020 16:19,R_umJ95coFcxt1o7T,,,,,anonymous,EN-GB,,5,,,,,,,4,5,31,male,5,,,,50000,,,,sep_general,1,A,B
+02/04/2020 16:18,02/04/2020 16:19,0,100,47,1,02/04/2020 16:19,R_1i53oCObswgbpzF,,,,,anonymous,EN-GB,5,,,,,,,,4,5,39,male,2,,,,32500,,,,sep_current,1,A,B
+02/04/2020 16:19,02/04/2020 16:19,0,100,31,1,02/04/2020 16:19,R_Q9yJHiRpUiznoXf,,,,,anonymous,EN-GB,4,,,,,,,,4,4,37,female,4,,,,50000,,,,sep_current,0,B,A
+02/04/2020 16:18,02/04/2020 16:19,0,100,59,1,02/04/2020 16:19,R_1ItPPEifpGIUp0x,,,,,anonymous,EN-GB,,,,,5,5,7,,4,17,24,male,5,,,,17500,,,,joint,0,B,A
+02/04/2020 16:18,02/04/2020 16:19,0,100,90,1,02/04/2020 16:19,R_1nOpjIHlfYX6TD4,,,,,anonymous,EN-GB,,,,,6,6,6,,4,18,43,male,4,,,,50000,,,,joint,0,B,A
+02/04/2020 16:18,02/04/2020 16:19,0,100,70,1,02/04/2020 16:19,R_3PjK5A82K9MMKkG,,,,,anonymous,EN-GB,,4,,,,,,,4,4,33,female,5,,,,17500,,,,sep_general,0,B,A
+02/04/2020 16:19,02/04/2020 16:19,0,100,44,1,02/04/2020 16:19,R_3psc3RYQ7wgzvlm,,,,,anonymous,EN-GB,,1,,,,,,,4,1,45,female,6,,,,50000,,,,sep_general,0,B,A
+02/04/2020 16:18,02/04/2020 16:19,0,100,56,1,02/04/2020 16:19,R_2YLNlZtqYSjDmcP,,,,,anonymous,EN-GB,,6,,,,,,,4,6,36,male,5,,,,100000,,,,sep_general,0,B,A
+02/04/2020 16:19,02/04/2020 16:19,0,100,43,1,02/04/2020 16:19,R_2uWlZqDlEYg9rtl,,,,,anonymous,EN-GB,,,,,4,4,4,,4,12,35,female,5,,,,132500,,,,joint,0,B,A
+02/04/2020 16:19,02/04/2020 16:19,0,100,33,1,02/04/2020 16:19,R_1dAc3S4PI7FL5ye,,,,,anonymous,EN-GB,7,,,,,,,,4,7,44,male,6,,,,72500,,,,sep_current,1,A,B
+02/04/2020 16:19,02/04/2020 16:19,0,100,40,1,02/04/2020 16:19,R_2fxm4uKtzoGqC37,,,,,anonymous,EN-GB,5,,,,,,,,4,5,30,female,5,,,,72500,,,,sep_current,1,A,B
+02/04/2020 16:19,02/04/2020 16:20,0,100,38,1,02/04/2020 16:20,R_1C7Si0yRxtn9k1U,,,,,anonymous,EN-GB,5,,,,,,,,4,5,41,female,3,,,,72500,,,,sep_current,1,A,B
+02/04/2020 16:19,02/04/2020 16:20,0,100,16,1,02/04/2020 16:20,R_3EfNoXpJl588PyW,,,,,anonymous,EN-GB,6,,,,,,,,1,6,34,male,6,,,,72500,,,,sep_current,1,A,B
+02/04/2020 16:19,02/04/2020 16:20,0,100,42,1,02/04/2020 16:20,R_2CeNe8NVpD59mVx,,,,,anonymous,EN-GB,,2,,,,,,,4,2,26,male,5,,,,50000,,,,sep_general,1,A,B
+02/04/2020 16:19,02/04/2020 16:20,0,100,29,1,02/04/2020 16:20,R_1g1hCxGTrSQrIs0,,,,,anonymous,EN-GB,,,7,7,,,7,theyre the same mostly,4,21,39,male,3,,,,72500,,,,joint,1,A,B
+02/04/2020 16:19,02/04/2020 16:20,0,100,66,1,02/04/2020 16:20,R_1pWnUvrZTaMURNQ,,,,,anonymous,EN-GB,,5,,,,,,,4,5,36,male,5,,,,225000,,,,sep_general,0,B,A
+02/04/2020 16:19,02/04/2020 16:20,0,100,26,1,02/04/2020 16:20,R_3lzDNBMaljV07kd,,,,,anonymous,EN-GB,,5,,,,,,,4,5,51,female,5,,,,100000,,,,sep_general,0,B,A
+02/04/2020 16:18,02/04/2020 16:20,0,100,93,1,02/04/2020 16:20,R_2QKun9CZ9OGZt4M,,,,,anonymous,EN-GB,,,6,6,,,7,,4,19,28,female,6,,,,50000,,,,joint,1,A,B
+02/04/2020 16:18,02/04/2020 16:20,0,100,109,1,02/04/2020 16:20,R_32PzVDWce9HTkB4,,,,,anonymous,EN-GB,,,6,6,,,7,I voted same thing,4,19,34,male,5,,,,100000,,,,joint,1,A,B
+02/04/2020 16:19,02/04/2020 16:20,0,100,21,1,02/04/2020 16:20,R_2ztD8dp4B36yM1q,,,,,anonymous,EN-GB,6,,,,,,,,4,6,25,female,5,,,,32500,,,,sep_current,1,A,B
+02/04/2020 16:19,02/04/2020 16:20,0,100,60,1,02/04/2020 16:20,R_3PQUVLiO0ZaSDw7,,,,,anonymous,EN-GB,6,,,,,,,,4,6,22,female,5,,,,72500,,,,sep_current,0,B,A
+02/04/2020 16:18,02/04/2020 16:20,0,100,90,1,02/04/2020 16:20,R_x929q9pqTNTh0Vr,,,,,anonymous,EN-GB,,6,,,,,,,4,6,33,female,5,,,,32500,,,,sep_general,0,B,A
+02/04/2020 16:18,02/04/2020 16:20,0,100,90,1,02/04/2020 16:20,R_2rOW4sAbEnE49AF,,,,,anonymous,EN-GB,,,,,7,7,7,,4,21,39,male,5,,,,132500,,,,joint,0,B,A
+02/04/2020 16:20,02/04/2020 16:20,0,100,22,1,02/04/2020 16:20,R_1PSrFe1uLJeWPeW,,,,,anonymous,EN-GB,4,,,,,,,,2,4,21,male,5,,,,17500,,,,sep_current,0,B,A
+02/04/2020 16:19,02/04/2020 16:20,0,100,42,1,02/04/2020 16:20,R_2Xh78GInxk3XgCi,,,,,anonymous,EN-GB,5,,,,,,,,4,5,41,male,5,,,,100000,,,,sep_current,0,B,A
+02/04/2020 16:20,02/04/2020 16:20,0,100,29,1,02/04/2020 16:20,R_3R4Ua5jNRZPaLIt,,,,,anonymous,EN-GB,,5,,,,,,,4,5,24,male,2,,,,4500,,,,sep_general,0,B,A
+02/04/2020 16:20,02/04/2020 16:20,0,100,26,1,02/04/2020 16:20,R_qz1pioHPu853yE1,,,,,anonymous,EN-GB,7,,,,,,,,4,7,24,female,5,,,,50000,,,,sep_current,0,B,A
+02/04/2020 16:19,02/04/2020 16:20,0,100,51,1,02/04/2020 16:20,R_Q9sO1LkTTfT3zBT,,,,,anonymous,EN-GB,5,,,,,,,,4,5,40,male,6,,,,100000,,,,sep_current,1,A,B
+02/04/2020 16:20,02/04/2020 16:20,0,100,38,1,02/04/2020 16:20,R_1Hq1FHdCE5ei4w1,,,,,anonymous,EN-GB,,,,,1,1,7,,4,9,39,female,6,,,,50000,,,,joint,0,B,A
+02/04/2020 16:20,02/04/2020 16:20,0,100,27,1,02/04/2020 16:20,R_2pWQPZ4YXpYOaeS,,,,,anonymous,EN-GB,6,,,,,,,,4,6,26,male,5,,,,50000,,,,sep_current,0,B,A
+02/04/2020 16:18,02/04/2020 16:20,0,100,106,1,02/04/2020 16:20,R_3Mgl0SdqP1WhIdc,,,,,anonymous,EN-GB,,,3,3,,,6,,4,12,38,male,2,,,,32500,,,,joint,1,A,B
+02/04/2020 16:19,02/04/2020 16:20,0,100,88,1,02/04/2020 16:20,R_wZgbu5QdkoTeuit,,,,,anonymous,EN-GB,,5,,,,,,,4,5,30,female,5,,,,50000,,,,sep_general,0,B,A
+02/04/2020 16:19,02/04/2020 16:20,0,100,60,1,02/04/2020 16:20,R_38fKgJruYuUFA9X,,,,,anonymous,EN-GB,,7,,,,,,,4,7,26,male,6,,,,72500,,,,sep_general,0,B,A
+02/04/2020 16:18,02/04/2020 16:20,0,100,109,1,02/04/2020 16:20,R_cZMvnt6Q0DzbCZr,,,,,anonymous,EN-GB,,,1,1,,,7,"I saw them as both the same general case, as putting one human life's value above another's, which is why I rated them both the same.",4,9,48,female,5,,,,72500,,,,joint,1,A,B
+02/04/2020 16:19,02/04/2020 16:20,0,100,68,1,02/04/2020 16:20,R_7U8qCTWM5zoonHb,,,,,anonymous,EN-GB,4,,,,,,,,4,4,65,female,3,,,,50000,,,,sep_current,1,A,B
+02/04/2020 16:20,02/04/2020 16:20,0,100,48,1,02/04/2020 16:20,R_23TJEGouZiicgH7,,,,,anonymous,EN-GB,,2,,,,,,,4,2,36,female,5,,,,72500,,,,sep_general,0,B,A
+02/04/2020 16:20,02/04/2020 16:20,0,100,39,1,02/04/2020 16:20,R_2QXa9lj3WjeMFMR,,,,,anonymous,EN-GB,6,,,,,,,,4,6,46,female,6,,,,72500,,,,sep_current,1,A,B
+02/04/2020 16:20,02/04/2020 16:20,0,100,41,1,02/04/2020 16:20,R_2YycUmxHj48CL0N,,,,,anonymous,EN-GB,,,1,1,,,7,,4,9,35,male,5,,,,72500,,,,joint,1,A,B
+02/04/2020 16:19,02/04/2020 16:20,0,100,71,1,02/04/2020 16:20,R_1QMzjYib6s1CHQM,,,,,anonymous,EN-GB,,1,,,,,,,4,1,31,female,4,,,,50000,,,,sep_general,1,A,B
+02/04/2020 16:20,02/04/2020 16:21,0,100,32,1,02/04/2020 16:21,R_u1SLeOlWS1kO0ql,,,,,anonymous,EN-GB,6,,,,,,,,4,6,33,female,5,,,,100000,,,,sep_current,1,A,B
+02/04/2020 16:20,02/04/2020 16:21,0,100,53,1,02/04/2020 16:21,R_1P5VJl1Ee5ZBIFh,,,,,anonymous,EN-GB,5,,,,,,,,4,5,64,female,5,,,,100000,,,,sep_current,1,A,B
+02/04/2020 16:20,02/04/2020 16:21,0,100,18,1,02/04/2020 16:21,R_3J3Ig6FGEhK82q8,,,,,anonymous,EN-GB,6,,,,,,,,4,6,42,female,5,,,,100000,,,,sep_current,1,A,B
+02/04/2020 16:19,02/04/2020 16:21,0,100,88,1,02/04/2020 16:21,R_0Nk1gJbMhaBMGoF,,,,,anonymous,EN-GB,,,,,4,6,5,I thought case B would be better,4,15,35,male,2,,,,50000,,,,joint,0,B,A
+02/04/2020 16:18,02/04/2020 16:21,0,100,135,1,02/04/2020 16:21,R_2BgJuZiutV3cLvG,,,,,anonymous,EN-GB,,6,,,,,,,4,6,32,female,5,,,,72500,,,,sep_general,0,B,A
+02/04/2020 16:20,02/04/2020 16:21,0,100,22,1,02/04/2020 16:21,R_4GvXnUxHKTraevT,,,,,anonymous,EN-GB,6,,,,,,,,4,6,32,male,4,,,,72500,,,,sep_current,0,B,A
+02/04/2020 16:20,02/04/2020 16:21,0,100,54,1,02/04/2020 16:21,R_3HNV4hVn9169uOk,,,,,anonymous,EN-GB,,7,,,,,,,4,7,37,male,2,,,,50000,,,,sep_general,0,B,A
+02/04/2020 16:20,02/04/2020 16:21,0,100,42,1,02/04/2020 16:21,R_sCounTq4i8ck3YZ,,,,,anonymous,EN-GB,,6,,,,,,,4,6,24,female,2,,,,4500,,,,sep_general,0,B,A
+02/04/2020 16:20,02/04/2020 16:21,0,100,18,1,02/04/2020 16:21,R_szZaltOx6u76Mlr,,,,,anonymous,EN-GB,4,,,,,,,,4,4,37,female,3,,,,72500,,,,sep_current,1,A,B
+02/04/2020 16:20,02/04/2020 16:21,0,100,15,1,02/04/2020 16:21,R_2B2O5pSk1FjQeiZ,,,,,anonymous,EN-GB,6,,,,,,,,4,6,25,female,5,,,,17500,,,,sep_current,1,A,B
+02/04/2020 16:20,02/04/2020 16:21,0,100,47,1,02/04/2020 16:21,R_3RekEX8uogUOjez,,,,,anonymous,EN-GB,,5,,,,,,,4,5,30,female,6,,,,50000,,,,sep_general,0,B,A
+02/04/2020 16:20,02/04/2020 16:21,0,100,49,1,02/04/2020 16:21,R_9pn14M2CehENcRj,,,,,anonymous,EN-GB,6,,,,,,,,4,6,29,female,4,,,,50000,,,,sep_current,0,B,A
+02/04/2020 16:19,02/04/2020 16:21,0,100,81,1,02/04/2020 16:21,R_tRhWCcS1GWiFOtb,,,,,anonymous,EN-GB,,3,,,,,,,4,3,34,male,6,,,,32500,,,,sep_general,0,B,A
+02/04/2020 16:20,02/04/2020 16:21,0,100,59,1,02/04/2020 16:21,R_1RF9IO07r5gHSKJ,,,,,anonymous,EN-GB,,,,,5,5,5,,4,15,38,female,6,,,,175000,,,,joint,0,B,A
+02/04/2020 16:20,02/04/2020 16:21,0,100,66,1,02/04/2020 16:21,R_1n7WbhFNpCWJ8Ja,,,,,anonymous,EN-GB,,2,,,,,,,4,2,33,male,3,,,,17500,,,,sep_general,0,B,A
+02/04/2020 16:20,02/04/2020 16:21,0,100,71,1,02/04/2020 16:21,R_1nSD6ZHcOe5KwYb,,,,,anonymous,EN-GB,,,6,6,,,6,,4,18,26,female,5,,,,132500,,,,joint,1,A,B
+02/04/2020 16:19,02/04/2020 16:21,0,100,97,1,02/04/2020 16:21,R_30wQGMAlNNMhWVD,,,,,anonymous,EN-GB,,,3,3,,,7,,4,13,28,male,5,,,,50000,,,,joint,1,A,B
+02/04/2020 16:20,02/04/2020 16:21,0,100,59,1,02/04/2020 16:21,R_3Ph1wE53OzhKD3c,,,,,anonymous,EN-GB,,4,,,,,,,4,4,31,male,4,,,,50000,,,,sep_general,0,B,A
+02/04/2020 16:21,02/04/2020 16:21,0,100,29,1,02/04/2020 16:21,R_1MQ9glVKGJpYZh9,,,,,anonymous,EN-GB,,7,,,,,,,4,7,31,female,3,,,,4500,,,,sep_general,0,B,A
+02/04/2020 16:18,02/04/2020 16:21,0,100,166,1,02/04/2020 16:21,R_2ru4xEkZTQJ4dEl,,,,,anonymous,EN-GB,,7,,,,,,,4,7,41,male,5,,,,72500,,,,sep_general,0,B,A
+02/04/2020 16:18,02/04/2020 16:21,0,100,172,1,02/04/2020 16:21,R_1ojMuUGpb4MjQQr,,,,,anonymous,EN-GB,,,,,7,6,3,rated them basically yhe same,4,16,69,male,6,,,,72500,,,,joint,0,B,A
+02/04/2020 16:20,02/04/2020 16:21,0,100,65,1,02/04/2020 16:21,R_1161wZNUsQU0Jaf,,,,,anonymous,EN-GB,,5,,,,,,,4,5,75,male,6,,,,32500,,,,sep_general,1,A,B
+02/04/2020 16:20,02/04/2020 16:21,0,100,58,1,02/04/2020 16:21,R_2QncWaulzbPZbvL,,,,,anonymous,EN-GB,2,,,,,,,,4,2,61,male,5,,,,132500,,,,sep_current,1,A,B
+02/04/2020 16:21,02/04/2020 16:21,0,100,25,1,02/04/2020 16:21,R_2ZE0BTUXTT8QFaW,,,,,anonymous,EN-GB,5,,,,,,,,4,5,40,female,6,,,,32500,,,,sep_current,1,A,B
+02/04/2020 16:21,02/04/2020 16:21,0,100,27,1,02/04/2020 16:21,R_73QNLB2MKIyiliN,,,,,anonymous,EN-GB,6,,,,,,,,4,6,32,male,2,,,,50000,,,,sep_current,1,A,B
+02/04/2020 16:16,02/04/2020 16:22,0,100,360,1,02/04/2020 16:22,R_3CCJxkfSGy7IDhR,,,,,anonymous,EN-GB,,,,,5,4,5,,4,14,29,male,6,,,,72500,,,,joint,0,B,A
+02/04/2020 16:20,02/04/2020 16:22,0,100,101,1,02/04/2020 16:22,R_337uaduUfoYAnmD,,,,,anonymous,EN-GB,,,5,5,,,5,n/a,4,15,21,male,4,,,,32500,,,,joint,1,A,B
+02/04/2020 16:20,02/04/2020 16:22,0,100,84,1,02/04/2020 16:22,R_SMH98s4LJjzw0sp,,,,,anonymous,EN-GB,,,,,6,6,7,,4,19,45,male,2,,,,50000,,,,joint,0,B,A
+02/04/2020 16:20,02/04/2020 16:22,0,100,88,1,02/04/2020 16:22,R_0fgemJeZ8jqF6bT,,,,,anonymous,EN-GB,,5,,,,,,,4,5,41,female,8,,,,100000,,,,sep_general,0,B,A
+02/04/2020 16:20,02/04/2020 16:22,0,100,127,1,02/04/2020 16:22,R_UWHtgimsFlTeiqZ,,,,,anonymous,EN-GB,,,1,1,,,7,,4,9,45,female,6,,,,50000,,,,joint,1,A,B
+02/04/2020 16:21,02/04/2020 16:22,0,100,52,1,02/04/2020 16:22,R_21bvkPo1Df3qS6P,,,,,anonymous,EN-GB,5,,,,,,,,4,5,31,female,2,,,,4500,,,,sep_current,1,A,B
+02/04/2020 16:19,02/04/2020 16:22,0,100,143,1,02/04/2020 16:22,R_2SDGGLjYZCtgqfj,,,,,anonymous,EN-GB,,,7,6,,,6,,4,19,34,female,5,,,,32500,,,,joint,1,A,B
+02/04/2020 16:22,02/04/2020 16:22,0,100,18,1,02/04/2020 16:22,R_50zHM3nj5CK2VQB,,,,,anonymous,EN-GB,6,,,,,,,,4,6,34,male,5,,,,100000,,,,sep_current,1,A,B
+02/04/2020 16:21,02/04/2020 16:22,0,100,37,1,02/04/2020 16:22,R_SHILLUIWl6QyGcN,,,,,anonymous,EN-GB,,,4,4,,,4,,4,12,34,female,5,,,,100000,,,,joint,1,A,B
+02/04/2020 16:20,02/04/2020 16:22,0,100,111,1,02/04/2020 16:22,R_qFbIKox6VaJJUSl,,,,,anonymous,EN-GB,1,,,,,,,,4,1,31,female,5,,,,132500,,,,sep_current,1,A,B
+02/04/2020 16:19,02/04/2020 16:22,0,100,207,1,02/04/2020 16:22,R_bCn8QIGVMZNcjvj,,,,,anonymous,EN-GB,,,6,6,,,5,"I feel there is a difference between the two cases in that the first scenario is specifically about that situation.  The second scenario applies to all cases, leaving no room for exceptions.",4,17,44,male,5,,,,32500,,,,joint,1,A,B
+02/04/2020 16:21,02/04/2020 16:22,0,100,51,1,02/04/2020 16:22,R_2BxImA4cleLovCp,,,,,anonymous,EN-GB,,,1,1,,,7,n/a,4,9,28,male,2,,,,17500,,,,joint,1,A,B
+02/04/2020 16:20,02/04/2020 16:22,0,100,113,1,02/04/2020 16:22,R_1rlIkBTrgWtVJJj,,,,,anonymous,EN-GB,,,6,3,,,5,Saving someone who is specialized and benefit more people in the future would be best for the greater good.,4,14,45,female,5,,,,72500,,,,joint,1,A,B
+02/04/2020 16:22,02/04/2020 16:22,0,100,39,1,02/04/2020 16:22,R_esdjKaNCgpOvgd3,,,,,anonymous,EN-GB,,6,,,,,,,4,6,36,female,5,,,,32500,,,,sep_general,0,B,A
+02/04/2020 16:21,02/04/2020 16:22,0,100,97,1,02/04/2020 16:22,R_278Se9xidjVQ53d,,,,,anonymous,EN-GB,,6,,,,,,,4,6,46,female,5,,,,72500,,,,sep_general,1,A,B
+02/04/2020 16:22,02/04/2020 16:22,0,100,43,1,02/04/2020 16:22,R_1Duvs9mthrk7Ns9,,,,,anonymous,EN-GB,,5,,,,,,,4,5,31,male,2,,,,72500,,,,sep_general,0,B,A
+02/04/2020 16:19,02/04/2020 16:22,0,100,192,1,02/04/2020 16:22,R_2BnRIXEMMHxtyEL,,,,,anonymous,EN-GB,,,4,4,,,7,,4,15,69,female,4,,,,72500,,,,joint,1,A,B
+02/04/2020 16:21,02/04/2020 16:22,0,100,67,1,02/04/2020 16:22,R_3Pw1gPwbqPn0elQ,,,,,anonymous,EN-GB,,5,,,,,,,4,5,42,male,5,,,,132500,,,,sep_general,0,B,A
+02/04/2020 16:18,02/04/2020 16:22,0,100,235,1,02/04/2020 16:22,R_1jJlO30R2HJ00BQ,,,,,anonymous,EN-GB,,,5,6,,,3,In the end it depends on how the policy is enacted. In the first case it was a one time only situation where the decision was made by one firefighter. This makes is very subjective and if the firefighter knows the unemployed person they may save that one first. The second policy is more consistent across the board so if I had to pick one I prefer better out of the two I prefer City B's policy because it is slighly less prone to manipulation.,4,14,46,male,6,,,,175000,,,,joint,1,A,B
+02/04/2020 16:20,02/04/2020 16:22,0,100,116,1,02/04/2020 16:22,R_4VkAdj0xN22NvR7,,,,,anonymous,EN-GB,,,,,6,6,7,did not rate differently,4,19,68,female,6,,,,50000,,,,joint,0,B,A
+02/04/2020 16:22,02/04/2020 16:22,0,100,50,1,02/04/2020 16:22,R_88jo0efnuR65LgZ,,,,,anonymous,EN-GB,,4,,,,,,,4,4,32,male,2,,,,32500,,,,sep_general,0,B,A
+02/04/2020 16:22,02/04/2020 16:22,0,100,33,1,02/04/2020 16:22,R_2akGRGbQMviMN85,,,,,anonymous,EN-GB,6,,,,,,,,4,6,54,male,5,,,,132500,,,,sep_current,1,A,B
+02/04/2020 16:22,02/04/2020 16:23,0,100,35,1,02/04/2020 16:23,R_3Eg3YdmXzBxYfPA,,,,,anonymous,EN-GB,,,,,5,6,7,NA,4,18,38,male,6,,,,100000,,,,joint,0,B,A
+02/04/2020 16:21,02/04/2020 16:23,0,100,110,1,02/04/2020 16:23,R_2CZBLdQgEagRhAr,,,,,anonymous,EN-GB,,3,,,,,,,4,3,31,female,5,,,,100000,,,,sep_general,1,A,B
+02/04/2020 16:21,02/04/2020 16:23,0,100,79,1,02/04/2020 16:23,R_3MzzPQ6tHj1cFzS,,,,,anonymous,EN-GB,,5,,,,,,,4,5,52,male,6,,,,100000,,,,sep_general,0,B,A
+02/04/2020 16:20,02/04/2020 16:23,0,100,130,1,02/04/2020 16:23,R_0HWjLIzbVTya4zT,,,,,anonymous,EN-GB,,,,,3,3,7,n/a,4,13,50,male,6,,,,32500,,,,joint,0,B,A
+02/04/2020 16:19,02/04/2020 16:23,0,100,192,1,02/04/2020 16:23,R_3PNZl10UNTHBzaB,,,,,anonymous,EN-GB,,,,,7,6,7,I agree with the choices made in each scenario.,4,20,36,male,5,,,,100000,,,,joint,0,B,A
+02/04/2020 16:21,02/04/2020 16:23,0,100,110,1,02/04/2020 16:23,R_1ergIkAdfKJE1hm,,,,,anonymous,EN-GB,,,,,6,6,6,rated the same.,4,18,48,female,6,,,,132500,,,,joint,0,B,A
+02/04/2020 16:22,02/04/2020 16:23,0,100,26,1,02/04/2020 16:23,R_oY6KsT0vf1CbVPb,,,,,anonymous,EN-GB,7,,,,,,,,4,7,31,female,2,,,,50000,,,,sep_current,0,B,A
+02/04/2020 16:22,02/04/2020 16:23,0,100,41,1,02/04/2020 16:23,R_1flt87Gbmwi6l8k,,,,,anonymous,EN-GB,4,,,,,,,,4,4,31,male,5,,,,100000,,,,sep_current,0,B,A
+02/04/2020 16:21,02/04/2020 16:23,0,100,132,1,02/04/2020 16:23,R_2rvzVC660cHUffP,,,,,anonymous,EN-GB,,6,,,,,,,4,6,31,male,5,,,,50000,,,,sep_general,0,B,A
+02/04/2020 16:21,02/04/2020 16:23,0,100,92,1,02/04/2020 16:23,R_2z89e6SpsBy9mwc,,,,,anonymous,EN-GB,,,7,7,,,7,,4,21,36,male,8,,,,50000,,,,joint,1,A,B
+02/04/2020 16:21,02/04/2020 16:23,0,100,140,1,02/04/2020 16:23,R_2fCgGwrusU67bvv,,,,,anonymous,EN-GB,,,,,4,4,7,,4,15,33,male,5,,,,175000,,,,joint,0,B,A
+02/04/2020 16:22,02/04/2020 16:23,0,100,68,1,02/04/2020 16:23,R_2ZTzpXwvzGh8Vvy,,,,,anonymous,EN-GB,4,,,,,,,,4,4,45,male,5,,,,132500,,,,sep_current,1,A,B
+02/04/2020 16:22,02/04/2020 16:24,0,100,96,1,02/04/2020 16:24,R_2uP7gsw5q5vtUeU,,,,,anonymous,EN-GB,,6,,,,,,,4,6,37,male,5,,,,32500,,,,sep_general,1,A,B
+02/04/2020 16:21,02/04/2020 16:24,0,100,147,1,02/04/2020 16:24,R_1Nfs1koaYerzMvt,,,,,anonymous,EN-GB,,,,,4,4,7,i didn't,4,15,49,male,4,,,,32500,,,,joint,0,B,A
+02/04/2020 16:22,02/04/2020 16:24,0,100,123,1,02/04/2020 16:24,R_3izpRGDkpX14ecu,,,,,anonymous,EN-GB,5,,,,,,,,4,5,51,female,5,,,,72500,,,,sep_current,1,A,B
+02/04/2020 16:23,02/04/2020 16:24,0,100,32,1,02/04/2020 16:24,R_QcEEZsCL7BF99CN,,,,,anonymous,EN-GB,6,,,,,,,,4,6,43,male,7,,,,175000,,,,sep_current,0,B,A
+02/04/2020 16:21,02/04/2020 16:24,0,100,154,1,02/04/2020 16:24,R_UR95osKOGXtZj4B,,,,,anonymous,EN-GB,,,,,5,3,5,One seemed to have better reasoning behind it.,4,13,56,male,3,,,,32500,,,,joint,0,B,A
+02/04/2020 16:22,02/04/2020 16:24,0,100,102,1,02/04/2020 16:24,R_1ohbXNzS9IkuI2Z,,,,,anonymous,EN-GB,,4,,,,,,,4,4,29,male,2,,,,17500,,,,sep_general,1,A,B
+02/04/2020 16:20,02/04/2020 16:24,0,100,239,1,02/04/2020 16:24,R_1d1ejeSXiPStvwt,,,,,anonymous,EN-GB,,,6,5,,,6,"Situation A specifically dealt with two people and the firefighter made the decision based on circumstance, whereas Situation B is a standard policy that removes any personal decisions, so I only slightly support Situation B.",4,17,46,female,5,,,,175000,,,,joint,1,A,B
+02/04/2020 16:22,02/04/2020 16:24,0,100,101,1,02/04/2020 16:24,R_1rrGs8G1WFZYv0J,,,,,anonymous,EN-GB,,,,,3,3,6,,4,12,35,female,5,,,,100000,,,,joint,0,B,A
+02/04/2020 16:22,02/04/2020 16:24,0,100,131,1,02/04/2020 16:24,R_1IKGaJKMZL1fJqd,,,,,anonymous,EN-GB,,,,,3,3,7,both policies mean to save the more important person and leave the other one to die. Both A and B are similar.,4,13,36,male,3,,,,100000,,,,joint,0,B,A
+02/04/2020 16:24,02/04/2020 16:24,0,100,10,1,02/04/2020 16:24,R_O9xXkmBwN1vShs5,,,,,anonymous,EN-GB,,5,,,,,,,3,5,36,male,5,,,,100000,,,,sep_general,0,B,A
+02/04/2020 16:22,02/04/2020 16:24,0,100,104,1,02/04/2020 16:24,R_4MfekFrTXQ9FyIV,,,,,anonymous,EN-GB,,2,,,,,,,4,2,42,male,5,,,,50000,,,,sep_general,1,A,B
+02/04/2020 16:24,02/04/2020 16:24,0,100,14,1,02/04/2020 16:24,R_upF2GmwNFaIsCPv,,,,,anonymous,EN-GB,,7,,,,,,,4,7,36,male,8,,,,50000,,,,sep_general,0,B,A
+02/04/2020 16:23,02/04/2020 16:24,0,100,97,1,02/04/2020 16:24,R_1ePHcxC8kkSsmSu,,,,,anonymous,EN-GB,,,4,4,,,7,,4,15,42,female,2,,,,17500,,,,joint,1,A,B
+02/04/2020 16:22,02/04/2020 16:25,0,100,155,1,02/04/2020 16:25,R_AGM8w2lC2C086Vb,,,,,anonymous,EN-GB,,5,,,,,,,4,5,35,male,5,,,,72500,,,,sep_general,1,A,B
+02/04/2020 16:23,02/04/2020 16:25,0,100,150,1,02/04/2020 16:25,R_3NO1ylKLZJLpMO2,,,,,anonymous,EN-GB,,,7,4,,,7,"I would prefer they did it on a case-by-case basis, not a set rule",4,18,30,male,5,,,,72500,,,,joint,1,A,B
+02/04/2020 16:24,02/04/2020 16:26,0,100,93,1,02/04/2020 16:26,R_UxQjTNFYVci2rKh,,,,,anonymous,EN-GB,,,4,4,,,7,,4,15,39,female,2,,,,72500,,,,joint,1,A,B
+02/04/2020 16:19,02/04/2020 16:26,0,100,397,1,02/04/2020 16:26,R_3qxIXyG0BMrXId7,,,,,anonymous,EN-GB,,,,,6,6,7,Both has a similar policy. It prioritize the saving one person who is more useful for the society. ,4,19,35,male,8,,,,50000,,,,joint,0,B,A
+02/04/2020 16:23,02/04/2020 16:26,0,100,192,1,02/04/2020 16:26,R_3Ma1OgZ898Oujfz,,,,,anonymous,EN-GB,4,,,,,,,,4,4,66,female,4,,,,72500,,,,sep_current,0,B,A
+02/04/2020 16:26,02/04/2020 16:27,0,100,36,1,02/04/2020 16:27,R_24e0WpF6GxkwU15,,,,,anonymous,EN-GB,,5,,,,,,,4,5,39,female,5,,,,225000,,,,sep_general,0,B,A
+02/04/2020 16:26,02/04/2020 16:27,0,100,46,1,02/04/2020 16:27,R_2YFWxEPiHFNfUQZ,,,,,anonymous,EN-GB,6,,,,,,,,4,6,25,female,5,,,,72500,,,,sep_current,1,A,B
+02/04/2020 16:27,02/04/2020 16:27,0,100,33,1,02/04/2020 16:27,R_1PRHisFM04Nxs90,,,,,anonymous,EN-GB,,,,,7,7,7,,4,21,30,male,5,,,,72500,,,,joint,0,B,A
+02/04/2020 16:25,02/04/2020 16:28,0,100,165,1,02/04/2020 16:28,R_1FJ5SnjeMSZhZhW,,,,,anonymous,EN-GB,5,,,,,,,,4,5,26,male,5,,,,100000,,,,sep_current,1,A,B
+02/04/2020 16:28,02/04/2020 16:28,0,100,32,1,02/04/2020 16:28,R_1FzWdrKUdMMXXRK,,,,,anonymous,EN-GB,6,,,,,,,,4,6,56,male,5,,,,72500,,,,sep_current,0,B,A
+02/04/2020 16:27,02/04/2020 16:29,0,100,104,1,02/04/2020 16:29,R_3ERNgTqK20BLngU,,,,,anonymous,EN-GB,,,,,3,3,7,I rated them the same.,4,13,26,female,5,,,,72500,,,,joint,0,B,A
+02/04/2020 16:27,02/04/2020 16:29,0,100,114,1,02/04/2020 16:29,R_3iL4FwdidY0msu8,,,,,anonymous,EN-GB,5,,,,,,,,4,5,38,female,5,,,,100000,,,,sep_current,1,A,B
+02/04/2020 16:29,02/04/2020 16:29,0,100,20,1,02/04/2020 16:29,R_3IcmcrPV5Vc1x48,,,,,anonymous,EN-GB,5,,,,,,,,4,5,28,female,6,,,,100000,,,,sep_current,1,A,B
+02/04/2020 16:28,02/04/2020 16:29,0,100,67,1,02/04/2020 16:29,R_3ER8dknCXjd9kin,,,,,anonymous,EN-GB,,2,,,,,,,4,2,46,female,4,,,,17500,,,,sep_general,1,A,B
+02/04/2020 16:29,02/04/2020 16:30,0,100,53,1,02/04/2020 16:30,R_24qo9OFVrRREAaE,,,,,anonymous,EN-GB,,1,,,,,,,4,1,64,female,6,,,,50000,,,,sep_general,0,B,A
+02/04/2020 16:29,02/04/2020 16:30,0,100,56,1,02/04/2020 16:30,R_3gZ0ZyKgwZuPJhE,,,,,anonymous,EN-GB,,2,,,,,,,4,2,36,female,3,,,,50000,,,,sep_general,1,A,B
+02/04/2020 16:29,02/04/2020 16:30,0,100,54,1,02/04/2020 16:30,R_1N2hfjmJMfjbq04,,,,,anonymous,EN-GB,6,,,,,,,,4,6,32,female,2,,,,4500,,,,sep_current,0,B,A
+02/04/2020 16:29,02/04/2020 16:30,0,100,39,1,02/04/2020 16:30,R_22JQTv9VbGieLz7,,,,,anonymous,EN-GB,,1,,,,,,,4,1,52,female,6,,,,17500,,,,sep_general,0,B,A
+02/04/2020 16:30,02/04/2020 16:30,0,100,25,1,02/04/2020 16:30,R_1I4oR7QVIPbcFBk,,,,,anonymous,EN-GB,3,,,,,,,,4,3,24,female,5,,,,50000,,,,sep_current,0,B,A
+02/04/2020 16:30,02/04/2020 16:30,0,100,32,1,02/04/2020 16:30,R_2BkAbArfOYiB2d5,,,,,anonymous,EN-GB,6,,,,,,,,4,6,26,male,5,,,,100000,,,,sep_current,0,B,A
+02/04/2020 16:30,02/04/2020 16:30,0,100,14,1,02/04/2020 16:30,R_3HtNZbU7vqBSBle,,,,,anonymous,EN-GB,3,,,,,,,,4,3,32,male,5,,,,100000,,,,sep_current,1,A,B
+02/04/2020 16:30,02/04/2020 16:30,0,100,37,1,02/04/2020 16:30,R_3MgoVHYKiRBopa8,,,,,anonymous,EN-GB,,2,,,,,,,4,2,26,,,,,,,,,,sep_general,1,A,B
+02/04/2020 16:29,02/04/2020 16:30,0,100,49,1,02/04/2020 16:30,R_2v0wtmlrOYNDPsp,,,,,anonymous,EN-GB,5,,,,,,,,4,5,29,other,5,,,,4500,,,,sep_current,0,B,A
+02/04/2020 16:29,02/04/2020 16:30,0,100,57,1,02/04/2020 16:30,R_2flz61lv9q5TLsv,,,,,anonymous,EN-GB,,1,,,,,,,4,1,49,female,5,,,,72500,,,,sep_general,1,A,B
+02/04/2020 16:30,02/04/2020 16:30,0,100,42,1,02/04/2020 16:30,R_1meFqbcfNtrdPG0,,,,,anonymous,EN-GB,,2,,,,,,,4,2,61,female,5,,,,32500,,,,sep_general,1,A,B
+02/04/2020 16:30,02/04/2020 16:30,0,100,22,1,02/04/2020 16:30,R_2zUV3RUUphpfFYS,,,,,anonymous,EN-GB,,3,,,,,,,4,3,34,male,4,,,,50000,,,,sep_general,0,B,A
+02/04/2020 16:30,02/04/2020 16:30,0,100,43,1,02/04/2020 16:30,R_26nnR3jSwodlgFj,,,,,anonymous,EN-GB,6,,,,,,,,4,6,62,female,6,,,,100000,,,,sep_current,0,B,A
+02/04/2020 16:29,02/04/2020 16:31,0,100,87,1,02/04/2020 16:31,R_3JkiqdgrOy0KI7h,,,,,anonymous,EN-GB,,,1,1,,,7,,4,9,44,male,5,,,,100000,,,,joint,1,A,B
+02/04/2020 16:30,02/04/2020 16:31,0,100,40,1,02/04/2020 16:31,R_3nxvjQwEOifCwkW,,,,,anonymous,EN-GB,,3,,,,,,,4,3,35,female,1,,,,32500,,,,sep_general,0,B,A
+02/04/2020 16:29,02/04/2020 16:31,0,100,102,1,02/04/2020 16:31,R_2fg48hH0OpbIT2u,,,,,anonymous,EN-GB,,,7,7,,,7,,4,21,53,female,6,,,,225000,,,,joint,1,A,B
+02/04/2020 16:30,02/04/2020 16:31,0,100,26,1,02/04/2020 16:31,R_dh7pdP5Cl5YiBNL,,,,,anonymous,EN-GB,5,,,,,,,,4,5,24,male,5,,,,100000,,,,sep_current,1,A,B
+02/04/2020 16:27,02/04/2020 16:31,0,100,231,1,02/04/2020 16:31,R_2OGwYWCWhEXzlS8,,,,,anonymous,EN-GB,,5,,,,,,,4,5,60,male,5,,,,72500,,,,sep_general,1,A,B
+02/04/2020 16:30,02/04/2020 16:31,0,100,52,1,02/04/2020 16:31,R_12Ftjp0vmhOrvwl,,,,,anonymous,EN-GB,,6,,,,,,,4,6,53,male,2,,,,32500,,,,sep_general,0,B,A
+02/04/2020 16:31,02/04/2020 16:31,0,100,35,1,02/04/2020 16:31,R_2VImOgPrmLpC5jO,,,,,anonymous,EN-GB,4,,,,,,,,4,4,36,male,5,,,,175000,,,,sep_current,0,B,A
+02/04/2020 16:31,02/04/2020 16:31,0,100,30,1,02/04/2020 16:31,R_12QmsUxVhL4bMFA,,,,,anonymous,EN-GB,,5,,,,,,,4,5,29,male,5,,,,72500,,,,sep_general,1,A,B
+02/04/2020 16:30,02/04/2020 16:31,0,100,99,1,02/04/2020 16:31,R_PBNTVjtFXIIcqRj,,,,,anonymous,EN-GB,,,,,6,6,7,I think they are both smart policies but hard to enforce.,4,19,41,male,3,,,,17500,,,,joint,0,B,A
+02/04/2020 16:31,02/04/2020 16:31,0,100,42,1,02/04/2020 16:31,R_2sRLEPivXkcrKPi,,,,,anonymous,EN-GB,5,,,,,,,,4,5,37,female,2,,,,17500,,,,sep_current,1,A,B
+02/04/2020 16:30,02/04/2020 16:31,0,100,85,1,02/04/2020 16:31,R_3oYkgIdYk5du08M,,,,,anonymous,EN-GB,,,,,5,5,7,,4,17,28,female,5,,,,100000,,,,joint,0,B,A
+02/04/2020 16:30,02/04/2020 16:32,0,100,83,1,02/04/2020 16:32,R_7WlbhtzHkfB5rhv,,,,,anonymous,EN-GB,,,5,5,,,7,Rated them the same,4,17,34,male,6,,,,100000,,,,joint,1,A,B
+02/04/2020 16:31,02/04/2020 16:32,0,100,48,1,02/04/2020 16:32,R_2EdjQHPsof71a1w,,,,,anonymous,EN-GB,,6,,,,,,,4,6,35,female,8,,,,100000,,,,sep_general,1,A,B
+02/04/2020 16:30,02/04/2020 16:32,0,100,74,1,02/04/2020 16:32,R_2TMHiUzhKNgEvTI,,,,,anonymous,EN-GB,,3,,,,,,,4,3,33,male,5,,,,32500,,,,sep_general,0,B,A
+02/04/2020 16:30,02/04/2020 16:32,0,100,95,1,02/04/2020 16:32,R_1DSxs26jC52vVmZ,,,,,anonymous,EN-GB,4,,,,,,,,4,4,36,female,4,,,,4500,,,,sep_current,1,A,B
+02/04/2020 16:31,02/04/2020 16:32,0,100,72,1,02/04/2020 16:32,R_2s6VqlaD94ECATM,,,,,anonymous,EN-GB,5,,,,,,,,4,5,65,female,6,,,,225000,,,,sep_current,0,B,A
+02/04/2020 16:30,02/04/2020 16:32,0,100,130,1,02/04/2020 16:32,R_OwESXxZOVzfDPcB,,,,,anonymous,EN-GB,,,,,3,3,5,,4,11,41,male,4,,,,4500,,,,joint,0,B,A
+02/04/2020 16:29,02/04/2020 16:32,0,100,158,1,02/04/2020 16:32,R_3HGJgACMYXnVRYn,,,,,anonymous,EN-GB,,6,,,,,,,4,6,31,male,4,,,,100000,,,,sep_general,1,A,B
+02/04/2020 16:32,02/04/2020 16:32,0,100,29,1,02/04/2020 16:32,R_YXGSjmhMlmgtCOB,,,,,anonymous,EN-GB,4,,,,,,,,4,4,58,female,4,,,,50000,,,,sep_current,1,A,B
+02/04/2020 16:31,02/04/2020 16:32,0,100,80,1,02/04/2020 16:32,R_3iRnEqRuNEplEAq,,,,,anonymous,EN-GB,,,,,1,1,7,,4,9,34,female,4,,,,32500,,,,joint,0,B,A
+02/04/2020 16:32,02/04/2020 16:32,0,100,22,1,02/04/2020 16:32,R_1Qoudyhk867Jyek,,,,,anonymous,EN-GB,,,,,6,5,7,I think they’re both fair policies,3,18,22,male,3,,,,50000,,,,joint,0,B,A
+02/04/2020 16:32,02/04/2020 16:33,0,100,54,1,02/04/2020 16:33,R_3R3DoZsOdlGVF6a,,,,,anonymous,EN-GB,,5,,,,,,,4,5,39,male,5,,,,175000,,,,sep_general,0,B,A
+02/04/2020 16:30,02/04/2020 16:33,0,100,146,1,02/04/2020 16:33,R_1gcO3IZY5GeNzLi,,,,,anonymous,EN-GB,,,2,2,,,7,,4,11,40,male,5,,,,50000,,,,joint,1,A,B
+02/04/2020 16:32,02/04/2020 16:33,0,100,30,1,02/04/2020 16:33,R_qF5FHtzdjy7RS7v,,,,,anonymous,EN-GB,,5,,,,,,,4,5,39,female,5,,,,100000,,,,sep_general,1,A,B
+02/04/2020 16:32,02/04/2020 16:33,0,100,24,1,02/04/2020 16:33,R_3Dw1rXv0ObRRXPN,,,,,anonymous,EN-GB,6,,,,,,,,4,6,30,male,6,,,,72500,,,,sep_current,1,A,B
+02/04/2020 16:32,02/04/2020 16:33,0,100,53,1,02/04/2020 16:33,R_3QKxo05C5GfXpby,,,,,anonymous,EN-GB,5,,,,,,,,4,5,36,male,8,,,,100000,,,,sep_current,1,A,B
+02/04/2020 16:32,02/04/2020 16:33,0,100,36,1,02/04/2020 16:33,R_3oC8bkyqvLGFha5,,,,,anonymous,EN-GB,4,,,,,,,,4,4,59,female,6,,,,225000,,,,sep_current,1,A,B
+02/04/2020 16:31,02/04/2020 16:33,0,100,136,1,02/04/2020 16:33,R_2vZDWtOJlynSRhT,,,,,anonymous,EN-GB,,,,,5,5,5,,4,15,61,female,3,,,,17500,,,,joint,0,B,A
+02/04/2020 16:32,02/04/2020 16:33,0,100,71,1,02/04/2020 16:33,R_er1ogqZV9dauyxr,,,,,anonymous,EN-GB,,,,,4,4,5,,4,13,36,female,4,,,,4500,,,,joint,0,B,A
+02/04/2020 16:29,02/04/2020 16:33,0,100,241,1,02/04/2020 16:33,R_3ikc9luFjKskUHQ,,,,,anonymous,EN-GB,,,,,1,1,7,,4,9,1949,female,5,,,,72500,,,,joint,0,B,A
+02/04/2020 16:32,02/04/2020 16:34,0,100,76,1,02/04/2020 16:34,R_2YEfIeBxnqxSFRY,,,,,anonymous,EN-GB,6,,,,,,,,4,6,36,male,4,,,,72500,,,,sep_current,0,B,A
+02/04/2020 16:33,02/04/2020 16:34,0,100,33,1,02/04/2020 16:34,R_aXcukWkcZRLKY9P,,,,,anonymous,EN-GB,6,,,,,,,,4,6,34,male,5,,,,72500,,,,sep_current,0,B,A
+02/04/2020 16:32,02/04/2020 16:34,0,100,77,1,02/04/2020 16:34,R_3sfIMO579K4QZ3z,,,,,anonymous,EN-GB,,1,,,,,,,4,1,65,male,5,,,,50000,,,,sep_general,1,A,B
+02/04/2020 16:34,02/04/2020 16:34,0,100,36,1,02/04/2020 16:34,R_2VO0ZIFQ3nxTy4s,,,,,anonymous,EN-GB,6,,,,,,,,4,6,38,female,6,,,,100000,,,,sep_current,0,B,A
+02/04/2020 16:31,02/04/2020 16:34,0,100,198,1,02/04/2020 16:34,R_1ilmzat3anUi3qW,,,,,anonymous,EN-GB,,,3,1,,,6,"I'm a bit more open to the A case as it's something suggested in the heat of the moment, even if I disagree with the rationale. Case B is easy to disregard out of hand.",4,10,29,male,4,,,,50000,,,,joint,1,A,B
+02/04/2020 16:34,02/04/2020 16:35,0,100,51,1,02/04/2020 16:35,R_2ZC7JWa8QROQMtd,,,,,anonymous,EN-GB,4,,,,,,,,4,4,33,male,5,,,,32500,,,,sep_current,1,A,B
+02/04/2020 16:34,02/04/2020 16:35,0,100,33,1,02/04/2020 16:35,R_er2JwGZgMfC9Kal,,,,,anonymous,EN-GB,,1,,,,,,,4,1,25,male,5,,,,32500,,,,sep_general,0,B,A
+02/04/2020 16:34,02/04/2020 16:35,0,100,64,1,02/04/2020 16:35,R_1k1CiGS8L8oFuQm,,,,,anonymous,EN-GB,,2,,,,,,,4,2,36,female,5,,,,50000,,,,sep_general,1,A,B
+02/04/2020 16:31,02/04/2020 16:35,0,100,248,1,02/04/2020 16:35,R_p6inOLJpgTU7yZX,,,,,anonymous,EN-GB,,,,,4,4,7,,4,15,56,female,6,,,,132500,,,,joint,0,B,A
+02/04/2020 16:33,02/04/2020 16:35,0,100,100,1,02/04/2020 16:35,R_3ZQWUcf4hSt0WpH,,,,,anonymous,EN-GB,,,6,4,,,4,"I support saving the person who can in turn save others. I don't think that making any kind of choice is right, but saving the doctor would be the BETTER choice.",4,14,31,male,5,,,,72500,,,,joint,1,A,B
+02/04/2020 16:32,02/04/2020 16:35,0,100,154,1,02/04/2020 16:35,R_3qR0VbtKPsSW6Pu,,,,,anonymous,EN-GB,,,,,6,6,7,I did not rate them differently.,4,19,21,female,5,,,,4500,,,,joint,0,B,A
+02/04/2020 16:34,02/04/2020 16:35,0,100,42,1,02/04/2020 16:35,R_12i10Mq2CCvo50i,,,,,anonymous,EN-GB,,7,,,,,,,4,7,43,male,6,,,,50000,,,,sep_general,1,A,B
+02/04/2020 16:33,02/04/2020 16:35,0,100,112,1,02/04/2020 16:35,R_10SP2CtD3owD2Jw,,,,,anonymous,EN-GB,,2,,,,,,,4,2,61,female,5,,,,17500,,,,sep_general,1,A,B
+02/04/2020 16:34,02/04/2020 16:35,0,100,92,1,02/04/2020 16:35,R_3nO7VBOFldtFK3t,,,,,anonymous,EN-GB,,,,,6,6,7,,4,19,43,male,3,,,,50000,,,,joint,0,B,A
+02/04/2020 16:35,02/04/2020 16:35,0,100,41,1,02/04/2020 16:35,R_1BTcYoS5Llty4oN,,,,,anonymous,EN-GB,5,,,,,,,,4,5,38,female,5,,,,132500,,,,sep_current,1,A,B
+02/04/2020 16:30,02/04/2020 16:35,0,100,327,1,02/04/2020 16:35,R_1K27HQLRSD7esu8,,,,,anonymous,EN-GB,,3,,,,,,,4,3,57,male,5,,,,50000,,,,sep_general,1,A,B
+02/04/2020 16:35,02/04/2020 16:36,0,100,39,1,02/04/2020 16:36,R_BQSwtuj6pkYK5X3,,,,,anonymous,EN-GB,4,,,,,,,,4,4,34,female,5,,,,50000,,,,sep_current,0,B,A
+02/04/2020 16:36,02/04/2020 16:36,0,100,24,1,02/04/2020 16:36,R_3GCmMATo7rx5gOU,,,,,anonymous,EN-GB,,,,,6,3,6,,4,15,38,male,5,,,,100000,,,,joint,0,B,A
+02/04/2020 16:33,02/04/2020 16:36,0,100,222,1,02/04/2020 16:36,R_1C7oP1HGgVmrapt,,,,,anonymous,EN-GB,,,,,3,3,5,,4,11,30,male,5,,,,17500,,,,joint,0,B,A
+02/04/2020 16:36,02/04/2020 16:36,0,100,25,1,02/04/2020 16:36,R_6wWtk6mOulepvcl,,,,,anonymous,EN-GB,6,,,,,,,,4,6,22,male,2,,,,132500,,,,sep_current,1,A,B
+02/04/2020 16:29,02/04/2020 16:36,0,100,416,1,02/04/2020 16:36,R_2pR02V8UCyGOcyw,,,,,anonymous,EN-GB,,,5,3,,,3,"In the first city, one firefighter is proposing to save the doctor while in the heat of the moment.  It seems like a reasonable conclusion that he would choose the doctor.  The policy in city B seems a bit cold and calculated.  I'm not sure how safe I would feel as a citizen knowing that if I were trapped in a burning building, my life would not be worth saving because I'm not a doctor who can potentially save the world.  I think a decision made in the heat of the moment is more acceptable than a general policy.",4,11,46,female,5,,,,132500,,,,joint,1,A,B
+02/04/2020 16:36,02/04/2020 16:37,0,100,44,1,02/04/2020 16:37,R_10YJjajZWFtN8hI,,,,,anonymous,EN-GB,,6,,,,,,,4,6,35,male,5,,,,132500,,,,sep_general,1,A,B
+02/04/2020 16:36,02/04/2020 16:37,0,100,65,1,02/04/2020 16:37,R_1NhqYrB0vppNnPI,,,,,anonymous,EN-GB,,4,,,,,,,4,4,67,male,5,,,,100000,,,,sep_general,0,B,A
+02/04/2020 16:36,02/04/2020 16:37,0,100,33,1,02/04/2020 16:37,R_2Y3By8SeajhNv3D,,,,,anonymous,EN-GB,6,,,,,,,,4,6,31,male,3,,,,17500,,,,sep_current,1,A,B
+02/04/2020 16:37,02/04/2020 16:37,0,100,30,1,02/04/2020 16:37,R_uajCA4NOcvyqLlL,,,,,anonymous,EN-GB,,2,,,,,,,4,2,39,male,2,,,,17500,,,,sep_general,0,B,A
+02/04/2020 16:37,02/04/2020 16:37,0,100,27,1,02/04/2020 16:37,R_2bVjvslevYaANZv,,,,,anonymous,EN-GB,5,,,,,,,,4,5,23,female,5,,,,50000,,,,sep_current,0,B,A
+02/04/2020 16:35,02/04/2020 16:37,0,100,121,1,02/04/2020 16:37,R_3D6jgay9n61upIE,,,,,anonymous,EN-GB,,5,,,,,,,4,5,49,male,5,,,,17500,,,,sep_general,0,B,A
+02/04/2020 16:36,02/04/2020 16:37,0,100,60,1,02/04/2020 16:37,R_2rl04O6p5sSsUNZ,,,,,anonymous,EN-GB,,7,,,,,,,4,7,44,male,5,,,,132500,,,,sep_general,1,A,B
+02/04/2020 16:36,02/04/2020 16:37,0,100,110,1,02/04/2020 16:37,R_3Rg7JGrwaNEVCer,,,,,anonymous,EN-GB,,,2,2,,,6,,4,10,29,male,6,,,,32500,,,,joint,1,A,B
+02/04/2020 16:35,02/04/2020 16:37,0,100,141,1,02/04/2020 16:37,R_steyX8bRkh5YwcV,,,,,anonymous,EN-GB,,,,,3,3,7,,4,13,37,female,7,,,,100000,,,,joint,0,B,A
+02/04/2020 16:36,02/04/2020 16:37,0,100,115,1,02/04/2020 16:37,R_2TRyNtCGzlPWXro,,,,,anonymous,EN-GB,4,,,,,,,,4,4,25,female,4,,,,32500,,,,sep_current,1,A,B
+02/04/2020 16:37,02/04/2020 16:38,0,100,49,1,02/04/2020 16:38,R_3KAuahj0ixweLrq,,,,,anonymous,EN-GB,6,,,,,,,,4,6,72,male,5,,,,72500,,,,sep_current,1,A,B
+02/04/2020 16:37,02/04/2020 16:38,0,100,34,1,02/04/2020 16:38,R_24eie2qDOACWZts,,,,,anonymous,EN-GB,6,,,,,,,,4,6,50,male,5,,,,72500,,,,sep_current,1,A,B
+02/04/2020 16:37,02/04/2020 16:38,0,100,38,1,02/04/2020 16:38,R_2QrmGz1uKbTECnN,,,,,anonymous,EN-GB,5,,,,,,,,4,5,20,male,4,,,,32500,,,,sep_current,1,A,B
+02/04/2020 16:37,02/04/2020 16:38,0,100,66,1,02/04/2020 16:38,R_1QlW1YKQrca8YBs,,,,,anonymous,EN-GB,5,,,,,,,,4,5,59,male,6,,,,175000,,,,sep_current,0,B,A
+02/04/2020 16:36,02/04/2020 16:38,0,100,116,1,02/04/2020 16:38,R_ehpRmNrGWNvLeCJ,,,,,anonymous,EN-GB,,3,,,,,,,4,3,53,female,5,,,,50000,,,,sep_general,0,B,A
+02/04/2020 16:36,02/04/2020 16:38,0,100,104,1,02/04/2020 16:38,R_27d8etAsX2HqUBP,,,,,anonymous,EN-GB,,,,,6,6,7,,4,19,29,female,5,,,,32500,,,,joint,0,B,A
+02/04/2020 16:36,02/04/2020 16:38,0,100,107,1,02/04/2020 16:38,R_2rUv8gSggnnK9Ih,,,,,anonymous,EN-GB,,,,,6,6,7,,4,19,39,male,4,,,,50000,,,,joint,0,B,A
+02/04/2020 16:37,02/04/2020 16:38,0,100,53,1,02/04/2020 16:38,R_2109hY9HJmg95Gm,,,,,anonymous,EN-GB,,3,,,,,,,4,3,29,female,6,,,,72500,,,,sep_general,0,B,A
+02/04/2020 16:38,02/04/2020 16:38,0,100,27,1,02/04/2020 16:38,R_DShm0To4Rv2CPm1,,,,,anonymous,EN-GB,5,,,,,,,,4,5,38,male,6,,,,132500,,,,sep_current,1,A,B
+02/04/2020 16:36,02/04/2020 16:38,0,100,122,1,02/04/2020 16:38,R_3O9AREqqmahpt89,,,,,anonymous,EN-GB,,2,,,,,,,4,2,65,female,6,,,,72500,,,,sep_general,1,A,B
+02/04/2020 16:37,02/04/2020 16:38,0,100,101,1,02/04/2020 16:38,R_yz4hA7bfdXMfUf7,,,,,anonymous,EN-GB,,,,,1,1,6,,4,8,32,male,6,,,,50000,,,,joint,0,B,A
+02/04/2020 16:38,02/04/2020 16:38,0,100,33,1,02/04/2020 16:38,R_3hgx2w2SbrD7koI,,,,,anonymous,EN-GB,6,,,,,,,,4,6,34,male,3,,,,50000,,,,sep_current,0,B,A
+02/04/2020 16:35,02/04/2020 16:38,0,100,193,1,02/04/2020 16:38,R_3lzYldSzGLm9BDa,,,,,anonymous,EN-GB,,5,,,,,,,4,5,42,female,4,,,,100000,,,,sep_general,1,A,B
+02/04/2020 16:38,02/04/2020 16:38,0,100,46,1,02/04/2020 16:38,R_3lQtJPNBt6ytNLr,,,,,anonymous,EN-GB,,1,,,,,,,4,1,30,male,5,,,,72500,,,,sep_general,0,B,A
+02/04/2020 16:37,02/04/2020 16:38,0,100,60,1,02/04/2020 16:38,R_1q8sQntBwwvxVnU,,,,,anonymous,EN-GB,,7,,,,,,,4,7,28,male,5,,,,72500,,,,sep_general,0,B,A
+02/04/2020 16:37,02/04/2020 16:39,0,100,100,1,02/04/2020 16:39,R_1M6CRD4KGh1tjQl,,,,,anonymous,EN-GB,,,,,1,1,7,,4,9,27,female,3,,,,50000,,,,joint,0,B,A
+02/04/2020 16:38,02/04/2020 16:39,0,100,65,1,02/04/2020 16:39,R_3DfY8R2Rn2ITJQt,,,,,anonymous,EN-GB,,,7,7,,,7,,4,21,31,female,5,,,,72500,,,,joint,1,A,B
+02/04/2020 16:37,02/04/2020 16:39,0,100,102,1,02/04/2020 16:39,R_2sQQxJbryBfBj8d,,,,,anonymous,EN-GB,,,,,3,3,6,,4,12,50,male,5,,,,72500,,,,joint,0,B,A
+02/04/2020 16:38,02/04/2020 16:39,0,100,64,1,02/04/2020 16:39,R_2c11CnUhNtzMqcE,,,,,anonymous,EN-GB,,4,,,,,,,4,4,32,male,4,,,,100000,,,,sep_general,1,A,B
+02/04/2020 16:39,02/04/2020 16:40,0,100,45,1,02/04/2020 16:40,R_117nkRv4d9VviKQ,,,,,anonymous,EN-GB,5,,,,,,,,4,5,42,female,5,,,,225000,,,,sep_current,1,A,B
+02/04/2020 16:39,02/04/2020 16:40,0,100,26,1,02/04/2020 16:40,R_OdqpFUgytaurugh,,,,,anonymous,EN-GB,,4,,,,,,,4,4,32,male,6,,,,132500,,,,sep_general,1,A,B
+02/04/2020 16:39,02/04/2020 16:40,0,100,35,1,02/04/2020 16:40,R_264iJ0fmSR0d4Gf,,,,,anonymous,EN-GB,6,,,,,,,,4,6,35,male,5,,,,100000,,,,sep_current,0,B,A
+02/04/2020 16:37,02/04/2020 16:40,0,100,180,1,02/04/2020 16:40,R_1eXXRMdqC75fEW2,,,,,anonymous,EN-GB,,5,,,,,,,4,5,53,female,3,,,,72500,,,,sep_general,1,A,B
+02/04/2020 16:39,02/04/2020 16:40,0,100,84,1,02/04/2020 16:40,R_3M9Ul3nzB5V1R6S,,,,,anonymous,EN-GB,,5,,,,,,,4,5,43,male,6,,,,100000,,,,sep_general,0,B,A
+02/04/2020 16:38,02/04/2020 16:40,0,100,128,1,02/04/2020 16:40,R_3RjYApxAbNiIBFr,,,,,anonymous,EN-GB,,,,,7,7,7,,4,21,48,male,5,,,,132500,,,,joint,0,B,A
+02/04/2020 16:34,02/04/2020 16:40,0,100,365,1,02/04/2020 16:40,R_T02xkGY3De1mPMB,,,,,anonymous,EN-GB,,,,,6,6,7,The two rated about the same. They both seemed pretty much the alike.,4,19,59,female,4,,,,17500,,,,joint,0,B,A
+02/04/2020 16:39,02/04/2020 16:40,0,100,60,1,02/04/2020 16:40,R_1rPvy9YDVaLmRgd,,,,,anonymous,EN-GB,,3,,,,,,,4,3,36,male,3,,,,72500,,,,sep_general,1,A,B
+02/04/2020 16:39,02/04/2020 16:40,0,100,73,1,02/04/2020 16:40,R_3GlB4XCNkGy6tH0,,,,,anonymous,EN-GB,,,,,6,5,6,Slighlty different explanation,4,17,38,male,6,,,,132500,,,,joint,0,B,A
+02/04/2020 16:39,02/04/2020 16:41,0,100,116,1,02/04/2020 16:41,R_1GTu1yczGU2FvsI,,,,,anonymous,EN-GB,,,5,5,,,5,,4,15,33,female,8,,,,100000,,,,joint,1,A,B
+02/04/2020 16:40,02/04/2020 16:41,0,100,57,1,02/04/2020 16:41,R_2WD4Gw8BzFrp7B4,,,,,anonymous,EN-GB,2,,,,,,,,4,2,66,female,3,,,,100000,,,,sep_current,0,B,A
+02/04/2020 16:41,02/04/2020 16:42,0,100,45,1,02/04/2020 16:42,R_1dgZXErFdNhiYbq,,,,,anonymous,EN-GB,6,,,,,,,,2,6,43,female,5,,,,100000,,,,sep_current,1,A,B
